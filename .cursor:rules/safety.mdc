@@ -1,0 +1,13 @@
+---
+description: Safe editing rules for this project
+alwaysApply: true
+---
+
+- Before changing code, briefly explain the intended change.
+- Do not rewrite unrelated files.
+- Do not introduce third-party dependencies without asking.
+- Do not change the app architecture unless explicitly requested.
+- Prefer small, reviewable diffs.
+- When unsure, ask instead of guessing.
+- Do not delete code unless it is clearly unused or I asked for it.
+- After editing, summarize what changed and what I should test.

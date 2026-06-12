@@ -1,0 +1,9 @@
+---
+description: Swift and SwiftUI conventions
+globs: ["**/*.swift"]
+---
+- Use SwiftUI and MVVM.
+- Prefer async/await over callbacks.
+- Keep views small and readable.
+- Put business logic in view models or services, not directly in views.
+- Do not add clever abstractions just to look architectural.
