@@ -1,6 +1,6 @@
 # NextSeason — Product Specification
 
-Phase 1 deliverable. Last updated: June 13, 2026.
+Phase 1 deliverable. Last updated: June 13, 2026 (Phase 2 research incorporated).
 
 ## Purpose
 
@@ -88,28 +88,30 @@ After v0.1, the intended product path is:
 - Status changes (e.g. "In Development" → "In Production")
 - Show transitions to "Ended" (no further seasons expected)
 
-Exact field mapping and edge cases are deferred to Phase 2 research (`TVMazeResearch.md`).
+Field mapping and edge cases are documented in [TVMazeResearch.md](TVMazeResearch.md).
+
+**Polling note (from Phase 2):** ~12-hour polling via `BGAppRefreshTask` is a target, not an iOS guarantee. Foreground refresh on app launch is the reliable fallback. The `/updates/shows` endpoint optimizes polling by skipping unchanged shows.
 
 ---
 
-## Open questions (Phase 2 research)
+## Phase 2 research — resolved
 
-Do not answer these with implementation detail until TVMaze research is complete:
+See [TVMazeResearch.md](TVMazeResearch.md) for full detail.
 
-- What next-season fields does TVMaze actually expose per show?
-- How reliable and timely are premiere dates vs. status strings?
-- What App Store and `UNUserNotificationCenter` constraints apply to background polling?
-- What is the minimum auth mechanism for saved shows (likely Sign in with Apple)?
+| Question | Answer |
+|---|---|
+| What next-season fields does TVMaze expose? | Show `status`, `ended`, `updated`; season `number`, `premiereDate`, `endDate`; optional `nextepisode.airdate` |
+| How reliable are premiere dates? | Present when known; future season rows can exist before dates are announced; data may lag up to 60 min |
+| iOS background polling constraints? | `BGAppRefreshTask` is discretionary; local notifications need no server; force-quit stops background tasks |
+| Auth for saved shows? | None for v0.1; Sign in with Apple likely when accounts are added |
 
 ---
 
 ## Success criteria for v0.1
 
-Phase 1 is complete when:
-
 - [ ] A guest can search for a show (e.g. "Severance") and understand next-season status on one screen
-- [ ] It is obvious what v0.1 does **not** do
-- [ ] The path to saved shows and change-based notifications is clear without prescribing implementation
+- [x] It is obvious what v0.1 does **not** do
+- [x] The path to saved shows and change-based notifications is clear without prescribing implementation
 
 ---
 
@@ -117,5 +119,5 @@ Phase 1 is complete when:
 
 - [ProjectKickoff.md](ProjectKickoff.md) — development workflow and AI philosophy
 - [DevelopmentLog.md](DevelopmentLog.md) — session decisions and engineering judgment
-- `TVMazeResearch.md` — Phase 2 (not started)
+- [TVMazeResearch.md](TVMazeResearch.md) — Phase 2 (complete)
 - `Architecture.md` — Phase 3 (not started)

@@ -34,3 +34,19 @@ Entries written by human hands
 5. Human engineering judgment applied
 	- Start small (guest search) but keep full core loop in mind for near-term follow-on
 	- Notifications triggered by status change after polling, not by premiere-date reminders alone
+
+## June 13th, 2026 — Phase 2 TVMaze research
+1. Problem being solved
+	- Investigate TVMaze API capabilities, data availability, and iOS notification/background constraints before architecture
+2. Prompting approach used
+	- Live API probes against Severance, House of the Dragon, and Game of Thrones; Apple background-tasks documentation review
+3. AI output accepted
+	- TVMazeResearch.md with endpoints, derivation logic, example shows, polling strategy, and iOS constraints
+	- `/updates/shows` endpoint for efficient future polling
+	- `BGAppRefreshTask` + foreground refresh as no-backend polling strategy
+	- Local notifications (no APNs server) when status snapshot changes
+4. AI output rejected or modified
+	- (none this session)
+5. Human engineering judgment applied
+	- Confirmed TVMaze is viable; proceed to Phase 3 architecture
+	- Accepted that 12-hour polling is a target, not an iOS guarantee
