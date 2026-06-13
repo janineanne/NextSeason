@@ -9,8 +9,8 @@
 /* Begin PBXFileReference section */
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
-		E13811E82FDCC0CB009C141B /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; path = safety.mdc; sourceTree = "<group>"; };
-		E13811E92FDCC140009C141B /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; path = "swiftui-project-style.mdc"; sourceTree = "<group>"; };
+		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
+		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -35,8 +35,8 @@
 		E13811C42FDB795C009C141B = {
 			isa = PBXGroup;
 			children = (
+				E1DA26BE2FDDD9A800C37DAC /* Cursor Rules */,
 				E13811E42FDCAFE0009C141B /* AGENTS.md */,
-				E13811E72FDCC034009C141B /* .cursor:rules */,
 				E13811CF2FDB795C009C141B /* NextSeason */,
 				E13811CE2FDB795C009C141B /* Products */,
 			);
@@ -50,13 +50,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		E13811E72FDCC034009C141B /* .cursor:rules */ = {
+		E1DA26BE2FDDD9A800C37DAC /* Cursor Rules */ = {
 			isa = PBXGroup;
 			children = (
-				E13811E82FDCC0CB009C141B /* safety.mdc */,
-				E13811E92FDCC140009C141B /* swiftui-project-style.mdc */,
+				E1DA26BC2FDDD99700C37DAC /* safety.mdc */,
+				E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */,
 			);
-			path = ".cursor:rules";
+			name = "Cursor Rules";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
