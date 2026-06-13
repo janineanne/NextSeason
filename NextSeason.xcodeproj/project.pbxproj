@@ -19,6 +19,7 @@
 		E1F4770E2FDE08BB0076DB1C /* 06-13-2026-Phase2Plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "06-13-2026-Phase2Plan.md"; sourceTree = "<group>"; };
 		E1F4770F2FDE08BB0076DB1C /* 06-13-2026-ProjectKickoffPhase2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "06-13-2026-ProjectKickoffPhase2.md"; sourceTree = "<group>"; };
 		E1F477102FDE08CE0076DB1C /* TVMazeResearch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TVMazeResearch.md; sourceTree = "<group>"; };
+		E1F477112FDE0F3B0076DB1C /* DesignPrinciples.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DesignPrinciples.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -71,6 +72,7 @@
 		E1DA26BF2FDDDE6000C37DAC /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
+				E1F477112FDE0F3B0076DB1C /* DesignPrinciples.md */,
 				E1F477102FDE08CE0076DB1C /* TVMazeResearch.md */,
 				E1DA26C42FDE023D00C37DAC /* CursorDiscussions */,
 				E1DA26C32FDDF53100C37DAC /* ProductSpec.md */,
