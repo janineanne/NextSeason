@@ -11,6 +11,9 @@
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
+		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
+		E1DA26C12FDDE47200C37DAC /* DevelopmentLog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DevelopmentLog.md; sourceTree = "<group>"; };
+		E1DA26C32FDDF53100C37DAC /* ProductSpec.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProductSpec.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -35,6 +38,7 @@
 		E13811C42FDB795C009C141B = {
 			isa = PBXGroup;
 			children = (
+				E1DA26BF2FDDDE6000C37DAC /* Development Documentation */,
 				E1DA26BE2FDDD9A800C37DAC /* Cursor Rules */,
 				E13811E42FDCAFE0009C141B /* AGENTS.md */,
 				E13811CF2FDB795C009C141B /* NextSeason */,
@@ -57,6 +61,16 @@
 				E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */,
 			);
 			name = "Cursor Rules";
+			sourceTree = "<group>";
+		};
+		E1DA26BF2FDDDE6000C37DAC /* Development Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				E1DA26C32FDDF53100C37DAC /* ProductSpec.md */,
+				E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */,
+				E1DA26C12FDDE47200C37DAC /* DevelopmentLog.md */,
+			);
+			path = "Development Documentation";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
