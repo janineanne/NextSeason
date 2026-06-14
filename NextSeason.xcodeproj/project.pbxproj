@@ -9,17 +9,11 @@
 /* Begin PBXFileReference section */
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
+		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
+		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
-		E1DA26C12FDDE47200C37DAC /* DevelopmentLog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DevelopmentLog.md; sourceTree = "<group>"; };
-		E1DA26C32FDDF53100C37DAC /* ProductSpec.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProductSpec.md; sourceTree = "<group>"; };
-		E1F4770C2FDE04B60076DB1C /* 06-13-2026-ProjectKickoffPhase1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "06-13-2026-ProjectKickoffPhase1.md"; sourceTree = "<group>"; };
-		E1F4770D2FDE05390076DB1C /* 06-13-2026-Phase1Plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "06-13-2026-Phase1Plan.md"; sourceTree = "<group>"; };
-		E1F4770E2FDE08BB0076DB1C /* 06-13-2026-Phase2Plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "06-13-2026-Phase2Plan.md"; sourceTree = "<group>"; };
-		E1F4770F2FDE08BB0076DB1C /* 06-13-2026-ProjectKickoffPhase2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "06-13-2026-ProjectKickoffPhase2.md"; sourceTree = "<group>"; };
-		E1F477102FDE08CE0076DB1C /* TVMazeResearch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TVMazeResearch.md; sourceTree = "<group>"; };
-		E1F477112FDE0F3B0076DB1C /* DesignPrinciples.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DesignPrinciples.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -72,25 +66,11 @@
 		E1DA26BF2FDDDE6000C37DAC /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
-				E1F477112FDE0F3B0076DB1C /* DesignPrinciples.md */,
-				E1F477102FDE08CE0076DB1C /* TVMazeResearch.md */,
-				E1DA26C42FDE023D00C37DAC /* CursorDiscussions */,
-				E1DA26C32FDDF53100C37DAC /* ProductSpec.md */,
+				E17E04942FDE291A00708D7A /* MVPDefinition.md */,
+				E17E04952FDE291A00708D7A /* ProblemStatement.md */,
 				E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */,
-				E1DA26C12FDDE47200C37DAC /* DevelopmentLog.md */,
 			);
 			path = Documentation;
-			sourceTree = "<group>";
-		};
-		E1DA26C42FDE023D00C37DAC /* CursorDiscussions */ = {
-			isa = PBXGroup;
-			children = (
-				E1F4770E2FDE08BB0076DB1C /* 06-13-2026-Phase2Plan.md */,
-				E1F4770F2FDE08BB0076DB1C /* 06-13-2026-ProjectKickoffPhase2.md */,
-				E1F4770D2FDE05390076DB1C /* 06-13-2026-Phase1Plan.md */,
-				E1F4770C2FDE04B60076DB1C /* 06-13-2026-ProjectKickoffPhase1.md */,
-			);
-			path = CursorDiscussions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
