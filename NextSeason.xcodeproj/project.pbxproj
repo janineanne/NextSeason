@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		E1DAC55D2FDF5A4B00BD81E5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E13811C52FDB795C009C141B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E13811CC2FDB795C009C141B;
+			remoteInfo = NextSeason;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
@@ -27,6 +37,7 @@
 		E1DAC5522FDF477C00BD81E5 /* 6-14-2026-ChatGPT Review of Phases 1-3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-ChatGPT Review of Phases 1-3.md"; sourceTree = "<group>"; };
 		E1DAC5532FDF4A8300BD81E5 /* 6-14-2026-Phase3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-Phase3.md"; sourceTree = "<group>"; };
 		E1DAC5542FDF4B0F00BD81E5 /* 6-14-2026-Post Review Updates.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-Post Review Updates.md"; sourceTree = "<group>"; };
+		E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -35,10 +46,22 @@
 			path = NextSeason;
 			sourceTree = "<group>";
 		};
+		E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NextSeasonTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E13811CA2FDB795C009C141B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1DAC5562FDF5A4B00BD81E5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -55,6 +78,7 @@
 				E1DA26BE2FDDD9A800C37DAC /* Cursor Rules */,
 				E13811E42FDCAFE0009C141B /* AGENTS.md */,
 				E13811CF2FDB795C009C141B /* NextSeason */,
+				E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */,
 				E13811CE2FDB795C009C141B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				E13811CD2FDB795C009C141B /* NextSeason.app */,
+				E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,6 +157,29 @@
 			productReference = E13811CD2FDB795C009C141B /* NextSeason.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E1DAC5582FDF5A4B00BD81E5 /* NextSeasonTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1DAC55F2FDF5A4B00BD81E5 /* Build configuration list for PBXNativeTarget "NextSeasonTests" */;
+			buildPhases = (
+				E1DAC5552FDF5A4B00BD81E5 /* Sources */,
+				E1DAC5562FDF5A4B00BD81E5 /* Frameworks */,
+				E1DAC5572FDF5A4B00BD81E5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E1DAC55E2FDF5A4B00BD81E5 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */,
+			);
+			name = NextSeasonTests;
+			packageProductDependencies = (
+			);
+			productName = NextSeasonTests;
+			productReference = E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -144,6 +192,10 @@
 				TargetAttributes = {
 					E13811CC2FDB795C009C141B = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					E1DAC5582FDF5A4B00BD81E5 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = E13811CC2FDB795C009C141B;
 					};
 				};
 			};
@@ -162,12 +214,20 @@
 			projectRoot = "";
 			targets = (
 				E13811CC2FDB795C009C141B /* NextSeason */,
+				E1DAC5582FDF5A4B00BD81E5 /* NextSeasonTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E13811CB2FDB795C009C141B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1DAC5572FDF5A4B00BD81E5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -184,7 +244,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1DAC5552FDF5A4B00BD81E5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E1DAC55E2FDF5A4B00BD81E5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E13811CC2FDB795C009C141B /* NextSeason */;
+			targetProxy = E1DAC55D2FDF5A4B00BD81E5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E13811D62FDB795E009C141B /* Debug */ = {
@@ -335,7 +410,7 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -367,8 +442,50 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E1DAC5602FDF5A4B00BD81E5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6U9C675XYA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NextSeason.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NextSeason";
+			};
+			name = Debug;
+		};
+		E1DAC5612FDF5A4B00BD81E5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6U9C675XYA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NextSeason.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NextSeason";
 			};
 			name = Release;
 		};
@@ -389,6 +506,15 @@
 			buildConfigurations = (
 				E13811D92FDB795E009C141B /* Debug */,
 				E13811DA2FDB795E009C141B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E1DAC55F2FDF5A4B00BD81E5 /* Build configuration list for PBXNativeTarget "NextSeasonTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1DAC5602FDF5A4B00BD81E5 /* Debug */,
+				E1DAC5612FDF5A4B00BD81E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

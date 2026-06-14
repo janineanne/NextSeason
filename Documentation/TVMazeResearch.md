@@ -256,7 +256,30 @@ The app is only as good as this data, so reliability was investigated explicitly
   (e.g. American Dad). Not critical for us — we care about "is there a next
   season and when," not exact episode ordering.
 
-### 6.3 Timeliness — the most relevant risk for NextSeason
+### 6.3 Reruns & re-broadcasts
+
+A re-broadcast of an old season must never be mistaken for a new one. TVMaze's
+data model makes this safe by construction:
+
+- **Dates/numbering are anchored to the original premiere** (§6.2), so re-airing a
+  season does not change its `premiereDate` or add a season row.
+- **Reruns are not modeled at all** — there is no rerun flag and no duplicate
+  episode entries; each episode carries a single (original) `airdate`.
+- **`nextepisode` is the next *unaired* episode by airstamp**, so a rerun (already
+  past-dated) never surfaces there.
+
+Verified (2026-06-14): *The Big Bang Theory* (ended 2019, in constant rerun)
+returns `status: Ended`, **no `nextepisode`**, and a last season (12) dated
+2018–2019 — i.e. zero future/undated signals.
+
+`NextSeasonCalculator` keys only off these rerun-immune fields (season rows + their
+original premiere dates + the next unaired episode), so reruns cannot produce a
+false `.airing`/`.scheduled`. The sole residual risk is a contributor *mis-entering*
+a rerun date as a season premiere — a data-accuracy issue covered by §6.5 and
+PD-008 (debounce/confirm + dedup), not a modeling gap. Step B includes an
+"ended-but-rerunning" calculator test to lock this in.
+
+### 6.4 Timeliness — the most relevant risk for NextSeason
 
 Our core promise depends on **how quickly** the community adds:
 
@@ -272,7 +295,7 @@ the API's own **60-minute edge cache** adds up to an hour on top.
 > infallible oracle. Showing a "last updated" timestamp and a "Data by TVMaze"
 > link (also a license requirement) sets honest expectations.
 
-### 6.4 Data volatility → notification correctness
+### 6.5 Data volatility → notification correctness
 
 Because data is editable, fields can **change or be corrected after the fact**:
 
@@ -290,7 +313,7 @@ Mitigations (feed into Slice 2 design, see `Architecture.md`):
   the blast radius of a value that flaps.
 - **Handle `404`/missing show** gracefully on refresh (mark stale, don't crash).
 
-### 6.5 Service availability
+### 6.6 Service availability
 
 - **No official public status page and no SLA** — expected for a free API.
 - Third-party monitors report **~100% uptime, ~0% error rate**, and ~110–130 ms
@@ -302,7 +325,7 @@ Mitigations (feed into Slice 2 design, see `Architecture.md`):
 - We must still code defensively: handle `429` (rate limit) with back-off, and
   treat network/`5xx` failures as transient with clear UI error states.
 
-### 6.6 Overall assessment
+### 6.7 Overall assessment
 
 TVMaze is **fit for purpose** for NextSeason: strong observed uptime, sensible
 moderation, and good upcoming-season coverage, at zero cost and with no auth. The
@@ -322,7 +345,7 @@ option.
 
 ## 7. Open questions / risks
 
-- **Data freshness/accuracy:** the main residual risk — see §6.3/§6.4 for the
+- **Data freshness/accuracy:** the main residual risk — see §6.4/§6.5 for the
   assessment and mitigations. Monitor real-world latency during testing.
 - **Background execution limits:** iOS `BGAppRefreshTask` scheduling is
   best-effort, not guaranteed every 12h. Notifications may be delayed until the
