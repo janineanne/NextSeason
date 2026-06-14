@@ -14,6 +14,12 @@
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
+		E1DAC5472FDE2E1F00BD81E5 /* DecisionLog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DecisionLog.md; sourceTree = "<group>"; };
+		E1DAC5482FDE2E1F00BD81E5 /* FunctionalRequirements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FunctionalRequirements.md; sourceTree = "<group>"; };
+		E1DAC5492FDE2E1F00BD81E5 /* 6-13-2026-Phase1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-13-2026-Phase1.md"; sourceTree = "<group>"; };
+		E1DAC54A2FDE2E1F00BD81E5 /* 6-13-2026-Phase2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-13-2026-Phase2.md"; sourceTree = "<group>"; };
+		E1DAC54C2FDE2E1F00BD81E5 /* MVPBacklog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPBacklog.md; sourceTree = "<group>"; };
+		E1DAC54D2FDE2E1F00BD81E5 /* UserStories.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = UserStories.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -66,11 +72,25 @@
 		E1DA26BF2FDDDE6000C37DAC /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
+				E1DAC5472FDE2E1F00BD81E5 /* DecisionLog.md */,
+				E1DAC5482FDE2E1F00BD81E5 /* FunctionalRequirements.md */,
+				E1DAC54B2FDE2E1F00BD81E5 /* KickoffTranscripts */,
+				E1DAC54C2FDE2E1F00BD81E5 /* MVPBacklog.md */,
+				E1DAC54D2FDE2E1F00BD81E5 /* UserStories.md */,
 				E17E04942FDE291A00708D7A /* MVPDefinition.md */,
 				E17E04952FDE291A00708D7A /* ProblemStatement.md */,
 				E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */,
 			);
 			path = Documentation;
+			sourceTree = "<group>";
+		};
+		E1DAC54B2FDE2E1F00BD81E5 /* KickoffTranscripts */ = {
+			isa = PBXGroup;
+			children = (
+				E1DAC5492FDE2E1F00BD81E5 /* 6-13-2026-Phase1.md */,
+				E1DAC54A2FDE2E1F00BD81E5 /* 6-13-2026-Phase2.md */,
+			);
+			path = KickoffTranscripts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
