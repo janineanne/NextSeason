@@ -34,9 +34,16 @@ You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and relat
 - Optimize for readability over cleverness.
 - Include previews when practical.
 - Add comments for non-obvious logic.
+- Naming: for data-transfer types (DTOs that mirror API JSON), use the `Data`
+  suffix in code, e.g. `ShowData`, `SeasonData`, `SearchResultData`. The term
+  "DTO" may still be used in documentation.
 
 ## AI Instructions
 
 - Explain major architectural decisions.
 - Do not create unnecessary abstractions.
 - Keep files under 500 lines when possible.
+- Before writing Swift, read the relevant Swift skill file(s) first and note
+  which were used: `swiftui-pro` (SwiftUI views), `swiftdata-pro` (SwiftData /
+  persistence), `swift-concurrency-pro` (async/await, actors), `swift-testing-pro`
+  (tests).
