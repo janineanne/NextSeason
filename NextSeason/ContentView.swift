@@ -2,20 +2,14 @@
 //  ContentView.swift
 //  NextSeason
 //
-//  Created by Janine Ohmer on 6/11/26.
-//
 
 import SwiftUI
 
+/// The app's root view. For Slice 1 it shows guest search; in Slice 2 this is the
+/// natural place to introduce a `TabView` (Search + Watchlist).
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        SearchView()
     }
 }
 

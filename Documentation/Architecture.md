@@ -304,7 +304,7 @@ Notes & trade-offs:
 ### Reliability-driven notification rules
 
 TVMaze data is crowd-sourced and editable, so a single poll can reflect a
-transient or incorrect edit (`TVMazeResearch.md` §6.3–6.4). To avoid false or
+transient or incorrect edit (`TVMazeResearch.md` §6.4–6.5). To avoid false or
 premature alerts:
 
 - **Debounce / confirm before notifying.** Only emit a notification for a change
@@ -393,7 +393,10 @@ These are deferred implementation choices, not Phase 5 review items.
 
 - **Resolved:** persistence = SwiftData behind a `WatchlistRepository` protocol,
   built in Slice 2; Slice 1 ships storage-free. (See §7, PD-007.)
-- Slice 1: `summary` HTML — strip to plain text vs. render as `AttributedString`?
+- **Resolved:** `summary` HTML will be **rendered formatted** (paragraphs, bold,
+  italics) via a small tested HTML→`AttributedString` converter, built in Step B.
+  Slice 1 uses interim plain-text stripping since the summary isn't displayed yet.
+  (See PD-009.)
 - Slice 1: lightweight in-memory response caching in `TVMazeClient`, or rely
   solely on TVMaze's 60-min edge cache?
 - Slice 2: exact notification copy and the precise set of "meaningful change"

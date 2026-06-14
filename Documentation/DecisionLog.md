@@ -111,6 +111,25 @@ freshness proves insufficient, without building multi-source now.
 
 ---
 
+## PD-009 Render show summaries as formatted text
+
+Decision:
+Display TVMaze summaries with their intended light formatting (paragraphs, bold,
+italics) rather than as stripped plain text. Implemented in Step B via a small,
+unit-tested HTML→`AttributedString` converter that keeps the app's fonts and
+respects Dynamic Type / VoiceOver. The raw `summary` HTML is retained on the
+domain model so formatting happens at render time.
+
+Rationale:
+The summary is the main descriptive content on the detail screen; preserving
+emphasis and paragraph breaks reads far better than flattened text. A dedicated
+converter (vs. `NSAttributedString`'s HTML import) avoids main-thread cost and
+baked-in styling that would fight Dynamic Type, and it is pure and testable.
+Plain-text stripping remains the Slice 1 interim because the summary is not yet
+displayed. No third-party dependency required.
+
+---
+
 ## Terminology note
 
 To resolve an overload of the term "v0.1": **MVP** = the full first release
