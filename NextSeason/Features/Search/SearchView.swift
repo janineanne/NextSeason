@@ -13,6 +13,9 @@ struct SearchView: View {
         NavigationStack {
             content
                 .navigationTitle("NextSeason")
+                .navigationDestination(for: Show.self) { show in
+                    ShowDetailView(show: show)
+                }
                 .searchable(text: $viewModel.query, prompt: "Search TV shows")
                 .task(id: viewModel.query) {
                     await viewModel.search()
@@ -34,7 +37,9 @@ struct SearchView: View {
                 .controlSize(.large)
         case .results(let shows):
             List(shows) { show in
-                ShowRow(show: show)
+                NavigationLink(value: show) {
+                    ShowRow(show: show)
+                }
             }
             .listStyle(.plain)
         case .empty:
