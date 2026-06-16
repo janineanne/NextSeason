@@ -30,7 +30,7 @@ struct ShowDetailView: View {
             if let viewModel {
                 detailContent(viewModel: viewModel)
             } else {
-                ProgressView()
+                ProgressView("Loading show…")
             }
         }
         .task(id: show.id) {
@@ -86,18 +86,31 @@ struct ShowDetailView: View {
             Button {
                 Task { await viewModel.toggleWatchlist() }
             } label: {
-                if viewModel.isUpdatingWatchlist {
-                    ProgressView()
-                } else {
-                    Label(
-                        viewModel.isTracked ? "Tracking" : "Track",
-                        systemImage: viewModel.isTracked ? "star.fill" : "star"
-                    )
+                Label {
+                    Text(trackButtonTitle(viewModel: viewModel))
+                } icon: {
+                    if viewModel.isUpdatingWatchlist {
+                        ProgressView()
+                    } else {
+                        Image(systemName: viewModel.isTracked ? "star.fill" : "star")
+                    }
                 }
             }
             .disabled(viewModel.loadState != .loaded || viewModel.isUpdatingWatchlist)
-            .accessibilityHint("Adds or removes this show from your watchlist")
+            .accessibilityHint(trackButtonHint(viewModel: viewModel))
         }
+    }
+
+    private func trackButtonTitle(viewModel: ShowDetailViewModel) -> String {
+        if viewModel.isUpdatingWatchlist { return "Updating…" }
+        return viewModel.isTracked ? "Tracking" : "Track"
+    }
+
+    private func trackButtonHint(viewModel: ShowDetailViewModel) -> String {
+        if viewModel.loadState != .loaded {
+            return "Available after show details finish loading"
+        }
+        return "Adds or removes this show from your watchlist"
     }
 
     private func header(viewModel: ShowDetailViewModel) -> some View {
@@ -106,7 +119,7 @@ struct ShowDetailView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(viewModel.displayShow.name)
                     .font(.title2.bold())
-                Label(viewModel.displayShow.status.displayLabel, systemImage: "tv")
+                Text(viewModel.displayShow.status.displayLabel)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 if let network = viewModel.displayShow.network {
