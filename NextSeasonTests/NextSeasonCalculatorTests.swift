@@ -157,12 +157,24 @@ struct NextSeasonCalculatorTests {
         #expect(NextSeasonCalculator.status(for: show, now: now) == .airing(season: 2))
     }
 
-    @Test("A next episode with no airdate in a new season reports airing")
+    @Test("A next episode with no airdate in a new season is announced, not airing")
     func nextEpisodeWithNoAirdate() {
         let show = makeShow(
             seasons: [season(1, premiere: "2025-01-01", end: "2025-03-01")],
             nextEpisode: NextEpisode(season: 2, airdate: nil)
         )
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .airing(season: 2))
+        #expect(NextSeasonCalculator.status(for: show, now: now) == .announcedUndated(season: 2))
+    }
+
+    @Test("An undated next episode with a matching undated season row is announced")
+    func nextEpisodeWithNoAirdateAndUndatedSeasonRow() {
+        let show = makeShow(
+            seasons: [
+                season(1, premiere: "2025-01-01", end: "2025-03-01"),
+                season(2, premiere: nil)
+            ],
+            nextEpisode: NextEpisode(season: 2, airdate: nil)
+        )
+        #expect(NextSeasonCalculator.status(for: show, now: now) == .announcedUndated(season: 2))
     }
 }
