@@ -393,12 +393,15 @@ These are deferred implementation choices, not Phase 5 review items.
 
 - **Resolved:** persistence = SwiftData behind a `WatchlistRepository` protocol,
   built in Slice 2; Slice 1 ships storage-free. (See §7, PD-007.)
-- **Resolved:** `summary` HTML will be **rendered formatted** (paragraphs, bold,
-  italics) via a small tested HTML→`AttributedString` converter, built in Step B.
-  Slice 1 uses interim plain-text stripping since the summary isn't displayed yet.
-  (See PD-009.)
-- Slice 1: lightweight in-memory response caching in `TVMazeClient`, or rely
-  solely on TVMaze's 60-min edge cache?
+- **Resolved:** `summary` HTML is **rendered formatted** (paragraphs, bold,
+  italics) via a small tested HTML→`AttributedString` converter, built in Step B
+  and displayed on the show-detail screen. The converter also normalizes messy
+  source whitespace; plain-text stripping is kept only as its fallback. (See PD-009.)
+- **Resolved:** response caching uses standard HTTP caching, not a custom cache.
+  `TVMazeClient` runs on a `URLSession` with a dedicated `URLCache` (~4 MB / 50 MB)
+  and `.useProtocolCachePolicy`; TVMaze's `Cache-Control: public, max-age=3600`
+  means repeat lookups skip the network for up to an hour. Offline "stale-but-usable"
+  fallback and force-refresh policy are deferred to Slice 2. (See PD-010.)
 - Slice 2: exact notification copy and the precise set of "meaningful change"
   triggers.
 ```
