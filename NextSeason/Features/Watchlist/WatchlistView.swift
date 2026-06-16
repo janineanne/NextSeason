@@ -16,7 +16,7 @@ struct WatchlistView: View {
                 if let viewModel {
                     content(for: viewModel)
                 } else {
-                    ProgressView()
+                    ProgressView("Loading watchlist…")
                 }
             }
             .navigationTitle("Watchlist")

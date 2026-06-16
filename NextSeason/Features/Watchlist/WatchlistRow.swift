@@ -18,7 +18,7 @@ struct WatchlistRow: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 if tracked.isStale {
-                    Label("No longer on TVMaze", systemImage: "exclamationmark.triangle")
+                    Text("No longer on TVMaze")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
@@ -28,6 +28,17 @@ struct WatchlistRow: View {
             }
         }
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var accessibilityLabel: String {
+        var parts = [tracked.name, tracked.nextSeason.headline]
+        if tracked.isStale {
+            parts.append("No longer on TVMaze")
+        }
+        let updated = tracked.lastCheckedAt.formatted(date: .abbreviated, time: .shortened)
+        parts.append("Updated \(updated)")
+        return parts.joined(separator: ", ")
     }
 
     private var poster: some View {
