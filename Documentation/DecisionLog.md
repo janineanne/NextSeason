@@ -3,14 +3,19 @@
 ## PD-001 User Accounts
 
 Decision:
-No user accounts in MVP.
+The MVP uses a **local watchlist stored on-device**. User accounts, Sign in with
+Apple, and cloud synchronization are deferred until there is a demonstrated need
+for cross-device sync.
 
 Rationale:
-The MVP validates demand for season notifications.
-Local storage dramatically reduces complexity and allows focus on the core value proposition.
+The MVP validates demand for season notifications. Search, save, and notify all
+work without accounts. Authentication adds significant complexity (Sign in with
+Apple, account management, privacy policy, deletion flows, and backend if data
+isn't purely local) without serving the core value proposition. Local storage
+keeps the portfolio project focused on product judgment and a polished MVP.
 
 Future Revisit:
-When cloud sync or multi-device support becomes necessary.
+When cloud sync or multi-device support becomes necessary — not as part of Slice 2.
 
 ---
 
