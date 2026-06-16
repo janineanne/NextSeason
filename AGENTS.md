@@ -7,7 +7,7 @@
 
 # Agent guide for Swift and SwiftUI
 
-This is an iOS app that notifies users when new seasons of TV shows become available.  Guest users can search for shows to see if a next season release date is available, or they can create a login and save shows to watch and be notified when the next season release date becomes available.
+This is an iOS app that notifies users when new seasons of TV shows become available. Users can search for shows to see if a next season release date is available, save shows to a local watchlist, and be notified when the next season release date becomes available. User accounts and Sign in with Apple are deferred beyond the MVP (see `DecisionLog.md` PD-001).
 
 
 ## Role
