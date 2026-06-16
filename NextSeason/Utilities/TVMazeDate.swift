@@ -7,7 +7,36 @@ import Foundation
 
 /// Parses TVMaze date-only strings ("yyyy-MM-dd"). Implemented without a shared
 /// `DateFormatter` so it is safe to call from any concurrency context.
+///
+/// TVMaze date-only fields represent calendar days in UTC. Comparisons against
+/// `Date.now` should use the helpers below so a season ending "today" is not
+/// treated as ended for most of that day.
 nonisolated enum TVMazeDate {
+    private static var utcCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .gmt
+        return calendar
+    }
+
+    static func startOfDayUTC(_ date: Date) -> Date {
+        utcCalendar.startOfDay(for: date)
+    }
+
+    /// True when `date`'s calendar day is on or before `other`'s (UTC).
+    static func isOnOrBefore(_ date: Date, _ other: Date) -> Bool {
+        startOfDayUTC(date) <= startOfDayUTC(other)
+    }
+
+    /// True when `date`'s calendar day is strictly before `other`'s (UTC).
+    static func isBefore(_ date: Date, _ other: Date) -> Bool {
+        startOfDayUTC(date) < startOfDayUTC(other)
+    }
+
+    /// True when `date`'s calendar day is strictly after `other`'s (UTC).
+    static func isAfter(_ date: Date, _ other: Date) -> Bool {
+        startOfDayUTC(date) > startOfDayUTC(other)
+    }
+
     static func dateOnly(_ string: String?) -> Date? {
         guard let string, string.count >= 10 else { return nil }
         let parts = string.prefix(10).split(separator: "-")
@@ -21,8 +50,6 @@ nonisolated enum TVMazeDate {
         components.year = year
         components.month = month
         components.day = day
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
-        return calendar.date(from: components)
+        return utcCalendar.date(from: components)
     }
 }

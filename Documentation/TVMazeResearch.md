@@ -24,7 +24,7 @@ live responses on 2026-06-14.
 | -------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | Rate limit     | "At least 20 calls / 10s per IP." HTTP `429` when exceeded.                              | Handle `429` with a short back-off + retry. Throttle background polling.             |
 | Edge caching   | All output cached 60 min by their load balancers.                                        | Don't expect sub-hour freshness. 12h polling is well within tolerance.               |
-| User-Agent     | Strongly recommended to set a unique UA.                                                 | Set `User-Agent: NextSeason/<version> (contact)` on every request.                  |
+| User-Agent     | Strongly recommended to set a unique UA.                                                 | Set `User-Agent: NextSeason/<version>` on every request (contact info may be added later). |
 | Connections    | Don't leave >1 idle connection open.                                                     | Use a single shared `URLSession`; let it manage connection reuse.                   |
 | Attribution    | CC BY-SA requires crediting TVMaze.                                                      | Show a "Data by TVMaze" credit + link in the UI.                                     |
 
@@ -175,9 +175,9 @@ Algorithm (pure function over the decoded DTOs):
 
 | Derived status                         | Condition                                                                                              |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `airing(season)`                       | `nextepisode.season` (or a season's `premiereDate`) indicates a season currently airing.              |
-| `scheduled(season, date)`              | Candidate next season has a `premiereDate` in the future.                                              |
-| `announcedUndated(season)`             | Candidate next season exists but `premiereDate == null` (e.g. Severance S3).                           |
+| `airing(season)`                       | Latest aired season hasn't ended, or `nextepisode` for a new season has an `airdate` on or before today. |
+| `scheduled(season, date)`              | Candidate next season has a future `premiereDate`, or `nextepisode` has a future `airdate`.              |
+| `announcedUndated(season)`             | Candidate next season exists but `premiereDate == null`, or `nextepisode` points at a new season with no `airdate`. |
 | `returningNoSeasonYet`                 | `status` is `Running`/`To Be Determined`/`In Development` but no candidate next season row exists yet. |
 | `ended`                                | `status == "Ended"` and no future/undated candidate season exists.                                    |
 | `unknown`                              | Data insufficient or `status` unrecognized.                                                            |
