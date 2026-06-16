@@ -22,7 +22,7 @@ nonisolated enum NextSeasonCalculator {
             .sorted { $0.number < $1.number }
 
         let aired = seasons.filter { season in
-            if let date = season.premiereDate { return date <= now }
+            if let date = season.premiereDate { return TVMazeDate.isOnOrBefore(date, now) }
             return false
         }
         let latestAired = aired.last
@@ -34,7 +34,7 @@ nonisolated enum NextSeasonCalculator {
         // 1. A not-yet-aired season with a known future premiere date.
         let datedUpcoming = upcoming
             .compactMap { season -> (number: Int, date: Date)? in
-                guard let date = season.premiereDate, date > now else { return nil }
+                guard let date = season.premiereDate, TVMazeDate.isAfter(date, now) else { return nil }
                 return (season.number, date)
             }
             .sorted { $0.date < $1.date }
@@ -47,7 +47,7 @@ nonisolated enum NextSeasonCalculator {
         if let episode = show.nextEpisode,
            let season = episode.season,
            season > latestAiredNumber {
-            if let date = episode.airdate, date > now {
+            if let date = episode.airdate, TVMazeDate.isAfter(date, now) {
                 return .scheduled(season: season, premiere: date)
             }
             return .airing(season: season)
@@ -55,7 +55,7 @@ nonisolated enum NextSeasonCalculator {
 
         // 3. The most recent season is currently airing (premiered, not yet ended).
         if show.status != .ended, let latest = latestAired {
-            let hasEnded = latest.endDate.map { $0 < now } ?? false
+            let hasEnded = latest.endDate.map { TVMazeDate.isBefore($0, now) } ?? false
             if !hasEnded {
                 return .airing(season: latest.number)
             }

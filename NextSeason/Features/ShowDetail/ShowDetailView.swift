@@ -103,7 +103,7 @@ struct ShowDetailView: View {
     @ViewBuilder
     private var aboutSection: some View {
         let html = viewModel.displayShow.summaryHTML
-        let hasSummary = !(html ?? "").isEmpty
+        let hasSummary = SummaryFormatter.hasDisplayableContent(html)
         if hasSummary || viewModel.displayShow.tvMazeURL != nil {
             VStack(alignment: .leading, spacing: 8) {
                 if let html, hasSummary {

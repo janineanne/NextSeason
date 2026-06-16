@@ -24,7 +24,7 @@ live responses on 2026-06-14.
 | -------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | Rate limit     | "At least 20 calls / 10s per IP." HTTP `429` when exceeded.                              | Handle `429` with a short back-off + retry. Throttle background polling.             |
 | Edge caching   | All output cached 60 min by their load balancers.                                        | Don't expect sub-hour freshness. 12h polling is well within tolerance.               |
-| User-Agent     | Strongly recommended to set a unique UA.                                                 | Set `User-Agent: NextSeason/<version> (contact)` on every request.                  |
+| User-Agent     | Strongly recommended to set a unique UA.                                                 | Set `User-Agent: NextSeason/<version>` on every request (contact info may be added later). |
 | Connections    | Don't leave >1 idle connection open.                                                     | Use a single shared `URLSession`; let it manage connection reuse.                   |
 | Attribution    | CC BY-SA requires crediting TVMaze.                                                      | Show a "Data by TVMaze" credit + link in the UI.                                     |
 
