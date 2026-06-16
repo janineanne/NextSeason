@@ -20,6 +20,7 @@ final class ShowDetailViewModel {
     private(set) var loadState: LoadState = .loading
     private(set) var isTracked = false
     private(set) var isUpdatingWatchlist = false
+    private(set) var shouldPromptForNotifications = false
 
     private let service: any TVMazeService
     private let repository: any WatchlistRepository
@@ -72,10 +73,23 @@ final class ShowDetailViewModel {
             } else {
                 try await repository.add(show)
                 isTracked = true
-                await notifications.requestAuthorizationIfNeeded()
+                if await notifications.needsAuthorizationPrompt() {
+                    shouldPromptForNotifications = true
+                } else {
+                    await notifications.requestAuthorizationIfNeeded()
+                }
             }
         } catch {
             loadState = .failed(error.localizedDescription)
         }
+    }
+
+    func dismissNotificationPrompt() {
+        shouldPromptForNotifications = false
+    }
+
+    func confirmNotificationPrompt() async {
+        shouldPromptForNotifications = false
+        await notifications.requestAuthorizationIfNeeded()
     }
 }

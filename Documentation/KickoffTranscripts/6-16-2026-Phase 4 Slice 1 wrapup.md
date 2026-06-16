@@ -388,3 +388,15 @@ Done.
 - `AGENTS.md`
 
 Working tree is clean. Not pushed.
+
+## User
+
+main is now up to date.
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Good — `main` includes the merge of `cursor/defer-login-beyond-mvp` (`0440311`), and your working tree is clean and synced with `origin/main`.
+
+The login deferral docs are on `main`, so you're clear to start Slice 2 planning whenever you want.

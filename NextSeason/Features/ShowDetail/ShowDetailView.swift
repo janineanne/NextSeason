@@ -33,15 +33,16 @@ struct ShowDetailView: View {
                 ProgressView()
             }
         }
-        .task {
-            if viewModel == nil {
-                viewModel = ShowDetailViewModel(
+        .task(id: show.id) {
+            if viewModel?.initialShow.id != show.id {
+                let vm = ShowDetailViewModel(
                     show: show,
                     service: service,
                     repository: previewRepository ?? repository
                 )
+                viewModel = vm
+                await vm.load()
             }
-            await viewModel?.load()
         }
     }
 
@@ -58,6 +59,25 @@ struct ShowDetailView: View {
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { watchlistToolbarItem(viewModel: viewModel) }
+        .alert("Stay in the Loop", isPresented: notificationPromptBinding(viewModel: viewModel)) {
+            Button("Not Now", role: .cancel) {
+                viewModel.dismissNotificationPrompt()
+            }
+            Button("Enable Notifications") {
+                Task { await viewModel.confirmNotificationPrompt() }
+            }
+        } message: {
+            Text("NextSeason can notify you when a tracked show gets a release date or season update.")
+        }
+    }
+
+    private func notificationPromptBinding(viewModel: ShowDetailViewModel) -> Binding<Bool> {
+        Binding(
+            get: { viewModel.shouldPromptForNotifications },
+            set: { isPresented in
+                if !isPresented { viewModel.dismissNotificationPrompt() }
+            }
+        )
     }
 
     @ToolbarContentBuilder
@@ -135,7 +155,7 @@ struct ShowDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             case .loaded:
                 if let status = viewModel.nextSeasonStatus {
-                    Label(status.headline, systemImage: status.systemImage)
+                    Text(status.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             case .failed(let message):

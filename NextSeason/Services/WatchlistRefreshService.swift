@@ -39,8 +39,10 @@ final class WatchlistRefreshService {
         if force {
             updates = [:]
         } else {
+            let oldestCheck = trackedShows.map(\.lastCheckedAt).min() ?? now()
+            let period = TVMazeUpdatePeriod.covering(since: oldestCheck, now: now())
             do {
-                updates = try await tvMaze.updatedShows(since: .day)
+                updates = try await tvMaze.updatedShows(since: period)
             } catch {
                 return
             }
