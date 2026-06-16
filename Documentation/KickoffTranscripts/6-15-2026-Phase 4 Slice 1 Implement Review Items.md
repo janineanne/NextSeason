@@ -328,3 +328,44 @@ Yes
 ## Assistant
 
 I'll commit only the review-item code changes and leave your kickoff transcripts and `pbxproj` edits out.
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Committed on **`Phase-4-Review-Items`** as `06859bd`:
+
+**Treat undated nextepisode in a new season as announced, not airing**
+
+3 files: `NextSeasonCalculator.swift`, `NextSeasonCalculatorTests.swift`, `TVMazeResearch.md`
+
+The branch now has two commits:
+1. `d8fee6c` — date-only logic, tests, summary whitespace, User-Agent doc
+2. `06859bd` — undated `nextepisode` → `.announcedUndated`
+
+Your kickoff transcript files and `pbxproj` changes are still uncommitted, as before. Not pushed yet — say the word if you want that.
+
+## User
+
+I've committed my changes and pushed. Please merge the branch into main.
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+`Phase-4-Review-Items` is merged into `main` and pushed.
+
+**Merge commit:** `04d1681` — "Merge Phase 4 review items into main"
+
+**Included (3 commits from the branch):**
+- `d8fee6c` — UTC date-only comparisons, new tests, summary whitespace handling, User-Agent doc
+- `06859bd` — undated `nextepisode` → `.announcedUndated` instead of `.airing`
+- `fd47954` — your AI discussion transcript files + `pbxproj` update
+
+**Remote:** `origin/main` is at `04d1681`. Merge was clean — no conflicts.
+
+You're on `main`, up to date with `origin/main`.
