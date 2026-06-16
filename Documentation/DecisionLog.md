@@ -125,8 +125,31 @@ The summary is the main descriptive content on the detail screen; preserving
 emphasis and paragraph breaks reads far better than flattened text. A dedicated
 converter (vs. `NSAttributedString`'s HTML import) avoids main-thread cost and
 baked-in styling that would fight Dynamic Type, and it is pure and testable.
-Plain-text stripping remains the Slice 1 interim because the summary is not yet
-displayed. No third-party dependency required.
+The summary is now rendered on the show-detail screen (Step B); the `SummaryFormatter`
+also normalizes messy source whitespace (stray non-breaking/double spaces), and
+plain-text stripping (`String.strippingHTMLTags`) is retained only as the
+converter's fallback. No third-party dependency required.
+
+---
+
+## PD-010 HTTP response caching via a dedicated URLCache
+
+Decision:
+Rely on standard HTTP caching for TVMaze reads rather than a custom in-memory
+cache. `TVMazeClient` uses a `URLSession` configured with its own `URLCache`
+(~4 MB memory / 50 MB disk) and the default `.useProtocolCachePolicy`. TVMaze
+sends `Cache-Control: public, max-age=3600` on the search and show endpoints, so
+repeat lookups are served from cache for up to an hour with no network round trip.
+
+Rationale:
+A bespoke cache would re-implement the freshness windows, disk persistence, and
+eviction that `URLCache` already handles correctly, while adding its own
+invalidation risk. A dedicated cache (vs. `URLCache.shared`) keeps sizing
+intentional and isolated, and leaves a clean per-request `cachePolicy` knob for
+Slice 2 (force-revalidate on background refresh; serve cached data when offline).
+Trade-off: if TVMaze ever drops its cache headers, caching silently stops — an
+acceptable, documented risk for a free data source, and not worth hedging with a
+custom cache.
 
 ---
 

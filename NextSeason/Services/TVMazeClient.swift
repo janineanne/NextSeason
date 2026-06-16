@@ -17,10 +17,24 @@ actor TVMazeClient: TVMazeService {
     private let baseURL = URL(string: "https://api.tvmaze.com")!
     private let maxRetries = 1
 
-    init(session: URLSession = .shared) {
+    init(session: URLSession = TVMazeClient.makeCachingSession()) {
         self.session = session
         let version = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "1.0"
         self.userAgent = "NextSeason/\(version)"
+    }
+
+    /// A session with a dedicated, modestly-sized cache. TVMaze sends
+    /// `Cache-Control: public, max-age=3600`, so honoring the protocol cache lets
+    /// repeat lookups (e.g. revisiting a show) skip the network for up to an hour.
+    /// Isolated from `URLCache.shared` so its sizing is intentional and tunable.
+    private static func makeCachingSession() -> URLSession {
+        let configuration = URLSessionConfiguration.default
+        configuration.urlCache = URLCache(
+            memoryCapacity: 4 * 1024 * 1024,
+            diskCapacity: 50 * 1024 * 1024
+        )
+        configuration.requestCachePolicy = .useProtocolCachePolicy
+        return URLSession(configuration: configuration)
     }
 
     func searchShows(matching query: String) async throws -> [Show] {

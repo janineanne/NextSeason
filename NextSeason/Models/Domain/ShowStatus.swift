@@ -27,7 +27,7 @@ nonisolated enum ShowStatus: Sendable, Hashable {
 
     var displayLabel: String {
         switch self {
-        case .running: "Running"
+        case .running: "Ongoing series"
         case .ended: "Ended"
         case .toBeDetermined: "To Be Determined"
         case .inDevelopment: "In Development"
