@@ -20,6 +20,7 @@
 		E102E5CA2FE0D4480076FCDD /* 6-15-2026-Phase4-Slice1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-15-2026-Phase4-Slice1.md"; sourceTree = "<group>"; };
 		E102E5CC2FE10EFD0076FCDD /* 6-15-2026-ChatGPT Review of Phase 4 Slice 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-15-2026-ChatGPT Review of Phase 4 Slice 1.md"; sourceTree = "<group>"; };
 		E102E5CD2FE10FB10076FCDD /* 6-15-2026-Phase 4 Slice 1 Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-15-2026-Phase 4 Slice 1 Implement Review Items.md"; sourceTree = "<group>"; };
+		E102E6B82FE1C2450076FCDD /* 6-16-2026-Phase 4 Slice 1 wrapup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-16-2026-Phase 4 Slice 1 wrapup.md"; sourceTree = "<group>"; };
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
@@ -125,6 +126,7 @@
 		E1DAC54B2FDE2E1F00BD81E5 /* KickoffTranscripts */ = {
 			isa = PBXGroup;
 			children = (
+				E102E6B82FE1C2450076FCDD /* 6-16-2026-Phase 4 Slice 1 wrapup.md */,
 				E1DAC54E2FDF23EE00BD81E5 /* Notes.md */,
 				E1DAC5492FDE2E1F00BD81E5 /* 6-13-2026-Phase1.md */,
 				E1DAC54A2FDE2E1F00BD81E5 /* 6-13-2026-Phase2.md */,
