@@ -392,3 +392,73 @@ Removed the SF Symbol from the **Next Season** section on the detail view so it 
 Also removed the now-unused `systemImage` property from `NextSeasonStatus+Display.swift`.
 
 **To verify:** Open a show detail and confirm the next-season line in the group box has no icon, consistent with watchlist rows.
+
+## User
+
+Please commit and merge to main.
+
+## Assistant
+
+Checking git state, then committing and merging to main.
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/agent-tools/7dad06be-4f08-4c9f-87cc-e130947a48f0.txt","limit":200}
+```
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Staging all changes, committing, then merging into main.
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Retrying with your approval — committing all branch work, then merging to main.
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Committed and merged to `main`. Summary:
+
+**Commit** `f7d1598` on `Phase2-Slice2`:
+> Address Phase 4 Slice 2 review items and polish detail UI.
+
+Includes the adaptive TVMaze update window, notification pre-prompt, detail view reload fix, authorization alignment, status icon removal, tests, and documentation transcripts.
+
+**Merge** — fast-forward of `Phase2-Slice2` into `main`, bringing in:
+1. `2560733` — local watchlist with notifications and background refresh
+2. `f7d1598` — review fixes and UI polish
+
+`main` is now 2 commits ahead of `origin/main` with a clean working tree. Say if you want me to push to remote.
+
+## User
+
+Execute the selected diff-tab push action.
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Pushed `main` to `origin/main` (`0440311..f7d1598`). Both local commits are now on the remote:
+
+1. `2560733` — Add local watchlist with notifications and background refresh
+2. `f7d1598` — Address Phase 4 Slice 2 review items and polish detail UI
