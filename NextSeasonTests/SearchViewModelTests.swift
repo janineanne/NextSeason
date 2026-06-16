@@ -17,8 +17,12 @@ struct SearchViewModelTests {
             try await handler(query)
         }
 
-        func show(id: Int) async throws -> Show {
+        func show(id: Int, bypassCache: Bool) async throws -> Show {
             throw TVMazeError.notFound
+        }
+
+        func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
+            [:]
         }
     }
 

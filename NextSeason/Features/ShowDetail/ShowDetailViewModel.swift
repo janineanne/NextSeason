@@ -18,12 +18,23 @@ final class ShowDetailViewModel {
     let initialShow: Show
     private(set) var fullShow: Show?
     private(set) var loadState: LoadState = .loading
+    private(set) var isTracked = false
+    private(set) var isUpdatingWatchlist = false
 
     private let service: any TVMazeService
+    private let repository: any WatchlistRepository
+    private let notifications: NotificationService
 
-    init(show: Show, service: any TVMazeService = TVMazeClient()) {
+    init(
+        show: Show,
+        service: any TVMazeService = TVMazeClient(),
+        repository: any WatchlistRepository,
+        notifications: NotificationService = NotificationService()
+    ) {
         self.initialShow = show
         self.service = service
+        self.repository = repository
+        self.notifications = notifications
     }
 
     /// Best available show data: the fully-loaded show once fetched, else the
@@ -41,8 +52,28 @@ final class ShowDetailViewModel {
         do {
             fullShow = try await service.show(id: initialShow.id)
             loadState = .loaded
+            isTracked = try await repository.contains(showID: initialShow.id)
         } catch is CancellationError {
             return
+        } catch {
+            loadState = .failed(error.localizedDescription)
+        }
+    }
+
+    func toggleWatchlist() async {
+        guard let show = fullShow, loadState == .loaded, !isUpdatingWatchlist else { return }
+        isUpdatingWatchlist = true
+        defer { isUpdatingWatchlist = false }
+
+        do {
+            if isTracked {
+                try await repository.remove(showID: show.id)
+                isTracked = false
+            } else {
+                try await repository.add(show)
+                isTracked = true
+                await notifications.requestAuthorizationIfNeeded()
+            }
         } catch {
             loadState = .failed(error.localizedDescription)
         }

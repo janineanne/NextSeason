@@ -47,20 +47,36 @@ actor TVMazeClient: TVMazeService {
         return results.map { $0.show.toDomain() }
     }
 
-    func show(id: Int) async throws -> Show {
+    func show(id: Int, bypassCache: Bool = false) async throws -> Show {
         var components = URLComponents(url: baseURL.appending(path: "shows/\(id)"), resolvingAgainstBaseURL: false)
         components?.queryItems = [
             URLQueryItem(name: "embed[]", value: "seasons"),
             URLQueryItem(name: "embed[]", value: "nextepisode")
         ]
-        let data: ShowData = try await get(components)
+        let data: ShowData = try await get(components, bypassCache: bypassCache)
         return data.toDomain()
     }
 
-    private func get<T: Decodable>(_ components: URLComponents?) async throws -> T {
+    func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
+        var components = URLComponents(url: baseURL.appending(path: "updates/shows"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "since", value: period.rawValue)]
+        let epochs: [String: TimeInterval] = try await get(components, bypassCache: true)
+        var result: [Int: Date] = [:]
+        result.reserveCapacity(epochs.count)
+        for (key, epoch) in epochs {
+            guard let id = Int(key) else { continue }
+            result[id] = Date(timeIntervalSince1970: epoch)
+        }
+        return result
+    }
+
+    private func get<T: Decodable>(_ components: URLComponents?, bypassCache: Bool = false) async throws -> T {
         guard let url = components?.url else { throw TVMazeError.invalidURL }
         var request = URLRequest(url: url)
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        if bypassCache {
+            request.cachePolicy = .reloadIgnoringLocalCacheData
+        }
         return try await perform(request, attempt: 0)
     }
 

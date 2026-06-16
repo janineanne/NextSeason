@@ -80,6 +80,7 @@ struct PreviewTVMazeService: TVMazeService {
     let stub: Show
 
     func searchShows(matching query: String) async throws -> [Show] { [stub] }
-    func show(id: Int) async throws -> Show { stub }
+    func show(id: Int, bypassCache: Bool) async throws -> Show { stub }
+    func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] { [:] }
 }
 #endif

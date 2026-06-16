@@ -5,14 +5,23 @@
 
 import SwiftUI
 
-/// The app's root view. For Slice 1 it shows guest search; in Slice 2 this is the
-/// natural place to introduce a `TabView` (Search + Watchlist).
+/// The app's root view: Search and Watchlist tabs (Slice 2).
 struct ContentView: View {
     var body: some View {
-        SearchView()
+        TabView {
+            SearchView()
+                .tabItem {
+                    Label("Search", systemImage: "magnifyingglass")
+                }
+            WatchlistView()
+                .tabItem {
+                    Label("Watchlist", systemImage: "star")
+                }
+        }
     }
 }
 
 #Preview {
     ContentView()
+        .environment(\.watchlistRepository, InMemoryWatchlistRepository())
 }

@@ -42,6 +42,7 @@
 		E1DAC5532FDF4A8300BD81E5 /* 6-14-2026-Phase3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-Phase3.md"; sourceTree = "<group>"; };
 		E1DAC5542FDF4B0F00BD81E5 /* 6-14-2026-Post Review Updates.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-Post Review Updates.md"; sourceTree = "<group>"; };
 		E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -81,6 +82,7 @@
 				E1DA26BF2FDDDE6000C37DAC /* Documentation */,
 				E1DA26BE2FDDD9A800C37DAC /* Cursor Rules */,
 				E13811E42FDCAFE0009C141B /* AGENTS.md */,
+				E1F0A0012FE200000076FCDD /* App-Info.plist */,
 				E13811CF2FDB795C009C141B /* NextSeason */,
 				E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */,
 				E13811CE2FDB795C009C141B /* Products */,
@@ -401,6 +403,7 @@
 				DEVELOPMENT_TEAM = JTVUXCB28U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = App-Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -433,6 +436,7 @@
 				DEVELOPMENT_TEAM = JTVUXCB28U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = App-Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

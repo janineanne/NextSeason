@@ -60,4 +60,5 @@ struct SearchView: View {
 
 #Preview {
     SearchView()
+        .environment(\.watchlistRepository, InMemoryWatchlistRepository())
 }

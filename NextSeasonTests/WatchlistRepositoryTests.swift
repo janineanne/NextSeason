@@ -1,0 +1,63 @@
+//
+//  WatchlistRepositoryTests.swift
+//  NextSeasonTests
+//
+
+import Foundation
+import Testing
+@testable import NextSeason
+
+@MainActor
+struct WatchlistRepositoryTests {
+    private var sampleShow: Show {
+        Show(
+            id: 44933,
+            name: "Severance",
+            tvMazeURL: URL(string: "https://www.tvmaze.com/shows/44933/severance"),
+            summaryHTML: "<p>A workplace thriller.</p>",
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: TVMazeDate.dateOnly("2022-02-18"),
+            ended: nil,
+            network: "Apple TV",
+            genres: ["Drama"],
+            averageRuntime: 49,
+            seasons: [
+                Season(id: 1, number: 1, premiereDate: TVMazeDate.dateOnly("2022-02-18"), endDate: TVMazeDate.dateOnly("2022-04-08"), episodeOrder: 9),
+                Season(id: 3, number: 3, premiereDate: nil, endDate: nil, episodeOrder: nil)
+            ],
+            nextEpisode: nil,
+            updatedAt: .now
+        )
+    }
+
+    @Test("Adding a show stores a snapshot and prevents duplicates")
+    func addAndContains() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let show = sampleShow
+        #expect(try await repository.contains(showID: show.id) == false)
+
+        try await repository.add(show)
+        #expect(try await repository.contains(showID: show.id))
+
+        let all = try await repository.all()
+        #expect(all.count == 1)
+        #expect(all[0].name == show.name)
+        #expect(all[0].summaryHTML == show.summaryHTML)
+        #expect(all[0].tvMazeURL == show.tvMazeURL)
+        #expect(all[0].nextSeason == NextSeasonCalculator.status(for: show))
+
+        try await repository.add(show)
+        #expect(try await repository.all().count == 1)
+    }
+
+    @Test("Removing a show deletes it from the watchlist")
+    func removeShow() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let show = sampleShow
+        try await repository.add(show)
+        try await repository.remove(showID: show.id)
+        #expect(try await repository.all().isEmpty)
+    }
+}
