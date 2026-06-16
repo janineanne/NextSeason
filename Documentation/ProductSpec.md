@@ -70,7 +70,6 @@ In scope:
 
 Explicitly **not** in Slice 1 (planned for Slice 2, see §6):
 
-- User accounts / Sign in with Apple
 - Saved watchlist + local persistence
 - Notifications and background polling
 
@@ -102,6 +101,12 @@ date changed, new season airing, or show ended. Field-level detail lives in
 [`TVMazeResearch.md`](TVMazeResearch.md) §4–5; the architecture path is in
 [`Architecture.md`](Architecture.md).
 
+Slice 2 uses **on-device storage only** — no user accounts or sign-in. See
+PD-001 in [`DecisionLog.md`](DecisionLog.md).
+
+**Future enhancement (post-MVP):** Sign in with Apple and cloud-synced
+watchlists, when cross-device sync justifies the added complexity.
+
 ## 7. Data source
 
 **TVMaze** public REST API. No auth, JSON, CC BY-SA (requires crediting TVMaze
@@ -130,7 +135,8 @@ notification when a new season becomes available — with no ongoing manual effo
 
 - Phase 1 — Product definition: **done** (ChatGPT).
 - Phase 2 — Research: **done** (ChatGPT).
-- Phase 3 — Architecture: **this document set** — `ProductSpec.md`,
-  `Architecture.md`, `TVMazeResearch.md` (Cursor / Claude).
-- Phase 4 — Implementation: next. First vertical slice = **guest search only**.
+- Phase 3 — Architecture: **done** — `ProductSpec.md`, `Architecture.md`,
+  `TVMazeResearch.md` (Cursor / Claude).
+- Phase 4 — Implementation: **in progress**. Slice 1 (Guest Search) = **done**.
+  Next: Slice 2 (Save & Notify).
 ```
