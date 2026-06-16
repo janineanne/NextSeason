@@ -13,18 +13,25 @@ import Foundation
 /// `inlineOnlyPreservingWhitespace`, which keeps our line breaks intact. Plain
 /// text is used as a fallback if parsing ever fails.
 nonisolated enum SummaryFormatter {
+    /// Whether the HTML contains any text worth showing after tag stripping and
+    /// whitespace normalization.
+    static func hasDisplayableContent(_ html: String?) -> Bool {
+        guard let html else { return false }
+        return !plainText(fromHTML: html).isEmpty
+    }
+
     static func attributedString(from html: String) -> AttributedString {
-        let markdown = markdown(fromHTML: html)
+        let text = plainText(fromHTML: html)
         let options = AttributedString.MarkdownParsingOptions(
             interpretedSyntax: .inlineOnlyPreservingWhitespace
         )
-        if let attributed = try? AttributedString(markdown: markdown, options: options) {
+        if let attributed = try? AttributedString(markdown: text, options: options) {
             return attributed
         }
-        return AttributedString(html.strippingHTMLTags)
+        return AttributedString(text)
     }
 
-    private static func markdown(fromHTML html: String) -> String {
+    private static func plainText(fromHTML html: String) -> String {
         var text = html
 
         let replacements: [(String, String)] = [
