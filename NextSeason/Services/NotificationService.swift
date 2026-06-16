@@ -25,13 +25,17 @@ final class NotificationService: NotificationDelivering {
         await center.notificationSettings().authorizationStatus
     }
 
+    /// True when the user has never been asked for notification permission.
+    func needsAuthorizationPrompt() async -> Bool {
+        await authorizationStatus() == .notDetermined
+    }
+
     /// Requests permission once; returns whether alerts are allowed.
     @discardableResult
     func requestAuthorizationIfNeeded() async -> Bool {
         let status = await authorizationStatus()
+        if Self.canDeliverAlerts(status) { return true }
         switch status {
-        case .authorized, .provisional, .ephemeral:
-            return true
         case .denied:
             return false
         case .notDetermined:
@@ -40,14 +44,14 @@ final class NotificationService: NotificationDelivering {
             } catch {
                 return false
             }
-        @unknown default:
+        default:
             return false
         }
     }
 
     func deliver(_ content: SeasonNotificationContent) async {
         let settings = await center.notificationSettings()
-        guard settings.authorizationStatus == .authorized else { return }
+        guard Self.canDeliverAlerts(settings.authorizationStatus) else { return }
 
         let notification = UNMutableNotificationContent()
         notification.title = content.title
@@ -62,5 +66,16 @@ final class NotificationService: NotificationDelivering {
         )
 
         try? await center.add(request)
+    }
+
+    private static func canDeliverAlerts(_ status: UNAuthorizationStatus) -> Bool {
+        switch status {
+        case .authorized, .provisional, .ephemeral:
+            true
+        case .notDetermined, .denied:
+            false
+        @unknown default:
+            false
+        }
     }
 }

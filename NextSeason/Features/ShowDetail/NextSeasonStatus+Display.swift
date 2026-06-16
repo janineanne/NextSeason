@@ -24,15 +24,4 @@ extension NextSeasonStatus {
             "Next season status unknown"
         }
     }
-
-    var systemImage: String {
-        switch self {
-        case .airing: "dot.radiowaves.left.and.right"
-        case .scheduled: "calendar"
-        case .announcedUndated: "hourglass"
-        case .returningNoSeasonYet: "arrow.clockwise"
-        case .ended: "checkmark.circle"
-        case .unknown: "questionmark.circle"
-        }
-    }
 }

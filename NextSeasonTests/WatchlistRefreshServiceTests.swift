@@ -25,6 +25,7 @@ struct WatchlistRefreshServiceTests {
         var shows: [Int: Show] = [:]
         private(set) var fetchedShowIDs: [Int] = []
         private(set) var lastBypassCache: Bool?
+        private(set) var lastUpdatePeriod: TVMazeUpdatePeriod?
 
         func searchShows(matching query: String) async throws -> [Show] { [] }
 
@@ -36,7 +37,8 @@ struct WatchlistRefreshServiceTests {
         }
 
         func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
-            updates
+            lastUpdatePeriod = period
+            return updates
         }
     }
 
@@ -227,5 +229,41 @@ struct WatchlistRefreshServiceTests {
         await service.refreshAll(force: true)
         #expect(notifications.delivered.count == 1)
         #expect(notifications.delivered[0].status == .announcedUndated(season: 3))
+    }
+
+    @Test("Background refresh uses a week window when the oldest check is older than a day")
+    func usesWeekWindowAfterDayGap() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let tvMaze = MockTVMazeService()
+        let notifications = RecordingNotificationService()
+
+        try await repository.add(show())
+
+        var tracked = try await repository.all()[0]
+        tracked.lastCheckedAt = fixedNow.addingTimeInterval(-2 * 86_400)
+        try await repository.updateAfterRefresh(tracked)
+
+        tvMaze.updates = [:]
+        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
+
+        #expect(tvMaze.lastUpdatePeriod == .week)
+    }
+
+    @Test("Background refresh uses a month window when the oldest check is older than a week")
+    func usesMonthWindowAfterWeekGap() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let tvMaze = MockTVMazeService()
+        let notifications = RecordingNotificationService()
+
+        try await repository.add(show())
+
+        var tracked = try await repository.all()[0]
+        tracked.lastCheckedAt = fixedNow.addingTimeInterval(-8 * 86_400)
+        try await repository.updateAfterRefresh(tracked)
+
+        tvMaze.updates = [:]
+        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
+
+        #expect(tvMaze.lastUpdatePeriod == .month)
     }
 }

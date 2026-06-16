@@ -17,3 +17,9 @@ When using ChatGPT, it's best to use the web version because it's easier to copy
 Because I had started out doing Phases 1 and 2 in Cursor and then switched to ChatGPT (I liked it's output better), there was a stale .cursor.plans folder that was confusing Cursor.  I removed it.
 
 An interesting side effect of having changed tools/models is that they use terminology differently.  ChatGPT refers to the MVP as version 0.1;  Claude uses it to refer to the first development slice, which is only part of the MVP.
+
+## Phase 4:
+
+- used Cursor to generate code, ChatGPT to review it.
+
+I kept telling Cursor to use Opus 4.8, but it immediately switched to Composer 2.5 each time.
