@@ -13,7 +13,8 @@ extension ShowData {
         Show(
             id: id,
             name: name,
-            summaryPlainText: summary?.strippingHTMLTags,
+            tvMazeURL: url.flatMap(URL.init(string:)),
+            summaryHTML: summary,
             posterMediumURL: image?.medium.flatMap(URL.init(string:)),
             posterOriginalURL: image?.original.flatMap(URL.init(string:)),
             status: ShowStatus(rawValue: status),
@@ -23,6 +24,9 @@ extension ShowData {
             genres: genres ?? [],
             averageRuntime: averageRuntime,
             seasons: (embedded?.seasons ?? []).map { $0.toDomain() },
+            nextEpisode: embedded?.nextepisode.map {
+                NextEpisode(season: $0.season, airdate: TVMazeDate.dateOnly($0.airdate))
+            },
             updatedAt: updated.map { Date(timeIntervalSince1970: TimeInterval($0)) } ?? .distantPast
         )
     }

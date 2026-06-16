@@ -10,7 +10,11 @@ import Foundation
 nonisolated struct Show: Identifiable, Sendable, Hashable {
     let id: Int
     let name: String
-    let summaryPlainText: String?
+    /// The show's page on TVMaze, used for attribution and a "view more" link.
+    let tvMazeURL: URL?
+    /// Raw TVMaze summary HTML, kept intact so it can be rendered formatted at
+    /// display time (see `SummaryFormatter`).
+    let summaryHTML: String?
     let posterMediumURL: URL?
     let posterOriginalURL: URL?
     let status: ShowStatus
@@ -20,5 +24,6 @@ nonisolated struct Show: Identifiable, Sendable, Hashable {
     let genres: [String]
     let averageRuntime: Int?
     let seasons: [Season]
+    let nextEpisode: NextEpisode?
     let updatedAt: Date
 }
