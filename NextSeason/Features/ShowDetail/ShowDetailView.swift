@@ -8,30 +8,81 @@ import SwiftUI
 /// Show detail: artwork, metadata, the derived next-season status, and a
 /// formatted summary.
 struct ShowDetailView: View {
-    @State private var viewModel: ShowDetailViewModel
+    @Environment(\.watchlistRepository) private var repository
+    @State private var viewModel: ShowDetailViewModel?
 
-    init(show: Show, service: any TVMazeService = TVMazeClient()) {
-        _viewModel = State(initialValue: ShowDetailViewModel(show: show, service: service))
+    private let show: Show
+    private let service: any TVMazeService
+    private let previewRepository: (any WatchlistRepository)?
+
+    init(
+        show: Show,
+        service: any TVMazeService = TVMazeClient(),
+        repository: (any WatchlistRepository)? = nil
+    ) {
+        self.show = show
+        self.service = service
+        self.previewRepository = repository
     }
 
     var body: some View {
+        Group {
+            if let viewModel {
+                detailContent(viewModel: viewModel)
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            if viewModel == nil {
+                viewModel = ShowDetailViewModel(
+                    show: show,
+                    service: service,
+                    repository: previewRepository ?? repository
+                )
+            }
+            await viewModel?.load()
+        }
+    }
+
+    private func detailContent(viewModel: ShowDetailViewModel) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                header
-                nextSeasonSection
-                aboutSection
+                header(viewModel: viewModel)
+                nextSeasonSection(viewModel: viewModel)
+                aboutSection(viewModel: viewModel)
                 attribution
             }
             .padding()
         }
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
-        .task { await viewModel.load() }
+        .toolbar { watchlistToolbarItem(viewModel: viewModel) }
     }
 
-    private var header: some View {
+    @ToolbarContentBuilder
+    private func watchlistToolbarItem(viewModel: ShowDetailViewModel) -> some ToolbarContent {
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                Task { await viewModel.toggleWatchlist() }
+            } label: {
+                if viewModel.isUpdatingWatchlist {
+                    ProgressView()
+                } else {
+                    Label(
+                        viewModel.isTracked ? "Tracking" : "Track",
+                        systemImage: viewModel.isTracked ? "star.fill" : "star"
+                    )
+                }
+            }
+            .disabled(viewModel.loadState != .loaded || viewModel.isUpdatingWatchlist)
+            .accessibilityHint("Adds or removes this show from your watchlist")
+        }
+    }
+
+    private func header(viewModel: ShowDetailViewModel) -> some View {
         HStack(alignment: .top, spacing: 16) {
-            poster
+            poster(viewModel: viewModel)
             VStack(alignment: .leading, spacing: 8) {
                 Text(viewModel.displayShow.name)
                     .font(.title2.bold())
@@ -53,7 +104,7 @@ struct ShowDetailView: View {
         }
     }
 
-    private var poster: some View {
+    private func poster(viewModel: ShowDetailViewModel) -> some View {
         AsyncImage(url: viewModel.displayShow.posterMediumURL) { phase in
             switch phase {
             case .success(let image):
@@ -72,7 +123,7 @@ struct ShowDetailView: View {
     }
 
     @ViewBuilder
-    private var nextSeasonSection: some View {
+    private func nextSeasonSection(viewModel: ShowDetailViewModel) -> some View {
         GroupBox("Next Season") {
             switch viewModel.loadState {
             case .loading:
@@ -101,7 +152,7 @@ struct ShowDetailView: View {
     }
 
     @ViewBuilder
-    private var aboutSection: some View {
+    private func aboutSection(viewModel: ShowDetailViewModel) -> some View {
         let html = viewModel.displayShow.summaryHTML
         let hasSummary = SummaryFormatter.hasDisplayableContent(html)
         if hasSummary || viewModel.displayShow.tvMazeURL != nil {
@@ -133,9 +184,14 @@ struct ShowDetailView: View {
     }
 }
 
+#if DEBUG
 #Preview("With summary") {
     NavigationStack {
-        ShowDetailView(show: .preview, service: PreviewTVMazeService(stub: .preview))
+        ShowDetailView(
+            show: .preview,
+            service: PreviewTVMazeService(stub: .preview),
+            repository: InMemoryWatchlistRepository()
+        )
     }
 }
 
@@ -143,7 +199,9 @@ struct ShowDetailView: View {
     NavigationStack {
         ShowDetailView(
             show: .previewMissingSummary,
-            service: PreviewTVMazeService(stub: .previewMissingSummary)
+            service: PreviewTVMazeService(stub: .previewMissingSummary),
+            repository: InMemoryWatchlistRepository()
         )
     }
 }
+#endif

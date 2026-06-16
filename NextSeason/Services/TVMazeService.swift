@@ -11,5 +11,18 @@ nonisolated protocol TVMazeService: Sendable {
     func searchShows(matching query: String) async throws -> [Show]
 
     /// Full show info including embedded seasons and next episode.
-    func show(id: Int) async throws -> Show
+    func show(id: Int, bypassCache: Bool) async throws -> Show
+
+    /// Show IDs updated since the given window (`GET /updates/shows`).
+    func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date]
+}
+
+nonisolated enum TVMazeUpdatePeriod: String, Sendable {
+    case day, week, month
+}
+
+extension TVMazeService {
+    func show(id: Int) async throws -> Show {
+        try await show(id: id, bypassCache: false)
+    }
 }

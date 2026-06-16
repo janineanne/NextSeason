@@ -1,0 +1,132 @@
+//
+//  StatusChangeDetector.swift
+//  NextSeason
+//
+
+import Foundation
+
+/// Decides whether a next-season delta is worth notifying about and applies
+/// PD-008 debounce rules before alerting.
+nonisolated enum StatusChangeDetector {
+    struct Evaluation: Sendable {
+        var tracked: TrackedShow
+        var notification: SeasonNotificationContent?
+    }
+
+    /// A stable string representing the current next-season state for dedup.
+    static func signature(for status: NextSeasonStatus) -> String {
+        switch status {
+        case .airing(let season):
+            "airing:\(season)"
+        case .scheduled(let season, let premiere):
+            "scheduled:\(season):\(premiere.timeIntervalSince1970)"
+        case .announcedUndated(let season):
+            "announcedUndated:\(season)"
+        case .returningNoSeasonYet:
+            "returningNoSeasonYet"
+        case .ended:
+            "ended"
+        case .unknown:
+            "unknown"
+        }
+    }
+
+    /// Meaningful deltas from `TVMazeResearch.md` §5.
+    static func isMeaningfulChange(from old: NextSeasonStatus, to new: NextSeasonStatus) -> Bool {
+        guard old != new else { return false }
+
+        switch (old, new) {
+        case (.announcedUndated, .scheduled):
+            return true
+        case (.scheduled, .scheduled):
+            return true
+        case (_, .airing):
+            return true
+        case (_, .ended):
+            return true
+        case (.returningNoSeasonYet, .announcedUndated),
+             (.returningNoSeasonYet, .scheduled):
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// Changes backed by a concrete premiere or on-air evidence can notify immediately.
+    static func isDateBacked(_ status: NextSeasonStatus) -> Bool {
+        switch status {
+        case .scheduled, .airing:
+            return true
+        default:
+            return false
+        }
+    }
+
+    static func evaluate(tracked: TrackedShow, newStatus: NextSeasonStatus, now: Date = .now) -> Evaluation {
+        let previousStatus = tracked.nextSeason
+        var updated = tracked
+        updated.lastCheckedAt = now
+        updated.nextSeason = newStatus
+
+        let changeSignature = signature(for: newStatus)
+
+        // Second poll: the snapshot already matches, but a pending change is confirming.
+        if tracked.pendingChangeSignature == changeSignature,
+           changeSignature != tracked.lastNotifiedSignature {
+            updated.lastNotifiedSignature = changeSignature
+            updated.pendingChangeSignature = nil
+            return Evaluation(
+                tracked: updated,
+                notification: SeasonNotificationContent(showID: tracked.id, showName: tracked.name, status: newStatus)
+            )
+        }
+
+        guard isMeaningfulChange(from: previousStatus, to: newStatus) else {
+            updated.pendingChangeSignature = nil
+            return Evaluation(tracked: updated, notification: nil)
+        }
+
+        if changeSignature == tracked.lastNotifiedSignature {
+            updated.pendingChangeSignature = nil
+            return Evaluation(tracked: updated, notification: nil)
+        }
+
+        if isDateBacked(newStatus) {
+            updated.lastNotifiedSignature = changeSignature
+            updated.pendingChangeSignature = nil
+            return Evaluation(
+                tracked: updated,
+                notification: SeasonNotificationContent(showID: tracked.id, showName: tracked.name, status: newStatus)
+            )
+        }
+
+        updated.pendingChangeSignature = changeSignature
+        return Evaluation(tracked: updated, notification: nil)
+    }
+}
+
+nonisolated struct SeasonNotificationContent: Sendable {
+    let showID: Int
+    let showName: String
+    let status: NextSeasonStatus
+
+    var title: String { "Next season update" }
+
+    var body: String {
+        switch status {
+        case .airing(let season):
+            return "\(showName): Season \(season) is now airing."
+        case .scheduled(let season, let premiere):
+            let date = premiere.formatted(date: .abbreviated, time: .omitted)
+            return "\(showName): Season \(season) premieres \(date)."
+        case .announcedUndated(let season):
+            return "\(showName): Season \(season) announced — date to be confirmed."
+        case .returningNoSeasonYet:
+            return "\(showName): Returning — watch for next season news."
+        case .ended:
+            return "\(showName) has ended."
+        case .unknown:
+            return "\(showName): Next season status updated."
+        }
+    }
+}

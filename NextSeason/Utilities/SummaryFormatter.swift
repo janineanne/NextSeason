@@ -34,18 +34,44 @@ nonisolated enum SummaryFormatter {
     private static func plainText(fromHTML html: String) -> String {
         var text = html
 
-        let replacements: [(String, String)] = [
+        let blockReplacements: [(String, String)] = [
             ("</p>", "\n\n"),
             ("<br>", "\n"),
             ("<br/>", "\n"),
-            ("<br />", "\n"),
-            ("<b>", "**"), ("</b>", "**"),
-            ("<strong>", "**"), ("</strong>", "**"),
-            ("<i>", "*"), ("</i>", "*"),
-            ("<em>", "*"), ("</em>", "*")
+            ("<br />", "\n")
         ]
-        for (tag, markdown) in replacements {
-            text = text.replacingOccurrences(of: tag, with: markdown, options: .caseInsensitive)
+        for (tag, replacement) in blockReplacements {
+            text = text.replacingOccurrences(of: tag, with: replacement, options: .caseInsensitive)
+        }
+
+        text = text.replacingOccurrences(of: "\u{00A0}", with: " ")
+
+        // TVMaze often puts a trailing space inside emphasis tags, e.g.
+        // `<b>Murdoch Mysteries </b>is`. Move that space outside the marker so
+        // Markdown parsing succeeds: `**Murdoch Mysteries** is`.
+        let spacedClosingTags: [(String, String)] = [
+            (" </b>", "** "),
+            (" </strong>", "** "),
+            (" </i>", "* "),
+            (" </em>", "* ")
+        ]
+        for (pattern, replacement) in spacedClosingTags {
+            text = text.replacingOccurrences(of: pattern, with: replacement, options: .caseInsensitive)
+        }
+
+        // Opening tags may include attributes; closing tags may include whitespace.
+        let inlinePatterns: [(String, String)] = [
+            ("<(?:b|strong)(?:\\s[^>]*)?>", "**"),
+            ("</(?:b|strong)\\s*>", "**"),
+            ("<(?:i|em)(?:\\s[^>]*)?>", "*"),
+            ("</(?:i|em)\\s*>", "*")
+        ]
+        for (pattern, replacement) in inlinePatterns {
+            text = text.replacingOccurrences(
+                of: pattern,
+                with: replacement,
+                options: [.regularExpression, .caseInsensitive]
+            )
         }
 
         // Drop any remaining tags (e.g. opening <p>, stray markup).
@@ -53,10 +79,7 @@ nonisolated enum SummaryFormatter {
 
         text = text.decodingBasicHTMLEntities
 
-        // Normalize messy source whitespace (TVMaze summaries often contain stray
-        // non-breaking spaces and double spaces) without disturbing the paragraph
-        // and line breaks we inserted above.
-        text = text.replacingOccurrences(of: "\u{00A0}", with: " ")
+        // Normalize messy source whitespace without disturbing paragraph breaks.
         text = text.replacingOccurrences(of: "[ \\t]+", with: " ", options: .regularExpression)
         text = text.replacingOccurrences(of: " *\\n *", with: "\n", options: .regularExpression)
 

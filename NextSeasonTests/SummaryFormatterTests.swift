@@ -24,6 +24,44 @@ struct SummaryFormatterTests {
         #expect(hasStrong)
     }
 
+    @Test("Bold with trailing space inside the tag still renders as emphasis")
+    func boldWithTrailingSpaceInsideTag() {
+        let result = SummaryFormatter.attributedString(
+            from: "<b>Murdoch Mysteries </b>is a detective series."
+        )
+        #expect(String(result.characters) == "Murdoch Mysteries is a detective series.")
+        let titleRun = result.runs.first {
+            $0.inlinePresentationIntent?.contains(.stronglyEmphasized) == true
+        }
+        #expect(titleRun != nil)
+        #expect(String(result.characters).hasPrefix("Murdoch Mysteries"))
+        #expect(String(result.characters).contains("**") == false)
+    }
+
+    @Test("Strong tags with attributes become emphasis")
+    func strongWithAttributes() {
+        let result = SummaryFormatter.attributedString(
+            from: "<strong class=\"foo\">Murdoch Mysteries</strong> is on TV."
+        )
+        #expect(String(result.characters) == "Murdoch Mysteries is on TV.")
+        let hasStrong = result.runs.contains {
+            $0.inlinePresentationIntent?.contains(.stronglyEmphasized) == true
+        }
+        #expect(hasStrong)
+    }
+
+    @Test("Italic tags with attributes become emphasis")
+    func italicWithAttributes() {
+        let result = SummaryFormatter.attributedString(
+            from: "<p>Hello <em class=\"bar\">world</em></p>"
+        )
+        #expect(String(result.characters) == "Hello world")
+        let hasEmphasis = result.runs.contains {
+            $0.inlinePresentationIntent?.contains(.emphasized) == true
+        }
+        #expect(hasEmphasis)
+    }
+
     @Test("Italic tags become emphasis")
     func italic() {
         let result = SummaryFormatter.attributedString(from: "<p>Hello <i>world</i></p>")

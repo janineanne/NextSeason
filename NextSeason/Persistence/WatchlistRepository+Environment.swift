@@ -1,0 +1,30 @@
+//
+//  WatchlistRepository+Environment.swift
+//  NextSeason
+//
+
+import SwiftUI
+
+private struct WatchlistRepositoryKey: EnvironmentKey {
+    @MainActor static let defaultValue: any WatchlistRepository = UnconfiguredWatchlistRepository()
+}
+
+extension EnvironmentValues {
+    @MainActor var watchlistRepository: any WatchlistRepository {
+        get { self[WatchlistRepositoryKey.self] }
+        set { self[WatchlistRepositoryKey.self] = newValue }
+    }
+}
+
+@MainActor
+private final class UnconfiguredWatchlistRepository: WatchlistRepository {
+    private func fail() -> Never {
+        fatalError("WatchlistRepository was not injected. Set it on the root view.")
+    }
+
+    func all() async throws -> [TrackedShow] { fail() }
+    func contains(showID: Int) async throws -> Bool { fail() }
+    func add(_ show: Show) async throws { fail() }
+    func remove(showID: Int) async throws { fail() }
+    func updateAfterRefresh(_ tracked: TrackedShow) async throws { fail() }
+}
