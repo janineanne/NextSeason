@@ -43,6 +43,7 @@ struct SearchView: View {
                 }
             }
             .listStyle(.plain)
+            .tvmazeAttributionInset()
         case .empty:
             ContentUnavailableView.search(text: viewModel.query)
         case .failed(let message):

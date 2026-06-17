@@ -82,6 +82,7 @@ struct WatchlistView: View {
                 #endif
             }
             .listStyle(.plain)
+            .tvmazeAttributionInset()
         case .failed(let message):
             ContentUnavailableView {
                 Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
