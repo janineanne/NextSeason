@@ -11,11 +11,17 @@ struct WatchlistView: View {
     @Environment(\.notificationService) private var notificationService
 
     @Binding var navigationPath: NavigationPath
+    private let tvMaze: any TVMazeService
     @State private var viewModel: WatchlistViewModel?
     @State private var notificationsDenied = false
     #if DEBUG
     @State private var isSchedulingTestNotification = false
     #endif
+
+    init(navigationPath: Binding<NavigationPath>, tvMaze: any TVMazeService = TVMazeClient()) {
+        _navigationPath = navigationPath
+        self.tvMaze = tvMaze
+    }
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -28,7 +34,7 @@ struct WatchlistView: View {
             }
             .navigationTitle("Watchlist")
             .navigationDestination(for: TrackedShow.self) { tracked in
-                ShowDetailView(show: Show(tracked: tracked))
+                ShowDetailView(show: Show(tracked: tracked), service: tvMaze)
             }
             .task {
                 if viewModel == nil {
@@ -59,6 +65,7 @@ struct WatchlistView: View {
                 systemImage: "star",
                 description: Text("Search for a show and tap Track to monitor its next season.")
             )
+            .uiTestMarker(AccessibilityID.Watchlist.emptyState, label: "No Tracked Shows")
         case .loaded(let shows):
             List {
                 if notificationsDenied {
@@ -150,7 +157,7 @@ struct WatchlistView: View {
 #if DEBUG
 #Preview {
     @Previewable @State var path = NavigationPath()
-    WatchlistView(navigationPath: $path)
+    WatchlistView(navigationPath: $path, tvMaze: TVMazeClient())
         .environment(\.watchlistRepository, InMemoryWatchlistRepository())
 }
 #endif

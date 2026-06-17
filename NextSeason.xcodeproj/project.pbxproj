@@ -14,6 +14,13 @@
 			remoteGlobalIDString = E13811CC2FDB795C009C141B;
 			remoteInfo = NextSeason;
 		};
+		E1UI00072FE400000076FCDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E13811C52FDB795C009C141B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E13811CC2FDB795C009C141B;
+			remoteInfo = NextSeason;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -32,7 +39,8 @@
 		E102EAAE2FE356E70076FCDD /* Phase 4 Slice 2 Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Phase 4 Slice 2 Implement Review Items.md"; sourceTree = "<group>"; };
 		E102EAB02FE356E70076FCDD /* ChatGPT Review of MVP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ChatGPT Review of MVP.md"; sourceTree = "<group>"; };
 		E102EAB12FE356E70076FCDD /* MVP Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "MVP Implement Review Items.md"; sourceTree = "<group>"; };
-		E102EAB32FE3572D0076FCDD /* Improve transcript file organization */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Improve transcript file organization"; sourceTree = "<group>"; };
+		E102EAB32FE3572D0076FCDD /* Improve transcript file organization.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Improve transcript file organization.md"; sourceTree = "<group>"; };
+		E102EFC62FE36AE50076FCDD /* Add UI Tests.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Add UI Tests.md"; sourceTree = "<group>"; };
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
@@ -50,6 +58,7 @@
 		E1DAC5512FDF358800BD81E5 /* TVMazeResearch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TVMazeResearch.md; sourceTree = "<group>"; };
 		E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
+		E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -63,6 +72,11 @@
 			path = NextSeasonTests;
 			sourceTree = "<group>";
 		};
+		E1UI00022FE400000076FCDD /* NextSeasonUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NextSeasonUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +88,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E1DAC5562FDF5A4B00BD81E5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1UI00052FE400000076FCDD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -129,7 +150,8 @@
 			children = (
 				E102EAB02FE356E70076FCDD /* ChatGPT Review of MVP.md */,
 				E102EAB12FE356E70076FCDD /* MVP Implement Review Items.md */,
-				E102EAB32FE3572D0076FCDD /* Improve transcript file organization */,
+				E102EAB32FE3572D0076FCDD /* Improve transcript file organization.md */,
+				E102EFC62FE36AE50076FCDD /* Add UI Tests.md */,
 			);
 			path = "6-17-2026";
 			sourceTree = "<group>";
@@ -143,6 +165,7 @@
 				E1F0A0012FE200000076FCDD /* App-Info.plist */,
 				E13811CF2FDB795C009C141B /* NextSeason */,
 				E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */,
+				E1UI00022FE400000076FCDD /* NextSeasonUITests */,
 				E13811CE2FDB795C009C141B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -152,6 +175,7 @@
 			children = (
 				E13811CD2FDB795C009C141B /* NextSeason.app */,
 				E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */,
+				E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -244,6 +268,29 @@
 			productReference = E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		E1UI00032FE400000076FCDD /* NextSeasonUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1UI00092FE400000076FCDD /* Build configuration list for PBXNativeTarget "NextSeasonUITests" */;
+			buildPhases = (
+				E1UI00042FE400000076FCDD /* Sources */,
+				E1UI00052FE400000076FCDD /* Frameworks */,
+				E1UI00062FE400000076FCDD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E1UI00082FE400000076FCDD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E1UI00022FE400000076FCDD /* NextSeasonUITests */,
+			);
+			name = NextSeasonUITests;
+			packageProductDependencies = (
+			);
+			productName = NextSeasonUITests;
+			productReference = E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -258,6 +305,10 @@
 						CreatedOnToolsVersion = 26.5;
 					};
 					E1DAC5582FDF5A4B00BD81E5 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = E13811CC2FDB795C009C141B;
+					};
+					E1UI00032FE400000076FCDD = {
 						CreatedOnToolsVersion = 26.5;
 						TestTargetID = E13811CC2FDB795C009C141B;
 					};
@@ -279,6 +330,7 @@
 			targets = (
 				E13811CC2FDB795C009C141B /* NextSeason */,
 				E1DAC5582FDF5A4B00BD81E5 /* NextSeasonTests */,
+				E1UI00032FE400000076FCDD /* NextSeasonUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -292,6 +344,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E1DAC5572FDF5A4B00BD81E5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1UI00062FE400000076FCDD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -315,6 +374,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1UI00042FE400000076FCDD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -322,6 +388,11 @@
 			isa = PBXTargetDependency;
 			target = E13811CC2FDB795C009C141B /* NextSeason */;
 			targetProxy = E1DAC55D2FDF5A4B00BD81E5 /* PBXContainerItemProxy */;
+		};
+		E1UI00082FE400000076FCDD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E13811CC2FDB795C009C141B /* NextSeason */;
+			targetProxy = E1UI00072FE400000076FCDD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -555,6 +626,46 @@
 			};
 			name = Release;
 		};
+		E1UI000A2FE400000076FCDD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6U9C675XYA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = NextSeason;
+			};
+			name = Debug;
+		};
+		E1UI000B2FE400000076FCDD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6U9C675XYA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = NextSeason;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -581,6 +692,15 @@
 			buildConfigurations = (
 				E1DAC5602FDF5A4B00BD81E5 /* Debug */,
 				E1DAC5612FDF5A4B00BD81E5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E1UI00092FE400000076FCDD /* Build configuration list for PBXNativeTarget "NextSeasonUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1UI000A2FE400000076FCDD /* Debug */,
+				E1UI000B2FE400000076FCDD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

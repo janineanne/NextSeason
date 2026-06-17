@@ -20,13 +20,15 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $coordinator.selectedTab) {
-            SearchView(navigationPath: $coordinator.searchPath)
+            SearchView(navigationPath: $coordinator.searchPath, tvMaze: tvMaze)
+                .accessibilityIdentifier(AccessibilityID.Tab.search)
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
                 .tag(AppNavigationCoordinator.Tab.search)
 
-            WatchlistView(navigationPath: $coordinator.watchlistPath)
+            WatchlistView(navigationPath: $coordinator.watchlistPath, tvMaze: tvMaze)
+                .accessibilityIdentifier(AccessibilityID.Tab.watchlist)
                 .tabItem {
                     Label("Watchlist", systemImage: "star")
                 }
