@@ -12,6 +12,7 @@ final class WatchlistRefreshService {
     private let repository: any WatchlistRepository
     private let notifications: any NotificationDelivering
     private let now: @Sendable () -> Date
+    private var lastForegroundRefreshAt: Date?
 
     init(
         tvMaze: any TVMazeService = TVMazeClient(),
@@ -23,6 +24,17 @@ final class WatchlistRefreshService {
         self.repository = repository
         self.notifications = notifications
         self.now = now
+    }
+
+    /// Foreground-only refresh that skips network work if a refresh ran recently.
+    func refreshAllIfNeeded() async {
+        guard RefreshPolicy.shouldPerformForegroundRefresh(
+            lastRefreshAt: lastForegroundRefreshAt,
+            now: now()
+        ) else { return }
+
+        await refreshAll(force: false)
+        lastForegroundRefreshAt = now()
     }
 
     func refreshAll(force: Bool = false) async {

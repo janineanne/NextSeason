@@ -11,6 +11,8 @@ struct NextSeasonApp: App {
     private let modelContainer: ModelContainer
     @State private var watchlistRepository: SwiftDataWatchlistRepository
     @State private var refreshService: WatchlistRefreshService
+    @State private var notificationService = NotificationService()
+    @State private var navigationCoordinator = AppNavigationCoordinator()
 
     init() {
         do {
@@ -28,16 +30,38 @@ struct NextSeasonApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.watchlistRepository, watchlistRepository)
-                .environment(\.watchlistRefreshService, refreshService)
-                .task {
-                    RefreshScheduler.configure {
-                        await refreshService.refreshAll()
-                    }
-                    RefreshScheduler.scheduleNextRefresh()
+            AppRootView(
+                navigationCoordinator: navigationCoordinator,
+                refreshService: refreshService
+            )
+            .environment(\.watchlistRepository, watchlistRepository)
+            .environment(\.watchlistRefreshService, refreshService)
+            .environment(\.notificationService, notificationService)
+            .task {
+                NotificationRouting.coordinator = navigationCoordinator
+                NotificationRouting.install()
+                RefreshScheduler.configure {
+                    await refreshService.refreshAll()
                 }
+                RefreshScheduler.scheduleNextRefresh()
+            }
         }
         .modelContainer(modelContainer)
+    }
+}
+
+/// Hosts scene-phase refresh so foreground returns pick up watchlist changes.
+private struct AppRootView: View {
+    @Environment(\.scenePhase) private var scenePhase
+
+    @Bindable var navigationCoordinator: AppNavigationCoordinator
+    let refreshService: WatchlistRefreshService
+
+    var body: some View {
+        ContentView(coordinator: navigationCoordinator)
+            .onChange(of: scenePhase) { previousPhase, phase in
+                guard phase == .active, previousPhase != .active else { return }
+                Task { await refreshService.refreshAllIfNeeded() }
+            }
     }
 }

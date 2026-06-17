@@ -83,11 +83,25 @@ struct WatchlistRefreshServiceTests {
         tvMaze: MockTVMazeService,
         notifications: RecordingNotificationService
     ) -> WatchlistRefreshService {
+        makeService(
+            repository: repository,
+            tvMaze: tvMaze,
+            notifications: notifications,
+            now: { fixedNow }
+        )
+    }
+
+    private func makeService(
+        repository: InMemoryWatchlistRepository,
+        tvMaze: MockTVMazeService,
+        notifications: RecordingNotificationService,
+        now: @escaping @Sendable () -> Date
+    ) -> WatchlistRefreshService {
         WatchlistRefreshService(
             tvMaze: tvMaze,
             repository: repository,
             notifications: notifications,
-            now: { self.fixedNow }
+            now: now
         )
     }
 
@@ -265,5 +279,38 @@ struct WatchlistRefreshServiceTests {
         await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
 
         #expect(tvMaze.lastUpdatePeriod == .month)
+    }
+
+    @Test("Foreground refresh skips network work when a refresh just ran")
+    func skipsImmediateForegroundRefresh() async throws {
+        final class NowBox: @unchecked Sendable {
+            var date: Date
+            init(_ date: Date) { self.date = date }
+        }
+
+        let nowBox = NowBox(fixedNow)
+        let repository = InMemoryWatchlistRepository()
+        let tvMaze = MockTVMazeService()
+        let notifications = RecordingNotificationService()
+        let service = makeService(
+            repository: repository,
+            tvMaze: tvMaze,
+            notifications: notifications,
+            now: { nowBox.date }
+        )
+
+        try await repository.add(show())
+        tvMaze.shows[showID] = show()
+        tvMaze.updates = [showID: fixedNow.addingTimeInterval(60)]
+
+        await service.refreshAllIfNeeded()
+        #expect(tvMaze.fetchedShowIDs.count == 1)
+
+        await service.refreshAllIfNeeded()
+        #expect(tvMaze.fetchedShowIDs.count == 1)
+
+        nowBox.date = fixedNow.addingTimeInterval(16 * 60)
+        await service.refreshAllIfNeeded()
+        #expect(tvMaze.fetchedShowIDs.count == 2)
     }
 }

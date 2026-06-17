@@ -7,10 +7,11 @@ import SwiftUI
 
 /// Guest search: type a title, see matching shows and their status.
 struct SearchView: View {
+    @Binding var navigationPath: NavigationPath
     @State private var viewModel = SearchViewModel()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             content
                 .navigationTitle("NextSeason")
                 .navigationDestination(for: Show.self) { show in
@@ -59,6 +60,7 @@ struct SearchView: View {
 }
 
 #Preview {
-    SearchView()
+    @Previewable @State var path = NavigationPath()
+    SearchView(navigationPath: $path)
         .environment(\.watchlistRepository, InMemoryWatchlistRepository())
 }
