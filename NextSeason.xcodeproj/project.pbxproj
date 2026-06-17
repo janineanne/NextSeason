@@ -17,16 +17,22 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E102E5CA2FE0D4480076FCDD /* 6-15-2026-Phase4-Slice1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-15-2026-Phase4-Slice1.md"; sourceTree = "<group>"; };
-		E102E5CC2FE10EFD0076FCDD /* 6-15-2026-ChatGPT Review of Phase 4 Slice 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-15-2026-ChatGPT Review of Phase 4 Slice 1.md"; sourceTree = "<group>"; };
-		E102E5CD2FE10FB10076FCDD /* 6-15-2026-Phase 4 Slice 1 Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-15-2026-Phase 4 Slice 1 Implement Review Items.md"; sourceTree = "<group>"; };
-		E102E6B82FE1C2450076FCDD /* 6-16-2026-Phase 4 Slice 1 wrapup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-16-2026-Phase 4 Slice 1 wrapup.md"; sourceTree = "<group>"; };
-		E102E8852FE20A360076FCDD /* 6-16-2026-Phase 4 Slice 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-16-2026-Phase 4 Slice 2.md"; sourceTree = "<group>"; };
-		E102E8862FE20BB00076FCDD /* 6-16-2026-ChatGPT Review of Phase 4 Slice 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-16-2026-ChatGPT Review of Phase 4 Slice 2.md"; sourceTree = "<group>"; };
-		E102E8892FE20C870076FCDD /* 6-16-2026-Phase 4 Slice 2 Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-16-2026-Phase 4 Slice 2 Implement Review Items.md"; sourceTree = "<group>"; };
-		E102E9802FE216A30076FCDD /* 6-16-2026-Implement Remaining MVP Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-16-2026-Implement Remaining MVP Items.md"; sourceTree = "<group>"; };
-		E102EA132FE351A40076FCDD /* 6-17-2826-ChatGPT Review of MVP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-17-2826-ChatGPT Review of MVP.md"; sourceTree = "<group>"; };
-		E102EA142FE352D80076FCDD /* 6-17-2026-MVP Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-17-2026-MVP Implement Review Items.md"; sourceTree = "<group>"; };
+		E102EA9F2FE356E70076FCDD /* Phase1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Phase1.md; sourceTree = "<group>"; };
+		E102EAA02FE356E70076FCDD /* Phase2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Phase2.md; sourceTree = "<group>"; };
+		E102EAA22FE356E70076FCDD /* ChatGPT Review of Phases 1-3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ChatGPT Review of Phases 1-3.md"; sourceTree = "<group>"; };
+		E102EAA32FE356E70076FCDD /* Phase3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Phase3.md; sourceTree = "<group>"; };
+		E102EAA42FE356E70076FCDD /* Post Review Updates.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Post Review Updates.md"; sourceTree = "<group>"; };
+		E102EAA62FE356E70076FCDD /* ChatGPT Review of Phase 4 Slice 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ChatGPT Review of Phase 4 Slice 1.md"; sourceTree = "<group>"; };
+		E102EAA72FE356E70076FCDD /* Phase 4 Slice 1 Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Phase 4 Slice 1 Implement Review Items.md"; sourceTree = "<group>"; };
+		E102EAA82FE356E70076FCDD /* Phase4-Slice1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Phase4-Slice1.md"; sourceTree = "<group>"; };
+		E102EAAA2FE356E70076FCDD /* ChatGPT Review of Phase 4 Slice 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ChatGPT Review of Phase 4 Slice 2.md"; sourceTree = "<group>"; };
+		E102EAAB2FE356E70076FCDD /* Implement Remaining MVP Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Remaining MVP Items.md"; sourceTree = "<group>"; };
+		E102EAAC2FE356E70076FCDD /* Phase 4 Slice 1 wrapup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Phase 4 Slice 1 wrapup.md"; sourceTree = "<group>"; };
+		E102EAAD2FE356E70076FCDD /* Phase 4 Slice 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Phase 4 Slice 2.md"; sourceTree = "<group>"; };
+		E102EAAE2FE356E70076FCDD /* Phase 4 Slice 2 Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Phase 4 Slice 2 Implement Review Items.md"; sourceTree = "<group>"; };
+		E102EAB02FE356E70076FCDD /* ChatGPT Review of MVP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ChatGPT Review of MVP.md"; sourceTree = "<group>"; };
+		E102EAB12FE356E70076FCDD /* MVP Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "MVP Implement Review Items.md"; sourceTree = "<group>"; };
+		E102EAB32FE3572D0076FCDD /* Improve transcript file organization */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Improve transcript file organization"; sourceTree = "<group>"; };
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
@@ -36,17 +42,12 @@
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
 		E1DAC5472FDE2E1F00BD81E5 /* DecisionLog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DecisionLog.md; sourceTree = "<group>"; };
 		E1DAC5482FDE2E1F00BD81E5 /* FunctionalRequirements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FunctionalRequirements.md; sourceTree = "<group>"; };
-		E1DAC5492FDE2E1F00BD81E5 /* 6-13-2026-Phase1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-13-2026-Phase1.md"; sourceTree = "<group>"; };
-		E1DAC54A2FDE2E1F00BD81E5 /* 6-13-2026-Phase2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-13-2026-Phase2.md"; sourceTree = "<group>"; };
 		E1DAC54C2FDE2E1F00BD81E5 /* MVPBacklog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPBacklog.md; sourceTree = "<group>"; };
 		E1DAC54D2FDE2E1F00BD81E5 /* UserStories.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = UserStories.md; sourceTree = "<group>"; };
 		E1DAC54E2FDF23EE00BD81E5 /* Notes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Notes.md; sourceTree = "<group>"; };
 		E1DAC54F2FDF358800BD81E5 /* Architecture.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Architecture.md; sourceTree = "<group>"; };
 		E1DAC5502FDF358800BD81E5 /* ProductSpec.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProductSpec.md; sourceTree = "<group>"; };
 		E1DAC5512FDF358800BD81E5 /* TVMazeResearch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TVMazeResearch.md; sourceTree = "<group>"; };
-		E1DAC5522FDF477C00BD81E5 /* 6-14-2026-ChatGPT Review of Phases 1-3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-ChatGPT Review of Phases 1-3.md"; sourceTree = "<group>"; };
-		E1DAC5532FDF4A8300BD81E5 /* 6-14-2026-Phase3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-Phase3.md"; sourceTree = "<group>"; };
-		E1DAC5542FDF4B0F00BD81E5 /* 6-14-2026-Post Review Updates.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-14-2026-Post Review Updates.md"; sourceTree = "<group>"; };
 		E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -82,6 +83,57 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E102EAA12FE356E70076FCDD /* 6-13-2026 */ = {
+			isa = PBXGroup;
+			children = (
+				E102EA9F2FE356E70076FCDD /* Phase1.md */,
+				E102EAA02FE356E70076FCDD /* Phase2.md */,
+			);
+			path = "6-13-2026";
+			sourceTree = "<group>";
+		};
+		E102EAA52FE356E70076FCDD /* 6-14-2026 */ = {
+			isa = PBXGroup;
+			children = (
+				E102EAA22FE356E70076FCDD /* ChatGPT Review of Phases 1-3.md */,
+				E102EAA32FE356E70076FCDD /* Phase3.md */,
+				E102EAA42FE356E70076FCDD /* Post Review Updates.md */,
+			);
+			path = "6-14-2026";
+			sourceTree = "<group>";
+		};
+		E102EAA92FE356E70076FCDD /* 6-15-2026 */ = {
+			isa = PBXGroup;
+			children = (
+				E102EAA62FE356E70076FCDD /* ChatGPT Review of Phase 4 Slice 1.md */,
+				E102EAA72FE356E70076FCDD /* Phase 4 Slice 1 Implement Review Items.md */,
+				E102EAA82FE356E70076FCDD /* Phase4-Slice1.md */,
+			);
+			path = "6-15-2026";
+			sourceTree = "<group>";
+		};
+		E102EAAF2FE356E70076FCDD /* 6-16-2026 */ = {
+			isa = PBXGroup;
+			children = (
+				E102EAAA2FE356E70076FCDD /* ChatGPT Review of Phase 4 Slice 2.md */,
+				E102EAAB2FE356E70076FCDD /* Implement Remaining MVP Items.md */,
+				E102EAAC2FE356E70076FCDD /* Phase 4 Slice 1 wrapup.md */,
+				E102EAAD2FE356E70076FCDD /* Phase 4 Slice 2.md */,
+				E102EAAE2FE356E70076FCDD /* Phase 4 Slice 2 Implement Review Items.md */,
+			);
+			path = "6-16-2026";
+			sourceTree = "<group>";
+		};
+		E102EAB22FE356E70076FCDD /* 6-17-2026 */ = {
+			isa = PBXGroup;
+			children = (
+				E102EAB02FE356E70076FCDD /* ChatGPT Review of MVP.md */,
+				E102EAB12FE356E70076FCDD /* MVP Implement Review Items.md */,
+				E102EAB32FE3572D0076FCDD /* Improve transcript file organization */,
+			);
+			path = "6-17-2026";
+			sourceTree = "<group>";
+		};
 		E13811C42FDB795C009C141B = {
 			isa = PBXGroup;
 			children = (
@@ -134,22 +186,12 @@
 		E1DAC54B2FDE2E1F00BD81E5 /* KickoffTranscripts */ = {
 			isa = PBXGroup;
 			children = (
+				E102EAA12FE356E70076FCDD /* 6-13-2026 */,
+				E102EAA52FE356E70076FCDD /* 6-14-2026 */,
+				E102EAA92FE356E70076FCDD /* 6-15-2026 */,
+				E102EAAF2FE356E70076FCDD /* 6-16-2026 */,
+				E102EAB22FE356E70076FCDD /* 6-17-2026 */,
 				E1DAC54E2FDF23EE00BD81E5 /* Notes.md */,
-				E1DAC5492FDE2E1F00BD81E5 /* 6-13-2026-Phase1.md */,
-				E1DAC54A2FDE2E1F00BD81E5 /* 6-13-2026-Phase2.md */,
-				E1DAC5532FDF4A8300BD81E5 /* 6-14-2026-Phase3.md */,
-				E1DAC5522FDF477C00BD81E5 /* 6-14-2026-ChatGPT Review of Phases 1-3.md */,
-				E1DAC5542FDF4B0F00BD81E5 /* 6-14-2026-Post Review Updates.md */,
-				E102E5CA2FE0D4480076FCDD /* 6-15-2026-Phase4-Slice1.md */,
-				E102E5CC2FE10EFD0076FCDD /* 6-15-2026-ChatGPT Review of Phase 4 Slice 1.md */,
-				E102E5CD2FE10FB10076FCDD /* 6-15-2026-Phase 4 Slice 1 Implement Review Items.md */,
-				E102E6B82FE1C2450076FCDD /* 6-16-2026-Phase 4 Slice 1 wrapup.md */,
-				E102E8852FE20A360076FCDD /* 6-16-2026-Phase 4 Slice 2.md */,
-				E102E8862FE20BB00076FCDD /* 6-16-2026-ChatGPT Review of Phase 4 Slice 2.md */,
-				E102E8892FE20C870076FCDD /* 6-16-2026-Phase 4 Slice 2 Implement Review Items.md */,
-				E102E9802FE216A30076FCDD /* 6-16-2026-Implement Remaining MVP Items.md */,
-				E102EA132FE351A40076FCDD /* 6-17-2826-ChatGPT Review of MVP.md */,
-				E102EA142FE352D80076FCDD /* 6-17-2026-MVP Implement Review Items.md */,
 			);
 			path = KickoffTranscripts;
 			sourceTree = "<group>";
