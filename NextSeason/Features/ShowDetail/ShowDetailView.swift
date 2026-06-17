@@ -119,6 +119,7 @@ struct ShowDetailView: View {
                 }
             }
             .disabled(viewModel.loadState != .loaded || viewModel.isUpdatingWatchlist)
+            .accessibilityIdentifier(AccessibilityID.ShowDetail.trackButton)
             .accessibilityHint(trackButtonHint(viewModel: viewModel))
         }
     }

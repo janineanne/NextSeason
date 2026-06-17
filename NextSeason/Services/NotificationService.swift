@@ -28,12 +28,14 @@ final class NotificationService: NotificationDelivering {
 
     /// True when the user has never been asked for notification permission.
     func needsAuthorizationPrompt() async -> Bool {
-        await authorizationStatus() == .notDetermined
+        guard !UITestingConfiguration.isEnabled else { return false }
+        return await authorizationStatus() == .notDetermined
     }
 
     /// True when the user previously denied notification permission.
     func isDenied() async -> Bool {
-        await authorizationStatus() == .denied
+        guard !UITestingConfiguration.isEnabled else { return false }
+        return await authorizationStatus() == .denied
     }
 
     func openNotificationSettings() {

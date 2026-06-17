@@ -8,14 +8,21 @@ import SwiftUI
 /// Guest search: type a title, see matching shows and their status.
 struct SearchView: View {
     @Binding var navigationPath: NavigationPath
-    @State private var viewModel = SearchViewModel()
+    private let tvMaze: any TVMazeService
+    @State private var viewModel: SearchViewModel
+
+    init(navigationPath: Binding<NavigationPath>, tvMaze: any TVMazeService = TVMazeClient()) {
+        _navigationPath = navigationPath
+        self.tvMaze = tvMaze
+        _viewModel = State(initialValue: SearchViewModel(service: tvMaze))
+    }
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
             content
                 .navigationTitle("NextSeason")
                 .navigationDestination(for: Show.self) { show in
-                    ShowDetailView(show: show)
+                    ShowDetailView(show: show, service: tvMaze)
                 }
                 .searchable(text: $viewModel.query, prompt: "Search TV shows")
                 .task(id: viewModel.query) {
@@ -33,6 +40,7 @@ struct SearchView: View {
                 systemImage: "magnifyingglass",
                 description: Text("Search for a TV show to see its status and upcoming season.")
             )
+            .uiTestMarker(AccessibilityID.Search.idlePrompt, label: "Find Your Next Season")
         case .loading:
             ProgressView("Searching…")
                 .controlSize(.large)
