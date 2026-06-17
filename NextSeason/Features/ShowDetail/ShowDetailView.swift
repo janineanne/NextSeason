@@ -54,10 +54,10 @@ struct ShowDetailView: View {
                 header(viewModel: viewModel)
                 nextSeasonSection(viewModel: viewModel)
                 aboutSection(viewModel: viewModel)
-                attribution
             }
             .padding()
         }
+        .tvmazeAttributionInset()
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { watchlistToolbarItem(viewModel: viewModel) }
@@ -228,14 +228,6 @@ struct ShowDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
-
-    private var attribution: some View {
-        Text("Data provided by TVMaze")
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.top, 24)
     }
 }
 
