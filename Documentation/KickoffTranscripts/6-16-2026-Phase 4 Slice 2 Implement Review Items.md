@@ -462,3 +462,335 @@ Pushed `main` to `origin/main` (`0440311..f7d1598`). Both local commits are now 
 
 1. `2560733` — Add local watchlist with notifications and background refresh
 2. `f7d1598` — Address Phase 4 Slice 2 review items and polish detail UI
+
+## User
+
+Have you considered VoiceOver?  Do you expect it to work correctly?
+
+## Assistant
+
+Reviewing VoiceOver-related accessibility across the app's views and interactions.
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"accessibility|VoiceOver|accessibilityLabel|accessibilityHint|accessibilityHidden|accessibilityElement","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_0e02fbed-a207-41a2-9dc7-69fbdf821a4","offset":0}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/.claude/skills/swiftui-pro/references/accessibility.md"}
+```
+
+### Tool Glob File Search
+
+```
+{"globPattern":"**/Features/**/*.swift"}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/ShowRow.swift"}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistRow.swift"}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift"}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift"}
+```
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"displayLabel","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_a7f3932a-6427-4d03-bae5-a98cc41bb47","offset":0}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/ShowStatus.swift"}
+```
+
+## Assistant
+
+Yes, I’ve considered it — but only lightly. For an MVP the basics are in place; I would **not** expect a fully polished VoiceOver experience without a dedicated pass and device testing.
+
+## What should work
+
+**Search rows** are the best case. `ShowRow` hides the decorative poster, combines the text into one element, and sets an explicit label:
+
+```23:24:NextSeason/Features/Search/ShowRow.swift
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(show.name), \(show.status.displayLabel)")
+```
+
+Inside a `NavigationLink`, VoiceOver should announce something like “Severance, Ongoing series, link.”
+
+**Watchlist rows** follow a similar pattern — poster hidden, children combined — so name, next-season status, stale warning, and last-updated date should read as one link:
+
+```30:31:NextSeason/Features/Watchlist/WatchlistRow.swift
+        .accessibilityElement(children: .combine)
+```
+
+**Detail view** has a few good choices:
+- Poster is hidden from VoiceOver
+- Track button uses a text `Label` (“Track” / “Tracking”), not icon-only
+- There’s an explicit hint on that button
+- Loading and error states mostly use labeled `ProgressView` / `Button("Try Again")`
+- Tabs use text labels, not icon-only tab items
+
+**Dynamic Type** looks fine — the app uses semantic fonts (`.headline`, `.subheadline`, `.body`) rather than fixed sizes.
+
+## Where I expect friction
+
+**1. Track button while updating**
+
+When the watchlist toggle is in progress, the button label becomes only a `ProgressView`:
+
+```89:96:NextSeason/Features/ShowDetail/ShowDetailView.swift
+                if viewModel.isUpdatingWatchlist {
+                    ProgressView()
+                } else {
+                    Label(
+                        viewModel.isTracked ? "Tracking" : "Track",
+                        systemImage: viewModel.isTracked ? "star.fill" : "star"
+                    )
+```
+
+VoiceOver will likely say something vague like “Progress indicator” instead of “Updating watchlist.” That’s the clearest gap.
+
+**2. Detail header still uses a `Label` with a TV icon for show status**
+
+```109:109:NextSeason/Features/ShowDetail/ShowDetailView.swift
+                Label(viewModel.displayShow.status.displayLabel, systemImage: "tv")
+```
+
+You removed icons from the next-season line for visual consistency; this one remains. VoiceOver may include extra icon noise (“tv”) before the status text.
+
+**3. No custom labels on watchlist rows**
+
+Search rows set an explicit `accessibilityLabel`; watchlist rows don’t. Combined children usually work, but reading order and verbosity are less controlled — especially with the stale warning `Label` plus “Updated …” timestamp.
+
+**4. Initial detail loading**
+
+Before the view model exists, the screen is an unlabeled `ProgressView()`. VoiceOver may not explain that show details are loading.
+
+**5. No announcements for state changes**
+
+Tracking a show, finishing a load, or getting a notification prompt won’t be announced automatically. VoiceOver users only discover those by moving focus again.
+
+**6. Not tested on device**
+
+There’s no evidence of VoiceOver testing in the project — no accessibility previews, UI tests, or manual test notes. SwiftUI often behaves well by default, but toolbars, `NavigationLink`, `GroupBox`, and `alert` are worth verifying on a real device.
+
+## Bottom line
+
+| Area | Expectation |
+|---|---|
+| Tab navigation | Should work |
+| Search results | Should work well |
+| Watchlist rows | Should mostly work; may be verbose |
+| Detail content reading | Should work |
+| Track / untrack action | Works, except during loading |
+| Alerts & links | Should work |
+| Dynamic Type | Should work |
+| Polish / confidence | Not yet — needs a VoiceOver pass |
+
+So: **usable for MVP, not something I’d call “done.”** The highest-value fixes would be:
+
+1. Keep a text label on the Track button while `ProgressView` is showing (e.g. “Updating…”).
+2. Change the header status from `Label(..., systemImage: "tv")` to plain `Text`.
+3. Add an explicit `accessibilityLabel` to `WatchlistRow`, mirroring `ShowRow`.
+4. Run a 15-minute VoiceOver walkthrough on device: search → detail → track → watchlist → delete.
+
+I can implement those accessibility improvements if you want.
+
+## User
+
+Yes, please create a branch and implement.
+
+## Assistant
+
+Creating a branch and implementing the VoiceOver improvements we identified.
+
+### Tool Run Terminal Command V2
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":28,"limit":50}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistRow.swift"}
+```
+
+## Assistant
+
+Implementing VoiceOver fixes: labeled loading states, explicit watchlist row labels, and a clearer Track button.
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+## Assistant
+
+Fixing the unlabeled loading state in `WatchlistView`.
+
+### Tool Edit File V2
+
+### Tool Read Lints
+
+```
+{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistRow.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift"]}
+```
+
+### Tool Unspecified
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"cursor/voiceover-accessibility"}
+```
+
+## Assistant
+
+Branch `cursor/voiceover-accessibility` is ready with these VoiceOver improvements:
+
+### ShowDetailView
+- **Initial load** — `ProgressView("Loading show…")` instead of an unlabeled spinner
+- **Track button** — always keeps a text label; shows “Updating…” with a spinner while toggling
+- **Track button hint** — explains when disabled (“Available after show details finish loading”)
+- **Show status** — plain `Text` instead of `Label` with a TV icon
+
+### WatchlistRow
+- **Explicit `accessibilityLabel`** — name, next-season status, stale warning (if any), and last-updated date
+- **Stale warning** — plain `Text` instead of a `Label` with an icon (avoids extra icon noise)
+
+### WatchlistView
+- **Initial load** — `ProgressView("Loading watchlist…")` when the view model isn’t ready yet
+
+**What to test with VoiceOver on:**
+1. Search → open a show → confirm “Loading show…” is announced
+2. Track / untrack → confirm “Updating…” is announced during the toggle
+3. Watchlist row → confirm one clear announcement with all key info
+4. Detail header → confirm status reads without “tv” icon noise
+
+Want me to commit this or open a PR?
+
+## User
+
+There are build errors in ShowDetailView;  please fix
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"}
+```
+
+### Tool Read Lints
+
+```
+{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"]}
+```
+
+## Assistant
+
+Fixing a missing closing brace in `trackButtonHint`.
+
+### Tool Edit File V2
+
+### Tool Read Lints
+
+```
+{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"]}
+```
+
+## Assistant
+
+The build error was a missing closing brace on `trackButtonHint()` — the function body wasn’t closed before `header(viewModel:)` started. That’s fixed now; rebuild and it should compile.
+
+## User
+
+I just noticed that when I tap in the search box the navigation stack title slides up and disappears.  Is that typical SwiftUI behavior or are you doing it on purpose?
+
+## Assistant
+
+Checking how search is wired into the navigation stack.
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
+```
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"navigationTitle|searchable|navigationBarTitleDisplayMode","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_3e595524-4b0d-439b-a25c-13546940afd","offset":0}
+```
+
+## Assistant
+
+That's typical SwiftUI / iOS behavior — nothing in the app is explicitly hiding the title.
+
+In `SearchView`, the title is set with the default large-title style:
+
+```15:19:NextSeason/Features/Search/SearchView.swift
+                .navigationTitle("NextSeason")
+                .navigationDestination(for: Show.self) { show in
+                    ShowDetailView(show: show)
+                }
+                .searchable(text: $viewModel.query, prompt: "Search TV shows")
+```
+
+There’s no `.navigationBarTitleDisplayMode(.inline)` here, so iOS uses a **large title**. When `.searchable` is active and the field is focused, the system collapses that large title to make room for the search bar. That slide-up animation is built into UIKit/SwiftUI.
+
+By contrast, `ShowDetailView` uses `.navigationBarTitleDisplayMode(.inline)`, so its title stays compact and doesn’t behave the same way.
+
+If you want the search tab to feel more stable, common options are:
+
+1. **`.navigationBarTitleDisplayMode(.inline)`** — compact title that stays put while searching (similar to Watchlist/detail).
+2. **Different search placement** — e.g. `.searchable(..., placement: .toolbar)` or drawer display modes on newer iOS versions, depending on the look you want.
+
+So: expected system behavior, not intentional custom logic. I can change it if you prefer a fixed inline title on Search.
+
+## User
+
+Ok, it's fine to leave it.
+
+## Assistant
+
+굿 — we'll leave the large title as-is. It's standard iOS search behavior, and the current setup is fine for the MVP.

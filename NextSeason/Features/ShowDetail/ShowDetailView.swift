@@ -9,6 +9,7 @@ import SwiftUI
 /// formatted summary.
 struct ShowDetailView: View {
     @Environment(\.watchlistRepository) private var repository
+    @Environment(\.notificationService) private var notificationService
     @State private var viewModel: ShowDetailViewModel?
 
     private let show: Show
@@ -38,7 +39,8 @@ struct ShowDetailView: View {
                 let vm = ShowDetailViewModel(
                     show: show,
                     service: service,
-                    repository: previewRepository ?? repository
+                    repository: previewRepository ?? repository,
+                    notifications: notificationService
                 )
                 viewModel = vm
                 await vm.load()
@@ -69,6 +71,26 @@ struct ShowDetailView: View {
         } message: {
             Text("NextSeason can notify you when a tracked show gets a release date or season update.")
         }
+        .alert("Notifications Are Off", isPresented: notificationsDeniedBinding(viewModel: viewModel)) {
+            Button("Not Now", role: .cancel) {
+                viewModel.dismissNotificationsDeniedAlert()
+            }
+            Button("Open Settings") {
+                viewModel.openNotificationSettings()
+                viewModel.dismissNotificationsDeniedAlert()
+            }
+        } message: {
+            Text("Enable notifications in Settings to get alerts when this show's next season status changes.")
+        }
+    }
+
+    private func notificationsDeniedBinding(viewModel: ShowDetailViewModel) -> Binding<Bool> {
+        Binding(
+            get: { viewModel.shouldShowNotificationsDeniedAlert },
+            set: { isPresented in
+                if !isPresented { viewModel.dismissNotificationsDeniedAlert() }
+            }
+        )
     }
 
     private func notificationPromptBinding(viewModel: ShowDetailViewModel) -> Binding<Bool> {

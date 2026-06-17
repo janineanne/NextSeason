@@ -8,10 +8,17 @@ import SwiftUI
 struct WatchlistView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.watchlistRefreshService) private var refreshService
+    @Environment(\.notificationService) private var notificationService
+
+    @Binding var navigationPath: NavigationPath
     @State private var viewModel: WatchlistViewModel?
+    @State private var notificationsDenied = false
+    #if DEBUG
+    @State private var isSchedulingTestNotification = false
+    #endif
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
                 if let viewModel {
                     content(for: viewModel)
@@ -31,9 +38,11 @@ struct WatchlistView: View {
                     )
                 }
                 await viewModel?.load()
+                notificationsDenied = await notificationService.isDenied()
             }
             .refreshable {
                 await viewModel?.refreshFromNetwork()
+                notificationsDenied = await notificationService.isDenied()
             }
         }
     }
@@ -52,6 +61,11 @@ struct WatchlistView: View {
             )
         case .loaded(let shows):
             List {
+                if notificationsDenied {
+                    NotificationsDisabledBanner {
+                        notificationService.openNotificationSettings()
+                    }
+                }
                 ForEach(shows) { tracked in
                     NavigationLink(value: tracked) {
                         WatchlistRow(tracked: tracked)
@@ -63,6 +77,9 @@ struct WatchlistView: View {
                         Task { await viewModel.remove(showID: showID) }
                     }
                 }
+                #if DEBUG
+                debugSection(for: shows)
+                #endif
             }
             .listStyle(.plain)
         case .failed(let message):
@@ -77,11 +94,62 @@ struct WatchlistView: View {
             }
         }
     }
+
+    #if DEBUG
+    @ViewBuilder
+    private func debugSection(for shows: [TrackedShow]) -> some View {
+        Section {
+            if let show = shows.first {
+                Button("Send Test Notification") {
+                    Task { await sendTestNotification(for: show) }
+                }
+                .disabled(isSchedulingTestNotification)
+                Text(testNotificationInstructions(showName: show.name))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Track a show to send a test notification.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Debug")
+        }
+    }
+
+    private static let testNotificationDelaySeconds = 5
+    private static var testNotificationDelay: Duration { .seconds(testNotificationDelaySeconds) }
+
+    private func testNotificationInstructions(showName: String) -> String {
+        if isSchedulingTestNotification {
+            return "Sending in \(Self.testNotificationDelaySeconds) seconds — background the app now, then tap the notification when it arrives."
+        }
+        return "Uses “\(showName)”. Waits \(Self.testNotificationDelaySeconds) seconds before sending; background the app during the countdown, then tap the notification."
+    }
+
+    private func sendTestNotification(for tracked: TrackedShow) async {
+        guard !isSchedulingTestNotification else { return }
+        isSchedulingTestNotification = true
+
+        await notificationService.deliverAfterDelay(
+            SeasonNotificationContent(
+                showID: tracked.id,
+                showName: tracked.name,
+                status: tracked.nextSeason
+            ),
+            requestIdentifier: "debug-\(UUID().uuidString)",
+            delay: TimeInterval(Self.testNotificationDelaySeconds)
+        )
+
+        isSchedulingTestNotification = false
+    }
+    #endif
 }
 
 #if DEBUG
 #Preview {
-    WatchlistView()
+    @Previewable @State var path = NavigationPath()
+    WatchlistView(navigationPath: $path)
         .environment(\.watchlistRepository, InMemoryWatchlistRepository())
 }
 #endif

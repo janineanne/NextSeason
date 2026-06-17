@@ -21,6 +21,7 @@ final class ShowDetailViewModel {
     private(set) var isTracked = false
     private(set) var isUpdatingWatchlist = false
     private(set) var shouldPromptForNotifications = false
+    private(set) var shouldShowNotificationsDeniedAlert = false
 
     private let service: any TVMazeService
     private let repository: any WatchlistRepository
@@ -77,6 +78,9 @@ final class ShowDetailViewModel {
                     shouldPromptForNotifications = true
                 } else {
                     await notifications.requestAuthorizationIfNeeded()
+                    if await notifications.isDenied() {
+                        shouldShowNotificationsDeniedAlert = true
+                    }
                 }
             }
         } catch {
@@ -91,5 +95,16 @@ final class ShowDetailViewModel {
     func confirmNotificationPrompt() async {
         shouldPromptForNotifications = false
         await notifications.requestAuthorizationIfNeeded()
+        if await notifications.isDenied() {
+            shouldShowNotificationsDeniedAlert = true
+        }
+    }
+
+    func dismissNotificationsDeniedAlert() {
+        shouldShowNotificationsDeniedAlert = false
+    }
+
+    func openNotificationSettings() {
+        notifications.openNotificationSettings()
     }
 }
