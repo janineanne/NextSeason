@@ -32,6 +32,19 @@ struct AppNavigationCoordinatorTests {
         #expect(NotificationRouting.showID(from: ["showID": "44933"]) == nil)
     }
 
+    @Test("Buffered notification routing flushes when the coordinator is attached")
+    func buffersShowNavigationUntilCoordinatorIsReady() {
+        NotificationRouting.resetForTesting()
+        defer { NotificationRouting.resetForTesting() }
+
+        let coordinator = AppNavigationCoordinator()
+        NotificationRouting.routeToShow(showID: 44933)
+        #expect(coordinator.pendingShowID == nil)
+
+        NotificationRouting.setCoordinator(coordinator)
+        #expect(coordinator.pendingShowID == 44933)
+    }
+
     @Test("Pending navigation opens a tracked show on the watchlist tab")
     func resolvesTrackedShowOnWatchlistTab() async throws {
         let repository = InMemoryWatchlistRepository()

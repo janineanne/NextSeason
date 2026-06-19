@@ -34,6 +34,12 @@ struct ContentView: View {
                 }
                 .tag(AppNavigationCoordinator.Tab.watchlist)
         }
+        .task {
+            await coordinator.resolvePendingNavigation(
+                repository: repository,
+                tvMaze: tvMaze
+            )
+        }
         .onChange(of: coordinator.pendingShowID) { _, showID in
             guard showID != nil else { return }
             Task {

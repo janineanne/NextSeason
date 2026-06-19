@@ -32,11 +32,13 @@ enum RefreshScheduler {
 
             let work = Task { @MainActor in
                 await refreshHandler?()
+                guard !Task.isCancelled else { return }
                 refreshTask.setTaskCompleted(success: true)
             }
 
             refreshTask.expirationHandler = {
                 work.cancel()
+                refreshTask.setTaskCompleted(success: false)
             }
         }
     }
@@ -44,6 +46,12 @@ enum RefreshScheduler {
     static func scheduleNextRefresh() {
         let request = BGAppRefreshTaskRequest(identifier: taskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: refreshInterval)
-        try? BGTaskScheduler.shared.submit(request)
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            #if DEBUG
+            print("RefreshScheduler: failed to schedule next refresh — \(error)")
+            #endif
+        }
     }
 }
