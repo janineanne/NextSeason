@@ -90,6 +90,7 @@ final class ShowDetailViewModel {
 
     func dismissNotificationPrompt() {
         shouldPromptForNotifications = false
+        notifications.deferAuthorizationPrompt()
     }
 
     func confirmNotificationPrompt() async {

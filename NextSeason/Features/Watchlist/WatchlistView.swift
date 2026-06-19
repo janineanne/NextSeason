@@ -126,13 +126,12 @@ struct WatchlistView: View {
     }
 
     private static let testNotificationDelaySeconds = 5
-    private static var testNotificationDelay: Duration { .seconds(testNotificationDelaySeconds) }
 
     private func testNotificationInstructions(showName: String) -> String {
         if isSchedulingTestNotification {
-            return "Sending in \(Self.testNotificationDelaySeconds) seconds — background the app now, then tap the notification when it arrives."
+            return "Scheduling…"
         }
-        return "Uses “\(showName)”. Waits \(Self.testNotificationDelaySeconds) seconds before sending; background the app during the countdown, then tap the notification."
+        return "Uses “\(showName)”. Arrives in \(Self.testNotificationDelaySeconds) seconds — background or quit the app, then tap the notification. Notifications must already be allowed in Settings."
     }
 
     private func sendTestNotification(for tracked: TrackedShow) async {

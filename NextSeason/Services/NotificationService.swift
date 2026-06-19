@@ -26,10 +26,24 @@ final class NotificationService: NotificationDelivering {
         await center.notificationSettings().authorizationStatus
     }
 
-    /// True when the user has never been asked for notification permission.
+    private static let deferredPromptKey = "notificationPromptDeferred"
+
+    #if DEBUG
+    static func resetDeferredPromptForTesting() {
+        UserDefaults.standard.removeObject(forKey: deferredPromptKey)
+    }
+    #endif
+
+    /// True when the user has never been asked and has not deferred the in-app prompt.
     func needsAuthorizationPrompt() async -> Bool {
         guard !UITestingConfiguration.isEnabled else { return false }
+        guard !UserDefaults.standard.bool(forKey: Self.deferredPromptKey) else { return false }
         return await authorizationStatus() == .notDetermined
+    }
+
+    /// Records that the user dismissed the in-app permission prompt without deciding.
+    func deferAuthorizationPrompt() {
+        UserDefaults.standard.set(true, forKey: Self.deferredPromptKey)
     }
 
     /// True when the user previously denied notification permission.
@@ -71,45 +85,18 @@ final class NotificationService: NotificationDelivering {
     }
 
     #if DEBUG
-    /// Debug helper: waits, then delivers immediately. Uses a background task so the wait
-    /// can finish after the app is backgrounded.
+    /// Debug helper: schedules delivery with the system so the notification can arrive
+    /// after the app is backgrounded or terminated.
     func deliverAfterDelay(
         _ content: SeasonNotificationContent,
         requestIdentifier: String,
         delay interval: TimeInterval
     ) async {
-        let settings = await center.notificationSettings()
-        guard NotificationAuthorizationPolicy.canDeliverAlerts(settings.authorizationStatus) else { return }
-
-        let backgroundTask = BackgroundTaskHandle(name: "NextSeason.testNotification")
-        defer { backgroundTask.end() }
-
-        do {
-            try await Task.sleep(for: .seconds(max(1, interval)))
-        } catch {
-            return
-        }
-
-        await scheduleNotification(content, requestIdentifier: requestIdentifier, trigger: nil)
-    }
-
-    @MainActor
-    private final class BackgroundTaskHandle {
-        private var id: UIBackgroundTaskIdentifier = .invalid
-
-        init(name: String) {
-            id = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
-                Task { @MainActor in
-                    self?.end()
-                }
-            }
-        }
-
-        func end() {
-            guard id != .invalid else { return }
-            UIApplication.shared.endBackgroundTask(id)
-            id = .invalid
-        }
+        let trigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: max(1, interval),
+            repeats: false
+        )
+        await scheduleNotification(content, requestIdentifier: requestIdentifier, trigger: trigger)
     }
     #endif
 

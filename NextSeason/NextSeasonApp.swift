@@ -15,8 +15,14 @@ struct NextSeasonApp: App {
     @State private var navigationCoordinator = AppNavigationCoordinator()
 
     init() {
+        let coordinator = AppNavigationCoordinator()
+        _navigationCoordinator = State(initialValue: coordinator)
         _notificationService = State(initialValue: NotificationService())
-        _navigationCoordinator = State(initialValue: AppNavigationCoordinator())
+
+        if !UITestingConfiguration.isEnabled {
+            NotificationRouting.setCoordinator(coordinator)
+            NotificationRouting.install()
+        }
 
         do {
             let repository: any WatchlistRepository
@@ -54,8 +60,6 @@ struct NextSeasonApp: App {
             .environment(\.notificationService, notificationService)
             .task {
                 guard !UITestingConfiguration.isEnabled else { return }
-                NotificationRouting.coordinator = navigationCoordinator
-                NotificationRouting.install()
                 RefreshScheduler.configure {
                     await refreshService.refreshAll()
                 }
