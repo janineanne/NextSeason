@@ -57,6 +57,7 @@
 		E117D3C52FEB2C2000C02ADC /* Plan Search Improvements.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Plan Search Improvements.pdf"; sourceTree = "<group>"; };
 		E117D3C62FEB2C2900C02ADC /* Search Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Search Discussion.md"; sourceTree = "<group>"; };
 		E117D4592FEB342D00C02ADC /* Implement Search improvements */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Implement Search improvements"; sourceTree = "<group>"; };
+		E117D57E2FEB389E00C02ADC /* Add Additional UI Tests.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Add Additional UI Tests.md"; sourceTree = "<group>"; };
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
@@ -247,6 +248,7 @@
 				E117D3C62FEB2C2900C02ADC /* Search Discussion.md */,
 				E117D3C52FEB2C2000C02ADC /* Plan Search Improvements.pdf */,
 				E117D4592FEB342D00C02ADC /* Implement Search improvements */,
+				E117D57E2FEB389E00C02ADC /* Add Additional UI Tests.md */,
 			);
 			path = "6-23-2026";
 			sourceTree = "<group>";
