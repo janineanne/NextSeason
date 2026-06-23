@@ -13,6 +13,13 @@ enum UITestingConfiguration {
     static var isEnabled: Bool {
         ProcessInfo.processInfo.arguments.contains(launchArgument)
     }
+
+    /// Sentinel search queries the stubbed service recognizes so UI tests can
+    /// drive the no-results and failure states (the real API isn't hit in tests).
+    enum SearchQuery {
+        static let noResults = "uitest-no-results"
+        static let failure = "uitest-failure"
+    }
 }
 
 /// Stable accessibility identifiers for UI tests.

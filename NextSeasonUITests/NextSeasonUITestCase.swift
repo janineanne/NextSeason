@@ -12,6 +12,7 @@ enum UITestLaunchArgument {
 enum UITestAccessibilityID {
     enum Search {
         static let idlePrompt = "search.idlePrompt"
+        static let noResults = "search.noResults"
     }
 
     enum ShowDetail {
@@ -21,6 +22,13 @@ enum UITestAccessibilityID {
     enum Watchlist {
         static let emptyState = "watchlist.emptyState"
     }
+}
+
+/// Sentinel search queries recognized by the stubbed service during UI testing.
+/// Must match `UITestingConfiguration.SearchQuery` in the app target.
+enum UITestSearchQuery {
+    static let noResults = "uitest-no-results"
+    static let failure = "uitest-failure"
 }
 
 enum UITestTimeout {
@@ -39,6 +47,10 @@ class NextSeasonUITestCase: XCTestCase {
 
     var watchlistEmptyState: XCUIElement {
         app.descendants(matching: .any)[UITestAccessibilityID.Watchlist.emptyState]
+    }
+
+    var searchNoResults: XCUIElement {
+        app.descendants(matching: .any)[UITestAccessibilityID.Search.noResults]
     }
 
     override func setUpWithError() throws {

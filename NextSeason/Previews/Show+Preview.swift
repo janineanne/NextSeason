@@ -79,7 +79,19 @@ extension Show {
 struct PreviewTVMazeService: TVMazeService {
     let stub: Show
 
-    func searchShows(matching query: String) async throws -> [Show] { [stub] }
+    func searchShows(matching query: String) async throws -> [Show] {
+        // Recognize UI-test sentinels so tests can exercise the empty and failure
+        // states. Previews never use these queries, so behavior there is unchanged.
+        switch query {
+        case UITestingConfiguration.SearchQuery.noResults:
+            return []
+        case UITestingConfiguration.SearchQuery.failure:
+            throw TVMazeError.server(statusCode: 500)
+        default:
+            return [stub]
+        }
+    }
+
     func show(id: Int, bypassCache: Bool) async throws -> Show { stub }
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] { [:] }
 }
