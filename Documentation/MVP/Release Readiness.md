@@ -37,6 +37,43 @@ Users should be able to find the show they are looking for even when search term
 - Handle partial title searches.
 - Improve matching of alternate show names.
 
+### TVMaze Coverage Summary
+
+The `/search/shows` endpoint is backed by Elasticsearch with a fuzzy algorithm
+(fuzziness 2) and ranks results by relevance (fuzzy closeness + popularity weight
++ exact-match boost), including matches against alternate (AKA) names. Most of the
+improvements above are therefore already handled server-side, so the remaining
+app-side work is narrow:
+
+- Already handled by TVMaze: punctuation differences, partial title searches,
+ alternate (AKA) name matching, and relevance/popularity ranking.
+- Mostly covered indirectly (low value): ignoring common articles — partial
+ matching already returns e.g. "The Office" for "office".
+- Real app-side opportunities: common abbreviation / acronym aliasing (e.g.
+ "GoT", "SVU"), which TVMaze does not expand, and app-purpose result ordering
+ (de-emphasize ended shows, surface shows with a known/upcoming next season).
+ 
+### Search Fallback UX
+
+TVMaze's public search API returns a maximum of 10 results with no pagination,
+even though the website exposes additional pages.
+
+If a user cannot find the desired show, provide a helpful empty/failure state
+instead of implying that no matching show exists.
+
+Potential copy:
+
+> Can't find your show?
+>
+> Try searching for a more specific title (for example, "Star Trek Voyager"
+> instead of "Star"), or include a year or subtitle.
+
+This is a low-cost usability improvement that addresses the API limitation
+without adding significant complexity.
+
+Validate during beta whether search is actually a pain point before investing
+further.
+
 ### Success Criteria
 
 Most users can successfully find and track a show without needing multiple search attempts.
