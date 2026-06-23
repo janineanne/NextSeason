@@ -24,6 +24,7 @@ enum AccessibilityID {
 
     enum Search {
         static let idlePrompt = "search.idlePrompt"
+        static let noResults = "search.noResults"
     }
 
     enum ShowDetail {

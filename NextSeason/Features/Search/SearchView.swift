@@ -53,7 +53,15 @@ struct SearchView: View {
             .listStyle(.plain)
             .tvmazeAttributionInset()
         case .empty:
-            ContentUnavailableView.search(text: viewModel.query)
+            // TVMaze's public search returns at most 10 results with no pagination,
+            // so an empty result set does not mean the show is missing. Guide the
+            // user toward a more specific query instead of implying it doesn't exist.
+            ContentUnavailableView {
+                Label("Can't Find Your Show?", systemImage: "magnifyingglass")
+            } description: {
+                Text("Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”).")
+            }
+            .uiTestMarker(AccessibilityID.Search.noResults, label: "Can't Find Your Show?")
         case .failed(let message):
             ContentUnavailableView {
                 Label("Something Went Wrong", systemImage: "exclamationmark.triangle")

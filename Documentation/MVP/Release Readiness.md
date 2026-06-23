@@ -65,14 +65,18 @@ Potential copy:
 
 > Can't find your show?
 >
-> Try searching for a more specific title (for example, "Star Trek Voyager"
-> instead of "Star"), or include a year or subtitle.
+> Try a more specific title instead of a single word — add a subtitle or the
+> year (for example, "Title: Subtitle" or "Title 2019").
 
 This is a low-cost usability improvement that addresses the API limitation
 without adding significant complexity.
 
 Validate during beta whether search is actually a pain point before investing
 further.
+
+Status: Implemented. The no-results state in `SearchView` now shows guidance
+("Can't Find Your Show?") encouraging a more specific query instead of the
+generic "no results" message.
 
 ### Success Criteria
 
