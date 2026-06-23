@@ -12,22 +12,56 @@ Future priorities should be informed by user behavior, beta feedback, and analyt
 
 # Core Product Improvements
 
-## Search Enhancements
+## Search
 
-### Motivation
+TVMaze already provides fuzzy matching, alternate-name (AKA) support,
+partial-title matching, punctuation tolerance, and relevance-based ranking.
 
-Search quality is critical to the application's success.
+Future work should therefore focus on features that add value beyond the
+underlying API rather than duplicating its behavior.
 
-### Potential Features
+Potential improvements:
 
-- Fuzzy matching.
-- Typo tolerance.
-- Search suggestions.
-- Recent searches.
-- Alternate title support.
-- Improved ranking.
+- Support common abbreviations and acronyms (GoT, SVU, TNG, etc.).
+- Experiment with app-specific result ordering.
+- Collect beta analytics before investing additional engineering effort.
 
-Priority: High
+### Recommended Analytics
+
+Before investing in significant search work, instrument the search flow to
+measure whether users are actually experiencing problems.
+
+Suggested events:
+
+- `search_performed`
+- query length
+- result count
+- `show_selected` (yes/no)
+
+If searches with 10 results frequently end without a selection, that provides
+evidence that the TVMaze API limit is hurting usability. If almost all searches
+lead to a selection, additional search work can remain a low priority.
+
+## Evaluate Multi-Provider Search
+
+TVMaze's public search API is limited to 10 results with no pagination.
+
+If search quality becomes a meaningful user pain point, investigate a
+multi-provider architecture:
+
+- Use TMDb (or another search-focused provider) for user-facing search.
+- Continue using TVMaze for season, episode, and next-airing metadata.
+- Map provider IDs when a show is selected.
+
+Benefits:
+
+- Unlimited paginated search results.
+- Better discovery of obscure shows.
+- Preserve the existing notification and season-tracking implementation.
+
+Pursue only if beta feedback and analytics demonstrate that the current TVMaze
+search limitations materially impact users.
+
 
 ---
 
