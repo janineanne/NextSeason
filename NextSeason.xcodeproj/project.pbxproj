@@ -54,8 +54,9 @@
 		E102F0F92FE5F0F60076FCDD /* Building Post-MVP Planning Documents.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Building Post-MVP Planning Documents.pdf"; sourceTree = "<group>"; };
 		E102F1002FE5F3D70076FCDD /* Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Roadmap.md; sourceTree = "<group>"; };
 		E102F1012FE5F4120076FCDD /* Release Readiness.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Release Readiness.md"; sourceTree = "<group>"; };
-		E117D3C52FEB2C2000C02ADC /* Search Update Improvements.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Search Update Improvements.pdf"; sourceTree = "<group>"; };
+		E117D3C52FEB2C2000C02ADC /* Plan Search Improvements.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Plan Search Improvements.pdf"; sourceTree = "<group>"; };
 		E117D3C62FEB2C2900C02ADC /* Search Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Search Discussion.md"; sourceTree = "<group>"; };
+		E117D4592FEB342D00C02ADC /* Implement Search improvements */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Implement Search improvements"; sourceTree = "<group>"; };
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
@@ -244,7 +245,8 @@
 			isa = PBXGroup;
 			children = (
 				E117D3C62FEB2C2900C02ADC /* Search Discussion.md */,
-				E117D3C52FEB2C2000C02ADC /* Search Update Improvements.pdf */,
+				E117D3C52FEB2C2000C02ADC /* Plan Search Improvements.pdf */,
+				E117D4592FEB342D00C02ADC /* Implement Search improvements */,
 			);
 			path = "6-23-2026";
 			sourceTree = "<group>";
