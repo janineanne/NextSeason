@@ -5,7 +5,6 @@
 
 import XCTest
 
-@MainActor
 final class SearchAndTrackUITests: NextSeasonUITestCase {
     private let previewShowName = "Severance"
 
@@ -21,18 +20,11 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
 
         XCTAssertTrue(app.navigationBars[previewShowName].waitForExistence(timeout: UITestTimeout.standard))
         XCTAssertTrue(app.staticTexts["Next Season"].waitForExistence(timeout: UITestTimeout.standard))
+        XCTAssertTrue(showDetailTrackButton().waitForExistence(timeout: UITestTimeout.standard))
     }
 
     func testTrackShowAppearsOnWatchlist() {
-        search(for: previewShowName)
-
-        let result = app.buttons["\(previewShowName), Ongoing series"]
-        XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
-        result.tap()
-
-        let trackButton = app.buttons[UITestAccessibilityID.ShowDetail.trackButton]
-        XCTAssertTrue(trackButton.waitForExistence(timeout: UITestTimeout.standard))
-        trackButton.tap()
+        trackShowFromDetail()
 
         app.tabBars.buttons["Watchlist"].tap()
         XCTAssertTrue(
@@ -71,14 +63,22 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
         result.tap()
 
-        let trackButton = app.buttons[UITestAccessibilityID.ShowDetail.trackButton]
+        let trackButton = showDetailTrackButton()
         XCTAssertTrue(
-            waitForButton(UITestAccessibilityID.ShowDetail.trackButton, labelContaining: "Track", timeout: UITestTimeout.standard),
+            waitForButton(
+                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Track",
+                timeout: UITestTimeout.standard
+            ),
             "An untracked show should offer to Track."
         )
         trackButton.tap()
         XCTAssertTrue(
-            waitForButton(UITestAccessibilityID.ShowDetail.trackButton, labelContaining: "Tracking", timeout: UITestTimeout.standard),
+            waitForButton(
+                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Stop tracking",
+                timeout: UITestTimeout.trackState
+            ),
             "Tapping Track should mark the show as tracked."
         )
 
@@ -86,45 +86,216 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
 
         result.tap()
         XCTAssertTrue(
-            waitForButton(UITestAccessibilityID.ShowDetail.trackButton, labelContaining: "Tracking", timeout: UITestTimeout.extended),
+            waitForButton(
+                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Stop tracking",
+                timeout: UITestTimeout.extended
+            ),
             "Reopening an already-tracked show should reflect the tracked state."
         )
     }
 
-    func testRemoveShowFromWatchlist() {
+    func testTrackFromSearchRowWithoutOpeningDetail() {
+        search(for: previewShowName)
+
+        let trackButton = searchTrackButton()
+        XCTAssertTrue(trackButton.waitForExistence(timeout: UITestTimeout.standard))
+        trackButton.tap()
+
+        XCTAssertFalse(
+            app.navigationBars[previewShowName].waitForExistence(timeout: 1),
+            "Tracking from the search row should not navigate to show detail."
+        )
+        XCTAssertTrue(
+            waitForButton(
+                "\(UITestAccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Stop tracking",
+                timeout: UITestTimeout.trackState
+            ),
+            "The search-row track button should reflect the tracked state."
+        )
+
+        app.tabBars.buttons["Watchlist"].tap()
+        waitForWatchlistRow(named: previewShowName, timeout: UITestTimeout.trackState)
+    }
+
+    func testSearchRowUntrackShowsUndoToast() {
+        trackShowFromSearchRow()
+
+        searchTrackButton().tap()
+
+        XCTAssertTrue(
+            watchlistUndoButton.waitForExistence(timeout: UITestTimeout.standard),
+            "Untracking from the search row should offer Undo."
+        )
+        XCTAssertTrue(
+            waitForButton(
+                "\(UITestAccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Track",
+                timeout: UITestTimeout.standard
+            ),
+            "The search-row star should reflect the pending untrack state."
+        )
+
+        watchlistConfirmButton.tap()
+
+        app.tabBars.buttons["Watchlist"].tap()
+        XCTAssertTrue(
+            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended),
+            "Confirming removal from search should clear the watchlist."
+        )
+    }
+
+    func testRemoveLastShowViaStarShowsUndoThenEmptyState() {
+        trackShowFromSearchRow()
+
+        app.tabBars.buttons["Watchlist"].tap()
+        waitForWatchlistRow(named: previewShowName)
+
+        watchlistTrackButton().tap()
+
+        XCTAssertTrue(
+            watchlistUndoButton.waitForExistence(timeout: UITestTimeout.standard),
+            "Removing a show should offer Undo."
+        )
+        XCTAssertTrue(
+            watchlistRow(named: previewShowName).waitForExistence(timeout: UITestTimeout.standard),
+            "The watchlist row should stay visible while Undo is offered."
+        )
+        XCTAssertFalse(
+            watchlistEmptyState.exists,
+            "The empty state should not appear until the removal is committed."
+        )
+
+        watchlistConfirmButton.tap()
+
+        XCTAssertTrue(
+            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended),
+            "After confirming removal, the watchlist should show its empty state."
+        )
+
+        app.tabBars.buttons["Search"].tap()
+        searchTrackButton().tap()
+
+        app.tabBars.buttons["Watchlist"].tap()
+        waitForWatchlistRow(named: previewShowName)
+    }
+
+    func testWatchlistUndoRestoresRemovedShow() {
+        trackShowFromSearchRow()
+
+        app.tabBars.buttons["Watchlist"].tap()
+        waitForWatchlistRow(named: previewShowName)
+
+        watchlistTrackButton().tap()
+        XCTAssertTrue(watchlistUndoButton.waitForExistence(timeout: UITestTimeout.standard))
+        watchlistUndoButton.tap()
+
+        waitForWatchlistRow(named: previewShowName)
+        XCTAssertFalse(watchlistEmptyState.exists)
+        XCTAssertTrue(
+            waitForButton(
+                "\(UITestAccessibilityID.Watchlist.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Stop tracking",
+                timeout: UITestTimeout.standard
+            ),
+            "Undo should restore the tracked star on the watchlist row."
+        )
+    }
+
+    func testWatchlistStarTapUndoesPendingRemoval() {
+        trackShowFromSearchRow()
+
+        app.tabBars.buttons["Watchlist"].tap()
+        waitForWatchlistRow(named: previewShowName)
+
+        watchlistTrackButton().tap()
+        XCTAssertTrue(watchlistUndoButton.waitForExistence(timeout: UITestTimeout.standard))
+
+        watchlistTrackButton().tap()
+
+        XCTAssertFalse(watchlistUndoButton.waitForExistence(timeout: 1))
+        waitForWatchlistRow(named: previewShowName)
+    }
+
+    func testUntrackFromDetailShowsUndoToast() {
+        trackShowFromDetail()
+
+        showDetailTrackButton().tap()
+
+        XCTAssertTrue(
+            watchlistUndoButton.waitForExistence(timeout: UITestTimeout.standard),
+            "Untracking from detail should offer Undo."
+        )
+        XCTAssertTrue(
+            waitForButton(
+                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Track",
+                timeout: UITestTimeout.standard
+            ),
+            "The detail star should reflect the pending untrack state."
+        )
+
+        watchlistUndoButton.tap()
+
+        XCTAssertTrue(
+            waitForButton(
+                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Stop tracking",
+                timeout: UITestTimeout.standard
+            ),
+            "Undo on detail should restore the tracked state."
+        )
+    }
+
+    func testUntrackFromDetailConfirmRemovesFromWatchlist() {
+        trackShowFromDetail()
+
+        showDetailTrackButton().tap()
+        XCTAssertTrue(watchlistUndoButton.waitForExistence(timeout: UITestTimeout.standard))
+        watchlistConfirmButton.tap()
+
+        app.tabBars.buttons["Watchlist"].tap()
+        XCTAssertTrue(
+            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended),
+            "Confirming removal from detail should clear the watchlist."
+        )
+    }
+
+    // MARK: - Helpers
+
+    private func trackShowFromSearchRow() {
+        search(for: previewShowName)
+
+        let trackButton = searchTrackButton()
+        XCTAssertTrue(trackButton.waitForExistence(timeout: UITestTimeout.standard))
+        trackButton.tap()
+        XCTAssertTrue(
+            waitForButton(
+                "\(UITestAccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Stop tracking",
+                timeout: UITestTimeout.trackState
+            ),
+            "The search-row track button should reflect the tracked state."
+        )
+    }
+
+    private func trackShowFromDetail() {
         search(for: previewShowName)
 
         let result = app.buttons["\(previewShowName), Ongoing series"]
         XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
         result.tap()
 
-        let trackButton = app.buttons[UITestAccessibilityID.ShowDetail.trackButton]
+        let trackButton = showDetailTrackButton()
         XCTAssertTrue(trackButton.waitForExistence(timeout: UITestTimeout.standard))
         trackButton.tap()
-        XCTAssertTrue(waitForButton(UITestAccessibilityID.ShowDetail.trackButton, labelContaining: "Tracking", timeout: UITestTimeout.standard))
-
-        app.tabBars.buttons["Watchlist"].tap()
-        let row = watchlistRow(named: previewShowName)
-        XCTAssertTrue(row.waitForExistence(timeout: UITestTimeout.extended))
-
-        // A fast swipe may either reveal a Delete action or commit the deletion
-        // outright (full-swipe). Handle both: tap Delete if it appears.
-        row.swipeLeft()
-        let deleteButton = app.buttons["Delete"]
-        if deleteButton.waitForExistence(timeout: UITestTimeout.standard) {
-            deleteButton.tap()
-        }
-
         XCTAssertTrue(
-            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended),
-            "Removing the only tracked show should return the watchlist to its empty state."
+            waitForButton(
+                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                labelContaining: "Stop tracking",
+                timeout: UITestTimeout.trackState
+            )
         )
-    }
-
-    private func search(for query: String) {
-        let searchField = app.searchFields["Search TV shows"]
-        XCTAssertTrue(searchField.waitForExistence(timeout: UITestTimeout.standard))
-        searchField.tap()
-        searchField.typeText(query)
     }
 }

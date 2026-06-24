@@ -97,12 +97,42 @@ New users should immediately understand how to track a show.
 - Is it obvious how to remove a show?
 - Is it obvious what the app does?
 
-### Potential Improvements
+### Implemented Improvements
+∫
+**Watchlist tab**
 
-- More prominent tracking controls.
-- Better visual feedback when tracking begins.
-- Empty-state guidance.
+- Actionable empty state with a prominent "Find a Show" button that switches to the Search tab at root (clears stale search navigation via `showSearchRoot()`).
+- Edit button in the toolbar when the watchlist has shows; exposes delete controls (swipe-to-delete still works).
+- Empty-state overlay pattern keeps the list mounted when empty to avoid a UICollectionView crash on last delete.
+- Edit mode resets when the last show is deleted (no stuck edit mode).
+
+**Search tab**
+
+- Tracked badge — filled yellow star on search rows for already-tracked shows.
+- Inline track button — star button on each search row to track/untrack without opening detail.
+- Notification prompts when tracking from a search row (same behavior as show detail).
+
+**Show detail**
+
+- Immediate tracked state at navigation time so the Track button shows the correct state on the first frame.
+- `refreshTrackedState` on reappear reconciles if the watchlist changed elsewhere.
+
+### Bug Fixes
+
+- Deleting the last watchlist show no longer crashes.
+- "Find a Show" no longer lands on a stale detail page from a prior search session.
+- Detail Track button no longer shows stale "Tracking" after removal elsewhere.
+
+Status: Implemented. UI and unit tests cover track-from-search-row, Find a Show navigation, edit-delete-last-show exiting edit mode, and `showSearchRoot()` on `AppNavigationCoordinator`.
+
+### Remaining Opportunities
+
 - Improved onboarding copy.
+- Welcome screen / first-run guidance (see First-Run Experience).
+
+### Success Criteria
+
+Users can find, track, and remove shows without confusion. Tracked state is visible and consistent across Search, detail, and Watchlist.
 
 ---
 

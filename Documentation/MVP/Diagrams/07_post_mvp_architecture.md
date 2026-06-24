@@ -15,7 +15,7 @@ flowchart TB
         Accounts[User Accounts]
         WatchlistAPI[Watchlist Sync API]
         Scheduler[Season Check Scheduler]
-        NotificationService[Notification Service]
+        NotificationService[Cloud Notification Service]
     end
 
     subgraph External[External Services]
@@ -41,11 +41,20 @@ flowchart TB
 
 ## Purpose
 
-This diagram shows what a post-MVP version might add:
+This diagram shows what a post-MVP version might add on top of the current MVP:
 
 - User accounts
 - Cloud-synced watchlists
-- Scheduled background checks
-- Push notifications
+- Server-side scheduled season checks
+- **Push notifications** (via APNs and a backend notification service)
 
-This is intentionally not part of the MVP. The MVP can prove the core value before adding account and notification complexity.
+## Relationship to the MVP
+
+The MVP already includes **local notifications** scheduled on-device when watchlist
+season status changes (`NotificationService`, `RefreshScheduler`, and
+`BGTaskScheduler`). Those are not shown here because they do not require accounts,
+cloud sync, or push infrastructure.
+
+Post-MVP work would add **push/cloud notifications** so alerts can reach the user
+even when the app has not run recently, plus the account and sync layer that
+supports cross-device watchlists.

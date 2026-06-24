@@ -20,19 +20,38 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $coordinator.selectedTab) {
-            SearchView(navigationPath: $coordinator.searchPath, tvMaze: tvMaze)
+            SearchView(
+                navigationPath: $coordinator.searchPath,
+                tvMaze: tvMaze,
+                onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }
+            )
                 .accessibilityIdentifier(AccessibilityID.Tab.search)
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
                 .tag(AppNavigationCoordinator.Tab.search)
 
-            WatchlistView(navigationPath: $coordinator.watchlistPath, tvMaze: tvMaze)
+            WatchlistView(
+                navigationPath: $coordinator.watchlistPath,
+                tvMaze: tvMaze,
+                watchlistReloadToken: coordinator.watchlistReloadToken,
+                onFindShow: {
+                    coordinator.showSearchRoot()
+                },
+                onWatchlistChanged: {
+                    coordinator.notifyWatchlistDataChanged()
+                }
+            )
                 .accessibilityIdentifier(AccessibilityID.Tab.watchlist)
                 .tabItem {
                     Label("Watchlist", systemImage: "star")
                 }
                 .tag(AppNavigationCoordinator.Tab.watchlist)
+        }
+        .onChange(of: coordinator.selectedTab) { _, tab in
+            if tab == .watchlist {
+                coordinator.notifyWatchlistDataChanged()
+            }
         }
         .task {
             await coordinator.resolvePendingNavigation(
@@ -55,4 +74,5 @@ struct ContentView: View {
 #Preview {
     ContentView(coordinator: AppNavigationCoordinator())
         .environment(\.watchlistRepository, InMemoryWatchlistRepository())
+        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(repository: InMemoryWatchlistRepository()))
 }

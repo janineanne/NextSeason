@@ -1,8 +1,12 @@
 # Architecture
 
-Phase 3 architecture for NextSeason. Defines the data model, persistence,
-networking, notification, and testing strategies. No implementation yet — this
-document is the blueprint reviewed before Phase 4 (vertical slices).
+Phase 3 architecture blueprint for NextSeason. Defines the data model, persistence,
+networking, notification, and testing strategies adopted for the MVP.
+
+**Implementation status:** Slices 1 (Guest Search) and 2 (Save & Notify) are
+**implemented** in the app target. This document remains the design reference; for
+a diagram-first view of the running MVP, see
+[`Diagrams/01_system_architecture.md`](Diagrams/01_system_architecture.md).
 
 Companion docs: [`ProductSpec.md`](ProductSpec.md),
 [`TVMazeResearch.md`](TVMazeResearch.md).
@@ -20,10 +24,9 @@ From `AGENTS.md` and the Cursor rules:
 - Prefer simple, readable code. No abstraction without a present need.
 - Files under 500 lines; views kept small; accessibility required.
 
-The architecture is intentionally sized for **Slice 1 (Guest Search)** while
-leaving an obvious, low-friction path to **Slice 2 (Save & Notify)**. We build the
-Slice 1 pieces now and stub nothing we don't use yet. (Terminology — MVP vs.
-slices — is defined in [`ProductSpec.md`](ProductSpec.md).)
+The architecture was sized for **Slice 1 (Guest Search)** first, then extended to
+**Slice 2 (Save & Notify)**. Both slices are now shipped in the MVP. (Terminology
+— MVP vs. slices — is defined in [`ProductSpec.md`](ProductSpec.md).)
 
 ---
 
@@ -34,23 +37,25 @@ flowchart TD
     subgraph UI [SwiftUI Views]
         SearchView
         ShowDetailView
-        WatchlistView[WatchlistView · future]
+        WatchlistView
     end
     subgraph VM [ViewModels · @Observable]
         SearchViewModel
         ShowDetailViewModel
+        WatchlistViewModel
     end
     subgraph SVC [Services]
         TVMazeClient
         NextSeasonCalculator
-        NotificationService[NotificationService · future]
-        RefreshScheduler[RefreshScheduler · future]
+        NotificationService
+        RefreshScheduler
+        WatchlistRefreshService
     end
     subgraph DATA [Data]
         DTOs[Codable DTOs]
         Domain[Domain models]
-        Repo[WatchlistRepository · Slice 2]
-        Store[(SwiftData · Slice 2)]
+        Repo[WatchlistRepository]
+        Store[(SwiftData)]
     end
 
     UI --> VM --> SVC
@@ -61,8 +66,9 @@ flowchart TD
     Repo --> Domain
     Repo --> Store
     RefreshScheduler --> TVMazeClient
-    RefreshScheduler --> Repo
-    RefreshScheduler --> NotificationService
+    RefreshScheduler --> WatchlistRefreshService
+    WatchlistRefreshService --> Repo
+    WatchlistRefreshService --> NotificationService
 ```
 
 **Three model tiers, kept deliberately separate:**
@@ -70,7 +76,8 @@ flowchart TD
 1. **DTOs** — `Codable` structs mirroring TVMaze JSON exactly. Network-only.
 2. **Domain models** — clean Swift types the app reasons about
    (`Show`, `Season`, `NextSeasonStatus`). UI binds to these.
-3. **Persistence models** — SwiftData `@Model` classes (future, for saved shows).
+3. **Persistence models** — SwiftData `@Model` classes for saved shows
+   (`TrackedShowEntity`), mapped to/from domain types inside the repository.
 
 Separating DTOs from domain models means API quirks (HTML summaries, open-ended
 `status`, embedded payloads) never leak into the UI, and the API can change
@@ -79,6 +86,11 @@ without touching views.
 ---
 
 ## 3. Domain model
+
+The shapes below are the Phase 3 design. The implemented domain types live under
+`NextSeason/Models/Domain/` and retain the same roles; field names evolved
+slightly (for example, `summaryHTML` is kept for formatted rendering rather than
+pre-stripped plain text).
 
 ```swift
 struct Show: Identifiable, Sendable, Hashable {
@@ -133,7 +145,7 @@ cache) for free under Swift 6 concurrency.
 protocol TVMazeService: Sendable {
     func searchShows(matching query: String) async throws -> [Show]
     func show(id: Int) async throws -> Show          // embeds seasons + nextepisode
-    func updatedShowIDs(since: UpdateWindow) async throws -> [Int: Date]  // future
+    func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date]
 }
 ```
 
@@ -200,10 +212,10 @@ enum NextSeasonCalculator {
 
 ---
 
-## 7. Persistence — repository over SwiftData (Slice 2)
+## 7. Persistence — repository over SwiftData
 
-Not built in Slice 1 (guest search needs no storage), but the strategy is decided
-now (Phase 3 deliverable) so Slice 2 drops in cleanly.
+**Implemented in Slice 2.** Guest search (Slice 1) needed no storage; the watchlist
+uses SwiftData behind a repository protocol as designed here.
 
 **Engine: SwiftData.** Native to iOS 26, no third-party dependency, and
 `@Attribute(.unique)` enforces "no duplicate watchlist entries" (FR-005) at the
@@ -281,11 +293,15 @@ Notes & trade-offs:
 
 ---
 
-## 8. Notifications (future)
+## 8. Notifications and background refresh
 
-- **`NotificationService`** wraps `UNUserNotificationCenter`:
-  permission request, scheduling local notifications, and tap handling that
-  routes to the relevant show.
+**Implemented in Slice 2 (local notifications only).** Push notifications and a
+cloud notification service are post-MVP (see
+[`Diagrams/07_post_mvp_architecture.md`](Diagrams/07_post_mvp_architecture.md)).
+
+- **`NotificationService`** wraps `UNUserNotificationCenter`: permission request,
+  scheduling **local** notifications, and tap handling that routes to the
+  relevant show via `AppNavigationCoordinator`.
 - **Permission flow** is gentle (US-008): explain value before prompting; the app
   remains fully usable if denied.
 - **Local notifications only** for the MVP — no push server, matching the
@@ -354,13 +370,14 @@ NextSeason/
 ├── Services/
 │   ├── TVMazeClient.swift
 │   ├── NextSeasonCalculator.swift
-│   ├── NotificationService.swift   // future
-│   └── RefreshScheduler.swift      // future
+│   ├── NotificationService.swift
+│   ├── RefreshScheduler.swift
+│   └── WatchlistRefreshService.swift
 ├── Features/
 │   ├── Search/        // SearchView + SearchViewModel
 │   ├── ShowDetail/    // ShowDetailView + ShowDetailViewModel
-│   └── Watchlist/     // future
-└── Persistence/                    // Slice 2
+│   └── Watchlist/     // WatchlistView + WatchlistViewModel
+└── Persistence/
     ├── WatchlistRepository.swift       // protocol + domain TrackedShow
     ├── SwiftDataWatchlistRepository.swift
     ├── InMemoryWatchlistRepository.swift
@@ -380,16 +397,17 @@ NextSeasonTests/
 | Separate DTO / domain / persistence tiers       | Isolates API quirks; keeps views and tests clean.                             |
 | `TVMazeClient` as an `actor` behind a protocol  | Safe shared state under Swift 6; injectable mock for tests.                    |
 | `NextSeasonCalculator` is a pure function       | One source of truth for "next season"; fully unit-testable.                   |
-| SwiftData behind a `WatchlistRepository`        | Testable, mockable boundary now; engine swap is a free side effect. Slice 1 stays storage-free; built in Slice 2. |
-| Local notifications + `BGTaskScheduler`         | No backend (PD-001); honest about iOS best-effort scheduling.                 |
+| SwiftData behind a `WatchlistRepository`        | Testable, mockable boundary; implemented in Slice 2.                            |
+| Local notifications + `BGTaskScheduler`         | No backend (PD-001); on-device alerts in MVP. Push/cloud is post-MVP.         |
 | Debounced, date-backed notifications            | Crowd-sourced data can flap; confirm durable changes before alerting (PD-008). |
 | Swift Testing, fixture-based decoding           | Modern API; deterministic, portfolio-quality tests with no live network.      |
 
 ---
 
-## 12. Open questions (resolve during Phase 4 implementation)
+## 12. Open questions (Phase 4 — resolved)
 
-These are deferred implementation choices, not Phase 5 review items.
+These were deferred implementation choices from Phase 3. All listed items below
+are **resolved** in the shipped MVP unless noted as post-MVP.
 
 - **Resolved:** persistence = SwiftData behind a `WatchlistRepository` protocol,
   built in Slice 2; Slice 1 ships storage-free. (See §7, PD-007.)
@@ -400,8 +418,9 @@ These are deferred implementation choices, not Phase 5 review items.
 - **Resolved:** response caching uses standard HTTP caching, not a custom cache.
   `TVMazeClient` runs on a `URLSession` with a dedicated `URLCache` (~4 MB / 50 MB)
   and `.useProtocolCachePolicy`; TVMaze's `Cache-Control: public, max-age=3600`
-  means repeat lookups skip the network for up to an hour. Offline "stale-but-usable"
-  fallback and force-refresh policy are deferred to Slice 2. (See PD-010.)
-- Slice 2: exact notification copy and the precise set of "meaningful change"
-  triggers.
+  means repeat lookups skip the network for up to an hour. (See PD-010.)
+- **Resolved (Slice 2):** local notification copy and meaningful-change triggers
+  implemented via `StatusChangeDetector` and debounce rules (PD-008).
+- **Post-MVP:** push notifications, user accounts, and cloud watchlist sync.
+  See [`Diagrams/07_post_mvp_architecture.md`](Diagrams/07_post_mvp_architecture.md).
 ```

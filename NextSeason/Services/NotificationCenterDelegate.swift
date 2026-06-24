@@ -67,6 +67,6 @@ final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelega
     ) async {
         let userInfo = response.notification.request.content.userInfo
         guard let showID = NotificationRouting.showID(from: userInfo) else { return }
-        await NotificationRouting.routeToShow(showID: showID)
+        NotificationRouting.routeToShow(showID: showID)
     }
 }

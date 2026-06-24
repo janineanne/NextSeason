@@ -5,7 +5,6 @@
 
 import XCTest
 
-@MainActor
 final class NavigationUITests: NextSeasonUITestCase {
     func testLaunchShowsSearchTab() {
         XCTAssertTrue(
@@ -32,5 +31,37 @@ final class NavigationUITests: NextSeasonUITestCase {
 
         app.tabBars.buttons["Search"].tap()
         XCTAssertTrue(searchIdlePrompt.waitForExistence(timeout: UITestTimeout.standard))
+    }
+
+    func testFindShowButtonNavigatesToSearch() {
+        search(for: UITestPreviewShow.name)
+
+        let result = app.buttons["\(UITestPreviewShow.name), Ongoing series"]
+        XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
+        result.tap()
+        XCTAssertTrue(
+            app.navigationBars[UITestPreviewShow.name].waitForExistence(timeout: UITestTimeout.standard),
+            "Opening a show from search should push its detail screen."
+        )
+
+        app.tabBars.buttons["Watchlist"].tap()
+        XCTAssertTrue(watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended))
+
+        let findShow = app.buttons["Find a Show"]
+        XCTAssertTrue(findShow.waitForExistence(timeout: UITestTimeout.standard))
+        findShow.tap()
+
+        XCTAssertTrue(
+            app.navigationBars["NextSeason"].waitForExistence(timeout: UITestTimeout.standard),
+            "Find a Show should land on the search screen root."
+        )
+        XCTAssertTrue(
+            app.searchFields["Search TV shows"].waitForExistence(timeout: UITestTimeout.standard),
+            "Find a Show should show the search field."
+        )
+        XCTAssertFalse(
+            app.navigationBars[UITestPreviewShow.name].exists,
+            "Find a Show should not reopen a stale detail screen from the search stack."
+        )
     }
 }
