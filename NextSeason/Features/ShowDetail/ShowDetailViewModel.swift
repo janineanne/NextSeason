@@ -31,12 +31,14 @@ final class ShowDetailViewModel {
         show: Show,
         service: any TVMazeService = TVMazeClient(),
         repository: any WatchlistRepository,
-        notifications: NotificationService = NotificationService()
+        notifications: NotificationService,
+        initialIsTracked: Bool = false
     ) {
         self.initialShow = show
         self.service = service
         self.repository = repository
         self.notifications = notifications
+        self.isTracked = initialIsTracked
     }
 
     /// Best available show data: the fully-loaded show once fetched, else the
@@ -48,43 +50,65 @@ final class ShowDetailViewModel {
         fullShow.map { NextSeasonCalculator.status(for: $0) }
     }
 
-    /// Loads full show details (seasons + next episode) needed to derive status.
+    /// Loads full show details (seasons + next episode) and tracked status.
+    /// Tracked status is fetched in parallel with the network request so the
+    /// toolbar reflects search-row changes without waiting on TVMaze.
     func load() async {
         loadState = .loading
+        async let trackedRefresh: Void = refreshTrackedState()
+
         do {
             fullShow = try await service.show(id: initialShow.id)
             loadState = .loaded
-            isTracked = try await repository.contains(showID: initialShow.id)
+            await trackedRefresh
         } catch is CancellationError {
             return
         } catch {
             loadState = .failed(error.localizedDescription)
+            await trackedRefresh
         }
     }
 
-    func toggleWatchlist() async {
-        guard let show = fullShow, loadState == .loaded, !isUpdatingWatchlist else { return }
+    /// Re-reads tracked status from the repository so the Track control reflects
+    /// changes made elsewhere (e.g. the show was removed on the Watchlist tab)
+    /// when this screen reappears. Skipped mid-toggle to avoid clobbering an
+    /// in-flight optimistic update.
+    func refreshTrackedState() async {
+        guard !isUpdatingWatchlist else { return }
+        if let tracked = try? await repository.contains(showID: initialShow.id) {
+            isTracked = tracked
+        }
+    }
+
+    func trackedShow() async -> TrackedShow? {
+        try? await repository.all().first { $0.id == initialShow.id }
+    }
+
+    func applyTrackedState(_ tracked: Bool) {
+        isTracked = tracked
+    }
+
+    func addToWatchlist() async {
+        guard !isUpdatingWatchlist else { return }
+        let show = fullShow ?? initialShow
         isUpdatingWatchlist = true
         defer { isUpdatingWatchlist = false }
 
         do {
-            if isTracked {
-                try await repository.remove(showID: show.id)
-                isTracked = false
+            try await repository.add(show)
+            isTracked = true
+            if await notifications.needsAuthorizationPrompt() {
+                shouldPromptForNotifications = true
             } else {
-                try await repository.add(show)
-                isTracked = true
-                if await notifications.needsAuthorizationPrompt() {
-                    shouldPromptForNotifications = true
-                } else {
-                    await notifications.requestAuthorizationIfNeeded()
-                    if await notifications.isDenied() {
-                        shouldShowNotificationsDeniedAlert = true
-                    }
+                await notifications.requestAuthorizationIfNeeded()
+                if await notifications.isDenied() {
+                    shouldShowNotificationsDeniedAlert = true
                 }
             }
         } catch {
-            loadState = .failed(error.localizedDescription)
+            if fullShow != nil {
+                loadState = .failed(error.localizedDescription)
+            }
         }
     }
 

@@ -11,6 +11,7 @@ struct NextSeasonApp: App {
     private let modelContainer: ModelContainer
     private let watchlistRepository: any WatchlistRepository
     private let refreshService: WatchlistRefreshService
+    private let watchlistUndoRemoval: WatchlistUndoRemoval
     @State private var notificationService = NotificationService()
     @State private var navigationCoordinator = AppNavigationCoordinator()
 
@@ -40,6 +41,7 @@ struct NextSeasonApp: App {
             }
             watchlistRepository = repository
             refreshService = WatchlistRefreshService(repository: repository)
+            watchlistUndoRemoval = WatchlistUndoRemoval(repository: repository)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -53,10 +55,12 @@ struct NextSeasonApp: App {
         WindowGroup {
             AppRootView(
                 navigationCoordinator: navigationCoordinator,
+                undoRemoval: watchlistUndoRemoval,
                 refreshService: refreshService
             )
             .environment(\.watchlistRepository, watchlistRepository)
             .environment(\.watchlistRefreshService, refreshService)
+            .environment(\.watchlistUndoRemoval, watchlistUndoRemoval)
             .environment(\.notificationService, notificationService)
             .task {
                 guard !UITestingConfiguration.isEnabled else { return }
@@ -75,10 +79,23 @@ private struct AppRootView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @Bindable var navigationCoordinator: AppNavigationCoordinator
+    @Bindable var undoRemoval: WatchlistUndoRemoval
     let refreshService: WatchlistRefreshService
 
     var body: some View {
         ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
+            .watchlistUndoToast(
+                isPresented: undoRemoval.pendingRemoval != nil,
+                anchor: undoRemoval.toastAnchor,
+                undoAction: { _ = undoRemoval.undoRemoval() },
+                confirmAction: {
+                    Task {
+                        await undoRemoval.commitPendingRemovalIfNeeded(
+                            onCommitted: { navigationCoordinator.notifyWatchlistDataChanged() }
+                        )
+                    }
+                }
+            )
             .onChange(of: scenePhase) { previousPhase, phase in
                 guard phase == .active, previousPhase != .active else { return }
                 guard !UITestingConfiguration.isEnabled else { return }

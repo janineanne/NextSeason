@@ -32,6 +32,7 @@ enum AccessibilityID {
     enum Search {
         static let idlePrompt = "search.idlePrompt"
         static let noResults = "search.noResults"
+        static let trackButton = "search.track"
     }
 
     enum ShowDetail {
@@ -40,6 +41,10 @@ enum AccessibilityID {
 
     enum Watchlist {
         static let emptyState = "watchlist.emptyState"
+        static let row = "watchlist.row"
+        static let trackButton = "watchlist.track"
+        static let undoButton = "watchlist.undo"
+        static let confirmButton = "watchlist.confirm"
     }
 }
 

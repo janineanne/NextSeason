@@ -22,11 +22,15 @@ flowchart TD
 
     NoLogin --> FutureAccounts[Accounts deferred]
     LocalWatchlist --> FutureSync[Sync deferred]
-    Calculate --> FutureNotifications[Notifications deferred]
+    Calculate --> LocalNotifications[Local notifications in MVP]
+    LocalNotifications --> FuturePush[Push/cloud notifications deferred]
 ```
 
 ## Purpose
 
 This diagram captures why the MVP is shaped the way it is.
 
-The key decision is not that accounts, sync, and notifications are unimportant. It is that they should come after the app proves the basic watchlist and season-status experience.
+The key decision is not that accounts, sync, or push notifications are unimportant.
+It is that they should come after the app proves the basic watchlist and
+season-status experience. **Local notifications** are part of the MVP; **push
+and cloud-delivered notifications** remain post-MVP.

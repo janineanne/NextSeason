@@ -19,9 +19,23 @@ final class AppNavigationCoordinator {
     var searchPath = NavigationPath()
 
     private(set) var pendingShowID: Int?
+    private(set) var watchlistReloadToken = 0
 
     func queueShowNavigation(showID: Int) {
         pendingShowID = showID
+    }
+
+    /// Switches to the Search tab at its root, popping any detail screen the
+    /// search stack was left on (e.g. a show viewed while adding to the
+    /// watchlist) so the user lands on the search screen itself.
+    func showSearchRoot() {
+        searchPath = NavigationPath()
+        selectedTab = .search
+    }
+
+    /// Bumps a token `WatchlistView` observes so it reloads from persistence.
+    func notifyWatchlistDataChanged() {
+        watchlistReloadToken &+= 1
     }
 
     func resolvePendingNavigation(

@@ -78,6 +78,38 @@ struct AppNavigationCoordinatorTests {
         #expect(tvMaze.fetchedIDs.isEmpty)
     }
 
+    @Test("Find a Show clears the search stack and selects the search tab")
+    func showSearchRoot() {
+        let coordinator = AppNavigationCoordinator()
+        let show = Show(
+            id: 44933,
+            name: "Severance",
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [],
+            nextEpisode: nil,
+            updatedAt: .now
+        )
+
+        coordinator.selectedTab = .watchlist
+        coordinator.searchPath.append(show)
+        coordinator.watchlistPath.append(TrackedShow(from: show))
+
+        coordinator.showSearchRoot()
+
+        #expect(coordinator.selectedTab == .search)
+        #expect(coordinator.searchPath.isEmpty)
+        #expect(coordinator.watchlistPath.count == 1)
+    }
+
     @Test("Pending navigation falls back to search when the show is no longer tracked")
     func resolvesUntrackedShowOnSearchTab() async throws {
         let repository = InMemoryWatchlistRepository()

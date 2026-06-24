@@ -8,44 +8,46 @@ import SwiftUI
 /// Show detail: artwork, metadata, the derived next-season status, and a
 /// formatted summary.
 struct ShowDetailView: View {
-    @Environment(\.watchlistRepository) private var repository
-    @Environment(\.notificationService) private var notificationService
-    @State private var viewModel: ShowDetailViewModel?
+    @Environment(\.watchlistUndoRemoval) private var undoRemoval
 
-    private let show: Show
-    private let service: any TVMazeService
-    private let previewRepository: (any WatchlistRepository)?
+    @State private var viewModel: ShowDetailViewModel
+
+    private let onWatchlistChanged: () -> Void
 
     init(
         show: Show,
         service: any TVMazeService = TVMazeClient(),
-        repository: (any WatchlistRepository)? = nil
+        repository: any WatchlistRepository,
+        notifications: NotificationService,
+        isTracked: Bool = false,
+        onWatchlistChanged: @escaping () -> Void = {}
     ) {
-        self.show = show
-        self.service = service
-        self.previewRepository = repository
+        _viewModel = State(
+            initialValue: ShowDetailViewModel(
+                show: show,
+                service: service,
+                repository: repository,
+                notifications: notifications,
+                initialIsTracked: isTracked
+            )
+        )
+        self.onWatchlistChanged = onWatchlistChanged
     }
 
     var body: some View {
-        Group {
-            if let viewModel {
-                detailContent(viewModel: viewModel)
-            } else {
-                ProgressView("Loading show…")
+        detailContent(viewModel: viewModel)
+            .task(id: viewModel.initialShow.id) {
+                await viewModel.load()
             }
-        }
-        .task(id: show.id) {
-            if viewModel?.initialShow.id != show.id {
-                let vm = ShowDetailViewModel(
-                    show: show,
-                    service: service,
-                    repository: previewRepository ?? repository,
-                    notifications: notificationService
-                )
-                viewModel = vm
-                await vm.load()
+            .onAppear {
+                // Reconcile tracked state on reappear (e.g. returning to this screen
+                // after the show was removed on the Watchlist tab).
+                Task { await viewModel.refreshTrackedState() }
             }
-        }
+            .onChange(of: undoRemoval?.pendingRemoval?.id) { oldValue, newValue in
+                guard oldValue == viewModel.initialShow.id, newValue == nil else { return }
+                Task { await viewModel.refreshTrackedState() }
+            }
     }
 
     private func detailContent(viewModel: ShowDetailViewModel) -> some View {
@@ -60,7 +62,6 @@ struct ShowDetailView: View {
         .tvmazeAttributionInset()
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar { watchlistToolbarItem(viewModel: viewModel) }
         .alert("Stay in the Loop", isPresented: notificationPromptBinding(viewModel: viewModel)) {
             Button("Not Now", role: .cancel) {
                 viewModel.dismissNotificationPrompt()
@@ -102,40 +103,6 @@ struct ShowDetailView: View {
         )
     }
 
-    @ToolbarContentBuilder
-    private func watchlistToolbarItem(viewModel: ShowDetailViewModel) -> some ToolbarContent {
-        ToolbarItem(placement: .primaryAction) {
-            Button {
-                Task { await viewModel.toggleWatchlist() }
-            } label: {
-                Label {
-                    Text(trackButtonTitle(viewModel: viewModel))
-                } icon: {
-                    if viewModel.isUpdatingWatchlist {
-                        ProgressView()
-                    } else {
-                        Image(systemName: viewModel.isTracked ? "star.fill" : "star")
-                    }
-                }
-            }
-            .disabled(viewModel.loadState != .loaded || viewModel.isUpdatingWatchlist)
-            .accessibilityIdentifier(AccessibilityID.ShowDetail.trackButton)
-            .accessibilityHint(trackButtonHint(viewModel: viewModel))
-        }
-    }
-
-    private func trackButtonTitle(viewModel: ShowDetailViewModel) -> String {
-        if viewModel.isUpdatingWatchlist { return "Updating…" }
-        return viewModel.isTracked ? "Tracking" : "Track"
-    }
-
-    private func trackButtonHint(viewModel: ShowDetailViewModel) -> String {
-        if viewModel.loadState != .loaded {
-            return "Available after show details finish loading"
-        }
-        return "Adds or removes this show from your watchlist"
-    }
-
     private func header(viewModel: ShowDetailViewModel) -> some View {
         HStack(alignment: .top, spacing: 16) {
             poster(viewModel: viewModel)
@@ -156,7 +123,37 @@ struct ShowDetailView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
+            ShowRowTrackButton(
+                showID: viewModel.displayShow.id,
+                showName: viewModel.displayShow.name,
+                isTracked: viewModel.isTracked,
+                isUpdating: viewModel.isUpdatingWatchlist,
+                trackButtonIdentifier: AccessibilityID.ShowDetail.trackButton
+            ) { anchor in
+                Task { await handleTrackButtonTap(viewModel: viewModel, anchor: anchor) }
+            }
+        }
+    }
+
+    private func handleTrackButtonTap(viewModel: ShowDetailViewModel, anchor: CGRect) async {
+        if undoRemoval?.pendingRemoval?.id == viewModel.initialShow.id {
+            undoRemoval?.undoRemoval()
+            await viewModel.refreshTrackedState()
+            return
+        }
+
+        if viewModel.isTracked {
+            guard let undoRemoval, let tracked = await viewModel.trackedShow() else { return }
+            undoRemoval.requestRemoval(
+                tracked,
+                anchor: anchor,
+                onCommitted: onWatchlistChanged
+            )
+            viewModel.applyTrackedState(false)
+        } else {
+            await viewModel.addToWatchlist()
+            onWatchlistChanged()
         }
     }
 
@@ -238,7 +235,8 @@ struct ShowDetailView: View {
         ShowDetailView(
             show: .preview,
             service: PreviewTVMazeService(stub: .preview),
-            repository: InMemoryWatchlistRepository()
+            repository: InMemoryWatchlistRepository(),
+            notifications: NotificationService()
         )
     }
 }
@@ -248,7 +246,8 @@ struct ShowDetailView: View {
         ShowDetailView(
             show: .previewMissingSummary,
             service: PreviewTVMazeService(stub: .previewMissingSummary),
-            repository: InMemoryWatchlistRepository()
+            repository: InMemoryWatchlistRepository(),
+            notifications: NotificationService()
         )
     }
 }
