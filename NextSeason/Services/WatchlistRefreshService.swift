@@ -11,6 +11,7 @@ final class WatchlistRefreshService {
     private let tvMaze: any TVMazeService
     private let repository: any WatchlistRepository
     private let notifications: any NotificationDelivering
+    private let analytics: any AnalyticsTracking
     private let now: @Sendable () -> Date
     private var lastForegroundRefreshAt: Date?
 
@@ -18,11 +19,13 @@ final class WatchlistRefreshService {
         tvMaze: any TVMazeService = TVMazeClient(),
         repository: any WatchlistRepository,
         notifications: any NotificationDelivering = NotificationService(),
+        analytics: any AnalyticsTracking = AnalyticsService(),
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.tvMaze = tvMaze
         self.repository = repository
         self.notifications = notifications
+        self.analytics = analytics
         self.now = now
     }
 
@@ -42,6 +45,7 @@ final class WatchlistRefreshService {
         do {
             trackedShows = try await repository.all()
         } catch {
+            analytics.trackNonFatalError(error, context: "watchlist_refresh_load")
             return
         }
 
@@ -56,6 +60,7 @@ final class WatchlistRefreshService {
             do {
                 updates = try await tvMaze.updatedShows(since: period)
             } catch {
+                analytics.trackNonFatalError(error, context: "watchlist_refresh_updates")
                 return
             }
         }
@@ -87,6 +92,7 @@ final class WatchlistRefreshService {
                 tracked.lastCheckedAt = now()
                 try? await repository.updateAfterRefresh(tracked)
             } catch {
+                analytics.trackNonFatalError(error, context: "watchlist_refresh_show")
                 continue
             }
         }

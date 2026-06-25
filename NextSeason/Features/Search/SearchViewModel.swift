@@ -20,12 +20,18 @@ final class SearchViewModel {
     var query: String = ""
 
     private let service: any TVMazeService
+    private let analytics: any AnalyticsTracking
     private let debounce: Duration
     /// Query that produced the current `.results` or `.empty` state.
     private var displayedQuery: String?
 
-    init(service: any TVMazeService = TVMazeClient(), debounce: Duration = .milliseconds(300)) {
+    init(
+        service: any TVMazeService = TVMazeClient(),
+        analytics: any AnalyticsTracking = AnalyticsService(),
+        debounce: Duration = .milliseconds(300)
+    ) {
         self.service = service
+        self.analytics = analytics
         self.debounce = debounce
     }
 
@@ -52,17 +58,38 @@ final class SearchViewModel {
         }
 
         state = .loading
+        let searchStarted = Date.now
         do {
             let shows = try await service.searchShows(matching: trimmed)
             guard !Task.isCancelled else { return }
+            let durationMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
             displayedQuery = trimmed
             state = shows.isEmpty ? .empty : .results(shows)
+            analytics.track(
+                .searchPerformed(
+                    queryLength: trimmed.count,
+                    resultCount: shows.count,
+                    durationMs: max(durationMs, 0)
+                )
+            )
+            if shows.isEmpty {
+                analytics.track(.emptySearchResultsShown)
+            }
         } catch is CancellationError {
             return
         } catch {
             guard !Task.isCancelled else { return }
+            let durationMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
             displayedQuery = nil
             state = .failed(error.localizedDescription)
+            analytics.track(
+                .searchPerformed(
+                    queryLength: trimmed.count,
+                    resultCount: 0,
+                    durationMs: max(durationMs, 0)
+                )
+            )
+            analytics.trackNonFatalError(error, context: "search")
         }
     }
 

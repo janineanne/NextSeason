@@ -10,6 +10,7 @@ struct SearchView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
+    @Environment(\.analytics) private var analytics
     @Environment(\.dismissSearch) private var dismissSearch
 
     @Binding var navigationPath: NavigationPath
@@ -27,12 +28,13 @@ struct SearchView: View {
     init(
         navigationPath: Binding<NavigationPath>,
         tvMaze: any TVMazeService = TVMazeClient(),
+        analytics: any AnalyticsTracking = AnalyticsService(),
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
         _navigationPath = navigationPath
         self.tvMaze = tvMaze
         self.onWatchlistChanged = onWatchlistChanged
-        _viewModel = State(initialValue: SearchViewModel(service: tvMaze))
+        _viewModel = State(initialValue: SearchViewModel(service: tvMaze, analytics: analytics))
     }
 
     var body: some View {
@@ -47,9 +49,13 @@ struct SearchView: View {
                         service: tvMaze,
                         repository: repository,
                         notifications: notificationService,
+                        analytics: analytics,
                         isTracked: trackedShowIDs.contains(show.id),
                         onWatchlistChanged: onWatchlistChanged
                     )
+                    .onAppear {
+                        analytics.track(.searchResultOpened(showID: show.id))
+                    }
                 }
                 .searchable(text: $viewModel.query, prompt: "Search TV shows")
                 .onSubmit(of: .search) {
@@ -150,7 +156,12 @@ struct SearchView: View {
             guard let undoRemoval,
                   let tracked = try? await repository.all().first(where: { $0.id == show.id })
             else { return }
-            undoRemoval.requestRemoval(tracked, anchor: anchor, onCommitted: onWatchlistChanged)
+            undoRemoval.requestRemoval(
+                tracked,
+                anchor: anchor,
+                source: .search,
+                onCommitted: onWatchlistChanged
+            )
             trackedShowIDs.remove(show.id)
             return
         }
@@ -161,6 +172,7 @@ struct SearchView: View {
         do {
             try await repository.add(show)
             trackedShowIDs.insert(show.id)
+            analytics.track(.watchlistAdded(source: .search, showID: show.id))
             dismissSearchResultsHintIfNeeded()
             if await notificationService.needsAuthorizationPrompt() {
                 shouldPromptForNotifications = true
@@ -174,6 +186,7 @@ struct SearchView: View {
         } catch is CancellationError {
             return
         } catch {
+            analytics.trackNonFatalError(error, context: "watchlist_add_search")
             await refreshTrackedShowIDs()
         }
     }

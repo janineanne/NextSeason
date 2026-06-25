@@ -18,23 +18,34 @@ protocol NotificationDelivering: AnyObject {
 final class NotificationService: NotificationDelivering {
     private let center: UNUserNotificationCenter
     private let userDefaults: UserDefaults
+    private let analytics: any AnalyticsTracking
     #if DEBUG
     private let authorizationStatusForTesting: UNAuthorizationStatus?
     #endif
 
-    init(center: UNUserNotificationCenter = .current(), userDefaults: UserDefaults = .standard) {
+    init(
+        center: UNUserNotificationCenter = .current(),
+        userDefaults: UserDefaults = .standard,
+        analytics: any AnalyticsTracking = AnalyticsService()
+    ) {
         self.center = center
         self.userDefaults = userDefaults
+        self.analytics = analytics
         #if DEBUG
         self.authorizationStatusForTesting = nil
         #endif
     }
 
     #if DEBUG
-    init(userDefaults: UserDefaults, authorizationStatusForTesting: UNAuthorizationStatus) {
+    init(
+        userDefaults: UserDefaults,
+        authorizationStatusForTesting: UNAuthorizationStatus,
+        analytics: any AnalyticsTracking = AnalyticsService()
+    ) {
         self.center = .current()
         self.userDefaults = userDefaults
         self.authorizationStatusForTesting = authorizationStatusForTesting
+        self.analytics = analytics
     }
 
     func resetDeferredPromptForTesting() {
@@ -86,8 +97,14 @@ final class NotificationService: NotificationDelivering {
             return false
         case .notDetermined:
             do {
-                return try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                analytics.track(
+                    .notificationPermission(result: granted ? .granted : .denied)
+                )
+                return granted
             } catch {
+                analytics.track(.notificationPermission(result: .denied))
+                analytics.trackNonFatalError(error, context: "notification_authorization")
                 return false
             }
         default:
@@ -144,6 +161,7 @@ final class NotificationService: NotificationDelivering {
         do {
             try await center.add(request)
         } catch {
+            analytics.trackNonFatalError(error, context: "notification_schedule")
             #if DEBUG
             assertionFailure("Failed to schedule notification: \(error)")
             #endif

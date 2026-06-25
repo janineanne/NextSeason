@@ -12,16 +12,18 @@ struct NextSeasonApp: App {
     private let watchlistRepository: any WatchlistRepository
     private let refreshService: WatchlistRefreshService
     private let watchlistUndoRemoval: WatchlistUndoRemoval
-    @State private var notificationService = NotificationService()
+    private let analyticsService = AnalyticsService()
+    @State private var notificationService: NotificationService
     @State private var navigationCoordinator = AppNavigationCoordinator()
 
     init() {
         let coordinator = AppNavigationCoordinator()
         _navigationCoordinator = State(initialValue: coordinator)
-        _notificationService = State(initialValue: NotificationService())
+        _notificationService = State(initialValue: NotificationService(analytics: analyticsService))
 
         if !UITestingConfiguration.isEnabled {
             NotificationRouting.setCoordinator(coordinator)
+            NotificationRouting.setAnalytics(analyticsService)
             NotificationRouting.install()
         }
 
@@ -40,8 +42,8 @@ struct NextSeasonApp: App {
                 repository = SwiftDataWatchlistRepository(context: ModelContext(container))
             }
             watchlistRepository = repository
-            refreshService = WatchlistRefreshService(repository: repository)
-            watchlistUndoRemoval = WatchlistUndoRemoval(repository: repository)
+            refreshService = WatchlistRefreshService(repository: repository, analytics: analyticsService)
+            watchlistUndoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analyticsService)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -64,6 +66,7 @@ struct NextSeasonApp: App {
             .environment(\.watchlistRefreshService, refreshService)
             .environment(\.watchlistUndoRemoval, watchlistUndoRemoval)
             .environment(\.notificationService, notificationService)
+            .environment(\.analytics, analyticsService)
             .task {
                 guard !UITestingConfiguration.isEnabled else { return }
                 RefreshScheduler.configure {

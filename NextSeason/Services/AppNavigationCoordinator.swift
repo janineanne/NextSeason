@@ -42,7 +42,8 @@ final class AppNavigationCoordinator {
 
     func resolvePendingNavigation(
         repository: any WatchlistRepository,
-        tvMaze: any TVMazeService
+        tvMaze: any TVMazeService,
+        analytics: any AnalyticsTracking
     ) async {
         guard let showID = pendingShowID else { return }
         pendingShowID = nil
@@ -50,12 +51,14 @@ final class AppNavigationCoordinator {
         if let tracked = try? await repository.all().first(where: { $0.id == showID }) {
             selectedTab = .watchlist
             watchlistPath.append(tracked)
+            analytics.track(.appOpenedFromNotification(showID: showID))
             return
         }
 
         if let show = try? await tvMaze.show(id: showID) {
             selectedTab = .search
             searchPath.append(show)
+            analytics.track(.appOpenedFromNotification(showID: showID))
         }
     }
 }

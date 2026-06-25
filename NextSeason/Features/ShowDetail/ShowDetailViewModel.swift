@@ -26,18 +26,21 @@ final class ShowDetailViewModel {
     private let service: any TVMazeService
     private let repository: any WatchlistRepository
     private let notifications: NotificationService
+    private let analytics: any AnalyticsTracking
 
     init(
         show: Show,
         service: any TVMazeService = TVMazeClient(),
         repository: any WatchlistRepository,
         notifications: NotificationService,
+        analytics: any AnalyticsTracking = AnalyticsService(),
         initialIsTracked: Bool = false
     ) {
         self.initialShow = show
         self.service = service
         self.repository = repository
         self.notifications = notifications
+        self.analytics = analytics
         self.isTracked = initialIsTracked
     }
 
@@ -65,6 +68,7 @@ final class ShowDetailViewModel {
             return
         } catch {
             loadState = .failed(error.localizedDescription)
+            analytics.trackNonFatalError(error, context: "show_detail_load")
             await trackedRefresh
         }
     }
@@ -97,6 +101,7 @@ final class ShowDetailViewModel {
         do {
             try await repository.add(show)
             isTracked = true
+            analytics.track(.watchlistAdded(source: .detail, showID: show.id))
             if await notifications.needsAuthorizationPrompt() {
                 shouldPromptForNotifications = true
             } else {
@@ -106,6 +111,7 @@ final class ShowDetailViewModel {
                 }
             }
         } catch {
+            analytics.trackNonFatalError(error, context: "watchlist_add_detail")
             if fullShow != nil {
                 loadState = .failed(error.localizedDescription)
             }
