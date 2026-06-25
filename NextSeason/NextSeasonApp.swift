@@ -90,9 +90,7 @@ private struct AppRootView: View {
                 undoAction: { _ = undoRemoval.undoRemoval() },
                 confirmAction: {
                     Task {
-                        await undoRemoval.commitPendingRemovalIfNeeded(
-                            onCommitted: { navigationCoordinator.notifyWatchlistDataChanged() }
-                        )
+                        await undoRemoval.commitPendingRemovalIfNeeded()
                     }
                 }
             )

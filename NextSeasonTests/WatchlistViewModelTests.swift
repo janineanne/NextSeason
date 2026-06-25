@@ -39,12 +39,9 @@ struct WatchlistViewModelTests {
 
         await viewModel.reload()
 
-        guard case .loaded(let shows) = viewModel.state else {
-            Issue.record("Expected loaded state")
-            return
-        }
-        #expect(shows.count == 1)
-        #expect(shows[0].name == sampleShow.name)
+        #expect(viewModel.state == .loaded)
+        #expect(viewModel.shows.count == 1)
+        #expect(viewModel.shows[0].name == sampleShow.name)
     }
 
     @Test("A pending removal keeps the show visible in the loaded list")
@@ -59,11 +56,7 @@ struct WatchlistViewModelTests {
         viewModel.requestRemoval(tracked, anchor: .zero)
 
         #expect(viewModel.isPendingRemoval(tracked))
-        guard case .loaded(let shows) = viewModel.state else {
-            Issue.record("Expected loaded state")
-            return
-        }
-        #expect(shows.count == 1)
+        #expect(viewModel.shows.count == 1)
         #expect(try await repository.contains(showID: tracked.id))
     }
 
@@ -79,12 +72,24 @@ struct WatchlistViewModelTests {
         viewModel.requestRemoval(tracked, anchor: .zero)
         await viewModel.commitPendingRemovalIfNeeded()
 
-        guard case .loaded(let shows) = viewModel.state else {
-            Issue.record("Expected loaded state")
-            return
-        }
-        #expect(shows.isEmpty)
+        #expect(viewModel.state == .loaded)
+        #expect(viewModel.shows.isEmpty)
         #expect(viewModel.pendingRemoval == nil)
+    }
+
+    @Test("Animated removal drops the row from the loaded list")
+    func removeShowAnimatedDropsRow() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let undoRemoval = WatchlistUndoRemoval(repository: repository)
+        let viewModel = WatchlistViewModel(repository: repository, undoRemoval: undoRemoval)
+        try await repository.add(sampleShow)
+        await viewModel.reload()
+        let tracked = try #require((try await repository.all()).first)
+
+        viewModel.removeShowAnimated(showID: tracked.id)
+
+        #expect(viewModel.state == .loaded)
+        #expect(viewModel.shows.isEmpty)
     }
 
     @Test("Undo clears the pending removal flag")

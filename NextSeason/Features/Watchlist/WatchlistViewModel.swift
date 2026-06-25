@@ -4,17 +4,21 @@
 //
 
 import Foundation
+import SwiftUI
 
 @Observable
 @MainActor
 final class WatchlistViewModel {
     enum State: Equatable {
         case loading
-        case loaded([TrackedShow])
+        case loaded
         case failed(String)
     }
 
-    private(set) var state: State = .loaded([])
+    private(set) var state: State = .loaded
+    /// Rows rendered by the list. Kept separate from `state` so `ForEach` can
+    /// diff removals and animate instead of replacing the whole list.
+    private(set) var shows: [TrackedShow] = []
 
     var pendingRemoval: TrackedShow? { removalCoordinator.pendingRemoval }
 
@@ -41,8 +45,9 @@ final class WatchlistViewModel {
     /// `.loading` when the reload token bumps in quick succession.
     func reload() async {
         do {
-            let shows = try await repository.all()
-            state = .loaded(shows)
+            let fetched = try await repository.all()
+            shows = fetched
+            state = .loaded
         } catch is CancellationError {
             return
         } catch {
@@ -71,8 +76,35 @@ final class WatchlistViewModel {
     }
 
     func commitPendingRemovalIfNeeded(onCommitted: (() -> Void)? = nil) async {
+        let removedID = removalCoordinator.pendingRemoval?.id
         await removalCoordinator.commitPendingRemovalIfNeeded(onCommitted: onCommitted)
-        await reload()
+        if let removedID, await showWasRemoved(showID: removedID) {
+            removeShowAnimated(showID: removedID)
+        } else {
+            await reload()
+        }
+    }
+
+    /// Removes a row from the displayed list. Wrap in `withAnimation` at the call
+    /// site so SwiftUI can run the standard list removal animation.
+    func removeShow(showID: Int) {
+        guard let index = shows.firstIndex(where: { $0.id == showID }) else { return }
+        shows.remove(at: index)
+        state = .loaded
+    }
+
+    func removeShowAnimated(showID: Int) {
+        withAnimation(.easeInOut(duration: 0.35)) {
+            removeShow(showID: showID)
+        }
+    }
+
+    private func showWasRemoved(showID: Int) async -> Bool {
+        do {
+            return try await repository.contains(showID: showID) == false
+        } catch {
+            return false
+        }
     }
 
     func isPendingRemoval(_ tracked: TrackedShow) -> Bool {

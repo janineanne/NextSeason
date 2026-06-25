@@ -11,14 +11,24 @@ struct ShowRowLabel: View {
     let subtitle: String
     let posterURL: URL?
     var isStale: Bool = false
-    /// Optional tertiary line, e.g. watchlist last-checked time.
+    /// Optional tertiary line (genres on search, last-checked on watchlist).
+    var detailLine: String?
+    /// Watchlist-only footer kept separate so genre lines don't collide.
     var footer: String?
 
-    init(name: String, subtitle: String, posterURL: URL?, isStale: Bool = false, footer: String? = nil) {
+    init(
+        name: String,
+        subtitle: String,
+        posterURL: URL?,
+        isStale: Bool = false,
+        detailLine: String? = nil,
+        footer: String? = nil
+    ) {
         self.name = name
         self.subtitle = subtitle
         self.posterURL = posterURL
         self.isStale = isStale
+        self.detailLine = detailLine
         self.footer = footer
     }
 
@@ -26,7 +36,8 @@ struct ShowRowLabel: View {
         self.init(
             name: show.name,
             subtitle: show.status.displayLabel,
-            posterURL: show.posterMediumURL
+            posterURL: show.posterMediumURL,
+            detailLine: show.genres.isEmpty ? nil : show.genres.joined(separator: " · ")
         )
     }
 
@@ -42,23 +53,30 @@ struct ShowRowLabel: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: AppSpacing.row) {
             poster
             VStack(alignment: .leading, spacing: 4) {
                 Text(name)
                     .font(.headline)
+                    .appPrimaryText()
                 Text(subtitle)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .appPrimaryText()
                 if isStale {
                     Text("No longer on TVMaze")
                         .font(.caption)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.warning)
+                }
+                if let detailLine {
+                    Text(detailLine)
+                        .font(.caption)
+                        .appSecondaryText()
                 }
                 if let footer {
                     Text(footer)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .font(.caption)
+                        .appSecondaryText()
                 }
             }
         }
@@ -70,6 +88,9 @@ struct ShowRowLabel: View {
         var parts = [name, subtitle]
         if isStale {
             parts.append("No longer on TVMaze")
+        }
+        if let detailLine {
+            parts.append(detailLine)
         }
         if let footer {
             parts.append(footer)
@@ -98,7 +119,6 @@ struct ShowRowLabel: View {
             .fill(.quaternary)
             .overlay {
                 Image(systemName: "tv")
-                    .foregroundStyle(.secondary)
             }
     }
 }
@@ -128,7 +148,7 @@ struct ShowRowTrackButton: View {
             .frame(width: 44, height: 44)
         }
         .buttonStyle(.borderless)
-        .tint(isTracked ? .yellow : .secondary)
+        .tint(isTracked ? Color.trackedStar : Color.accentColor)
         .disabled(isUpdating)
         .accessibilityLabel(trackAccessibilityLabel)
         .accessibilityIdentifier("\(trackButtonIdentifier).\(showID)")

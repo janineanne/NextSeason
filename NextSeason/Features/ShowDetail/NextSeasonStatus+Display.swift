@@ -3,7 +3,7 @@
 //  NextSeason
 //
 
-import Foundation
+import SwiftUI
 
 /// User-facing presentation for `NextSeasonStatus`. Kept in the feature layer so
 /// the domain enum stays free of display concerns.
@@ -22,6 +22,35 @@ extension NextSeasonStatus {
             "Ended — no next season expected"
         case .unknown:
             "Next season status unknown"
+        }
+    }
+
+    var statusSymbolName: String {
+        switch self {
+        case .airing:
+            "play.tv"
+        case .scheduled:
+            "calendar"
+        case .announcedUndated:
+            "calendar.badge.clock"
+        case .returningNoSeasonYet:
+            "arrow.clockwise"
+        case .ended:
+            "checkmark.circle"
+        case .unknown:
+            "questionmark.circle"
+        }
+    }
+
+    /// Tint for the status icon and headline on show detail.
+    var emphasisColor: Color {
+        switch self {
+        case .scheduled, .airing:
+            Color.accentColor
+        case .announcedUndated, .returningNoSeasonYet, .unknown:
+            Color.appMutedText
+        case .ended:
+            Color.appMutedText.opacity(0.85)
         }
     }
 }

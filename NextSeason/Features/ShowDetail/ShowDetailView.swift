@@ -52,16 +52,18 @@ struct ShowDetailView: View {
 
     private func detailContent(viewModel: ShowDetailViewModel) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: AppSpacing.section) {
                 header(viewModel: viewModel)
                 nextSeasonSection(viewModel: viewModel)
                 aboutSection(viewModel: viewModel)
             }
-            .padding()
+            .padding(AppSpacing.screen)
         }
+        .appScreenBackground()
+        .scrollContentBackground(.hidden)
         .tvmazeAttributionInset()
-        .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
+        .appNavigationChrome()
         .alert("Stay in the Loop", isPresented: notificationPromptBinding(viewModel: viewModel)) {
             Button("Not Now", role: .cancel) {
                 viewModel.dismissNotificationPrompt()
@@ -104,26 +106,27 @@ struct ShowDetailView: View {
     }
 
     private func header(viewModel: ShowDetailViewModel) -> some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: AppSpacing.screen) {
             poster(viewModel: viewModel)
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: AppSpacing.tight) {
                 Text(viewModel.displayShow.name)
                     .font(.title2.bold())
+                    .appPrimaryText()
                 Text(viewModel.displayShow.status.displayLabel)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .appSecondaryText()
                 if let network = viewModel.displayShow.network {
                     Text(network)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .appSecondaryText()
                 }
                 if !viewModel.displayShow.genres.isEmpty {
                     Text(viewModel.displayShow.genres.joined(separator: " · "))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .appSecondaryText()
                 }
             }
-            Spacer(minLength: 8)
+            Spacer(minLength: AppSpacing.tight)
             ShowRowTrackButton(
                 showID: viewModel.displayShow.id,
                 showName: viewModel.displayShow.name,
@@ -165,7 +168,7 @@ struct ShowDetailView: View {
             case .empty, .failure:
                 Rectangle()
                     .fill(.quaternary)
-                    .overlay { Image(systemName: "tv").foregroundStyle(.secondary) }
+                    .overlay { Image(systemName: "tv") }
             @unknown default:
                 Rectangle().fill(.quaternary)
             }
@@ -177,24 +180,41 @@ struct ShowDetailView: View {
 
     @ViewBuilder
     private func nextSeasonSection(viewModel: ShowDetailViewModel) -> some View {
-        GroupBox("Next Season") {
+        VStack(alignment: .leading, spacing: AppSpacing.tight) {
+            Text("Next Season")
+                .font(.headline)
+                .appPrimaryText()
+
             switch viewModel.loadState {
             case .loading:
-                HStack(spacing: 8) {
+                HStack(spacing: AppSpacing.tight) {
                     ProgressView()
                     Text("Checking next season…")
-                        .foregroundStyle(.secondary)
+                        .appSecondaryText()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             case .loaded:
                 if let status = viewModel.nextSeasonStatus {
-                    Text(status.headline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(alignment: .top, spacing: AppSpacing.tight) {
+                        Image(systemName: status.statusSymbolName)
+                            .font(.subheadline)
+                            .foregroundStyle(status.emphasisColor)
+                            .accessibilityHidden(true)
+                        Text(status.headline)
+                            .font(.body)
+                            .appPrimaryText()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
             case .failed(let message):
-                VStack(alignment: .leading, spacing: 8) {
-                    Label(message, systemImage: "exclamationmark.triangle")
-                        .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: AppSpacing.tight) {
+                    Label {
+                        Text(message)
+                            .appSecondaryText()
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundStyle(Color.warning)
+                    }
                     Button("Try Again") {
                         Task { await viewModel.load() }
                     }
@@ -202,6 +222,8 @@ struct ShowDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        .padding(AppSpacing.row)
+        .appSurfaceCard()
     }
 
     @ViewBuilder
@@ -209,19 +231,21 @@ struct ShowDetailView: View {
         let html = viewModel.displayShow.summaryHTML
         let hasSummary = SummaryFormatter.hasDisplayableContent(html)
         if hasSummary || viewModel.displayShow.tvMazeURL != nil {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: AppSpacing.tight) {
                 if let html, hasSummary {
                     Text("About")
                         .font(.headline)
+                        .appPrimaryText()
                     Text(SummaryFormatter.attributedString(from: html))
                         .font(.body)
+                        .appSecondaryText()
                 }
                 if let url = viewModel.displayShow.tvMazeURL {
                     Link(destination: url) {
                         Label("View on TVMaze", systemImage: "arrow.up.right.square")
                     }
                     .font(.subheadline)
-                    .padding(.top, 4)
+                    .padding(.top, AppSpacing.tight / 2)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

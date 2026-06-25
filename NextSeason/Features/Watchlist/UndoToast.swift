@@ -15,6 +15,7 @@ struct UndoToast: View {
         HStack(spacing: 12) {
             Text(message)
                 .font(.subheadline)
+                .appSecondaryText()
             Spacer(minLength: 0)
             Button("Undo", action: undoAction)
                 .font(.subheadline.weight(.semibold))

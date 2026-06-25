@@ -10,7 +10,7 @@ struct TVMazeAttributionView: View {
     var body: some View {
         Text("Data provided by TVMaze")
             .font(.footnote)
-            .foregroundStyle(.secondary)
+            .appSecondaryText()
             .frame(maxWidth: .infinity, alignment: .center)
     }
 }
@@ -20,8 +20,8 @@ extension View {
     func tvmazeAttributionInset() -> some View {
         safeAreaInset(edge: .bottom, spacing: 0) {
             TVMazeAttributionView()
-                .padding(.vertical, 12)
-                .background(.background)
+                .padding(.vertical, AppSpacing.tight)
+                .background(Color.appBackground)
         }
     }
 }

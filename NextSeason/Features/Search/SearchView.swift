@@ -10,6 +10,7 @@ struct SearchView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
+    @Environment(\.dismissSearch) private var dismissSearch
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
@@ -19,6 +20,7 @@ struct SearchView: View {
     @State private var updatingShowIDs: Set<Int> = []
     @State private var shouldPromptForNotifications = false
     @State private var shouldShowNotificationsDeniedAlert = false
+    @State private var isScrollDismissingKeyboard = false
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -34,6 +36,8 @@ struct SearchView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .appScreenBackground()
                 .navigationTitle("NextSeason")
                 .navigationDestination(for: Show.self) { show in
                     ShowDetailView(
@@ -46,8 +50,12 @@ struct SearchView: View {
                     )
                 }
                 .searchable(text: $viewModel.query, prompt: "Search TV shows")
+                .onSubmit(of: .search) {
+                    collapseSearchKeyboard()
+                }
                 .task(id: viewModel.query) {
                     await viewModel.search()
+                    collapseSearchKeyboardIfSearchFinished()
                 }
                 .task {
                     await refreshTrackedShowIDs()
@@ -79,6 +87,45 @@ struct SearchView: View {
                     Text("Enable notifications in Settings to get alerts when a tracked show's next season status changes.")
                 }
         }
+        .scrollDismissesKeyboard(.immediately)
+        .appNavigationChrome()
+    }
+
+    /// Dismisses the keyboard but keeps the query visible in the search field.
+    private func collapseSearchKeyboard() {
+        dismissSearch()
+        // `isPresented = false` collapses searchable and clears the visible query;
+        // resign first responder ends editing while the nav-bar search text stays put.
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
+    /// After a live search completes, tuck the keyboard so results are easier to read.
+    private func collapseSearchKeyboardIfSearchFinished() {
+        switch viewModel.state {
+        case .results, .empty, .failed:
+            collapseSearchKeyboard()
+        case .idle, .loading:
+            break
+        }
+    }
+
+    /// Nav-bar `.searchable` often ignores `scrollDismissesKeyboard`; drag is a reliable fallback.
+    private func scrollDismissesSearchKeyboardGesture() -> some Gesture {
+        DragGesture(minimumDistance: 8, coordinateSpace: .local)
+            .onChanged { value in
+                guard !isScrollDismissingKeyboard else { return }
+                guard abs(value.translation.height) > 4 else { return }
+                isScrollDismissingKeyboard = true
+                collapseSearchKeyboard()
+            }
+            .onEnded { _ in
+                isScrollDismissingKeyboard = false
+            }
     }
 
     private func refreshTrackedShowIDs() async {
@@ -136,21 +183,32 @@ struct SearchView: View {
     private var content: some View {
         switch viewModel.state {
         case .idle:
-            ContentUnavailableView(
-                "Find Your Next Season",
-                systemImage: "magnifyingglass",
-                description: Text("Search for a TV show to see its status and upcoming season.")
-            )
+            ContentUnavailableView {
+                Label("Find Your Next Season", systemImage: "magnifyingglass")
+                    .appPrimaryText()
+            } description: {
+                Text("Search for a TV show to see its status and upcoming season.")
+                    .appSecondaryText()
+            }
             .uiTestMarker(AccessibilityID.Search.idlePrompt, label: "Find Your Next Season")
         case .loading:
-            ProgressView("Searching…")
-                .controlSize(.large)
+            List {
+                ForEach(0..<3, id: \.self) { _ in
+                    ShowRowSkeleton()
+                }
+                .appListRowSurface()
+            }
+            .appPlainListStyle()
+            .scrollDismissesKeyboard(.immediately)
+            .simultaneousGesture(scrollDismissesSearchKeyboardGesture())
+            .tvmazeAttributionInset()
         case .results(let shows):
             List(shows) { show in
-                HStack(spacing: 8) {
+                HStack(spacing: AppSpacing.tight) {
                     NavigationLink(value: show) {
                         ShowRowLabel(show: show)
                     }
+                    .buttonStyle(.plain)
                     ShowRowTrackButton(
                         showID: show.id,
                         showName: show.name,
@@ -160,8 +218,11 @@ struct SearchView: View {
                         Task { await handleTrackButton(for: show, anchor: anchor) }
                     }
                 }
+                .appListRowSurface()
             }
-            .listStyle(.plain)
+            .appPlainListStyle()
+            .scrollDismissesKeyboard(.immediately)
+            .simultaneousGesture(scrollDismissesSearchKeyboardGesture())
             .tvmazeAttributionInset()
         case .empty:
             // TVMaze's public search returns at most 10 results with no pagination,
@@ -169,15 +230,19 @@ struct SearchView: View {
             // user toward a more specific query instead of implying it doesn't exist.
             ContentUnavailableView {
                 Label("Can't Find Your Show?", systemImage: "magnifyingglass")
+                    .appPrimaryText()
             } description: {
                 Text("Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”).")
+                    .appSecondaryText()
             }
             .uiTestMarker(AccessibilityID.Search.noResults, label: "Can't Find Your Show?")
         case .failed(let message):
             ContentUnavailableView {
                 Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
+                    .appPrimaryText()
             } description: {
                 Text(message)
+                    .appSecondaryText()
             } actions: {
                 Button("Try Again") {
                     Task { await viewModel.search() }

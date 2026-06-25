@@ -21,6 +21,8 @@ final class SearchViewModel {
 
     private let service: any TVMazeService
     private let debounce: Duration
+    /// Query that produced the current `.results` or `.empty` state.
+    private var displayedQuery: String?
 
     init(service: any TVMazeService = TVMazeClient(), debounce: Duration = .milliseconds(300)) {
         self.service = service
@@ -33,6 +35,7 @@ final class SearchViewModel {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             state = .idle
+            displayedQuery = nil
             return
         }
 
@@ -42,16 +45,33 @@ final class SearchViewModel {
             return // superseded by a newer query
         }
 
+        // `.task(id: query)` runs again when returning from show detail; keep
+        // existing results instead of flashing the loading placeholder.
+        if trimmed == displayedQuery, isShowingSearchOutcome {
+            return
+        }
+
         state = .loading
         do {
             let shows = try await service.searchShows(matching: trimmed)
             guard !Task.isCancelled else { return }
+            displayedQuery = trimmed
             state = shows.isEmpty ? .empty : .results(shows)
         } catch is CancellationError {
             return
         } catch {
             guard !Task.isCancelled else { return }
+            displayedQuery = nil
             state = .failed(error.localizedDescription)
+        }
+    }
+
+    private var isShowingSearchOutcome: Bool {
+        switch state {
+        case .results, .empty:
+            true
+        default:
+            false
         }
     }
 }

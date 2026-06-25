@@ -98,7 +98,7 @@ New users should immediately understand how to track a show.
 - Is it obvious what the app does?
 
 ### Implemented Improvements
-∫
+
 **Watchlist tab**
 
 - Actionable empty state with a prominent "Find a Show" button that switches to the Search tab at root (clears stale search navigation via `showSearchRoot()`).
@@ -142,19 +142,80 @@ Users can find, track, and remove shows without confusion. Tracked state is visi
 
 The application should feel intentional and complete.
 
-### Potential Improvements
+### Scope
 
-- App-wide color palette.
-- Consistent spacing.
-- Improved typography hierarchy.
-- Better loading states.
-- Better empty states.
-- Refined dark mode appearance.
-- Final app icon.
+Polish only — no new features. Prefer asset-catalog colors, typography, and layout
+adjustments over a custom design system or third-party dependencies.
+
+### Work Items
+
+| Item | Priority | Status |
+|------|----------|--------|
+| App icon (1024×1024) | P0 | Done — review artwork before portfolio release |
+| Accent + semantic colors (`AccentColor`, `TrackedStar`, `Warning`) | P0 | Done |
+| Lavender-gray surfaces (`AppBackground`, `AppSurface`) | P0 | Done |
+| Text hierarchy (`AppMutedText`, `appPrimaryText` / `appSecondaryText`) | P0 | Done |
+| Next Season card on show detail (surface + status icon) | P0 | Done |
+| Inset list row surfaces (`appListRowSurface`) | P1 | Done |
+| Tracked star + stale warning use semantic colors | P1 | Done |
+| Notifications-disabled banner card treatment | P1 | Done |
+| Search loading skeleton rows | P1 | Done |
+| Search keyboard dismiss (retain query text) | P1 | Done |
+| Watchlist row removal animation | P1 | Done |
+| Consistent spacing scale (`AppSpacing`) | P2 | Done |
+| Dark-mode surface + muted-text refinements | P2 | Done |
+| Watchlist row subtitle line limit | P2 | Done |
+| Empty / no-results states use primary + muted text | P2 | Done |
+
+### Deferred (out of scope for this pass)
+
+- Full welcome / onboarding screen (see First-Run Experience).
+- Custom tab bar or navigation chrome.
+- Accent-colored navigation titles (large titles remain system primary).
+- Motion-heavy transitions or third-party design libraries.
+- High-contrast variants for `AppMutedText` (verify during Accessibility Review).
+
+### Implementation Notes
+
+- **Surfaces:** `AppBackground` and `AppSurface` replace stark system white/black on
+  screens, lists, cards, and the TVMaze attribution strip. `appScreenBackground()`,
+  `appNavigationChrome()`, `appPlainListStyle()`, `appSurfaceCard()`, and
+  `appInsetSurfaceCard()` centralize layout chrome in `AppScreenBackground.swift`.
+- **Colors:** `AccentColor` (dusky purple light / lavender light dark) drives tint,
+  primary text, and prominent buttons. `TrackedStar` and `Warning` replace raw
+  `.yellow` / `.orange`. `AppMutedText` is used for secondary metadata lines.
+- **Text hierarchy:** `appPrimaryText()` applies accent to titles, show names, status
+  lines, and section headers. `appSecondaryText()` applies muted color to genres,
+  timestamps, descriptions, attribution, and supporting copy. Tab bar and controls use
+  `.tint(Color.accentColor)`.
+- **Next Season:** Body-sized headline with a status icon on an inset `AppSurface`
+  card (not a large hero). Icon tint uses `NextSeasonStatus.emphasisColor` (accent for
+  scheduled/airing, muted for less certain states).
+- **Lists:** Search and watchlist rows use inset rounded `AppSurface` cards instead of
+  full-width system row backgrounds. Watchlist removal animates via `withAnimation` and
+  avoids a full reload on local commits.
+- **Search:** Skeleton poster/text placeholders while loading. Live search is
+  debounced; returning from detail does not flash skeletons when results are cached.
+  Keyboard dismisses on results, scroll, and after search completes while keeping the
+  query visible in the navigation search field.
+- **Empty states:** Search idle uses `ContentUnavailableView` (“Find Your Next Season”).
+  No-results state guides toward a more specific query (“Can't Find Your Show?”).
+  Watchlist empty state has “Find a Show.” All use primary title + muted description.
 
 ### Success Criteria
 
 Users describe the app as "finished" rather than "a prototype."
+
+### Manual Verification
+
+- Light Mode and Dark Mode: surfaces, primary/muted text hierarchy, tracked star,
+  warning text, and accent buttons.
+- App icon renders correctly on home screen and in Settings.
+- Search: keyboard dismisses without clearing query; skeleton does not flash on back
+  navigation; no-results copy is helpful.
+- Watchlist: last-row delete animates smoothly; empty overlay does not crash.
+- Largest Dynamic Type: list rows, Next Season card, and skeleton rows do not clip
+  awkwardly (full pass planned under Accessibility Review).
 
 ---
 
@@ -172,18 +233,6 @@ Help users understand the app without instructions.
 - Brief explanation of purpose.
 - Suggested first search.
 - Guidance when watchlist is empty.
-
----
-
-## Accessibility Review
-
-### Verify
-
-- Dynamic Type support.
-- VoiceOver navigation.
-- Button labeling.
-- Color contrast.
-- Focus order.
 
 ---
 
@@ -280,6 +329,63 @@ Verify:
 
 ---
 
+## Accessibility Review
+
+### Status
+
+Accessibility is considered MVP-ready from an implementation standpoint (combined
+row labels, hidden decorative images, descriptive track controls). A **full manual
+accessibility pass** (Dynamic Type, VoiceOver, Increased Contrast, Xcode audit) is
+planned before portfolio release. Visual polish introduced `AppMutedText` and accent
+primary text — verify contrast during that pass.
+
+### Dynamic Type
+
+- Verify Search, Watchlist, Show Detail, empty states, notification banner, and undo toast at the largest Accessibility text size.
+- Confirm posters do not overlap text.
+- Confirm text does not truncate unexpectedly.
+- Confirm interactive controls remain reachable.
+
+### VoiceOver
+
+- Verify complete user flow using VoiceOver:
+  1. Search for a show
+  2. Open show detail
+  3. Add/remove a show from the watchlist
+  4. Navigate the Watchlist
+  5. Enable notifications
+
+- Confirm rows are announced as a single combined element and that decorative images remain hidden.
+
+### Button Labels
+
+- Confirm watchlist controls announce descriptive labels such as:
+  - "Track <Show Name>"
+  - "Stop tracking <Show Name>"
+- Confirm accessibility hints remain present.
+
+### Color & Contrast
+
+Verify in Light Mode, Dark Mode, and Increased Contrast:
+
+- Tracked star remains clearly distinguishable from accent purple text.
+- "No longer on TVMaze" warning remains readable.
+- `AppMutedText` secondary lines (genres, "Updated" timestamps, descriptions) remain legible against `AppSurface` / `AppBackground`.
+- Accent primary text remains readable on lavender-gray surfaces.
+
+### Xcode Accessibility Audit
+
+Run Xcode's Accessibility Audit / Accessibility Inspector and resolve any reported issues.
+
+## Release Decision
+
+Complete the Accessibility Review manual verification steps before distributing the
+app to resume reviewers and initial beta testers. Visual polish and core flows are
+implemented; no known critical defects block an internal beta once accessibility
+sign-off is complete.
+
+---
+
 # Portfolio Readiness
 
 Before linking from resume:
@@ -291,3 +397,7 @@ Before linking from resume:
 - No known critical issues.
 
 The application should demonstrate product thinking, engineering judgment, and effective AI collaboration.
+
+
+---
+
