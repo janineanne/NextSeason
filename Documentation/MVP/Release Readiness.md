@@ -1,5 +1,18 @@
 # NextSeason - Release Readiness
 
+## Completed Improvements
+
+The following improvements have already been implemented during MVP development and are retained here as a record of release readiness progress.
+
+- Accessibility review completed with VoiceOver, Dynamic Type, and touch target improvements.
+- Notification handling refined, including permission flow and behavior from terminated app state.
+- Watchlist discovery improvements, including clearer watchlist status and quick add/remove from search results.
+- Search behavior reviewed and updated to reflect current TVMaze capabilities and limitations.
+- General UX polish and documentation updates completed throughout the MVP review process.
+
+---
+
+
 ## Purpose
 
 This document tracks the work required before NextSeason is shared publicly, linked from a resume, or distributed to beta testers.
@@ -321,34 +334,59 @@ app after Search idle improvements. If implemented:
 
 ---
 
-## Analytics Foundation
+## Beta Feedback
 
-### Goal
+**Primary Feedback Channel**
 
-Collect enough information to guide future product decisions.
+- Use TestFlight as the primary mechanism for beta distribution, crash reporting, screenshots, and tester comments.
+- Do **not** build an in-app feedback feature for the MVP.
 
-### Suggested Metrics
+**Structured Feedback**
 
-- Searches performed.
-- Search result counts.
-- Search-to-track conversion.
-- Watchlist additions.
-- Watchlist removals.
-- Notification opens.
+Create a simple Google Form and provide the link to all beta testers. This provides more consistent and actionable feedback than free-form comments while requiring virtually no engineering effort.
 
----
+Suggested questions:
 
-## Feedback Mechanism
+- What were you trying to accomplish?
+- What happened?
+- What did you expect to happen?
+- How severe is the issue? (Critical / Major / Minor / Suggestion)
+- Device model
+- iOS version
+- Additional comments
 
-### Goal
+Revisit the need for an in-app feedback screen only if beta testing demonstrates that the TestFlight + Google Form workflow is insufficient.
 
-Make it easy for beta users to report issues.
 
-### Options
+## Analytics
 
-- Email feedback link.
-- Report incorrect data action.
-- Simple feedback form.
+**Goal:** Collect enough anonymous usage data during beta testing to answer product questions and prioritize post-MVP development, rather than measuring engagement or marketing metrics.
+
+### Implement
+
+- Search performed (query length only, result count, search duration)
+- Search result opened
+- Added to watchlist from search
+- Removed from watchlist from search
+- Show detail viewed
+- Added to watchlist from detail
+- Removed from watchlist from detail
+- Watchlist viewed
+- Watchlist item opened
+- Watchlist item removed
+- Notification permission granted or denied
+- Notification tapped
+- App opened from notification
+- Empty watchlist shown
+- Empty search results shown
+- Non-fatal errors (API failures, decoding errors, notification scheduling failures)
+- Actor name tapped (analytics only; no user-visible behavior)
+
+### Design Notes
+
+- Do **not** record search text or other personally identifying information.
+- Avoid instrumenting every UI interaction; collect only data that informs product decisions.
+- Implement analytics behind a simple `AnalyticsService` abstraction so providers can be changed without affecting the rest of the app.
 
 ---
 
@@ -485,4 +523,3 @@ The application should demonstrate product thinking, engineering judgment, and e
 
 
 ---
-
