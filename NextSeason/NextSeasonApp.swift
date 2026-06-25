@@ -15,6 +15,7 @@ struct NextSeasonApp: App {
     private let analyticsService = AnalyticsService()
     @State private var notificationService: NotificationService
     @State private var navigationCoordinator = AppNavigationCoordinator()
+    @State private var themeController = AppThemeController()
 
     init() {
         let coordinator = AppNavigationCoordinator()
@@ -51,7 +52,9 @@ struct NextSeasonApp: App {
         if !UITestingConfiguration.isEnabled {
             RefreshScheduler.registerBackgroundTask()
         } else {
+            #if DEBUG
             FirstRunPreferences.resetSearchResultsHintForTesting()
+            #endif
         }
     }
 
@@ -62,6 +65,8 @@ struct NextSeasonApp: App {
                 undoRemoval: watchlistUndoRemoval,
                 refreshService: refreshService
             )
+            .environment(themeController)
+            .appThemeColors(from: themeController)
             .environment(\.watchlistRepository, watchlistRepository)
             .environment(\.watchlistRefreshService, refreshService)
             .environment(\.watchlistUndoRemoval, watchlistUndoRemoval)
@@ -89,6 +94,15 @@ private struct AppRootView: View {
 
     var body: some View {
         ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
+            // Beta: theme switcher left enabled for palette feedback. Before portfolio release,
+            // wrap in #if DEBUG or remove — see Release Readiness.md § Portfolio Readiness.
+            // #if DEBUG
+            .overlay(alignment: .bottomTrailing) {
+                if !UITestingConfiguration.isEnabled {
+                    ThemeSwitcherButton()
+                }
+            }
+            // #endif
             .watchlistUndoToast(
                 isPresented: undoRemoval.pendingRemoval != nil,
                 anchor: undoRemoval.toastAnchor,

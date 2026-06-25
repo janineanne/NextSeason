@@ -7,6 +7,8 @@ import SwiftUI
 
 /// One-time guidance shown below the first search results list.
 struct SearchResultsHintView: View {
+    @Environment(\.appThemeColors) private var themeColors
+
     var body: some View {
         Text(FirstRunCopy.searchResultsHint)
             .font(.footnote)
@@ -15,7 +17,7 @@ struct SearchResultsHintView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, AppSpacing.screen)
             .padding(.vertical, AppSpacing.tight)
-            .background(Color.appBackground)
+            .background(themeColors.background)
             .accessibilityIdentifier(AccessibilityID.Search.resultsHint)
     }
 }
@@ -35,5 +37,6 @@ extension View {
 #Preview {
     SearchResultsHintView()
         .appScreenBackground()
+        .appThemePreview()
 }
 #endif
