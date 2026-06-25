@@ -9,6 +9,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.analytics) private var analytics
+    @Environment(\.appThemeColors) private var themeColors
 
     @Bindable var coordinator: AppNavigationCoordinator
 
@@ -50,7 +51,7 @@ struct ContentView: View {
                 }
                 .tag(AppNavigationCoordinator.Tab.watchlist)
         }
-        .tint(Color.accentColor)
+        .tint(themeColors.controlTint)
         .appScreenBackground()
         .onChange(of: coordinator.selectedTab) { _, tab in
             if tab == .watchlist {
@@ -81,4 +82,5 @@ struct ContentView: View {
     ContentView(coordinator: AppNavigationCoordinator())
         .environment(\.watchlistRepository, InMemoryWatchlistRepository())
         .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(repository: InMemoryWatchlistRepository()))
+        .appThemePreview()
 }

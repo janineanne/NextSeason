@@ -7,6 +7,8 @@ import SwiftUI
 
 /// Poster, title, and status for a show in search results or the watchlist.
 struct ShowRowLabel: View {
+    @Environment(\.appThemeColors) private var themeColors
+
     let name: String
     let subtitle: String
     let posterURL: URL?
@@ -66,7 +68,7 @@ struct ShowRowLabel: View {
                 if isStale {
                     Text("No longer on TVMaze")
                         .font(.caption)
-                        .foregroundStyle(Color.warning)
+                        .foregroundStyle(themeColors.warning)
                 }
                 if let detailLine {
                     Text(detailLine)
@@ -125,6 +127,8 @@ struct ShowRowLabel: View {
 
 /// Track / untrack control shown beside a show list row.
 struct ShowRowTrackButton: View {
+    @Environment(\.appThemeColors) private var themeColors
+
     let showID: Int
     let showName: String
     let isTracked: Bool
@@ -148,7 +152,7 @@ struct ShowRowTrackButton: View {
             .frame(width: 44, height: 44)
         }
         .buttonStyle(.borderless)
-        .tint(isTracked ? Color.trackedStar : Color.accentColor)
+        .tint(isTracked ? themeColors.trackedStar : themeColors.accent)
         .disabled(isUpdating)
         .accessibilityLabel(trackAccessibilityLabel)
         .accessibilityIdentifier("\(trackButtonIdentifier).\(showID)")
@@ -181,6 +185,7 @@ struct ShowRowTrackButton: View {
     }
 }
 
+#if DEBUG
 #Preview {
     List {
         ShowRowLabel(show: .preview)
@@ -196,3 +201,4 @@ struct ShowRowTrackButton: View {
         }
     }
 }
+#endif

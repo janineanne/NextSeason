@@ -6,15 +6,14 @@
 import SwiftUI
 
 extension View {
-    /// Lavender-gray screen fill (`AppBackground` in the asset catalog).
+    /// Screen fill from the active app palette.
     func appScreenBackground() -> some View {
-        background(Color.appBackground.ignoresSafeArea())
+        modifier(AppScreenBackgroundModifier())
     }
 
     /// Matches navigation bars to the app screen background.
     func appNavigationChrome() -> some View {
-        toolbarBackground(Color.appBackground, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+        modifier(AppNavigationChromeModifier())
     }
 
     /// Plain list on the app background instead of system white/black.
@@ -23,19 +22,14 @@ extension View {
             .scrollContentBackground(.hidden)
     }
 
-    /// Inset card row on `AppSurface` (replaces stark system list row backgrounds).
+    /// Inset card row on the app surface (replaces stark system list row backgrounds).
     func appListRowSurface() -> some View {
-        listRowInsets(EdgeInsets(top: 4, leading: AppSpacing.screen, bottom: 4, trailing: AppSpacing.screen))
-            .listRowSeparator(.hidden)
-            .listRowBackground(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.appSurface)
-            )
+        modifier(AppListRowSurfaceModifier())
     }
 
     /// Rounded surface for insets and cards outside lists.
     func appSurfaceCard(cornerRadius: CGFloat = 12) -> some View {
-        background(Color.appSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        modifier(AppSurfaceCardModifier(cornerRadius: cornerRadius))
     }
 
     /// Surface card used inside lists (clear row chrome, inset card content).
@@ -47,14 +41,72 @@ extension View {
             .listRowBackground(Color.clear)
     }
 
-    /// Titles, show names, and section headers (accent purple).
+    /// Titles, show names, and section headers.
     func appPrimaryText() -> some View {
-        foregroundStyle(Color.accentColor)
+        modifier(AppPrimaryTextModifier())
     }
 
     /// Metadata lines: genres, timestamps, supporting descriptions.
     func appSecondaryText() -> some View {
-        foregroundStyle(Color.appMutedText)
+        modifier(AppSecondaryTextModifier())
+    }
+}
+
+private struct AppScreenBackgroundModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var colors
+
+    func body(content: Content) -> some View {
+        content.background(colors.background.ignoresSafeArea())
+    }
+}
+
+private struct AppNavigationChromeModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var colors
+
+    func body(content: Content) -> some View {
+        content
+            .toolbarBackground(colors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+    }
+}
+
+private struct AppListRowSurfaceModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var colors
+
+    func body(content: Content) -> some View {
+        content
+            .listRowInsets(EdgeInsets(top: 4, leading: AppSpacing.screen, bottom: 4, trailing: AppSpacing.screen))
+            .listRowSeparator(.hidden)
+            .listRowBackground(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(colors.surface)
+            )
+    }
+}
+
+private struct AppSurfaceCardModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var colors
+
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content.background(colors.surface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+}
+
+private struct AppPrimaryTextModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var colors
+
+    func body(content: Content) -> some View {
+        content.foregroundStyle(colors.accent)
+    }
+}
+
+private struct AppSecondaryTextModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var colors
+
+    func body(content: Content) -> some View {
+        content.foregroundStyle(colors.mutedText)
     }
 }
 
@@ -69,5 +121,6 @@ extension View {
     .appSurfaceCard()
     .padding()
     .appScreenBackground()
+    .appThemePreview()
 }
 #endif

@@ -519,6 +519,7 @@ Before linking from resume:
 - AI-assisted development process documented.
 - No known critical issues.
 - Remove the beta analytics tap target from show summaries (`SummaryFormatter.analyticsTapTargetMarkdown` — the bold “Tap here for Actor Name Analytics” line injected into About text).
+- Remove or re-wrap the beta theme switcher in `#if DEBUG` before portfolio release. The palette button and picker live in `ThemeSwitcherView.swift` and the overlay in `NextSeasonApp.swift` (`ThemeSwitcherButton`); search the project for `ThemeSwitcher` to find all call sites. Pick a default palette in `AppThemeController` when removing the switcher.
 
 The application should demonstrate product thinking, engineering judgment, and effective AI collaboration.
 
