@@ -17,33 +17,52 @@ protocol NotificationDelivering: AnyObject {
 @MainActor
 final class NotificationService: NotificationDelivering {
     private let center: UNUserNotificationCenter
+    private let userDefaults: UserDefaults
+    #if DEBUG
+    private let authorizationStatusForTesting: UNAuthorizationStatus?
+    #endif
 
-    init(center: UNUserNotificationCenter = .current()) {
+    init(center: UNUserNotificationCenter = .current(), userDefaults: UserDefaults = .standard) {
         self.center = center
+        self.userDefaults = userDefaults
+        #if DEBUG
+        self.authorizationStatusForTesting = nil
+        #endif
     }
 
+    #if DEBUG
+    init(userDefaults: UserDefaults, authorizationStatusForTesting: UNAuthorizationStatus) {
+        self.center = .current()
+        self.userDefaults = userDefaults
+        self.authorizationStatusForTesting = authorizationStatusForTesting
+    }
+
+    func resetDeferredPromptForTesting() {
+        userDefaults.removeObject(forKey: Self.deferredPromptKey)
+    }
+    #endif
+
     func authorizationStatus() async -> UNAuthorizationStatus {
-        await center.notificationSettings().authorizationStatus
+        #if DEBUG
+        if let authorizationStatusForTesting {
+            return authorizationStatusForTesting
+        }
+        #endif
+        return await center.notificationSettings().authorizationStatus
     }
 
     private static let deferredPromptKey = "notificationPromptDeferred"
 
-    #if DEBUG
-    static func resetDeferredPromptForTesting() {
-        UserDefaults.standard.removeObject(forKey: deferredPromptKey)
-    }
-    #endif
-
     /// True when the user has never been asked and has not deferred the in-app prompt.
     func needsAuthorizationPrompt() async -> Bool {
         guard !UITestingConfiguration.isEnabled else { return false }
-        guard !UserDefaults.standard.bool(forKey: Self.deferredPromptKey) else { return false }
+        guard !userDefaults.bool(forKey: Self.deferredPromptKey) else { return false }
         return await authorizationStatus() == .notDetermined
     }
 
     /// Records that the user dismissed the in-app permission prompt without deciding.
     func deferAuthorizationPrompt() {
-        UserDefaults.standard.set(true, forKey: Self.deferredPromptKey)
+        userDefaults.set(true, forKey: Self.deferredPromptKey)
     }
 
     /// True when the user previously denied notification permission.

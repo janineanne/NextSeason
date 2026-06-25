@@ -21,6 +21,8 @@ struct SearchView: View {
     @State private var shouldPromptForNotifications = false
     @State private var shouldShowNotificationsDeniedAlert = false
     @State private var isScrollDismissingKeyboard = false
+    @AppStorage(FirstRunPreferences.searchResultsHintDismissedKey)
+    private var searchResultsHintDismissed = false
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -61,6 +63,9 @@ struct SearchView: View {
                     await refreshTrackedShowIDs()
                 }
                 .onChange(of: navigationPath) {
+                    if navigationPath.count > 0 {
+                        dismissSearchResultsHintIfNeeded()
+                    }
                     // Returning from a detail screen may have changed tracking
                     // state, so refresh the controls shown in the results list.
                     Task { await refreshTrackedShowIDs() }
@@ -76,7 +81,7 @@ struct SearchView: View {
                         Task { await confirmNotificationPrompt() }
                     }
                 } message: {
-                    Text("NextSeason can notify you when a tracked show gets a release date or season update.")
+                    Text(FirstRunCopy.notificationPromptMessage)
                 }
                 .alert("Notifications Are Off", isPresented: $shouldShowNotificationsDeniedAlert) {
                     Button("Not Now", role: .cancel) {}
@@ -84,7 +89,7 @@ struct SearchView: View {
                         notificationService.openNotificationSettings()
                     }
                 } message: {
-                    Text("Enable notifications in Settings to get alerts when a tracked show's next season status changes.")
+                    Text(FirstRunCopy.notificationsDeniedMessage)
                 }
         }
         .scrollDismissesKeyboard(.immediately)
@@ -156,6 +161,7 @@ struct SearchView: View {
         do {
             try await repository.add(show)
             trackedShowIDs.insert(show.id)
+            dismissSearchResultsHintIfNeeded()
             if await notificationService.needsAuthorizationPrompt() {
                 shouldPromptForNotifications = true
             } else {
@@ -179,6 +185,11 @@ struct SearchView: View {
         }
     }
 
+    private func dismissSearchResultsHintIfNeeded() {
+        guard !searchResultsHintDismissed else { return }
+        searchResultsHintDismissed = true
+    }
+
     @ViewBuilder
     private var content: some View {
         switch viewModel.state {
@@ -187,10 +198,17 @@ struct SearchView: View {
                 Label("Find Your Next Season", systemImage: "magnifyingglass")
                     .appPrimaryText()
             } description: {
-                Text("Search for a TV show to see its status and upcoming season.")
+                Text(FirstRunCopy.searchIdleDescription)
                     .appSecondaryText()
+            } actions: {
+                Button(FirstRunCopy.tryExampleButtonTitle) {
+                    viewModel.query = FirstRunCopy.exampleSearchQuery
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier(AccessibilityID.Search.tryExampleButton)
             }
-            .uiTestMarker(AccessibilityID.Search.idlePrompt, label: "Find Your Next Season")
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(AccessibilityID.Search.idlePrompt)
         case .loading:
             List {
                 ForEach(0..<3, id: \.self) { _ in
@@ -223,6 +241,7 @@ struct SearchView: View {
             .appPlainListStyle()
             .scrollDismissesKeyboard(.immediately)
             .simultaneousGesture(scrollDismissesSearchKeyboardGesture())
+            .searchResultsHintInset(isVisible: !searchResultsHintDismissed)
             .tvmazeAttributionInset()
         case .empty:
             // TVMaze's public search returns at most 10 results with no pagination,

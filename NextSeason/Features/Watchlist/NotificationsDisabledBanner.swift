@@ -20,7 +20,7 @@ struct NotificationsDisabledBanner: View {
                 Text("Notifications Are Off")
                     .font(.headline)
                     .appPrimaryText()
-                Text("Turn on notifications in Settings to get alerts when a tracked show gets a next season date.")
+                Text(FirstRunCopy.notificationsDisabledBannerMessage)
                     .font(.subheadline)
                     .appSecondaryText()
                 Button("Open Settings", action: openSettings)

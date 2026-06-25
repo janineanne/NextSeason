@@ -72,7 +72,7 @@ struct ShowDetailView: View {
                 Task { await viewModel.confirmNotificationPrompt() }
             }
         } message: {
-            Text("NextSeason can notify you when a tracked show gets a release date or season update.")
+            Text(FirstRunCopy.notificationPromptMessage)
         }
         .alert("Notifications Are Off", isPresented: notificationsDeniedBinding(viewModel: viewModel)) {
             Button("Not Now", role: .cancel) {
@@ -83,7 +83,7 @@ struct ShowDetailView: View {
                 viewModel.dismissNotificationsDeniedAlert()
             }
         } message: {
-            Text("Enable notifications in Settings to get alerts when this show's next season status changes.")
+            Text(FirstRunCopy.notificationsDeniedMessage)
         }
     }
 

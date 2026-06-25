@@ -45,15 +45,14 @@ struct WatchlistView: View {
             Group {
                 if let viewModel {
                     content(for: viewModel)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .appScreenBackground()
                 } else {
                     ProgressView("Loading watchlist…")
-                        .appScreenBackground()
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .appScreenBackground()
             .navigationTitle("Watchlist")
-            .appNavigationChrome()
+            .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: TrackedShow.self) { tracked in
                 ShowDetailView(
                     show: Show(tracked: tracked),
@@ -98,6 +97,7 @@ struct WatchlistView: View {
                 }
             }
         }
+        .appNavigationChrome()
     }
 
     @ViewBuilder
@@ -117,6 +117,16 @@ struct WatchlistView: View {
                     NotificationsDisabledBanner {
                         notificationService.openNotificationSettings()
                     }
+                }
+                // Keeps the list scroll-backed so the large navigation title renders
+                // when the watchlist is empty (zero tracked shows, no banner).
+                if viewModel.shows.isEmpty, !notificationsDenied {
+                    Color.clear
+                        .frame(height: 1)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .accessibilityHidden(true)
                 }
                 ForEach(viewModel.shows) { tracked in
                     HStack(spacing: AppSpacing.tight) {
@@ -178,7 +188,7 @@ struct WatchlistView: View {
             Label("No Tracked Shows", systemImage: "star")
                 .appPrimaryText()
         } description: {
-            Text("Search for a show and tap Track to monitor its next season.")
+            Text(FirstRunCopy.watchlistEmptyDescription)
                 .appSecondaryText()
         } actions: {
             Button("Find a Show") {

@@ -12,6 +12,8 @@ enum UITestLaunchArgument {
 enum UITestAccessibilityID {
     enum Search {
         static let idlePrompt = "search.idlePrompt"
+        static let tryExampleButton = "search.tryExample"
+        static let resultsHint = "search.resultsHint"
         static let noResults = "search.noResults"
         static let trackButton = "search.track"
     }
@@ -64,6 +66,18 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
 
     var searchNoResults: XCUIElement {
         app.descendants(matching: .any)[UITestAccessibilityID.Search.noResults]
+    }
+
+    var searchField: XCUIElement {
+        app.searchFields["Search TV shows"]
+    }
+
+    var tryExampleButton: XCUIElement {
+        app.descendants(matching: .any)[UITestAccessibilityID.Search.tryExampleButton]
+    }
+
+    var searchResultsHint: XCUIElement {
+        app.descendants(matching: .any)[UITestAccessibilityID.Search.resultsHint]
     }
 
     var watchlistUndoButton: XCUIElement {
@@ -149,15 +163,12 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
     }
 
     func search(for query: String) {
-        let searchField = app.searchFields["Search TV shows"]
+        let searchField = self.searchField
         XCTAssertTrue(searchField.waitForExistence(timeout: UITestTimeout.standard))
         searchField.tap()
 
         if let currentValue = searchField.value as? String, !currentValue.isEmpty {
-            let clearButton = searchField.buttons["Clear text"]
-            if clearButton.waitForExistence(timeout: UITestTimeout.standard) {
-                clearButton.tap()
-            }
+            clearSearchField(clearingField: searchField)
         }
 
         searchField.typeText(query)
@@ -166,5 +177,60 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
         if app.keyboards.buttons["Search"].waitForExistence(timeout: 1) {
             app.keyboards.buttons["Search"].tap()
         }
+    }
+
+    func tapTryExample() {
+        XCTAssertTrue(tryExampleButton.waitForExistence(timeout: UITestTimeout.standard))
+        tryExampleButton.tap()
+    }
+
+    func clearSearchField(clearingField field: XCUIElement? = nil) {
+        let searchField = field ?? self.searchField
+        XCTAssertTrue(searchField.waitForExistence(timeout: UITestTimeout.standard))
+        searchField.tap()
+
+        let clearCandidates = [
+            searchField.buttons["Clear text"],
+            app.buttons["Clear text"],
+            app.navigationBars.buttons["Clear text"]
+        ]
+        for clearButton in clearCandidates where clearButton.waitForExistence(timeout: 1) {
+            clearButton.tap()
+            break
+        }
+
+        if let value = searchField.value as? String, !value.isEmpty {
+            searchField.press(forDuration: 1.0)
+            if app.menuItems["Select All"].waitForExistence(timeout: 1) {
+                app.menuItems["Select All"].tap()
+                app.keys["delete"].tap()
+            } else {
+                let deleteKey = app.keys["delete"]
+                if deleteKey.waitForExistence(timeout: 1) {
+                    for _ in 0..<(value.count + 2) {
+                        deleteKey.tap()
+                    }
+                }
+            }
+        }
+
+        if app.keyboards.buttons["Search"].waitForExistence(timeout: 1) {
+            app.keyboards.buttons["Search"].tap()
+        }
+    }
+
+    @discardableResult
+    func waitForSearchFieldValue(
+        _ expected: String,
+        timeout: TimeInterval = UITestTimeout.extended
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if let value = searchField.value as? String, value == expected {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        return false
     }
 }
