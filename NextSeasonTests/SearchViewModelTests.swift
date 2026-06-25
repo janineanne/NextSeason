@@ -74,6 +74,21 @@ struct SearchViewModelTests {
         #expect(viewModel.state == .failed("Something failed"))
     }
 
+    @Test("Clearing the query after results returns to idle")
+    func clearingQueryReturnsToIdle() async {
+        let viewModel = SearchViewModel(
+            service: MockService { _ in [.preview] },
+            debounce: .zero
+        )
+        viewModel.query = FirstRunCopy.exampleSearchQuery
+        await viewModel.search()
+        #expect(viewModel.state == .results([.preview]))
+
+        viewModel.query = ""
+        await viewModel.search()
+        #expect(viewModel.state == .idle)
+    }
+
     @Test("Repeating the same query while results are shown does not reload")
     func repeatedQuerySkipsReload() async {
         final class CallCounter: @unchecked Sendable {

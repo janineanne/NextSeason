@@ -11,6 +11,10 @@ final class NavigationUITests: NextSeasonUITestCase {
             searchIdlePrompt.waitForExistence(timeout: UITestTimeout.standard),
             "Search tab should show the idle prompt on launch."
         )
+        XCTAssertTrue(
+            tryExampleButton.waitForExistence(timeout: UITestTimeout.standard),
+            "Search idle state should offer Try an Example on launch."
+        )
         XCTAssertTrue(app.navigationBars["NextSeason"].waitForExistence(timeout: UITestTimeout.standard))
         XCTAssertTrue(app.tabBars.buttons["Search"].exists)
     }

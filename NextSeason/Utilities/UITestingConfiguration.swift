@@ -31,6 +31,8 @@ enum AccessibilityID {
 
     enum Search {
         static let idlePrompt = "search.idlePrompt"
+        static let tryExampleButton = "search.tryExample"
+        static let resultsHint = "search.resultsHint"
         static let noResults = "search.noResults"
         static let trackButton = "search.track"
     }

@@ -48,6 +48,8 @@ struct NextSeasonApp: App {
 
         if !UITestingConfiguration.isEnabled {
             RefreshScheduler.registerBackgroundTask()
+        } else {
+            FirstRunPreferences.resetSearchResultsHintForTesting()
         }
     }
 
