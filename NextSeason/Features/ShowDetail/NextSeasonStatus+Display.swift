@@ -43,14 +43,14 @@ extension NextSeasonStatus {
     }
 
     /// Tint for the status icon and headline on show detail.
-    var emphasisColor: Color {
+    func emphasisColor(in colors: AppThemeColors) -> Color {
         switch self {
         case .scheduled, .airing:
-            Color.accentColor
+            colors.accent
         case .announcedUndated, .returningNoSeasonYet, .unknown:
-            Color.appMutedText
+            colors.mutedText
         case .ended:
-            Color.appMutedText.opacity(0.85)
+            colors.mutedText.opacity(0.85)
         }
     }
 }

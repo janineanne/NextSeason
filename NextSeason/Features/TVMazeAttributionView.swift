@@ -18,10 +18,18 @@ struct TVMazeAttributionView: View {
 extension View {
     /// Pins TVMaze attribution above the tab bar or home indicator.
     func tvmazeAttributionInset() -> some View {
-        safeAreaInset(edge: .bottom, spacing: 0) {
+        modifier(TVMazeAttributionInsetModifier())
+    }
+}
+
+private struct TVMazeAttributionInsetModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var themeColors
+
+    func body(content: Content) -> some View {
+        content.safeAreaInset(edge: .bottom, spacing: 0) {
             TVMazeAttributionView()
                 .padding(.vertical, AppSpacing.tight)
-                .background(Color.appBackground)
+                .background(themeColors.background)
         }
     }
 }
