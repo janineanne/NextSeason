@@ -85,6 +85,7 @@
 		E1F25DD82FEDC3D6006D0E58 /* Implement Analytics.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Analytics.md"; sourceTree = "<group>"; };
 		E1F25F392FEDC87B006D0E58 /* Fix search keyboard bug */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Fix search keyboard bug"; sourceTree = "<group>"; };
 		E1F260B22FEDD75E006D0E58 /* Implement Color Theme Switcher.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Color Theme Switcher.md"; sourceTree = "<group>"; };
+		E1F2680C2FEDDC26006D0E58 /* Move target ios version to 18.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Move target ios version to 18.md"; sourceTree = "<group>"; };
 		E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -342,6 +343,7 @@
 				E1F25DD82FEDC3D6006D0E58 /* Implement Analytics.md */,
 				E1F25F392FEDC87B006D0E58 /* Fix search keyboard bug */,
 				E1F260B22FEDD75E006D0E58 /* Implement Color Theme Switcher.md */,
+				E1F2680C2FEDDC26006D0E58 /* Move target ios version to 18.md */,
 			);
 			path = "6-25-2026";
 			sourceTree = "<group>";
@@ -576,7 +578,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -634,7 +636,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
