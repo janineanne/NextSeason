@@ -202,6 +202,46 @@ Priority: Medium
 
 # Product Analytics
 
+## MVP State (Local Logging Only)
+
+The MVP implements analytics behind an `AnalyticsTracking` abstraction
+(`AnalyticsService`), with a default provider that logs structured events via
+`os.Logger` on the user's device. Events are anonymous (query length, not search
+text; show IDs; error categories — see Release Readiness.md).
+
+**What this is good for today:**
+
+- Verifying instrumentation during development and internal testing
+- Debugging flows on devices you control (Xcode console, Console.app)
+- Keeping call sites stable before a remote provider is chosen
+
+**What it does not provide:**
+
+- Aggregate behavior across beta testers or production users
+- Answers to product questions unless logs are manually captured from a device
+
+For multi-user beta, treat TestFlight crash reports and the structured feedback
+form as primary inputs until remote collection is added.
+
+## Post-MVP: Remote Collection
+
+To make analytics useful for prioritization after beta, add a second
+`AnalyticsTracking` implementation that sends the same `AnalyticsEvent` payloads
+to a centralized service. No changes should be required at instrumentation call
+sites.
+
+Candidate approaches (evaluate privacy, cost, and maintenance):
+
+- Privacy-focused SDKs (e.g. TelemetryDeck)
+- General analytics platforms (e.g. Firebase Analytics, Mixpanel)
+- A minimal first-party backend (event name + parameters only)
+
+Keep the existing privacy constraints: no search text, show titles, or other PII
+in event payloads.
+
+Remove the beta-only analytics tap target from show summaries before portfolio
+release (see Release Readiness.md, Portfolio Readiness).
+
 ## Future Investigation
 
 Use analytics and feedback to answer questions such as:

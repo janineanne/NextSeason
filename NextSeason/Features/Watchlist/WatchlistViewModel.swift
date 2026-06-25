@@ -25,15 +25,18 @@ final class WatchlistViewModel {
     private let repository: any WatchlistRepository
     private let refreshService: WatchlistRefreshService?
     private let removalCoordinator: WatchlistUndoRemoval
+    private let analytics: any AnalyticsTracking
 
     init(
         repository: any WatchlistRepository,
         refreshService: WatchlistRefreshService? = nil,
-        undoRemoval: WatchlistUndoRemoval
+        undoRemoval: WatchlistUndoRemoval,
+        analytics: any AnalyticsTracking = AnalyticsService()
     ) {
         self.repository = repository
         self.refreshService = refreshService
         self.removalCoordinator = undoRemoval
+        self.analytics = analytics
     }
 
     func load() async {
@@ -52,6 +55,7 @@ final class WatchlistViewModel {
             return
         } catch {
             state = .failed(error.localizedDescription)
+            analytics.trackNonFatalError(error, context: "watchlist_reload")
         }
     }
 
@@ -66,9 +70,10 @@ final class WatchlistViewModel {
     func requestRemoval(
         _ tracked: TrackedShow,
         anchor: CGRect,
+        source: WatchlistActionSource = .watchlist,
         onCommitted: @escaping () -> Void = {}
     ) {
-        removalCoordinator.requestRemoval(tracked, anchor: anchor, onCommitted: onCommitted)
+        removalCoordinator.requestRemoval(tracked, anchor: anchor, source: source, onCommitted: onCommitted)
     }
 
     func undoPendingRemoval() {

@@ -518,6 +518,7 @@ Before linking from resume:
 - Architecture documented.
 - AI-assisted development process documented.
 - No known critical issues.
+- Remove the beta analytics tap target from show summaries (`SummaryFormatter.analyticsTapTargetMarkdown` — the bold “Tap here for Actor Name Analytics” line injected into About text).
 
 The application should demonstrate product thinking, engineering judgment, and effective AI collaboration.
 

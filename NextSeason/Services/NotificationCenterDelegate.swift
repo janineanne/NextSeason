@@ -10,11 +10,16 @@ import UserNotifications
 @MainActor
 enum NotificationRouting {
     static weak var coordinator: AppNavigationCoordinator?
+    static var analytics: (any AnalyticsTracking)?
     private static var bufferedShowID: Int?
 
     static func setCoordinator(_ coordinator: AppNavigationCoordinator) {
         self.coordinator = coordinator
         flushBufferedNavigation()
+    }
+
+    static func setAnalytics(_ analytics: any AnalyticsTracking) {
+        self.analytics = analytics
     }
 
     static func install(center: UNUserNotificationCenter = .current()) {
@@ -23,6 +28,7 @@ enum NotificationRouting {
     }
 
     static func routeToShow(showID: Int) {
+        analytics?.track(.notificationTapped(showID: showID))
         if let coordinator {
             coordinator.queueShowNavigation(showID: showID)
         } else {
@@ -46,6 +52,7 @@ enum NotificationRouting {
     /// Clears routing state between unit tests.
     static func resetForTesting() {
         coordinator = nil
+        analytics = nil
         bufferedShowID = nil
     }
     #endif

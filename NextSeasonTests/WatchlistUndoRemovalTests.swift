@@ -58,7 +58,7 @@ struct WatchlistUndoRemovalTests {
         let tracked = try #require((try await repository.all()).first)
 
         var committed = false
-        coordinator.requestRemoval(tracked, anchor: CGRect(x: 10, y: 20, width: 44, height: 44)) {
+        coordinator.requestRemoval(tracked, anchor: CGRect(x: 10, y: 20, width: 44, height: 44), source: .watchlist) {
             committed = true
         }
 
@@ -81,7 +81,7 @@ struct WatchlistUndoRemovalTests {
         try await repository.add(sampleShow)
         let tracked = try #require((try await repository.all()).first)
 
-        coordinator.requestRemoval(tracked, anchor: .zero)
+        coordinator.requestRemoval(tracked, anchor: .zero, source: .watchlist)
         let restored = coordinator.undoRemoval()
 
         #expect(restored?.id == tracked.id)
@@ -99,8 +99,8 @@ struct WatchlistUndoRemovalTests {
         let first = try #require((try await repository.all()).first { $0.id == sampleShow.id })
         let second = try #require((try await repository.all()).first { $0.id == secondShow.id })
 
-        coordinator.requestRemoval(first, anchor: .zero)
-        coordinator.requestRemoval(second, anchor: .zero)
+        coordinator.requestRemoval(first, anchor: .zero, source: .watchlist)
+        coordinator.requestRemoval(second, anchor: .zero, source: .detail)
 
         #expect(coordinator.pendingRemoval?.id == second.id)
 

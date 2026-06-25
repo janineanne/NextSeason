@@ -12,6 +12,7 @@ struct ShowDetailView: View {
 
     @State private var viewModel: ShowDetailViewModel
 
+    private let analytics: any AnalyticsTracking
     private let onWatchlistChanged: () -> Void
 
     init(
@@ -19,6 +20,7 @@ struct ShowDetailView: View {
         service: any TVMazeService = TVMazeClient(),
         repository: any WatchlistRepository,
         notifications: NotificationService,
+        analytics: any AnalyticsTracking = AnalyticsService(),
         isTracked: Bool = false,
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
@@ -28,9 +30,11 @@ struct ShowDetailView: View {
                 service: service,
                 repository: repository,
                 notifications: notifications,
+                analytics: analytics,
                 initialIsTracked: isTracked
             )
         )
+        self.analytics = analytics
         self.onWatchlistChanged = onWatchlistChanged
     }
 
@@ -40,6 +44,7 @@ struct ShowDetailView: View {
                 await viewModel.load()
             }
             .onAppear {
+                analytics.track(.showDetailViewed(showID: viewModel.initialShow.id))
                 // Reconcile tracked state on reappear (e.g. returning to this screen
                 // after the show was removed on the Watchlist tab).
                 Task { await viewModel.refreshTrackedState() }
@@ -151,6 +156,7 @@ struct ShowDetailView: View {
             undoRemoval.requestRemoval(
                 tracked,
                 anchor: anchor,
+                source: .detail,
                 onCommitted: onWatchlistChanged
             )
             viewModel.applyTrackedState(false)
@@ -236,9 +242,20 @@ struct ShowDetailView: View {
                     Text("About")
                         .font(.headline)
                         .appPrimaryText()
-                    Text(SummaryFormatter.attributedString(from: html))
+                    Text(SummaryFormatter.attributedStringWithTappableEmphasis(
+                        from: html,
+                        showID: viewModel.displayShow.id
+                    ))
                         .font(.body)
                         .appSecondaryText()
+                        .tint(Color.appMutedText)
+                        .environment(\.openURL, OpenURLAction { url in
+                            if url.scheme == SummaryFormatter.analyticsEmphasisScheme {
+                                analytics.track(.actorNameTapped(showID: viewModel.displayShow.id))
+                                return .handled
+                            }
+                            return .systemAction
+                        })
                 }
                 if let url = viewModel.displayShow.tvMazeURL {
                     Link(destination: url) {

@@ -49,6 +49,7 @@ struct AppNavigationCoordinatorTests {
     func resolvesTrackedShowOnWatchlistTab() async throws {
         let repository = InMemoryWatchlistRepository()
         let tvMaze = MockTVMazeService()
+        let analytics = RecordingAnalyticsService()
         let coordinator = AppNavigationCoordinator()
         let show = Show(
             id: 44933,
@@ -70,12 +71,17 @@ struct AppNavigationCoordinatorTests {
 
         try await repository.add(show)
         coordinator.queueShowNavigation(showID: show.id)
-        await coordinator.resolvePendingNavigation(repository: repository, tvMaze: tvMaze)
+        await coordinator.resolvePendingNavigation(
+            repository: repository,
+            tvMaze: tvMaze,
+            analytics: analytics
+        )
 
         #expect(coordinator.selectedTab == .watchlist)
         #expect(coordinator.watchlistPath.count == 1)
         #expect(coordinator.pendingShowID == nil)
         #expect(tvMaze.fetchedIDs.isEmpty)
+        #expect(analytics.events.contains(.appOpenedFromNotification(showID: show.id)))
     }
 
     @Test("Find a Show clears the search stack and selects the search tab")
@@ -114,6 +120,7 @@ struct AppNavigationCoordinatorTests {
     func resolvesUntrackedShowOnSearchTab() async throws {
         let repository = InMemoryWatchlistRepository()
         let tvMaze = MockTVMazeService()
+        let analytics = RecordingAnalyticsService()
         let coordinator = AppNavigationCoordinator()
         let show = Show(
             id: 82,
@@ -135,11 +142,16 @@ struct AppNavigationCoordinatorTests {
 
         tvMaze.shows[82] = show
         coordinator.queueShowNavigation(showID: show.id)
-        await coordinator.resolvePendingNavigation(repository: repository, tvMaze: tvMaze)
+        await coordinator.resolvePendingNavigation(
+            repository: repository,
+            tvMaze: tvMaze,
+            analytics: analytics
+        )
 
         #expect(coordinator.selectedTab == .search)
         #expect(coordinator.searchPath.count == 1)
         #expect(coordinator.pendingShowID == nil)
         #expect(tvMaze.fetchedIDs == [82])
+        #expect(analytics.events.contains(.appOpenedFromNotification(showID: show.id)))
     }
 }

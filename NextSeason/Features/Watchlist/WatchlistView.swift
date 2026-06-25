@@ -10,6 +10,7 @@ struct WatchlistView: View {
     @Environment(\.watchlistRefreshService) private var refreshService
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
+    @Environment(\.analytics) private var analytics
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
@@ -59,9 +60,13 @@ struct WatchlistView: View {
                     service: tvMaze,
                     repository: repository,
                     notifications: notificationService,
+                    analytics: analytics,
                     isTracked: true,
                     onWatchlistChanged: onWatchlistChanged
                 )
+                .onAppear {
+                    analytics.track(.watchlistItemOpened(showID: tracked.id))
+                }
             }
             .task(id: watchlistReloadToken) {
                 guard let undoRemoval else { return }
@@ -69,13 +74,15 @@ struct WatchlistView: View {
                     viewModel = WatchlistViewModel(
                         repository: repository,
                         refreshService: refreshService,
-                        undoRemoval: undoRemoval
+                        undoRemoval: undoRemoval,
+                        analytics: analytics
                     )
                 }
                 await viewModel?.reload()
                 notificationsDenied = await notificationService.isDenied()
             }
             .onAppear {
+                analytics.track(.watchlistViewed)
                 Task { await viewModel?.reload() }
             }
             .onDisappear {
@@ -149,6 +156,7 @@ struct WatchlistView: View {
                                 viewModel.requestRemoval(
                                     tracked,
                                     anchor: anchor,
+                                    source: .watchlist,
                                     onCommitted: {}
                                 )
                             }
@@ -200,6 +208,9 @@ struct WatchlistView: View {
         .background(Color.appSurface)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Watchlist.emptyState)
+        .onAppear {
+            analytics.track(.emptyWatchlistShown)
+        }
     }
 
     #if DEBUG

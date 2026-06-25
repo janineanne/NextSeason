@@ -8,6 +8,7 @@ import SwiftUI
 /// The app's root view: Search and Watchlist tabs (Slice 2).
 struct ContentView: View {
     @Environment(\.watchlistRepository) private var repository
+    @Environment(\.analytics) private var analytics
 
     @Bindable var coordinator: AppNavigationCoordinator
 
@@ -23,6 +24,7 @@ struct ContentView: View {
             SearchView(
                 navigationPath: $coordinator.searchPath,
                 tvMaze: tvMaze,
+                analytics: analytics,
                 onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }
             )
                 .accessibilityIdentifier(AccessibilityID.Tab.search)
@@ -58,7 +60,8 @@ struct ContentView: View {
         .task {
             await coordinator.resolvePendingNavigation(
                 repository: repository,
-                tvMaze: tvMaze
+                tvMaze: tvMaze,
+                analytics: analytics
             )
         }
         .onChange(of: coordinator.pendingShowID) { _, showID in
@@ -66,7 +69,8 @@ struct ContentView: View {
             Task {
                 await coordinator.resolvePendingNavigation(
                     repository: repository,
-                    tvMaze: tvMaze
+                    tvMaze: tvMaze,
+                    analytics: analytics
                 )
             }
         }
