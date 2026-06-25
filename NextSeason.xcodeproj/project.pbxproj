@@ -61,6 +61,7 @@
 		E117D5802FEC40CD00C02ADC /* Implement Watchlist Discovery.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Watchlist Discovery.md"; sourceTree = "<group>"; };
 		E117D5812FEC41D000C02ADC /* Additional Watchlist Planning.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Additional Watchlist Planning.pdf"; sourceTree = "<group>"; };
 		E117D58D2FEC85ED00C02ADC /* Implement Watchlist Redesign.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Watchlist Redesign.md"; sourceTree = "<group>"; };
+		E117D6C62FEC8C7B00C02ADC /* Add Accessibility Details.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Add Accessibility Details.pdf"; sourceTree = "<group>"; };
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
@@ -78,6 +79,7 @@
 		E1DAC5512FDF358800BD81E5 /* TVMazeResearch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TVMazeResearch.md; sourceTree = "<group>"; };
 		E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
+		E1F2592C2FECA491006D0E58 /* Implement Visual and UI Polish.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Visual and UI Polish.md"; sourceTree = "<group>"; };
 		E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -261,7 +263,9 @@
 		E117D58C2FEC85D900C02ADC /* 6-24-2026 */ = {
 			isa = PBXGroup;
 			children = (
+				E117D6C62FEC8C7B00C02ADC /* Add Accessibility Details.pdf */,
 				E117D58D2FEC85ED00C02ADC /* Implement Watchlist Redesign.md */,
+				E1F2592C2FECA491006D0E58 /* Implement Visual and UI Polish.md */,
 			);
 			path = "6-24-2026";
 			sourceTree = "<group>";

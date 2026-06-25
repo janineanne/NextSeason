@@ -34,8 +34,10 @@ final class AppNavigationCoordinator {
     }
 
     /// Bumps a token `WatchlistView` observes so it reloads from persistence.
-    func notifyWatchlistDataChanged() {
-        watchlistReloadToken &+= 1
+    func notifyWatchlistDataChanged(reloadWatchlist: Bool = true) {
+        if reloadWatchlist {
+            watchlistReloadToken &+= 1
+        }
     }
 
     func resolvePendingNavigation(

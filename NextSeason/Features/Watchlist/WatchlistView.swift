@@ -45,11 +45,15 @@ struct WatchlistView: View {
             Group {
                 if let viewModel {
                     content(for: viewModel)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .appScreenBackground()
                 } else {
                     ProgressView("Loading watchlist…")
+                        .appScreenBackground()
                 }
             }
             .navigationTitle("Watchlist")
+            .appNavigationChrome()
             .navigationDestination(for: TrackedShow.self) { tracked in
                 ShowDetailView(
                     show: Show(tracked: tracked),
@@ -76,25 +80,35 @@ struct WatchlistView: View {
                 Task { await viewModel?.reload() }
             }
             .onDisappear {
-                Task { await viewModel?.commitPendingRemovalIfNeeded(onCommitted: onWatchlistChanged) }
+                Task {
+                    await viewModel?.commitPendingRemovalIfNeeded()
+                }
             }
             .refreshable {
                 await viewModel?.refreshFromNetwork()
                 notificationsDenied = await notificationService.isDenied()
             }
-            .onChange(of: undoRemoval?.pendingRemoval?.id) { _, _ in
-                Task { await viewModel?.reload() }
+            .onChange(of: undoRemoval?.pendingRemoval?.id) { oldId, newId in
+                guard let oldId, newId == nil else { return }
+                Task { @MainActor in
+                    guard try await repository.contains(showID: oldId) == false else { return }
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        viewModel?.removeShow(showID: oldId)
+                    }
+                }
             }
         }
     }
 
     @ViewBuilder
     private func content(for viewModel: WatchlistViewModel) -> some View {
+        @Bindable var viewModel = viewModel
+
         switch viewModel.state {
         case .loading:
             ProgressView("Loading watchlist…")
                 .controlSize(.large)
-        case .loaded(let shows):
+        case .loaded:
             // The List is kept mounted even when empty (empty state is an overlay)
             // so removing the last row doesn't tear the List down mid-animation,
             // which crashes UICollectionView with "invalid number of items".
@@ -104,11 +118,12 @@ struct WatchlistView: View {
                         notificationService.openNotificationSettings()
                     }
                 }
-                ForEach(shows) { tracked in
-                    HStack(spacing: 8) {
+                ForEach(viewModel.shows) { tracked in
+                    HStack(spacing: AppSpacing.tight) {
                         NavigationLink(value: tracked) {
                             ShowRowLabel(tracked: tracked)
                         }
+                        .buttonStyle(.plain)
                         .accessibilityIdentifier("\(AccessibilityID.Watchlist.row).\(tracked.id)")
 
                         ShowRowTrackButton(
@@ -124,28 +139,32 @@ struct WatchlistView: View {
                                 viewModel.requestRemoval(
                                     tracked,
                                     anchor: anchor,
-                                    onCommitted: onWatchlistChanged
+                                    onCommitted: {}
                                 )
                             }
                         }
                     }
+                    .appListRowSurface()
                 }
                 #if DEBUG
-                debugSection(for: shows)
+                debugSection(for: viewModel.shows)
                 #endif
             }
-            .listStyle(.plain)
+            .animation(.easeInOut(duration: 0.35), value: viewModel.shows.map(\.id))
+            .appPlainListStyle()
             .tvmazeAttributionInset()
             .overlay {
-                if shows.isEmpty, viewModel.pendingRemoval == nil {
+                if viewModel.shows.isEmpty, viewModel.pendingRemoval == nil {
                     emptyState
                 }
             }
         case .failed(let message):
             ContentUnavailableView {
                 Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
+                    .appPrimaryText()
             } description: {
                 Text(message)
+                    .appSecondaryText()
             } actions: {
                 Button("Try Again") {
                     Task { await viewModel.load() }
@@ -157,8 +176,10 @@ struct WatchlistView: View {
     private var emptyState: some View {
         ContentUnavailableView {
             Label("No Tracked Shows", systemImage: "star")
+                .appPrimaryText()
         } description: {
             Text("Search for a show and tap Track to monitor its next season.")
+                .appSecondaryText()
         } actions: {
             Button("Find a Show") {
                 onFindShow()
@@ -166,7 +187,7 @@ struct WatchlistView: View {
             .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
+        .background(Color.appSurface)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Watchlist.emptyState)
     }
@@ -178,17 +199,21 @@ struct WatchlistView: View {
         // tracked show doesn't change this section's structure during the
         // ForEach deletion animation (which crashes UICollectionView).
         Section {
-            Button("Send Test Notification") {
-                if let show = shows.first {
-                    Task { await sendTestNotification(for: show) }
+            VStack(alignment: .leading, spacing: AppSpacing.tight) {
+                Text("Debug")
+                    .font(.headline)
+                    .appPrimaryText()
+                Button("Send Test Notification") {
+                    if let show = shows.first {
+                        Task { await sendTestNotification(for: show) }
+                    }
                 }
+                .disabled(shows.isEmpty || isSchedulingTestNotification)
+                Text(testNotificationInstructions(for: shows))
+                    .font(.caption)
+                    .appSecondaryText()
             }
-            .disabled(shows.isEmpty || isSchedulingTestNotification)
-            Text(testNotificationInstructions(for: shows))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        } header: {
-            Text("Debug")
+            .appInsetSurfaceCard()
         }
     }
 

@@ -48,6 +48,8 @@ struct ContentView: View {
                 }
                 .tag(AppNavigationCoordinator.Tab.watchlist)
         }
+        .tint(Color.accentColor)
+        .appScreenBackground()
         .onChange(of: coordinator.selectedTab) { _, tab in
             if tab == .watchlist {
                 coordinator.notifyWatchlistDataChanged()

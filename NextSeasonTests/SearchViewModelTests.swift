@@ -73,4 +73,27 @@ struct SearchViewModelTests {
         await viewModel.search()
         #expect(viewModel.state == .failed("Something failed"))
     }
+
+    @Test("Repeating the same query while results are shown does not reload")
+    func repeatedQuerySkipsReload() async {
+        final class CallCounter: @unchecked Sendable {
+            var value = 0
+        }
+        let counter = CallCounter()
+        let viewModel = SearchViewModel(
+            service: MockService { _ in
+                counter.value += 1
+                return [.preview]
+            },
+            debounce: .zero
+        )
+        viewModel.query = "severance"
+        await viewModel.search()
+        #expect(viewModel.state == .results([.preview]))
+        #expect(counter.value == 1)
+
+        await viewModel.search()
+        #expect(viewModel.state == .results([.preview]))
+        #expect(counter.value == 1)
+    }
 }
