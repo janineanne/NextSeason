@@ -17,7 +17,7 @@ Companion docs: [`ProductSpec.md`](ProductSpec.md),
 
 From `AGENTS.md` and the Cursor rules:
 
-- iOS 26+, Swift 6.2+, strict concurrency, `async/await` over callbacks.
+- iOS 18+, Swift 6.2+, strict concurrency, `async/await` over callbacks.
 - SwiftUI + MVVM. Business logic lives in view models / services, not views.
 - SwiftData for local persistence.
 - No third-party dependencies, no UIKit (without approval).
@@ -217,7 +217,7 @@ enum NextSeasonCalculator {
 **Implemented in Slice 2.** Guest search (Slice 1) needed no storage; the watchlist
 uses SwiftData behind a repository protocol as designed here.
 
-**Engine: SwiftData.** Native to iOS 26, no third-party dependency, and
+**Engine: SwiftData.** Native from iOS 17; `@Attribute(.unique)` requires iOS 18. No third-party dependency, and
 `@Attribute(.unique)` enforces "no duplicate watchlist entries" (FR-005) at the
 store level.
 
