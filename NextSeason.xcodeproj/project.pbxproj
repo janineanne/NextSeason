@@ -83,6 +83,7 @@
 		E1F25BC82FEDAF5A006D0E58 /* Release Readiness.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Release Readiness.md"; sourceTree = "<group>"; };
 		E1F25DCF2FEDB3D8006D0E58 /* Implement First Run Experience.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement First Run Experience.md"; sourceTree = "<group>"; };
 		E1F25DD82FEDC3D6006D0E58 /* Implement Analytics.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Analytics.md"; sourceTree = "<group>"; };
+		E1F25F392FEDC87B006D0E58 /* Fix search keyboard bug */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Fix search keyboard bug"; sourceTree = "<group>"; };
 		E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -338,6 +339,7 @@
 			children = (
 				E1F25BC72FEDAF46006D0E58 /* Update Release Readiness for Feedback and Analyics.pdf */,
 				E1F25DD82FEDC3D6006D0E58 /* Implement Analytics.md */,
+				E1F25F392FEDC87B006D0E58 /* Fix search keyboard bug */,
 			);
 			path = "6-25-2026";
 			sourceTree = "<group>";

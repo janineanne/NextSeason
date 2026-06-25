@@ -63,7 +63,6 @@ struct SearchView: View {
                 }
                 .task(id: viewModel.query) {
                     await viewModel.search()
-                    collapseSearchKeyboardIfSearchFinished()
                 }
                 .task {
                     await refreshTrackedShowIDs()
@@ -113,16 +112,6 @@ struct SearchView: View {
             from: nil,
             for: nil
         )
-    }
-
-    /// After a live search completes, tuck the keyboard so results are easier to read.
-    private func collapseSearchKeyboardIfSearchFinished() {
-        switch viewModel.state {
-        case .results, .empty, .failed:
-            collapseSearchKeyboard()
-        case .idle, .loading:
-            break
-        }
     }
 
     /// Nav-bar `.searchable` often ignores `scrollDismissesKeyboard`; drag is a reliable fallback.
