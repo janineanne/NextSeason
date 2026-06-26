@@ -204,6 +204,7 @@ struct SearchView: View {
                     .appSecondaryText()
             } actions: {
                 Button(FirstRunCopy.tryExampleButtonTitle) {
+                    analytics.track(.exampleSearchUsed)
                     viewModel.query = FirstRunCopy.exampleSearchQuery
                 }
                 .buttonStyle(.borderedProminent)

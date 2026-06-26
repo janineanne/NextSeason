@@ -9,6 +9,7 @@ import SwiftUI
 struct ThemeSwitcherView: View {
     @Environment(AppThemeController.self) private var themeController
     @Environment(\.appThemeColors) private var themeColors
+    @Environment(\.analytics) private var analytics
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -17,7 +18,9 @@ struct ThemeSwitcherView: View {
                 Section {
                     ForEach(AppPaletteVariant.allCases) { variant in
                         Button {
+                            guard themeController.variant != variant else { return }
                             themeController.variant = variant
+                            analytics.track(.themeSelected(variant: variant))
                         } label: {
                             ThemeVariantRow(
                                 variant: variant,

@@ -160,6 +160,7 @@ final class NotificationService: NotificationDelivering {
 
         do {
             try await center.add(request)
+            analytics.track(.notificationReminderScheduled)
         } catch {
             analytics.trackNonFatalError(error, context: "notification_schedule")
             #if DEBUG

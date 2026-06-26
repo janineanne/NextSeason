@@ -51,6 +51,7 @@ struct NextSeasonApp: App {
 
         if !UITestingConfiguration.isEnabled {
             RefreshScheduler.registerBackgroundTask()
+            analyticsService.track(.appLaunched)
         } else {
             #if DEBUG
             FirstRunPreferences.resetSearchResultsHintForTesting()

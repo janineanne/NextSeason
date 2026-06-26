@@ -8,36 +8,25 @@ import Foundation
 @testable import NextSeason
 
 struct SummaryFormatterTests {
-    @Test("Bold segments receive analytics tap links without changing visible text")
-    func tappableEmphasisLinks() {
-        let result = SummaryFormatter.attributedStringWithTappableEmphasis(
-            from: "<p>Hello <b>world</b></p>"
+    @Test("Bold actor-name segments receive tap links without changing visible text")
+    func tappableActorNameLinks() {
+        let result = SummaryFormatter.attributedStringWithTappableActorNames(
+            from: "<p>Mark Scout <b>Adam Scott</b> leads a team at Lumon.</p>"
         )
-        #expect(String(result.characters) == "Hello world")
+        #expect(String(result.characters) == "Mark Scout Adam Scott leads a team at Lumon.")
         let linkedRun = result.runs.first { $0.link != nil }
         #expect(linkedRun != nil)
-        #expect(linkedRun?.link?.scheme == SummaryFormatter.analyticsEmphasisScheme)
+        #expect(linkedRun?.link?.scheme == SummaryFormatter.actorNameTapScheme)
+        #expect(linkedRun?.link?.host == "actor-name")
     }
 
-    @Test("Analytics tap target is inserted for each show ID")
-    func analyticsTapTargetInserted() {
-        let html = "<p>Mark Scout leads a team at Lumon Industries.</p>"
-        let result = SummaryFormatter.attributedStringWithTappableEmphasis(
-            from: html,
-            showID: 44933
+    @Test("Summaries without bold markup have no actor-name links")
+    func summariesWithoutBoldHaveNoLinks() {
+        let result = SummaryFormatter.attributedStringWithTappableActorNames(
+            from: "<p>Mark Scout leads a team at Lumon Industries.</p>"
         )
-        #expect(String(result.characters).contains("Tap here for Actor Name Analytics"))
         #expect(String(result.characters).contains("Mark Scout leads a team"))
-        let linkedRuns = result.runs.filter { $0.link != nil }
-        #expect(linkedRuns.isEmpty == false)
-    }
-
-    @Test("Analytics tap target placement is stable for a show ID")
-    func analyticsTapTargetPlacementIsStable() {
-        let html = "<p>One two three four five six seven eight nine ten.</p>"
-        let first = SummaryFormatter.attributedStringWithTappableEmphasis(from: html, showID: 44933)
-        let second = SummaryFormatter.attributedStringWithTappableEmphasis(from: html, showID: 44933)
-        #expect(String(first.characters) == String(second.characters))
+        #expect(result.runs.contains { $0.link != nil } == false)
     }
 
     @Test("Tags are stripped, leaving plain text")
