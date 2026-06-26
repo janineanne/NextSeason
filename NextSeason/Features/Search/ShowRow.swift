@@ -39,7 +39,7 @@ struct ShowRowLabel: View {
             name: show.name,
             subtitle: show.status.displayLabel,
             posterURL: show.posterMediumURL,
-            detailLine: show.genres.isEmpty ? nil : show.genres.joined(separator: " · ")
+            detailLine: show.genres.isEmpty ? nil : show.genres.genreDisplayLine
         )
     }
 

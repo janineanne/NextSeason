@@ -6,19 +6,8 @@
 	<array>
 		<string>com.TrialByFyre.NextSeason.watchlist-refresh</string>
 	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-	</array>
-	<key>NSUserNotificationsUsageDescription</key>
-	<string>NextSeason notifies you when a tracked show gets a next season date or starts airing.</string>
 	<key>CFBundleIcons</key>
 	<dict>
-		<key>CFBundlePrimaryIcon</key>
-		<dict>
-			<key>CFBundleIconName</key>
-			<string>AppIcon</string>
-		</dict>
 		<key>CFBundleAlternateIcons</key>
 		<dict>
 			<key>LavenderDark</key>
@@ -26,27 +15,38 @@
 				<key>CFBundleIconName</key>
 				<string>AppIcon-LavenderDark</string>
 			</dict>
-			<key>TealUtilityLight</key>
-			<dict>
-				<key>CFBundleIconName</key>
-				<string>AppIcon-TealUtilityLight</string>
-			</dict>
 			<key>TealUtilityDark</key>
 			<dict>
 				<key>CFBundleIconName</key>
 				<string>AppIcon-TealUtilityDark</string>
 			</dict>
-			<key>WarmSlateLight</key>
+			<key>TealUtilityLight</key>
 			<dict>
 				<key>CFBundleIconName</key>
-				<string>AppIcon-WarmSlateLight</string>
+				<string>AppIcon-TealUtilityLight</string>
 			</dict>
 			<key>WarmSlateDark</key>
 			<dict>
 				<key>CFBundleIconName</key>
 				<string>AppIcon-WarmSlateDark</string>
 			</dict>
+			<key>WarmSlateLight</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>AppIcon-WarmSlateLight</string>
+			</dict>
+		</dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconName</key>
+			<string>AppIcon</string>
 		</dict>
 	</dict>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>NextSeason notifies you when a tracked show gets a next season date or starts airing.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
 </dict>
 </plist>
