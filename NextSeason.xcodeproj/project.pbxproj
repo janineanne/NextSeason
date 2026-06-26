@@ -87,6 +87,9 @@
 		E1F260B22FEDD75E006D0E58 /* Implement Color Theme Switcher.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Color Theme Switcher.md"; sourceTree = "<group>"; };
 		E1F2680C2FEDDC26006D0E58 /* Move target ios version to 18.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Move target ios version to 18.md"; sourceTree = "<group>"; };
 		E1F268CD2FEDF477006D0E58 /* Improve App Icon.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Improve App Icon.md"; sourceTree = "<group>"; };
+		E1F26A492FEDFAFF006D0E58 /* Code Review and Analytics Discussion.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Code Review and Analytics Discussion.pdf"; sourceTree = "<group>"; };
+		E1F26A4B2FEDFCFA006D0E58 /* Analytics Recommendations.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Analytics Recommendations.md"; sourceTree = "<group>"; };
+		E1F26A542FEE1B3A006D0E58 /* Implement additional Analytics.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement additional Analytics.md"; sourceTree = "<group>"; };
 		E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -206,6 +209,9 @@
 			children = (
 				E102F0622FE4A8D10076FCDD /* Diagrams */,
 				E1DAC54B2FDE2E1F00BD81E5 /* AI Transcripts */,
+				E17E04952FDE291A00708D7A /* ProblemStatement.md */,
+				E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */,
+				E17E04942FDE291A00708D7A /* MVPDefinition.md */,
 				E1DAC54F2FDF358800BD81E5 /* Architecture.md */,
 				E1DAC5502FDF358800BD81E5 /* ProductSpec.md */,
 				E1DAC5512FDF358800BD81E5 /* TVMazeResearch.md */,
@@ -213,9 +219,7 @@
 				E1DAC5482FDE2E1F00BD81E5 /* FunctionalRequirements.md */,
 				E1DAC54C2FDE2E1F00BD81E5 /* MVPBacklog.md */,
 				E1DAC54D2FDE2E1F00BD81E5 /* UserStories.md */,
-				E17E04942FDE291A00708D7A /* MVPDefinition.md */,
-				E17E04952FDE291A00708D7A /* ProblemStatement.md */,
-				E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */,
+				E1F26A4B2FEDFCFA006D0E58 /* Analytics Recommendations.md */,
 				E1F25BC82FEDAF5A006D0E58 /* Release Readiness.md */,
 			);
 			path = MVP;
@@ -346,6 +350,8 @@
 				E1F260B22FEDD75E006D0E58 /* Implement Color Theme Switcher.md */,
 				E1F2680C2FEDDC26006D0E58 /* Move target ios version to 18.md */,
 				E1F268CD2FEDF477006D0E58 /* Improve App Icon.md */,
+				E1F26A492FEDFAFF006D0E58 /* Code Review and Analytics Discussion.pdf */,
+				E1F26A542FEE1B3A006D0E58 /* Implement additional Analytics.md */,
 			);
 			path = "6-25-2026";
 			sourceTree = "<group>";

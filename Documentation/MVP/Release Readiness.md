@@ -332,6 +332,22 @@ app after Search idle improvements. If implemented:
 - Second launch: no repeated welcome sheet (when implemented); idle guidance still
   works.
 
+## ChatGPT's version of this section
+
+The first-run experience is in good shape for beta testing.
+
+**Implemented**
+- Empty search state includes a friendly prompt and "Try an Example" buttons to help new users get started.
+- Watchlist empty state clearly explains the feature and how to add shows.
+- Search automatically focuses on the search field when appropriate.
+- Example searches reduce the chance that a first-time user encounters an empty screen.
+
+**Watch During Beta**
+- Observe whether users naturally understand that they must search before adding shows.
+- Note whether users discover the Watchlist without prompting.
+- Ask testers whether the example searches are helpful or if different examples would better demonstrate the app.
+- Consider whether an optional one-time onboarding tip would improve discoverability, but avoid adding onboarding unless beta feedback indicates it is necessary.
+
 ---
 
 ## Beta Feedback
@@ -380,7 +396,7 @@ Revisit the need for an in-app feedback screen only if beta testing demonstrates
 - Empty watchlist shown
 - Empty search results shown
 - Non-fatal errors (API failures, decoding errors, notification scheduling failures)
-- Actor name tapped (analytics only; no user-visible behavior)
+- Actor name tapped (shows a “coming soon” placeholder; increments diagnostics counter)
 
 ### Design Notes
 
@@ -518,7 +534,6 @@ Before linking from resume:
 - Architecture documented.
 - AI-assisted development process documented.
 - No known critical issues.
-- Remove the beta analytics tap target from show summaries (`SummaryFormatter.analyticsTapTargetMarkdown` — the bold “Tap here for Actor Name Analytics” line injected into About text).
 - Remove or re-wrap the beta theme switcher in `#if DEBUG` before portfolio release. The palette button and picker live in `ThemeSwitcherView.swift` and the overlay in `NextSeasonApp.swift` (`ThemeSwitcherButton`); search the project for `ThemeSwitcher` to find all call sites. Pick a default palette in `AppThemeController` when removing the switcher.
 
 The application should demonstrate product thinking, engineering judgment, and effective AI collaboration.

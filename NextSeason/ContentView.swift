@@ -13,6 +13,8 @@ struct ContentView: View {
 
     @Bindable var coordinator: AppNavigationCoordinator
 
+    @State private var showDiagnostics = false
+
     private let tvMaze: any TVMazeService
 
     init(coordinator: AppNavigationCoordinator, tvMaze: any TVMazeService = TVMazeClient()) {
@@ -53,6 +55,13 @@ struct ContentView: View {
         }
         .tint(themeColors.controlTint)
         .appScreenBackground()
+        .environment(\.openDiagnostics) {
+            guard !UITestingConfiguration.isEnabled else { return }
+            showDiagnostics = true
+        }
+        .sheet(isPresented: $showDiagnostics) {
+            DiagnosticsView()
+        }
         .onChange(of: coordinator.selectedTab) { _, tab in
             if tab == .watchlist {
                 coordinator.notifyWatchlistDataChanged()

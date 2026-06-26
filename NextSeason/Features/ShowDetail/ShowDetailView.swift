@@ -12,6 +12,7 @@ struct ShowDetailView: View {
     @Environment(\.appThemeColors) private var themeColors
 
     @State private var viewModel: ShowDetailViewModel
+    @State private var showActorNameAlert = false
 
     private let analytics: any AnalyticsTracking
     private let onWatchlistChanged: () -> Void
@@ -90,6 +91,11 @@ struct ShowDetailView: View {
             }
         } message: {
             Text(FirstRunCopy.notificationsDeniedMessage)
+        }
+        .alert("Coming Soon", isPresented: $showActorNameAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(FirstRunCopy.actorDetailsPlannedMessage)
         }
     }
 
@@ -243,16 +249,14 @@ struct ShowDetailView: View {
                     Text("About")
                         .font(.headline)
                         .appPrimaryText()
-                    Text(SummaryFormatter.attributedStringWithTappableEmphasis(
-                        from: html,
-                        showID: viewModel.displayShow.id
-                    ))
+                    Text(SummaryFormatter.attributedStringWithTappableActorNames(from: html))
                         .font(.body)
                         .appSecondaryText()
                         .tint(themeColors.mutedText)
                         .environment(\.openURL, OpenURLAction { url in
-                            if url.scheme == SummaryFormatter.analyticsEmphasisScheme {
+                            if url.scheme == SummaryFormatter.actorNameTapScheme {
                                 analytics.track(.actorNameTapped(showID: viewModel.displayShow.id))
+                                showActorNameAlert = true
                                 return .handled
                             }
                             return .systemAction
