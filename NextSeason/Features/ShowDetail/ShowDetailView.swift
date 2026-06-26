@@ -133,7 +133,7 @@ struct ShowDetailView: View {
                         .appSecondaryText()
                 }
                 if !viewModel.displayShow.genres.isEmpty {
-                    Text(viewModel.displayShow.genres.joined(separator: " · "))
+                    Text(viewModel.displayShow.genres.genreDisplayLine)
                         .font(.caption)
                         .appSecondaryText()
                 }
