@@ -11,11 +11,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
     func testSearchOpensShowDetail() {
         search(for: previewShowName)
 
-        let result = app.buttons["\(previewShowName), Ongoing series"]
-        XCTAssertTrue(
-            result.waitForExistence(timeout: UITestTimeout.standard),
-            "Search should return the stubbed Severance result."
-        )
+        let result = waitForSearchResultRow(named: previewShowName)
         result.tap()
 
         XCTAssertTrue(app.navigationBars[previewShowName].waitForExistence(timeout: UITestTimeout.standard))
@@ -38,11 +34,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         XCTAssertTrue(searchIdlePrompt.waitForExistence(timeout: UITestTimeout.standard))
         tapTryExample()
 
-        let result = app.buttons["\(previewShowName), Ongoing series"]
-        XCTAssertTrue(
-            result.waitForExistence(timeout: UITestTimeout.extended),
-            "Try an Example should run a search and show results."
-        )
+        waitForSearchResultRow(named: previewShowName, timeout: UITestTimeout.extended)
     }
 
     func testTryExamplePopulatesSearchField() {
@@ -58,9 +50,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
     func testSearchResultsHintAppearsOnFirstResults() {
         tapTryExample()
 
-        XCTAssertTrue(
-            app.buttons["\(previewShowName), Ongoing series"].waitForExistence(timeout: UITestTimeout.extended)
-        )
+        waitForSearchResultRow(named: previewShowName, timeout: UITestTimeout.extended)
         XCTAssertTrue(
             searchResultsHint.waitForExistence(timeout: UITestTimeout.standard),
             "The first search results should show row guidance below the list."
@@ -92,16 +82,13 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         tapTryExample()
         XCTAssertTrue(searchResultsHint.waitForExistence(timeout: UITestTimeout.extended))
 
-        let result = app.buttons["\(previewShowName), Ongoing series"]
-        XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
+        let result = waitForSearchResultRow(named: previewShowName)
         result.tap()
 
         XCTAssertTrue(app.navigationBars[previewShowName].waitForExistence(timeout: UITestTimeout.standard))
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
-        XCTAssertTrue(
-            app.buttons["\(previewShowName), Ongoing series"].waitForExistence(timeout: UITestTimeout.standard)
-        )
+        waitForSearchResultRow(named: previewShowName)
         XCTAssertFalse(
             searchResultsHint.waitForExistence(timeout: 2),
             "Opening show detail should dismiss the search results hint."
@@ -133,8 +120,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
     func testReopeningTrackedShowReflectsTrackedState() {
         search(for: previewShowName)
 
-        let result = app.buttons["\(previewShowName), Ongoing series"]
-        XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
+        let result = waitForSearchResultRow(named: previewShowName)
         result.tap()
 
         let trackButton = showDetailTrackButton()
@@ -357,8 +343,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
     private func trackShowFromDetail() {
         search(for: previewShowName)
 
-        let result = app.buttons["\(previewShowName), Ongoing series"]
-        XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
+        let result = waitForSearchResultRow(named: previewShowName)
         result.tap()
 
         let trackButton = showDetailTrackButton()

@@ -14,6 +14,7 @@ struct SearchView: View {
     @Environment(\.dismissSearch) private var dismissSearch
 
     @Binding var navigationPath: NavigationPath
+    @Binding var profileFlowSearchQuery: String?
     private let tvMaze: any TVMazeService
     private let onWatchlistChanged: () -> Void
     @State private var viewModel: SearchViewModel
@@ -27,11 +28,13 @@ struct SearchView: View {
 
     init(
         navigationPath: Binding<NavigationPath>,
+        profileFlowSearchQuery: Binding<String?> = .constant(nil),
         tvMaze: any TVMazeService = TVMazeClient(),
         analytics: any AnalyticsTracking = AnalyticsService(),
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
         _navigationPath = navigationPath
+        _profileFlowSearchQuery = profileFlowSearchQuery
         self.tvMaze = tvMaze
         self.onWatchlistChanged = onWatchlistChanged
         _viewModel = State(initialValue: SearchViewModel(service: tvMaze, analytics: analytics))
@@ -63,6 +66,11 @@ struct SearchView: View {
                 }
                 .task(id: viewModel.query) {
                     await viewModel.search()
+                }
+                .onChange(of: profileFlowSearchQuery) { _, query in
+                    guard let query, !query.isEmpty else { return }
+                    viewModel.query = query
+                    profileFlowSearchQuery = nil
                 }
                 .task {
                     await refreshTrackedShowIDs()
@@ -230,6 +238,7 @@ struct SearchView: View {
                         ShowRowLabel(show: show)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("\(AccessibilityID.Search.result).\(show.id)")
                     ShowRowTrackButton(
                         showID: show.id,
                         showName: show.name,

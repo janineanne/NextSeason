@@ -81,6 +81,16 @@ struct NextSeasonApp: App {
                 }
                 RefreshScheduler.scheduleNextRefresh()
             }
+            .task {
+                guard let flow = ProfileFlowConfiguration.activeFlow else { return }
+                await ProfileFlowRunner(
+                    flow: flow,
+                    coordinator: navigationCoordinator,
+                    repository: watchlistRepository,
+                    tvMaze: TVMazeClient(),
+                    analytics: analyticsService
+                ).run()
+            }
         }
         .modelContainer(modelContainer)
     }

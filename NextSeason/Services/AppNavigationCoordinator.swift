@@ -17,6 +17,8 @@ final class AppNavigationCoordinator {
     var selectedTab: Tab = .search
     var watchlistPath = NavigationPath()
     var searchPath = NavigationPath()
+    /// Set by `ProfileFlowRunner` so SearchView can drive a query during Instruments runs.
+    var profileFlowSearchQuery: String?
 
     private(set) var pendingShowID: Int?
     private(set) var watchlistReloadToken = 0

@@ -35,6 +35,7 @@ enum AccessibilityID {
         static let resultsHint = "search.resultsHint"
         static let noResults = "search.noResults"
         static let trackButton = "search.track"
+        static let result = "search.result"
     }
 
     enum ShowDetail {
