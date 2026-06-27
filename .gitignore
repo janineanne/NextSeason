@@ -4,6 +4,14 @@
 
 .DS_Store
 
+# Xcode build products
+build/
+DerivedData/
+
+# Instruments
+.instruments/
+*.trace
+
 ## User settings
 xcuserdata/
 

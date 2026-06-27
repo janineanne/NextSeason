@@ -16,6 +16,7 @@ enum UITestAccessibilityID {
         static let resultsHint = "search.resultsHint"
         static let noResults = "search.noResults"
         static let trackButton = "search.track"
+        static let result = "search.result"
     }
 
     enum ShowDetail {
@@ -72,6 +73,17 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
         app.searchFields["Search TV shows"]
     }
 
+    /// Placeholder text `.searchable` exposes as `value` when the field is empty.
+    private var searchFieldPlaceholder: String { "Search TV shows" }
+
+    /// Returns user-entered search text, ignoring placeholder/empty values.
+    func searchFieldText(in field: XCUIElement? = nil) -> String? {
+        let field = field ?? searchField
+        guard let value = field.value as? String else { return nil }
+        guard !value.isEmpty, value != searchFieldPlaceholder else { return nil }
+        return value
+    }
+
     var tryExampleButton: XCUIElement {
         app.descendants(matching: .any)[UITestAccessibilityID.Search.tryExampleButton]
     }
@@ -98,7 +110,48 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
         app = XCUIApplication()
         app.launchArguments = [UITestLaunchArgument.uiTesting]
         app.launch()
-        XCTAssertTrue(app.wait(for: .runningForeground, timeout: UITestTimeout.standard))
+        XCTAssertTrue(
+            app.wait(for: .runningForeground, timeout: UITestTimeout.standard),
+            "NextSeason should launch to the foreground during UI tests."
+        )
+    }
+
+    /// Captures the current screen and accessibility tree when an assertion fails.
+    func recordFailureContext(_ step: String) {
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Screenshot — \(step)"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+
+        let hierarchy = XCTAttachment(string: app.debugDescription)
+        hierarchy.name = "Accessibility hierarchy — \(step)"
+        hierarchy.lifetime = .keepAlways
+        add(hierarchy)
+    }
+
+    func assertExists(
+        _ element: XCUIElement,
+        timeout: TimeInterval = UITestTimeout.standard,
+        _ message: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        if !element.waitForExistence(timeout: timeout) {
+            recordFailureContext(message)
+            XCTFail(message, file: file, line: line)
+        }
+    }
+
+    func assertNotExists(
+        _ element: XCUIElement,
+        _ message: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        if element.exists {
+            recordFailureContext(message)
+            XCTFail(message, file: file, line: line)
+        }
     }
 
     func waitForButton(_ identifier: String, labelContaining text: String, timeout: TimeInterval) -> Bool {
@@ -115,6 +168,47 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
 
     func watchlistRow(named showName: String, showID: Int = UITestPreviewShow.id) -> XCUIElement {
         app.descendants(matching: .any)["\(UITestAccessibilityID.Watchlist.row).\(showID)"]
+    }
+
+    /// Search result row in the list (NavigationLink). Labels include genres after the status.
+    func searchResultRow(
+        named showName: String,
+        showID: Int = UITestPreviewShow.id,
+        status: String = "Ongoing series"
+    ) -> XCUIElement {
+        let byID = app.descendants(matching: .any)["\(UITestAccessibilityID.Search.result).\(showID)"]
+        if byID.exists { return byID }
+
+        let prefix = "\(showName), \(status)"
+        return app.descendants(matching: .any).matching(
+            NSPredicate(format: "label BEGINSWITH[c] %@", prefix)
+        ).firstMatch
+    }
+
+    /// Waits for a search result row by stable identifier, then by combined label.
+    @discardableResult
+    func waitForSearchResultRow(
+        named showName: String,
+        showID: Int = UITestPreviewShow.id,
+        status: String = "Ongoing series",
+        timeout: TimeInterval = UITestTimeout.standard
+    ) -> XCUIElement {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            let row = searchResultRow(named: showName, showID: showID, status: status)
+            if row.exists { return row }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+
+        let searchValue = searchFieldText() ?? searchFieldPlaceholder
+        recordFailureContext("Search should return “\(showName)”")
+        XCTFail(
+            """
+            Search should return “\(showName)” (id: \(UITestAccessibilityID.Search.result).\(showID)). \
+            Search field value: “\(searchValue)”.
+            """
+        )
+        return searchResultRow(named: showName, showID: showID, status: status)
     }
 
     /// Waits for a watchlist row by stable identifier, then by combined label.
@@ -157,17 +251,33 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
     }
 
     func showDetailTrackButton(showID: Int = UITestPreviewShow.id) -> XCUIElement {
-        let byID = app.descendants(matching: .any)["\(UITestAccessibilityID.ShowDetail.trackButton).\(showID)"]
-        if byID.exists { return byID }
-        return app.buttons["Track \(UITestPreviewShow.name)"]
+        app.descendants(matching: .any)["\(UITestAccessibilityID.ShowDetail.trackButton).\(showID)"]
+    }
+
+    /// Detail-only track control; does not match the search-row star.
+    @discardableResult
+    func waitForShowDetail(
+        showID: Int = UITestPreviewShow.id,
+        timeout: TimeInterval = UITestTimeout.standard
+    ) -> XCUIElement {
+        let button = showDetailTrackButton(showID: showID)
+        assertExists(
+            button,
+            timeout: timeout,
+            "Show detail should display the track control (id: \(UITestAccessibilityID.ShowDetail.trackButton).\(showID))."
+        )
+        return button
     }
 
     func search(for query: String) {
         let searchField = self.searchField
-        XCTAssertTrue(searchField.waitForExistence(timeout: UITestTimeout.standard))
+        assertExists(
+            searchField,
+            "Search tab should expose the “Search TV shows” field before typing."
+        )
         searchField.tap()
 
-        if let currentValue = searchField.value as? String, !currentValue.isEmpty {
+        if searchFieldText(in: searchField) != nil {
             clearSearchField(clearingField: searchField)
         }
 
@@ -186,7 +296,8 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
 
     func clearSearchField(clearingField field: XCUIElement? = nil) {
         let searchField = field ?? self.searchField
-        XCTAssertTrue(searchField.waitForExistence(timeout: UITestTimeout.standard))
+        assertExists(searchField, "Search field should exist before clearing.")
+
         searchField.tap()
 
         let clearCandidates = [
@@ -196,23 +307,20 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
         ]
         for clearButton in clearCandidates where clearButton.waitForExistence(timeout: 1) {
             clearButton.tap()
-            break
+            if searchFieldText(in: searchField) == nil { return }
         }
 
-        if let value = searchField.value as? String, !value.isEmpty {
-            searchField.press(forDuration: 1.0)
-            if app.menuItems["Select All"].waitForExistence(timeout: 1) {
-                app.menuItems["Select All"].tap()
-                app.keys["delete"].tap()
-            } else {
-                let deleteKey = app.keys["delete"]
-                if deleteKey.waitForExistence(timeout: 1) {
-                    for _ in 0..<(value.count + 2) {
-                        deleteKey.tap()
-                    }
-                }
-            }
+        guard searchFieldText(in: searchField) != nil else { return }
+
+        // Prefer select-all over per-character delete; tapping keyboard keys is flaky on
+        // narrow simulators (XCTest fails to scroll the delete key into view).
+        searchField.press(forDuration: 1.0)
+        if app.menuItems["Select All"].waitForExistence(timeout: 1) {
+            app.menuItems["Select All"].tap()
+        } else {
+            searchField.typeKey("a", modifierFlags: [.command])
         }
+        searchField.typeKey(XCUIKeyboardKey.delete.rawValue, modifierFlags: [])
 
         if app.keyboards.buttons["Search"].waitForExistence(timeout: 1) {
             app.keyboards.buttons["Search"].tap()
@@ -226,7 +334,7 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
     ) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
-            if let value = searchField.value as? String, value == expected {
+            if searchFieldText() == expected {
                 return true
             }
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))

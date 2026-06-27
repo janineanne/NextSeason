@@ -26,6 +26,7 @@ struct ContentView: View {
         TabView(selection: $coordinator.selectedTab) {
             SearchView(
                 navigationPath: $coordinator.searchPath,
+                profileFlowSearchQuery: $coordinator.profileFlowSearchQuery,
                 tvMaze: tvMaze,
                 analytics: analytics,
                 onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }

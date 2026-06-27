@@ -50,7 +50,7 @@ extension AnalyticsCounters {
             }
         case .notificationReminderScheduled:
             notificationRemindersScheduled += 1
-        case let .themeSelected:
+        case .themeSelected:
             themeSelections += 1
         case .actorNameTapped:
             actorNameTaps += 1

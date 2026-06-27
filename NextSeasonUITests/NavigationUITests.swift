@@ -38,34 +38,46 @@ final class NavigationUITests: NextSeasonUITestCase {
     }
 
     func testFindShowButtonNavigatesToSearch() {
-        search(for: UITestPreviewShow.name)
+        XCTContext.runActivity(named: "Search for a show and open its detail") { _ in
+            search(for: UITestPreviewShow.name)
 
-        let result = app.buttons["\(UITestPreviewShow.name), Ongoing series"]
-        XCTAssertTrue(result.waitForExistence(timeout: UITestTimeout.standard))
-        result.tap()
-        XCTAssertTrue(
-            app.navigationBars[UITestPreviewShow.name].waitForExistence(timeout: UITestTimeout.standard),
-            "Opening a show from search should push its detail screen."
-        )
+            let result = waitForSearchResultRow(
+                named: UITestPreviewShow.name,
+                timeout: UITestTimeout.extended
+            )
+            result.tap()
+            waitForShowDetail()
+        }
 
-        app.tabBars.buttons["Watchlist"].tap()
-        XCTAssertTrue(watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended))
+        XCTContext.runActivity(named: "Switch to empty watchlist") { _ in
+            app.tabBars.buttons["Watchlist"].tap()
+            assertExists(
+                watchlistEmptyState,
+                timeout: UITestTimeout.extended,
+                "Watchlist tab should show the empty state when no shows are tracked."
+            )
+        }
 
-        let findShow = app.buttons["Find a Show"]
-        XCTAssertTrue(findShow.waitForExistence(timeout: UITestTimeout.standard))
-        findShow.tap()
+        XCTContext.runActivity(named: "Tap Find a Show and verify search root") { _ in
+            let findShow = app.buttons["Find a Show"]
+            assertExists(
+                findShow,
+                "Watchlist empty state should offer a Find a Show button."
+            )
+            findShow.tap()
 
-        XCTAssertTrue(
-            app.navigationBars["NextSeason"].waitForExistence(timeout: UITestTimeout.standard),
-            "Find a Show should land on the search screen root."
-        )
-        XCTAssertTrue(
-            app.searchFields["Search TV shows"].waitForExistence(timeout: UITestTimeout.standard),
-            "Find a Show should show the search field."
-        )
-        XCTAssertFalse(
-            app.navigationBars[UITestPreviewShow.name].exists,
-            "Find a Show should not reopen a stale detail screen from the search stack."
-        )
+            assertExists(
+                searchField,
+                "Find a Show should show the search field on the Search tab."
+            )
+            waitForSearchResultRow(
+                named: UITestPreviewShow.name,
+                timeout: UITestTimeout.extended
+            )
+            assertNotExists(
+                showDetailTrackButton(),
+                "Find a Show should return to the search results list, not a stale detail screen."
+            )
+        }
     }
 }
