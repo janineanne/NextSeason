@@ -59,9 +59,13 @@ final class SearchViewModel {
 
         state = .loading
         let searchStarted = Date.now
+        AppDiagnosticsLogger.breadcrumb("search_viewmodel_start")
         do {
             let shows = try await service.searchShows(matching: trimmed)
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                AppDiagnosticsLogger.logTaskCancel("search_viewmodel")
+                return
+            }
             let durationMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
             displayedQuery = trimmed
             state = shows.isEmpty ? .empty : .results(shows)
@@ -76,9 +80,13 @@ final class SearchViewModel {
                 analytics.track(.emptySearchResultsShown)
             }
         } catch is CancellationError {
+            AppDiagnosticsLogger.logTaskCancel("search_viewmodel")
             return
         } catch {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                AppDiagnosticsLogger.logTaskCancel("search_viewmodel")
+                return
+            }
             let durationMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
             displayedQuery = nil
             state = .failed(error.localizedDescription)

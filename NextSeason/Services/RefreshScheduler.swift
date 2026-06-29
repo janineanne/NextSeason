@@ -5,6 +5,7 @@
 
 import BackgroundTasks
 import Foundation
+import os
 
 /// Schedules best-effort background watchlist refresh (~12h target cadence).
 enum RefreshScheduler {
@@ -24,19 +25,29 @@ enum RefreshScheduler {
             using: nil
         ) { task in
             guard let refreshTask = task as? BGAppRefreshTask else {
+                AppDiagnosticsLogger.logger(for: .tasks)
+                    .fault("background_task_unexpected_type")
                 task.setTaskCompleted(success: false)
                 return
             }
 
+            AppDiagnosticsLogger.breadcrumb("background_task_started")
             scheduleNextRefresh()
 
             let work = Task { @MainActor in
+                AppDiagnosticsLogger.logTaskStart("bg_app_refresh")
                 await refreshHandler?()
-                guard !Task.isCancelled else { return }
+                guard !Task.isCancelled else {
+                    AppDiagnosticsLogger.logTaskCancel("bg_app_refresh")
+                    return
+                }
+                AppDiagnosticsLogger.logTaskComplete("bg_app_refresh")
                 refreshTask.setTaskCompleted(success: true)
             }
 
             refreshTask.expirationHandler = {
+                AppDiagnosticsLogger.logger(for: .tasks).notice("background_task_expired")
+                AppDiagnosticsLogger.breadcrumb("background_task_expired")
                 work.cancel()
                 refreshTask.setTaskCompleted(success: false)
             }
@@ -48,10 +59,12 @@ enum RefreshScheduler {
         request.earliestBeginDate = Date(timeIntervalSinceNow: refreshInterval)
         do {
             try BGTaskScheduler.shared.submit(request)
+            AppDiagnosticsLogger.logger(for: .tasks)
+                .notice("background_task_scheduled earliest=\(refreshInterval, privacy: .public)s")
+            AppDiagnosticsLogger.breadcrumb("background_task_scheduled")
         } catch {
-            #if DEBUG
-            print("RefreshScheduler: failed to schedule next refresh — \(error)")
-            #endif
+            AppDiagnosticsLogger.logger(for: .tasks)
+                .error("background_task_schedule_failed error=\(String(describing: error), privacy: .public)")
         }
     }
 }
