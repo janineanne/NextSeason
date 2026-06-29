@@ -33,9 +33,9 @@ enum ProfileFlowTimingStore {
         let out = line + "\n"
         if FileManager.default.fileExists(atPath: fileURL.path) {
             if let handle = try? FileHandle(forWritingTo: fileURL) {
-                try? handle.seekToEnd()
+                defer { try? handle.close() }
+                _ = try? handle.seekToEnd()
                 try? handle.write(contentsOf: Data(out.utf8))
-                try? handle.close()
             }
         } else {
             try? out.write(to: fileURL, atomically: true, encoding: .utf8)
