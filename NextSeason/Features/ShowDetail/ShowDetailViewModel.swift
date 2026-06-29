@@ -58,13 +58,19 @@ final class ShowDetailViewModel {
     /// toolbar reflects search-row changes without waiting on TVMaze.
     func load() async {
         loadState = .loading
+        AppDiagnosticsLogger.breadcrumb("show_detail_load:\(initialShow.id)")
         async let trackedRefresh: Void = refreshTrackedState()
 
         do {
             fullShow = try await service.show(id: initialShow.id)
+            guard !Task.isCancelled else {
+                AppDiagnosticsLogger.logTaskCancel("show_detail_load")
+                return
+            }
             loadState = .loaded
             await trackedRefresh
         } catch is CancellationError {
+            AppDiagnosticsLogger.logTaskCancel("show_detail_load")
             return
         } catch {
             loadState = .failed(error.localizedDescription)

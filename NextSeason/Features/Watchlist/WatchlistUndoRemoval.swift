@@ -38,6 +38,7 @@ final class WatchlistUndoRemoval {
         onCommitted: @escaping () -> Void = {}
     ) {
         commitRemovalTask?.cancel()
+        AppDiagnosticsLogger.logTaskCancel("undo_removal_timer")
 
         if let pending = pendingRemoval, pending.id != tracked.id {
             let previous = pending
@@ -81,10 +82,15 @@ final class WatchlistUndoRemoval {
         pendingRemoval = tracked
         toastAnchor = anchor
 
+        AppDiagnosticsLogger.logTaskStart("undo_removal_timer")
         commitRemovalTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(Self.undoWindowSeconds))
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                AppDiagnosticsLogger.logTaskCancel("undo_removal_timer")
+                return
+            }
             await self?.commitPendingRemoval()
+            AppDiagnosticsLogger.logTaskComplete("undo_removal_timer")
         }
     }
 

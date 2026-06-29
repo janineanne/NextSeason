@@ -23,9 +23,18 @@ enum AnalyticsDiagnosticsReport {
     static func formatted(
         counters: AnalyticsCounters,
         notificationsEnabled: Bool,
-        currentTheme: String
+        currentTheme: String,
+        recentBreadcrumbs: [String] = AppDiagnosticsLogger.recentBreadcrumbs(),
+        persistedBreadcrumbs: [String] = AppDiagnosticsLogger.persistedBreadcrumbsForExport()
     ) -> String {
-        """
+        let breadcrumbLines = recentBreadcrumbs.isEmpty
+            ? "  (none this session)"
+            : recentBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
+        let priorLines = persistedBreadcrumbs.isEmpty
+            ? "  (none persisted)"
+            : persistedBreadcrumbs.suffix(10).map { "  \($0)" }.joined(separator: "\n")
+
+        return """
         NextSeason Diagnostics
 
         Version: \(AppVersionInfo.displayString)
@@ -45,6 +54,12 @@ enum AnalyticsDiagnosticsReport {
         Actor name taps: \(counters.actorNameTaps)
         Notifications enabled: \(notificationsEnabled)
         Current theme: \(currentTheme)
+
+        Recent breadcrumbs (this session):
+        \(breadcrumbLines)
+
+        Persisted breadcrumbs (prior session, if any):
+        \(priorLines)
         """
     }
 }
