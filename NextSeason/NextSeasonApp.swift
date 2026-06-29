@@ -18,6 +18,11 @@ struct NextSeasonApp: App {
     @State private var themeController = AppThemeController()
 
     init() {
+        if !UITestingConfiguration.isEnabled {
+            AppDiagnosticsLogger.recordAppLaunch()
+            MetricKitDiagnosticsSubscriber.installIfNeeded()
+        }
+
         let coordinator = AppNavigationCoordinator()
         _navigationCoordinator = State(initialValue: coordinator)
         _notificationService = State(initialValue: NotificationService(analytics: analyticsService))
@@ -76,8 +81,11 @@ struct NextSeasonApp: App {
             .environment(\.analytics, analyticsService)
             .task {
                 guard !UITestingConfiguration.isEnabled else { return }
+                AppDiagnosticsLogger.breadcrumb("refresh_scheduler_configure")
                 RefreshScheduler.configure {
+                    AppDiagnosticsLogger.logTaskStart("background_watchlist_refresh")
                     await refreshService.refreshAll()
+                    AppDiagnosticsLogger.logTaskComplete("background_watchlist_refresh")
                 }
                 RefreshScheduler.scheduleNextRefresh()
             }
@@ -126,9 +134,23 @@ private struct AppRootView: View {
                 }
             )
             .onChange(of: scenePhase) { previousPhase, phase in
-                guard phase == .active, previousPhase != .active else { return }
                 guard !UITestingConfiguration.isEnabled else { return }
-                Task { await refreshService.refreshAllIfNeeded() }
+                AppDiagnosticsLogger.logScenePhase(
+                    from: String(describing: previousPhase),
+                    to: String(describing: phase)
+                )
+
+                if phase == .background {
+                    AppDiagnosticsLogger.recordEnterBackground()
+                }
+
+                guard phase == .active, previousPhase != .active else { return }
+                AppDiagnosticsLogger.breadcrumb("foreground_refresh_scheduled")
+                Task {
+                    AppDiagnosticsLogger.logTaskStart("foreground_watchlist_refresh")
+                    await refreshService.refreshAllIfNeeded()
+                    AppDiagnosticsLogger.logTaskComplete("foreground_watchlist_refresh")
+                }
             }
     }
 

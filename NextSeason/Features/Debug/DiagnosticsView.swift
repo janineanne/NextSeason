@@ -35,6 +35,23 @@ struct DiagnosticsView: View {
                     LabeledContent("Notifications enabled", value: notificationsEnabled ? "Yes" : "No")
                 }
 
+                Section {
+                    if !AppDiagnosticsLogger.recentBreadcrumbs().isEmpty {
+                        ForEach(AppDiagnosticsLogger.recentBreadcrumbs(), id: \.self) { entry in
+                            Text(entry)
+                                .font(.caption.monospaced())
+                        }
+                    } else {
+                        Text("No breadcrumbs recorded this session.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Crash investigation")
+                } footer: {
+                    Text("Breadcrumbs and OSLog entries (subsystem: com.TrialByFyre.NextSeason) help correlate idle crashes with the last app activity. After a crash, reopen the app and share this report, or check Xcode Organizer → Crashes.")
+                }
+
                 Section("Usage") {
                     let counters = analytics.countersSnapshot()
                     LabeledContent("App launches", value: String(counters.appLaunches))

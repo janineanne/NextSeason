@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import os
 
 /// Polls TVMaze for watchlist changes and emits notifications when appropriate.
 @MainActor
@@ -34,22 +35,37 @@ final class WatchlistRefreshService {
         guard RefreshPolicy.shouldPerformForegroundRefresh(
             lastRefreshAt: lastForegroundRefreshAt,
             now: now()
-        ) else { return }
+        ) else {
+            AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_skipped policy")
+            return
+        }
 
+        AppDiagnosticsLogger.breadcrumb("watchlist_refresh_foreground")
         await refreshAll(force: false)
         lastForegroundRefreshAt = now()
     }
 
     func refreshAll(force: Bool = false) async {
+        AppDiagnosticsLogger.logger(for: .cache)
+            .notice("watchlist_refresh_start force=\(force, privacy: .public)")
+        AppDiagnosticsLogger.breadcrumb("watchlist_refresh_start")
         let trackedShows: [TrackedShow]
         do {
             trackedShows = try await repository.all()
         } catch {
+            if error is CancellationError {
+                AppDiagnosticsLogger.logTaskCancel("watchlist_refresh")
+                return
+            }
             analytics.trackNonFatalError(error, context: "watchlist_refresh_load")
             return
         }
 
-        guard !trackedShows.isEmpty else { return }
+        guard !trackedShows.isEmpty else {
+            AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_complete empty_watchlist")
+            AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
+            return
+        }
 
         let updates: [Int: Date]
         if force {
@@ -96,5 +112,7 @@ final class WatchlistRefreshService {
                 continue
             }
         }
+        AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_complete")
+        AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
     }
 }

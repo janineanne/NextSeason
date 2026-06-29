@@ -119,6 +119,7 @@ private struct AppThemeIconUpdater: ViewModifier {
             }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else { return }
+                AppDiagnosticsLogger.breadcrumb("theme_icon_sync_foreground")
                 AppThemeIconService.syncIconAfterForegroundReturn(
                     variant: controller.variant,
                     fallback: colorScheme

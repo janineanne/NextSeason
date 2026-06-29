@@ -87,8 +87,11 @@ struct WatchlistView: View {
                 Task { await viewModel?.reload() }
             }
             .onDisappear {
-                Task {
+                AppDiagnosticsLogger.breadcrumb("watchlist_disappear")
+                Task { [viewModel] in
+                    AppDiagnosticsLogger.logTaskStart("watchlist_commit_on_disappear")
                     await viewModel?.commitPendingRemovalIfNeeded()
+                    AppDiagnosticsLogger.logTaskComplete("watchlist_commit_on_disappear")
                 }
             }
             .refreshable {
