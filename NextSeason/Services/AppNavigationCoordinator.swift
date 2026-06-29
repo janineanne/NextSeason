@@ -19,6 +19,18 @@ final class AppNavigationCoordinator {
     var searchPath = NavigationPath()
     /// Set by `ProfileFlowRunner` so SearchView can drive a query during Instruments runs.
     var profileFlowSearchQuery: String?
+    /// Bumped when search reaches a settled outcome during a profile flow run.
+    private(set) var profileFlowSearchSettledToken = 0
+    /// Bumped when show detail finishes loading during a profile flow run.
+    private(set) var profileFlowDetailLoadedToken = 0
+
+    func notifyProfileFlowSearchSettled() {
+        profileFlowSearchSettledToken &+= 1
+    }
+
+    func notifyProfileFlowDetailLoaded() {
+        profileFlowDetailLoadedToken &+= 1
+    }
 
     private(set) var pendingShowID: Int?
     private(set) var watchlistReloadToken = 0

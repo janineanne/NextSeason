@@ -16,6 +16,7 @@ struct ShowDetailView: View {
 
     private let analytics: any AnalyticsTracking
     private let onWatchlistChanged: () -> Void
+    private let onProfileFlowDetailLoaded: (() -> Void)?
 
     init(
         show: Show,
@@ -24,7 +25,8 @@ struct ShowDetailView: View {
         notifications: NotificationService,
         analytics: any AnalyticsTracking = AnalyticsService(),
         isTracked: Bool = false,
-        onWatchlistChanged: @escaping () -> Void = {}
+        onWatchlistChanged: @escaping () -> Void = {},
+        onProfileFlowDetailLoaded: (() -> Void)? = nil
     ) {
         _viewModel = State(
             initialValue: ShowDetailViewModel(
@@ -38,6 +40,7 @@ struct ShowDetailView: View {
         )
         self.analytics = analytics
         self.onWatchlistChanged = onWatchlistChanged
+        self.onProfileFlowDetailLoaded = onProfileFlowDetailLoaded
     }
 
     var body: some View {
@@ -54,6 +57,10 @@ struct ShowDetailView: View {
             .onChange(of: undoRemoval?.pendingRemoval?.id) { oldValue, newValue in
                 guard oldValue == viewModel.initialShow.id, newValue == nil else { return }
                 Task { await viewModel.refreshTrackedState() }
+            }
+            .onChange(of: viewModel.loadState) { _, loadState in
+                guard ProfileFlowConfiguration.isEnabled, loadState == .loaded else { return }
+                onProfileFlowDetailLoaded?()
             }
     }
 

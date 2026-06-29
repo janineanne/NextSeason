@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import os
 
 /// Live `TVMazeService` backed by the public TVMaze REST API.
 ///
@@ -41,23 +42,46 @@ actor TVMazeClient: TVMazeService {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
 
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("search_start query_length=\(trimmed.count, privacy: .public)")
+        AppDiagnosticsLogger.breadcrumb("network_search")
+        let searchStarted = Date.now
+
         var components = URLComponents(url: baseURL.appending(path: "search/shows"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "q", value: trimmed)]
         let results: [ShowSearchResultData] = try await get(components)
-        return results.map { $0.show.toDomain() }
+        let shows = results.map { $0.show.toDomain() }
+
+        let elapsedMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("search_complete result_count=\(shows.count, privacy: .public) duration_ms=\(elapsedMs, privacy: .public)")
+        return shows
     }
 
     func show(id: Int, bypassCache: Bool = false) async throws -> Show {
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("show_detail_start show_id=\(id, privacy: .public) bypass_cache=\(bypassCache, privacy: .public)")
+        AppDiagnosticsLogger.breadcrumb("network_show_detail:\(id)")
+        let detailStarted = Date.now
+
         var components = URLComponents(url: baseURL.appending(path: "shows/\(id)"), resolvingAgainstBaseURL: false)
         components?.queryItems = [
             URLQueryItem(name: "embed[]", value: "seasons"),
             URLQueryItem(name: "embed[]", value: "nextepisode")
         ]
         let data: ShowData = try await get(components, bypassCache: bypassCache)
-        return data.toDomain()
+        let show = data.toDomain()
+
+        let elapsedMs = Int(Date.now.timeIntervalSince(detailStarted) * 1000)
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("show_detail_complete show_id=\(id, privacy: .public) duration_ms=\(elapsedMs, privacy: .public)")
+        return show
     }
 
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("updates_start period=\(period.rawValue, privacy: .public)")
+        AppDiagnosticsLogger.breadcrumb("network_updates")
         var components = URLComponents(url: baseURL.appending(path: "updates/shows"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "since", value: period.rawValue)]
         let epochs: [String: TimeInterval] = try await get(components, bypassCache: true)
@@ -67,11 +91,16 @@ actor TVMazeClient: TVMazeService {
             guard let id = Int(key) else { continue }
             result[id] = Date(timeIntervalSince1970: epoch)
         }
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("updates_complete changed_count=\(result.count, privacy: .public)")
         return result
     }
 
     private func get<T: Decodable>(_ components: URLComponents?, bypassCache: Bool = false) async throws -> T {
         guard let url = components?.url else { throw TVMazeError.invalidURL }
+        if bypassCache {
+            AppDiagnosticsLogger.logger(for: .cache).notice("request_bypass_cache path=\(url.path, privacy: .public)")
+        }
         var request = URLRequest(url: url)
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         if bypassCache {
