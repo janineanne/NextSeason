@@ -6,19 +6,19 @@
 import Foundation
 import os
 
-nonisolated(unsafe) private let diagnosticsSubsystem =
-    Bundle.main.bundleIdentifier ?? "com.TrialByFyre.NextSeason"
-nonisolated(unsafe) private let breadcrumbsDefaultsKey = "AppDiagnosticsLogger.breadcrumbs"
-nonisolated(unsafe) private let sessionActiveDefaultsKey = "AppDiagnosticsLogger.sessionActive"
-nonisolated(unsafe) private let maxBreadcrumbs = 50
-nonisolated(unsafe) private let breadcrumbStore = BreadcrumbStore()
-
 /// Structured OSLog output and breadcrumb trail for intermittent crash investigation.
 ///
 /// Logs use the app bundle ID as subsystem so Console.app and `log stream` can filter
 /// with `subsystem:com.TrialByFyre.NextSeason`. Breadcrumbs are persisted across launches
 /// so the next session can report the last activity before an abrupt termination.
 enum AppDiagnosticsLogger: Sendable {
+    private nonisolated static let diagnosticsSubsystem =
+        Bundle.main.bundleIdentifier ?? "com.TrialByFyre.NextSeason"
+    private nonisolated static let breadcrumbsDefaultsKey = "AppDiagnosticsLogger.breadcrumbs"
+    private nonisolated static let sessionActiveDefaultsKey = "AppDiagnosticsLogger.sessionActive"
+    private nonisolated static let maxBreadcrumbs = 50
+    private nonisolated static let breadcrumbStore = BreadcrumbStore()
+
     enum Category: String, Sendable {
         case lifecycle
         case scene
