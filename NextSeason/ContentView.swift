@@ -27,6 +27,8 @@ struct ContentView: View {
             SearchView(
                 navigationPath: $coordinator.searchPath,
                 profileFlowSearchQuery: $coordinator.profileFlowSearchQuery,
+                onProfileFlowSearchSettled: { coordinator.notifyProfileFlowSearchSettled() },
+                onProfileFlowDetailLoaded: { coordinator.notifyProfileFlowDetailLoaded() },
                 tvMaze: tvMaze,
                 analytics: analytics,
                 onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }

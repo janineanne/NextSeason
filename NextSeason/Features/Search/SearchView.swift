@@ -15,6 +15,8 @@ struct SearchView: View {
 
     @Binding var navigationPath: NavigationPath
     @Binding var profileFlowSearchQuery: String?
+    private let onProfileFlowSearchSettled: (() -> Void)?
+    private let onProfileFlowDetailLoaded: (() -> Void)?
     private let tvMaze: any TVMazeService
     private let onWatchlistChanged: () -> Void
     @State private var viewModel: SearchViewModel
@@ -29,12 +31,16 @@ struct SearchView: View {
     init(
         navigationPath: Binding<NavigationPath>,
         profileFlowSearchQuery: Binding<String?> = .constant(nil),
+        onProfileFlowSearchSettled: (() -> Void)? = nil,
+        onProfileFlowDetailLoaded: (() -> Void)? = nil,
         tvMaze: any TVMazeService = TVMazeClient(),
         analytics: any AnalyticsTracking = AnalyticsService(),
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
         _navigationPath = navigationPath
         _profileFlowSearchQuery = profileFlowSearchQuery
+        self.onProfileFlowSearchSettled = onProfileFlowSearchSettled
+        self.onProfileFlowDetailLoaded = onProfileFlowDetailLoaded
         self.tvMaze = tvMaze
         self.onWatchlistChanged = onWatchlistChanged
         _viewModel = State(initialValue: SearchViewModel(service: tvMaze, analytics: analytics))
@@ -54,7 +60,8 @@ struct SearchView: View {
                         notifications: notificationService,
                         analytics: analytics,
                         isTracked: trackedShowIDs.contains(show.id),
-                        onWatchlistChanged: onWatchlistChanged
+                        onWatchlistChanged: onWatchlistChanged,
+                        onProfileFlowDetailLoaded: onProfileFlowDetailLoaded
                     )
                     .onAppear {
                         analytics.track(.searchResultOpened(showID: show.id))
@@ -71,6 +78,15 @@ struct SearchView: View {
                     guard let query, !query.isEmpty else { return }
                     viewModel.query = query
                     profileFlowSearchQuery = nil
+                }
+                .onChange(of: viewModel.state) { _, state in
+                    guard ProfileFlowConfiguration.isEnabled else { return }
+                    switch state {
+                    case .results, .empty, .failed:
+                        onProfileFlowSearchSettled?()
+                    default:
+                        break
+                    }
                 }
                 .task {
                     await refreshTrackedShowIDs()
