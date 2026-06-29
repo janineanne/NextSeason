@@ -214,34 +214,32 @@ private func equalMarginLayout(
     )
 }
 
-private func drawIcon(spec: ThemeIconSpec) throws -> Data {
-    guard let rep = NSBitmapImageRep(
-        bitmapDataPlanes: nil,
-        pixelsWide: IconLayout.pixelSize,
-        pixelsHigh: IconLayout.pixelSize,
-        bitsPerSample: 8,
-        samplesPerPixel: 4,
-        hasAlpha: true,
-        isPlanar: false,
-        colorSpaceName: .deviceRGB,
+private func drawIcon(spec: ThemeIconSpec) throws -> CGImage {
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue)
+    guard let ctx = CGContext(
+        data: nil,
+        width: IconLayout.pixelSize,
+        height: IconLayout.pixelSize,
+        bitsPerComponent: 8,
         bytesPerRow: 0,
-        bitsPerPixel: 0
+        space: colorSpace,
+        bitmapInfo: bitmapInfo.rawValue
     ) else {
         throw NSError(domain: "IconPreview", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to create bitmap"])
     }
 
-    rep.size = NSSize(width: IconLayout.pixelSize, height: IconLayout.pixelSize)
-    NSGraphicsContext.saveGraphicsState()
-    defer { NSGraphicsContext.restoreGraphicsState() }
-    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
-
-    let canvas = NSSize(width: IconLayout.pixelSize, height: IconLayout.pixelSize)
-    nsColor(spec.background).setFill()
-    NSBezierPath(
-        roundedRect: NSRect(origin: .zero, size: canvas),
-        xRadius: IconLayout.cornerRadius,
-        yRadius: IconLayout.cornerRadius
-    ).fill()
+    let canvas = CGFloat(IconLayout.pixelSize)
+    ctx.setFillColor(nsColor(spec.background).cgColor)
+    ctx.addPath(
+        CGPath(
+            roundedRect: CGRect(x: 0, y: 0, width: canvas, height: canvas),
+            cornerWidth: IconLayout.cornerRadius,
+            cornerHeight: IconLayout.cornerRadius,
+            transform: nil
+        )
+    )
+    ctx.fillPath()
 
     let accent = nsColor(spec.foreground)
     guard
@@ -256,28 +254,87 @@ private func drawIcon(spec: ThemeIconSpec) throws -> Data {
         calendarSymbol: calendarSymbol,
         background: spec.background
     )
-    let rects = symbolLayout(groupOriginX: layout.groupOriginX, groupTop: layout.groupTop, canvasHeight: canvas.height)
+    let rects = symbolLayout(groupOriginX: layout.groupOriginX, groupTop: layout.groupTop, canvasHeight: canvas)
+    NSGraphicsContext.saveGraphicsState()
+    defer { NSGraphicsContext.restoreGraphicsState() }
+    NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
     tvSymbol.draw(in: rects.tv)
     calendarSymbol.draw(in: rects.calendar)
 
-    guard let png = rep.representation(using: .png, properties: [:]) else {
-        throw NSError(domain: "IconPreview", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to encode PNG"])
+    guard let image = ctx.makeImage() else {
+        throw NSError(domain: "IconPreview", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to create output image"])
     }
 
+    return image
+}
+
+private func pngData(from image: CGImage) throws -> Data {
+    let rep = NSBitmapImageRep(cgImage: image)
+    guard let png = rep.representation(using: .png, properties: [:]) else {
+        throw NSError(domain: "IconPreview", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to encode PNG"])
+    }
     return png
+}
+
+private func resizedPNG(from image: CGImage, pixelSize: Int) throws -> Data {
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue)
+    guard let ctx = CGContext(
+        data: nil,
+        width: pixelSize,
+        height: pixelSize,
+        bitsPerComponent: 8,
+        bytesPerRow: 0,
+        space: colorSpace,
+        bitmapInfo: bitmapInfo.rawValue
+    ) else {
+        throw NSError(domain: "IconPreview", code: 5, userInfo: [NSLocalizedDescriptionKey: "Failed to create resize context"])
+    }
+
+    ctx.interpolationQuality = .high
+    ctx.draw(image, in: CGRect(x: 0, y: 0, width: pixelSize, height: pixelSize))
+
+    guard let resized = ctx.makeImage() else {
+        throw NSError(domain: "IconPreview", code: 6, userInfo: [NSLocalizedDescriptionKey: "Failed to resize icon"])
+    }
+
+    return try pngData(from: resized)
 }
 
 private func writeAppIconSet(spec: ThemeIconSpec, assetsRoot: URL) throws {
     let iconSetURL = assetsRoot.appendingPathComponent("\(spec.assetName).appiconset", isDirectory: true)
     try FileManager.default.createDirectory(at: iconSetURL, withIntermediateDirectories: true)
 
-    let png = try drawIcon(spec: spec)
-    try png.write(to: iconSetURL.appendingPathComponent(spec.fileName))
+    let sourceImage = try drawIcon(spec: spec)
+    try pngData(from: sourceImage).write(to: iconSetURL.appendingPathComponent(spec.fileName))
 
+    let isAlternateIcon = spec.assetName != "AppIcon"
+    if isAlternateIcon {
+        try resizedPNG(from: sourceImage, pixelSize: 120).write(to: iconSetURL.appendingPathComponent("\(spec.assetName)-120.png"))
+        try resizedPNG(from: sourceImage, pixelSize: 152).write(to: iconSetURL.appendingPathComponent("\(spec.assetName)-152.png"))
+    }
+
+    let baseName = spec.assetName
+    let legacyEntries = isAlternateIcon
+        ? """
+        {
+          "filename" : "\(baseName)-120.png",
+          "idiom" : "iphone",
+          "scale" : "2x",
+          "size" : "60x60"
+        },
+        {
+          "filename" : "\(baseName)-152.png",
+          "idiom" : "ipad",
+          "scale" : "2x",
+          "size" : "76x76"
+        },
+        """
+        : ""
     let contents = """
     {
       "images" : [
-        {
+        \(legacyEntries){
           "filename" : "\(spec.fileName)",
           "idiom" : "universal",
           "platform" : "ios",

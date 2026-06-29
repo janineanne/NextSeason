@@ -1,6 +1,18 @@
 {
   "images" : [
     {
+      "filename" : "AppIcon-LavenderDark-120.png",
+      "idiom" : "iphone",
+      "scale" : "2x",
+      "size" : "60x60"
+    },
+    {
+      "filename" : "AppIcon-LavenderDark-152.png",
+      "idiom" : "ipad",
+      "scale" : "2x",
+      "size" : "76x76"
+    },
+    {
       "filename" : "AppIcon-LavenderDark.png",
       "idiom" : "universal",
       "platform" : "ios",
