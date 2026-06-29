@@ -112,6 +112,27 @@ enum AppDiagnosticsLogger: Sendable {
         breadcrumb("task_complete:\(name)")
     }
 
+    /// Parseable wall-clock for `-ProfileFlow` runs without Instruments attached.
+    nonisolated static func logProfileFlowTiming(flow: String, durationMs: Int, phase: String? = nil) {
+        if let phase {
+            logger(for: .tasks).notice(
+                "profile_flow_timing flow=\(flow, privacy: .public) phase=\(phase, privacy: .public) duration_ms=\(durationMs)"
+            )
+        } else {
+            logger(for: .tasks).notice(
+                "profile_flow_timing flow=\(flow, privacy: .public) duration_ms=\(durationMs)"
+            )
+        }
+        if isProfileFlowActive {
+            ProfileFlowTimingStore.append(flow: flow, durationMs: durationMs, phase: phase)
+        }
+    }
+
+    private nonisolated static var isProfileFlowActive: Bool {
+        if ProcessInfo.processInfo.environment["PROFILE_FLOW"] != nil { return true }
+        return ProcessInfo.processInfo.arguments.contains("-ProfileFlow")
+    }
+
     // MARK: - Crash diagnostic formatting
 
     nonisolated static func logCrashDiagnosticSummary(
