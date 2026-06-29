@@ -1,6 +1,18 @@
 {
   "images" : [
     {
+      "filename" : "AppIcon-TealUtilityLight-120.png",
+      "idiom" : "iphone",
+      "scale" : "2x",
+      "size" : "60x60"
+    },
+    {
+      "filename" : "AppIcon-TealUtilityLight-152.png",
+      "idiom" : "ipad",
+      "scale" : "2x",
+      "size" : "76x76"
+    },
+    {
       "filename" : "AppIcon-TealUtilityLight.png",
       "idiom" : "universal",
       "platform" : "ios",
