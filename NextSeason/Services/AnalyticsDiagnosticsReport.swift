@@ -25,7 +25,8 @@ enum AnalyticsDiagnosticsReport {
         notificationsEnabled: Bool,
         currentTheme: String,
         recentBreadcrumbs: [String] = AppDiagnosticsLogger.recentBreadcrumbs(),
-        persistedBreadcrumbs: [String] = AppDiagnosticsLogger.persistedBreadcrumbsForExport()
+        persistedBreadcrumbs: [String] = AppDiagnosticsLogger.persistedBreadcrumbsForExport(),
+        betaRefreshDiagnostics: BetaRefreshDiagnostics? = nil
     ) -> String {
         let breadcrumbLines = recentBreadcrumbs.isEmpty
             ? "  (none this session)"
@@ -34,10 +35,30 @@ enum AnalyticsDiagnosticsReport {
             ? "  (none persisted)"
             : persistedBreadcrumbs.suffix(10).map { "  \($0)" }.joined(separator: "\n")
 
+        var betaSection = ""
+        if BetaBuildConfiguration.isAvailable, let betaRefreshDiagnostics {
+            let lastRefresh = betaRefreshDiagnostics.lastRefreshAt
+                .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Never"
+            let nextRefresh = betaRefreshDiagnostics.nextScheduledRefreshAt
+                .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Not scheduled yet"
+            betaSection = """
+
+            Beta validation:
+            Last refresh: \(lastRefresh)
+            Next refresh window: \(nextRefresh)
+            Last fetch result: \(betaRefreshDiagnostics.lastFetchResult)
+            Last notification decision: \(betaRefreshDiagnostics.lastNotificationDecision)
+            """
+            if let simulated = betaRefreshDiagnostics.lastSimulatedScenarioSummary {
+                betaSection += "\nLast simulation: \(simulated)"
+            }
+        }
+
         return """
         NextSeason Diagnostics
 
         Version: \(AppVersionInfo.displayString)
+        \(betaSection)
 
         App launches: \(counters.appLaunches)
         Searches: \(counters.searchesPerformed)

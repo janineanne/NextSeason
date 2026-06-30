@@ -13,8 +13,6 @@ struct ContentView: View {
 
     @Bindable var coordinator: AppNavigationCoordinator
 
-    @State private var showDiagnostics = false
-
     private let tvMaze: any TVMazeService
 
     init(coordinator: AppNavigationCoordinator, tvMaze: any TVMazeService = TVMazeClient()) {
@@ -58,13 +56,7 @@ struct ContentView: View {
         }
         .tint(themeColors.controlTint)
         .appScreenBackground()
-        .environment(\.openDiagnostics) {
-            guard !UITestingConfiguration.isEnabled else { return }
-            showDiagnostics = true
-        }
-        .sheet(isPresented: $showDiagnostics) {
-            DiagnosticsView()
-        }
+        .modifier(BetaDiagnosticsPresentationModifier())
         .onChange(of: coordinator.selectedTab) { _, tab in
             if tab == .watchlist {
                 coordinator.notifyWatchlistDataChanged()
@@ -86,6 +78,26 @@ struct ContentView: View {
                     analytics: analytics
                 )
             }
+        }
+    }
+}
+
+/// Presents beta diagnostics only in DEBUG or TestFlight builds.
+private struct BetaDiagnosticsPresentationModifier: ViewModifier {
+    @State private var showDiagnostics = false
+
+    func body(content: Content) -> some View {
+        if BetaBuildConfiguration.isAvailable {
+            content
+                .environment(\.openDiagnostics) {
+                    guard !UITestingConfiguration.isEnabled else { return }
+                    showDiagnostics = true
+                }
+                .sheet(isPresented: $showDiagnostics) {
+                    DiagnosticsView()
+                }
+        } else {
+            content
         }
     }
 }

@@ -24,9 +24,6 @@ struct WatchlistView: View {
     private let watchlistReloadToken: Int
     @State private var viewModel: WatchlistViewModel?
     @State private var notificationsDenied = false
-    #if DEBUG
-    @State private var isSchedulingTestNotification = false
-    #endif
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -168,9 +165,6 @@ struct WatchlistView: View {
                     }
                     .appListRowSurface()
                 }
-                #if DEBUG
-                debugSection(for: viewModel.shows)
-                #endif
             }
             .animation(.easeInOut(duration: 0.35), value: viewModel.shows.map(\.id))
             .appPlainListStyle()
@@ -216,61 +210,6 @@ struct WatchlistView: View {
             analytics.track(.emptyWatchlistShown)
         }
     }
-
-    #if DEBUG
-    @ViewBuilder
-    private func debugSection(for shows: [TrackedShow]) -> some View {
-        // Keep a constant row count regardless of `shows` so removing the last
-        // tracked show doesn't change this section's structure during the
-        // ForEach deletion animation (which crashes UICollectionView).
-        Section {
-            VStack(alignment: .leading, spacing: AppSpacing.tight) {
-                Text("Debug")
-                    .font(.headline)
-                    .appPrimaryText()
-                Button("Send Test Notification") {
-                    if let show = shows.first {
-                        Task { await sendTestNotification(for: show) }
-                    }
-                }
-                .disabled(shows.isEmpty || isSchedulingTestNotification)
-                Text(testNotificationInstructions(for: shows))
-                    .font(.caption)
-                    .appSecondaryText()
-            }
-            .appInsetSurfaceCard()
-        }
-    }
-
-    private static let testNotificationDelaySeconds = 5
-
-    private func testNotificationInstructions(for shows: [TrackedShow]) -> String {
-        guard let show = shows.first else {
-            return "Track a show to send a test notification."
-        }
-        if isSchedulingTestNotification {
-            return "Scheduling…"
-        }
-        return "Uses “\(show.name)”. Arrives in \(Self.testNotificationDelaySeconds) seconds — background or quit the app, then tap the notification. Notifications must already be allowed in Settings."
-    }
-
-    private func sendTestNotification(for tracked: TrackedShow) async {
-        guard !isSchedulingTestNotification else { return }
-        isSchedulingTestNotification = true
-
-        await notificationService.deliverAfterDelay(
-            SeasonNotificationContent(
-                showID: tracked.id,
-                showName: tracked.name,
-                status: tracked.nextSeason
-            ),
-            requestIdentifier: "debug-\(UUID().uuidString)",
-            delay: TimeInterval(Self.testNotificationDelaySeconds)
-        )
-
-        isSchedulingTestNotification = false
-    }
-    #endif
 }
 
 #if DEBUG
