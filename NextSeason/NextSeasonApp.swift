@@ -34,7 +34,7 @@ struct NextSeasonApp: App {
         }
 
         do {
-            let repository: any WatchlistRepository
+			let repository: any WatchlistRepository
             if UITestingConfiguration.isEnabled {
                 let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
                 modelContainer = try ModelContainer(
@@ -51,11 +51,7 @@ struct NextSeasonApp: App {
             refreshService = WatchlistRefreshService(repository: repository, analytics: analyticsService)
             watchlistUndoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analyticsService)
         } catch {
-            AppDiagnosticsLogger.breadcrumb("model_container_init_failed")
-            AppDiagnosticsLogger.persistBreadcrumbsNow()
-            AppDiagnosticsLogger.logger(for: .persistence).fault(
-                "model_container_init_failed error=\(String(describing: error), privacy: .public)"
-            )
+            AppDiagnosticsLogger.logModelContainerInitFailure(error)
             fatalError("Failed to create ModelContainer: \(error)")
         }
 

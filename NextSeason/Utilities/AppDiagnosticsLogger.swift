@@ -133,6 +133,17 @@ enum AppDiagnosticsLogger: Sendable {
         return ProcessInfo.processInfo.arguments.contains("-ProfileFlow")
     }
 
+    // MARK: - Persistence failures
+
+    /// Logs a fatal startup failure before `ModelContainer` initialization aborts the process.
+    nonisolated static func logModelContainerInitFailure(_ error: Error) {
+        breadcrumb("model_container_init_failed")
+        persistBreadcrumbsNow()
+        logger(for: .persistence).fault(
+            "model_container_init_failed error=\(String(describing: error), privacy: .public)"
+        )
+    }
+
     // MARK: - Crash diagnostic formatting
 
     nonisolated static func logCrashDiagnosticSummary(
