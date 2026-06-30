@@ -1,74 +1,105 @@
-# Conceptual Data Model
+# Current Data Model
 
 ```mermaid
 classDiagram
     class Show {
-        +id
-        +name
-        +summary
-        +imageURL
-        +status
-        +premiered
-        +ended
+        +Int id
+        +String name
+        +String? summaryHTML
+        +URL? posterMediumURL
+        +URL? tvMazeURL
+        +ShowStatus status
+        +Date updatedAt
+        +[Season] seasons
+        +NextEpisode? nextEpisode
     }
 
-    class Episode {
-        +id
-        +name
-        +season
-        +number
-        +airdate
+    class Season {
+        +Int id
+        +Int number
+        +String? name
+        +Date? premiereDate
+        +Date? endDate
+        +Int? episodeOrder
     }
 
-    class WatchlistItem {
-        +showID
-        +showName
-        +imageURL
-        +updatedAt
-        +notes/status fields
+    class NextEpisode {
+        +Int id
+        +String? name
+        +Int season
+        +Int number
+        +Date? airDate
     }
 
-    class SeasonStatus {
-        +state
-        +message
-        +lastKnownSeason
-        +lastKnownAirdate
+    class NextSeasonStatus {
+        <<enum>>
+        announced
+        scheduled
+        available
+        ended
+        unknown
     }
 
-    class TVMazeClient {
-        +searchShows(query)
-        +fetchEpisodes(showID)
+    class TrackedShow {
+        +Int id
+        +String name
+        +URL? posterMediumURL
+        +String? summaryHTML
+        +URL? tvMazeURL
+        +ShowStatus status
+        +NextSeasonStatus nextSeason
+        +Date sourceUpdatedAt
+        +Date lastCheckedAt
+        +String? lastNotifiedSignature
+        +String? pendingChangeSignature
+        +Bool isStale
+        +Date dateAdded
     }
 
-    class WatchlistStore {
-        +items
-        +add(show)
-        +remove(showID)
-        +load()
-        +save()
+    class TrackedShowEntity {
+        +Int tvMazeID unique
+        +String name
+        +URL? posterMediumURL
+        +String? summaryHTML
+        +URL? tvMazeURL
+        +String statusRaw
+        +Data nextSeasonSnapshot
+        +Date sourceUpdatedAt
+        +Date lastCheckedAt
+        +String? lastNotifiedSignature
+        +String? pendingChangeSignature
+        +Bool isStale
+        +Date dateAdded
     }
 
-    class NextSeasonCalculator {
-        +calculate(show, episodes)
+    class ShowData {
+        <<DTO>>
+        +Int id
+        +String name
+        +ImageData? image
+        +NetworkData? network
+        +EmbeddedData? embedded
     }
 
-    Show "1" --> "many" Episode
-    Show "1" --> "0..1" WatchlistItem
-    WatchlistStore --> WatchlistItem
-    TVMazeClient --> Show
-    TVMazeClient --> Episode
-    NextSeasonCalculator --> Show
-    NextSeasonCalculator --> Episode
-    NextSeasonCalculator --> SeasonStatus
+    class SeasonData {
+        <<DTO>>
+    }
+
+    class NextEpisodeData {
+        <<DTO>>
+    }
+
+    Show "1" --> "many" Season
+    Show "1" --> "0..1" NextEpisode
+    Show --> NextSeasonStatus : calculated from
+    Show --> TrackedShow : converted when tracked
+    TrackedShowEntity --> TrackedShow : decodes to domain
+    TrackedShow --> TrackedShowEntity : encodes to persistence
+    ShowData --> Show : maps to domain
+    SeasonData --> Season : maps to domain
+    NextEpisodeData --> NextEpisode : maps to domain
 ```
 
-## Purpose
+## Notes
 
-This is a conceptual model, not necessarily a one-to-one copy of Swift files.
-
-It shows the main things the app knows about:
-
-- Shows from TVMaze
-- Episodes/seasons from TVMaze
-- Locally saved watchlist items
-- Calculated season status
+`TrackedShowEntity` stores `NextSeasonStatus` as encoded data. This keeps the persisted watchlist compact, but future schema changes should be covered by a SwiftData migration plan and migration testing.
