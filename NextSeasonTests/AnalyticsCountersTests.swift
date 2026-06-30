@@ -72,13 +72,13 @@ struct AnalyticsDiagnosticsReportTests {
         let report = AnalyticsDiagnosticsReport.formatted(
             counters: counters,
             notificationsEnabled: true,
-            currentTheme: "Lavender (Current)"
+            currentTheme: "Lavender"
         )
 
         #expect(report.contains("NextSeason Diagnostics"))
         #expect(report.contains("App launches: 19"))
         #expect(report.contains("Searches: 52"))
         #expect(report.contains("Notifications enabled: true"))
-        #expect(report.contains("Current theme: Lavender (Current)"))
+        #expect(report.contains("Current theme: Lavender"))
     }
 }

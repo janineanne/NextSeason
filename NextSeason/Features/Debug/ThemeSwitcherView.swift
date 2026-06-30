@@ -8,9 +8,15 @@ import SwiftUI
 /// Palette picker for beta feedback on color directions.
 struct ThemeSwitcherView: View {
     @Environment(AppThemeController.self) private var themeController
-    @Environment(\.appThemeColors) private var themeColors
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.analytics) private var analytics
     @Environment(\.dismiss) private var dismiss
+
+    @State private var draftVariant: AppPaletteVariant = .lavender
+
+    private var draftColors: AppThemeColors {
+        AppThemeColors.colors(for: draftVariant, colorScheme: colorScheme)
+    }
 
     var body: some View {
         NavigationStack {
@@ -18,13 +24,11 @@ struct ThemeSwitcherView: View {
                 Section {
                     ForEach(AppPaletteVariant.allCases) { variant in
                         Button {
-                            guard themeController.variant != variant else { return }
-                            themeController.variant = variant
-                            analytics.track(.themeSelected(variant: variant))
+                            draftVariant = variant
                         } label: {
                             ThemeVariantRow(
                                 variant: variant,
-                                isSelected: themeController.variant == variant
+                                isSelected: draftVariant == variant
                             )
                         }
                         .buttonStyle(.plain)
@@ -32,25 +36,36 @@ struct ThemeSwitcherView: View {
                 } header: {
                     Text("Palette")
                 } footer: {
-                    Text("Your choice is saved on this device.")
+                    Text("Tap Done to apply and save your choice on this device.")
                 }
 
                 Section("Current Swatches") {
-                    ThemeSwatchGrid(colors: themeColors)
+                    ThemeSwatchGrid(colors: draftColors)
                 }
 
                 Section("Sample UI") {
-                    ThemeSampleCard(colors: themeColors)
+                    ThemeSampleCard(colors: draftColors)
                 }
             }
             .navigationTitle("Theme Preview")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done", action: dismiss.callAsFunction)
+                    Button("Done", action: applyDraftAndDismiss)
                 }
             }
+            .onAppear {
+                draftVariant = themeController.variant
+            }
         }
+    }
+
+    private func applyDraftAndDismiss() {
+        if draftVariant != themeController.variant {
+            themeController.variant = draftVariant
+            analytics.track(.themeSelected(variant: draftVariant))
+        }
+        dismiss()
     }
 }
 

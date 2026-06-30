@@ -16,7 +16,7 @@ enum AppPaletteVariant: String, CaseIterable, Identifiable, Sendable {
     var displayName: String {
         switch self {
         case .lavender:
-            "Lavender (Current)"
+            "Lavender"
         case .tealUtility:
             "Teal Utility"
         case .warmSlate:
