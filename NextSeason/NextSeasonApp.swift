@@ -51,6 +51,11 @@ struct NextSeasonApp: App {
             refreshService = WatchlistRefreshService(repository: repository, analytics: analyticsService)
             watchlistUndoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analyticsService)
         } catch {
+            AppDiagnosticsLogger.breadcrumb("model_container_init_failed")
+            AppDiagnosticsLogger.persistBreadcrumbsNow()
+            AppDiagnosticsLogger.logger(for: .persistence).fault(
+                "model_container_init_failed error=\(String(describing: error), privacy: .public)"
+            )
             fatalError("Failed to create ModelContainer: \(error)")
         }
 

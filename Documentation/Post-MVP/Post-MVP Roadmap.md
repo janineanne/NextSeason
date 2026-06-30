@@ -10,6 +10,40 @@ Future priorities should be informed by user behavior, beta feedback, and analyt
 
 ---
 
+# Data Persistence & Recovery
+
+## SwiftData Migration Strategy
+
+Before making future changes to `TrackedShowEntity` or other persistent models:
+
+- Add and test a SwiftData migration plan.
+- Verify that upgrades from previous TestFlight and App Store versions preserve user data.
+- Include migration testing in release validation whenever the persistent schema changes.
+- Keep representative stores from older app versions to validate real-world upgrade scenarios.
+
+## Persistence Recovery
+
+The MVP intentionally terminates if the SwiftData `ModelContainer` cannot be created because the application cannot function meaningfully without persistence.
+
+Before App Store release, replace the startup `fatalError` with a user-facing recovery flow.
+
+Potential recovery options:
+
+- Log detailed diagnostics before presenting recovery options.
+- Allow users to reset local data and recreate the persistent store if it becomes corrupted.
+- Explain the consequences of resetting local data before proceeding.
+- Offer users the option to export diagnostic information before resetting the persistent store.
+
+## Crash Loop Prevention
+
+Prevent users from becoming permanently locked out of the application because of a damaged persistent store.
+
+Potential approaches:
+
+- Detect repeated launch failures.
+- Offer a "Reset Local Data" recovery option.
+- Preserve diagnostic information to help investigate failures before resetting.
+
 # Core Product Improvements
 
 ## Search
