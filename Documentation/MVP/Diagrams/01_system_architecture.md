@@ -1,46 +1,93 @@
-# NextSeason MVP System Architecture
+# NextSeason System Architecture
 
 ```mermaid
 flowchart TB
     User[User]
 
     subgraph App[NextSeason iOS App]
-        UI[SwiftUI Views]
-        VM[View Models / UI State]
-        Search[Show Search Feature]
-        Watchlist[Local Watchlist Feature]
-        Calculator[Next Season Calculator]
-        Persistence[Local Persistence]
-        Models[Domain Models]
+        Root[NextSeasonApp / AppRootView]
+        Nav[AppNavigationCoordinator]
+        Content[ContentView / TabView]
+
+        subgraph Features[SwiftUI Features]
+            Search[SearchView + SearchViewModel]
+            Detail[ShowDetailView + ShowDetailViewModel]
+            Watchlist[WatchlistView + WatchlistViewModel]
+            Diagnostics[Diagnostics + Theme Switcher]
+        end
+
+        subgraph Services[Services]
+            TVMazeClient[TVMazeClient actor]
+            Calculator[NextSeasonCalculator]
+            Refresh[WatchlistRefreshService]
+            Scheduler[RefreshScheduler]
+            Notifications[NotificationService]
+            Analytics[AnalyticsService]
+            Metrics[MetricKitDiagnosticsSubscriber]
+        end
+
+        subgraph Persistence[Persistence]
+            Repo[WatchlistRepository]
+            SwiftDataRepo[SwiftDataWatchlistRepository]
+            Store[(SwiftData ModelContainer)]
+            Entity[TrackedShowEntity]
+        end
     end
 
-    subgraph External[External Services]
-        TVMaze[TVMaze API]
+    subgraph External[External Systems]
+        TVMaze[(TVMaze API)]
+        UNCenter[UNUserNotificationCenter]
+        BGTasks[BGTaskScheduler]
+        MetricKit[MetricKit]
     end
 
-    User --> UI
-    UI --> VM
-    VM --> Search
-    VM --> Watchlist
-    VM --> Calculator
+    User --> Content
+    Root --> Content
+    Root --> Store
+    Root --> Repo
+    Root --> Refresh
+    Root --> Notifications
+    Root --> Analytics
+    Root --> Nav
 
-    Search --> TVMaze
-    TVMaze --> Search
+    Content --> Search
+    Content --> Watchlist
+    Content --> Diagnostics
+    Nav --> Content
 
-    Search --> Models
-    Watchlist --> Models
-    Calculator --> Models
+    Search --> TVMazeClient
+    Search --> Repo
+    Search --> Analytics
+    Search --> Detail
 
-    Watchlist --> Persistence
-    Persistence --> Watchlist
+    Detail --> TVMazeClient
+    Detail --> Repo
+    Detail --> Calculator
+    Detail --> Notifications
+    Detail --> Analytics
 
-    Calculator --> UI
-    Watchlist --> UI
-    Search --> UI
+    Watchlist --> Repo
+    Watchlist --> Refresh
+    Watchlist --> Notifications
+    Watchlist --> Detail
+    Watchlist --> Analytics
+
+    Refresh --> Repo
+    Refresh --> TVMazeClient
+    Refresh --> Calculator
+    Refresh --> Notifications
+    Refresh --> Analytics
+
+    Scheduler --> BGTasks
+    Scheduler --> Refresh
+    Notifications --> UNCenter
+    TVMazeClient --> TVMaze
+    SwiftDataRepo --> Store
+    Store --> Entity
+    Repo --> SwiftDataRepo
+    Metrics --> MetricKit
 ```
 
-## Purpose
+## Notes
 
-This diagram shows the MVP as a local-first iOS app.
-
-The app fetches show data from TVMaze, lets the user maintain a local watchlist, and uses local calculation logic to present useful season-status information. There is no account system or backend in the MVP.
+The MVP remains a local-first iOS app. The app has no user accounts, backend, or cloud sync. TVMaze is the only external data provider used by the running product.
