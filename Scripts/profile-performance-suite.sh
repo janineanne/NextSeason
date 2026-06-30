@@ -18,6 +18,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=lib/device-log-capture.sh
+source "${ROOT}/Scripts/lib/device-log-capture.sh"
 SCHEME="NextSeason"
 CONFIGURATION="Release"
 DEVICE="${DEVICE_UDID:-}"
@@ -82,20 +84,14 @@ core_device_uuid() {
 start_log_stream() {
     local device="$1"
     local log_file="$2"
-    xcrun log stream \
-        --device-udid "${device}" \
-        --style compact \
-        --predicate "subsystem == \"${SUBSYSTEM}\" OR processImagePath CONTAINS \"NextSeason\"" \
-        > "${log_file}" 2>&1 &
-    echo $!
+    local predicate="subsystem == \"${SUBSYSTEM}\" OR processImagePath CONTAINS \"NextSeason\""
+    device_log_capture_begin "${device}" "${log_file}" "${predicate}"
 }
 
 stop_log_stream() {
-    local pid="$1"
-    if [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null; then
-        kill "${pid}" 2>/dev/null || true
-        wait "${pid}" 2>/dev/null || true
-    fi
+    local _marker="$1"
+    local window="${2:-2m}"
+    device_log_capture_end "${window}"
 }
 
 record_trace() {
@@ -253,7 +249,7 @@ main() {
     LOG="${LOG_DIR}/seedWatchlist.log"
     LPID="$(start_log_stream "${DEVICE}" "${LOG}")"
     record_flow "seedWatchlist" "${DEVICE}" "${APP}" "${TRACE_DIR}/seedWatchlist.trace" "60s"
-    stop_log_stream "${LPID}"
+    stop_log_stream "${LPID}" "90s"
     append_manifest "${MANIFEST}" "seedWatchlist" "traces/seedWatchlist.trace" "logs/seedWatchlist.log"
 
     CORE_FLOWS=(
@@ -281,11 +277,12 @@ main() {
                 pf=""
                 [[ "${flow_key}" == "launch-with-data" ]] && pf="${profile_flow}"
                 record_launch "${DEVICE}" "${APP}" "${TRACE}" "${pf}"
+                stop_log_stream "${LPID}" "35s"
             else
                 record_flow "${profile_flow}" "${DEVICE}" "${APP}" "${TRACE}" "35s"
+                stop_log_stream "${LPID}" "45s"
             fi
 
-            stop_log_stream "${LPID}"
             append_manifest "${MANIFEST}" "${flow_key}" "traces/${flow_key}-run${run}.trace" "logs/${flow_key}-run${run}.log"
             echo "   run ${run}/${RUNS} done"
         done
@@ -299,7 +296,7 @@ main() {
         LOG="${LOG_DIR}/network-${net_flow}.log"
         LPID="$(start_log_stream "${DEVICE}" "${LOG}")"
         record_network "${net_flow}" "${DEVICE}" "${APP}" "${TRACE}" "${HAR}" "35s"
-        stop_log_stream "${LPID}"
+        stop_log_stream "${LPID}" "45s"
         append_manifest "${MANIFEST}" "network-${net_flow}" "traces/network-${net_flow}.trace" "logs/network-${net_flow}.log" "har/${net_flow}.har"
     done
 
@@ -316,7 +313,7 @@ main() {
         LOG="${LOG_DIR}/${stress}.log"
         LPID="$(start_log_stream "${DEVICE}" "${LOG}")"
         record_flow "${stress}" "${DEVICE}" "${APP}" "${TRACE}" "${limit}"
-        stop_log_stream "${LPID}"
+        stop_log_stream "${LPID}" "${limit}"
         append_manifest "${MANIFEST}" "${stress}" "traces/${stress}.trace" "logs/${stress}.log"
     done
 
@@ -327,7 +324,7 @@ main() {
         LOG="${LOG_DIR}/stress-launch-with-data-run${run}.log"
         LPID="$(start_log_stream "${DEVICE}" "${LOG}")"
         record_launch "${DEVICE}" "${APP}" "${TRACE}" "launchWithData"
-        stop_log_stream "${LPID}"
+        stop_log_stream "${LPID}" "35s"
         append_manifest "${MANIFEST}" "stress-launch-with-data" "traces/stress-launch-with-data-run${run}.trace" "logs/stress-launch-with-data-run${run}.log"
         echo "   launch ${run}/10 done"
     done

@@ -55,7 +55,27 @@ struct NextSeasonApp: App {
         }
 
         if !UITestingConfiguration.isEnabled {
+            if BackgroundRefreshConfiguration.forceAcceleratedForSoakTest
+                || ProcessInfo.processInfo.arguments.contains(BackgroundRefreshConfiguration.launchFlag)
+            {
+                BackgroundRefreshConfiguration.persistAcceleratedModeIfRequested()
+                if BackgroundRefreshConfiguration.isAccelerated {
+                    AppDiagnosticsLogger.breadcrumb("background_refresh_accelerated_10m")
+                }
+            } else {
+                BackgroundRefreshConfiguration.clearPersistedAcceleratedMode()
+            }
             RefreshScheduler.registerBackgroundTask()
+            let refreshServiceForBackground = refreshService
+            MainActor.assumeIsolated {
+                AppDiagnosticsLogger.breadcrumb("refresh_scheduler_configure")
+                RefreshScheduler.configure {
+                    AppDiagnosticsLogger.logTaskStart("background_watchlist_refresh")
+                    await refreshServiceForBackground.refreshAll()
+                    AppDiagnosticsLogger.logTaskComplete("background_watchlist_refresh")
+                }
+                RefreshScheduler.scheduleNextRefresh()
+            }
             analyticsService.track(.appLaunched)
         } else {
             #if DEBUG
@@ -79,16 +99,6 @@ struct NextSeasonApp: App {
             .environment(\.watchlistUndoRemoval, watchlistUndoRemoval)
             .environment(\.notificationService, notificationService)
             .environment(\.analytics, analyticsService)
-            .task {
-                guard !UITestingConfiguration.isEnabled else { return }
-                AppDiagnosticsLogger.breadcrumb("refresh_scheduler_configure")
-                RefreshScheduler.configure {
-                    AppDiagnosticsLogger.logTaskStart("background_watchlist_refresh")
-                    await refreshService.refreshAll()
-                    AppDiagnosticsLogger.logTaskComplete("background_watchlist_refresh")
-                }
-                RefreshScheduler.scheduleNextRefresh()
-            }
             .task {
                 guard let flow = ProfileFlowConfiguration.activeFlow else { return }
                 await ProfileFlowRunner(
