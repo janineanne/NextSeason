@@ -13,6 +13,7 @@ final class WatchlistRefreshService {
     private let repository: any WatchlistRepository
     private let notifications: any NotificationDelivering
     private let analytics: any AnalyticsTracking
+    private let diagnostics: BetaRefreshDiagnostics?
     private let now: @Sendable () -> Date
     private var lastForegroundRefreshAt: Date?
 
@@ -21,12 +22,14 @@ final class WatchlistRefreshService {
         repository: any WatchlistRepository,
         notifications: any NotificationDelivering = NotificationService(),
         analytics: any AnalyticsTracking = AnalyticsService(),
+        diagnostics: BetaRefreshDiagnostics? = nil,
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.tvMaze = tvMaze
         self.repository = repository
         self.notifications = notifications
         self.analytics = analytics
+        self.diagnostics = diagnostics
         self.now = now
     }
 
@@ -37,6 +40,9 @@ final class WatchlistRefreshService {
             now: now()
         ) else {
             AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_skipped policy")
+            diagnostics?.recordRefreshSkipped(
+                reason: "Foreground policy (\(Int(RefreshPolicy.foregroundMinimumInterval / 60)) min minimum)"
+            )
             return
         }
 
@@ -49,6 +55,12 @@ final class WatchlistRefreshService {
         AppDiagnosticsLogger.logger(for: .cache)
             .notice("watchlist_refresh_start force=\(force, privacy: .public)")
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_start")
+        let refreshStartedAt = now()
+        var fetchResult = "Completed"
+        var lastNotificationDecision = "No notification (no meaningful change)"
+        var refreshedShowCount = 0
+        var skippedShowCount = 0
+
         let trackedShows: [TrackedShow]
         do {
             trackedShows = try await repository.all()
@@ -58,12 +70,22 @@ final class WatchlistRefreshService {
                 return
             }
             analytics.trackNonFatalError(error, context: "watchlist_refresh_load")
+            diagnostics?.recordRefreshCompleted(
+                at: refreshStartedAt,
+                fetchResult: "Failed to load watchlist",
+                notificationDecision: lastNotificationDecision
+            )
             return
         }
 
         guard !trackedShows.isEmpty else {
             AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_complete empty_watchlist")
             AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
+            diagnostics?.recordRefreshCompleted(
+                at: refreshStartedAt,
+                fetchResult: "Skipped: empty watchlist",
+                notificationDecision: lastNotificationDecision
+            )
             return
         }
 
@@ -77,13 +99,21 @@ final class WatchlistRefreshService {
                 updates = try await tvMaze.updatedShows(since: period)
             } catch {
                 analytics.trackNonFatalError(error, context: "watchlist_refresh_updates")
+                diagnostics?.recordRefreshCompleted(
+                    at: refreshStartedAt,
+                    fetchResult: "Failed to fetch TVMaze updates",
+                    notificationDecision: lastNotificationDecision
+                )
                 return
             }
         }
 
         for var tracked in trackedShows {
             if !force {
-                guard let updatedAt = updates[tracked.id], updatedAt > tracked.sourceUpdatedAt else { continue }
+                guard let updatedAt = updates[tracked.id], updatedAt > tracked.sourceUpdatedAt else {
+                    skippedShowCount += 1
+                    continue
+                }
             }
 
             do {
@@ -100,6 +130,11 @@ final class WatchlistRefreshService {
                 let evaluation = StatusChangeDetector.evaluate(tracked: tracked, newStatus: newStatus, now: now())
 
                 try await repository.updateAfterRefresh(evaluation.tracked)
+                refreshedShowCount += 1
+                lastNotificationDecision = Self.describeNotificationDecision(
+                    for: tracked.name,
+                    evaluation: evaluation
+                )
                 if let notification = evaluation.notification {
                     await notifications.deliver(notification)
                 }
@@ -107,12 +142,45 @@ final class WatchlistRefreshService {
                 tracked.isStale = true
                 tracked.lastCheckedAt = now()
                 try? await repository.updateAfterRefresh(tracked)
+                refreshedShowCount += 1
+                lastNotificationDecision = "Marked stale: \(tracked.name) not found on TVMaze"
             } catch {
                 analytics.trackNonFatalError(error, context: "watchlist_refresh_show")
                 continue
             }
         }
+
+        if refreshedShowCount == 0, skippedShowCount > 0 {
+            fetchResult = "No TVMaze changes for \(skippedShowCount) tracked show(s)"
+        } else {
+            fetchResult = "Refreshed \(refreshedShowCount) show(s)"
+            if skippedShowCount > 0 {
+                fetchResult += ", skipped \(skippedShowCount) unchanged"
+            }
+            if force {
+                fetchResult += " (forced)"
+            }
+        }
+
+        diagnostics?.recordRefreshCompleted(
+            at: refreshStartedAt,
+            fetchResult: fetchResult,
+            notificationDecision: lastNotificationDecision
+        )
         AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_complete")
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
+    }
+
+    private static func describeNotificationDecision(
+        for showName: String,
+        evaluation: StatusChangeDetector.Evaluation
+    ) -> String {
+        if let notification = evaluation.notification {
+            return "Delivered for \(showName): \(notification.body)"
+        }
+        if evaluation.tracked.pendingChangeSignature != nil {
+            return "Pending debounce for \(showName)"
+        }
+        return "No notification for \(showName) (no meaningful change)"
     }
 }

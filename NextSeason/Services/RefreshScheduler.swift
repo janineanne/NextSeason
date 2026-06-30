@@ -12,9 +12,14 @@ enum RefreshScheduler {
     static let taskIdentifier = "com.TrialByFyre.NextSeason.watchlist-refresh"
 
     @MainActor private static var refreshHandler: (() async -> Void)?
+    @MainActor private static var diagnostics: BetaRefreshDiagnostics?
 
     @MainActor
-    static func configure(refreshHandler: @escaping () async -> Void) {
+    static func configure(
+        diagnostics: BetaRefreshDiagnostics? = nil,
+        refreshHandler: @escaping () async -> Void
+    ) {
+        self.diagnostics = diagnostics
         self.refreshHandler = refreshHandler
     }
 
@@ -65,8 +70,12 @@ enum RefreshScheduler {
 
     static func scheduleNextRefresh() {
         let interval = BackgroundRefreshConfiguration.refreshInterval
+        let nextRefreshAt = Date(timeIntervalSinceNow: interval)
+        MainActor.assumeIsolated {
+            diagnostics?.recordNextScheduledRefresh(at: nextRefreshAt)
+        }
         let request = BGAppRefreshTaskRequest(identifier: taskIdentifier)
-        request.earliestBeginDate = Date(timeIntervalSinceNow: interval)
+        request.earliestBeginDate = nextRefreshAt
         do {
             try BGTaskScheduler.shared.submit(request)
             AppDiagnosticsLogger.logger(for: .tasks)

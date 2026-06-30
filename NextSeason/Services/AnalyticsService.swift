@@ -67,7 +67,11 @@ enum AnalyticsErrorCategory: String, Sendable {
 protocol AnalyticsTracking: AnyObject {
     func track(_ event: AnalyticsEvent)
     func countersSnapshot() -> AnalyticsCounters
-    func diagnosticsReport(notificationsEnabled: Bool, currentTheme: String) -> String
+    func diagnosticsReport(
+        notificationsEnabled: Bool,
+        currentTheme: String,
+        betaRefreshDiagnostics: BetaRefreshDiagnostics?
+    ) -> String
 }
 
 extension AnalyticsTracking {
@@ -79,11 +83,16 @@ extension AnalyticsTracking {
         AnalyticsCounters()
     }
 
-    func diagnosticsReport(notificationsEnabled: Bool, currentTheme: String) -> String {
+    func diagnosticsReport(
+        notificationsEnabled: Bool,
+        currentTheme: String,
+        betaRefreshDiagnostics: BetaRefreshDiagnostics? = nil
+    ) -> String {
         AnalyticsDiagnosticsReport.formatted(
             counters: countersSnapshot(),
             notificationsEnabled: notificationsEnabled,
-            currentTheme: currentTheme
+            currentTheme: currentTheme,
+            betaRefreshDiagnostics: betaRefreshDiagnostics
         )
     }
 }
@@ -166,14 +175,6 @@ final class AnalyticsService: AnalyticsTracking {
         countersStore.snapshot()
     }
 
-    func diagnosticsReport(notificationsEnabled: Bool, currentTheme: String) -> String {
-        AnalyticsDiagnosticsReport.formatted(
-            counters: countersSnapshot(),
-            notificationsEnabled: notificationsEnabled,
-            currentTheme: currentTheme
-        )
-    }
-
     func track(_ event: AnalyticsEvent) {
         guard isEnabled else { return }
         countersStore.record(event)
@@ -205,14 +206,6 @@ final class RecordingAnalyticsService: AnalyticsTracking {
 
     func countersSnapshot() -> AnalyticsCounters {
         counters
-    }
-
-    func diagnosticsReport(notificationsEnabled: Bool, currentTheme: String) -> String {
-        AnalyticsDiagnosticsReport.formatted(
-            counters: counters,
-            notificationsEnabled: notificationsEnabled,
-            currentTheme: currentTheme
-        )
     }
 
     func reset() {

@@ -13,6 +13,7 @@ struct NextSeasonApp: App {
     private let refreshService: WatchlistRefreshService
     private let watchlistUndoRemoval: WatchlistUndoRemoval
     private let analyticsService = AnalyticsService()
+    private let betaRefreshDiagnostics = BetaRefreshDiagnostics()
     @State private var notificationService: NotificationService
     @State private var navigationCoordinator = AppNavigationCoordinator()
     @State private var themeController = AppThemeController()
@@ -48,7 +49,11 @@ struct NextSeasonApp: App {
                 repository = SwiftDataWatchlistRepository(context: ModelContext(container))
             }
             watchlistRepository = repository
-            refreshService = WatchlistRefreshService(repository: repository, analytics: analyticsService)
+            refreshService = WatchlistRefreshService(
+                repository: repository,
+                analytics: analyticsService,
+                diagnostics: betaRefreshDiagnostics
+            )
             watchlistUndoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analyticsService)
         } catch {
             AppDiagnosticsLogger.logModelContainerInitFailure(error)
@@ -70,7 +75,7 @@ struct NextSeasonApp: App {
             let refreshServiceForBackground = refreshService
             MainActor.assumeIsolated {
                 AppDiagnosticsLogger.breadcrumb("refresh_scheduler_configure")
-                RefreshScheduler.configure {
+                RefreshScheduler.configure(diagnostics: betaRefreshDiagnostics) {
                     AppDiagnosticsLogger.logTaskStart("background_watchlist_refresh")
                     await refreshServiceForBackground.refreshAll()
                     AppDiagnosticsLogger.logTaskComplete("background_watchlist_refresh")
@@ -100,6 +105,7 @@ struct NextSeasonApp: App {
             .environment(\.watchlistUndoRemoval, watchlistUndoRemoval)
             .environment(\.notificationService, notificationService)
             .environment(\.analytics, analyticsService)
+            .environment(\.betaRefreshDiagnostics, betaRefreshDiagnostics)
             .task {
                 guard let flow = ProfileFlowConfiguration.activeFlow else { return }
                 await ProfileFlowRunner(
