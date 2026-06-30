@@ -70,6 +70,8 @@
 		E197EF202FF31C0B00D34A28 /* Instruments Report Stage 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Instruments Report Stage 1.md"; sourceTree = "<group>"; };
 		E197EF212FF31C3B00D34A28 /* Instruments Report Stage 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Instruments Report Stage 2.md"; sourceTree = "<group>"; };
 		E197EF222FF31E9100D34A28 /* Instruments Post-Report Discussion.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Instruments Post-Report Discussion.pdf"; sourceTree = "<group>"; };
+		E197F2752FF39AF100D34A28 /* Fix watchlist refresh crash.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Fix watchlist refresh crash.md"; sourceTree = "<group>"; };
+		E197F2762FF39B3B00D34A28 /* Plan for fixing watchlist refresh crash.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Plan for fixing watchlist refresh crash.md"; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
@@ -334,6 +336,8 @@
 			children = (
 				E197EF222FF31E9100D34A28 /* Instruments Post-Report Discussion.pdf */,
 				E197EF212FF31C3B00D34A28 /* Instruments Report Stage 2.md */,
+				E197F2762FF39B3B00D34A28 /* Plan for fixing watchlist refresh crash.md */,
+				E197F2752FF39AF100D34A28 /* Fix watchlist refresh crash.md */,
 			);
 			path = "6-29-2026";
 			sourceTree = "<group>";

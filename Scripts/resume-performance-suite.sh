@@ -4,6 +4,8 @@ set -uo pipefail
 
 SESSION="${1:?usage: resume-performance-suite.sh SESSION_DIR}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=lib/device-log-capture.sh
+source "${ROOT}/Scripts/lib/device-log-capture.sh"
 DEVICE="${DEVICE_UDID:-00008140-001178E92EF3001C}"
 APP="${APP_PATH:-/Users/janine/Library/Developer/Xcode/DerivedData/NextSeason-edzsejwlkhbozadhjlqbhyrvklkf/Build/Products/Release-iphoneos/NextSeason.app}"
 MANIFEST="${SESSION}/manifest.json"
@@ -29,15 +31,15 @@ PY
 }
 
 start_log() {
-    xcrun log stream --device-udid "${DEVICE}" --style compact \
-        --predicate "subsystem == \"${SUBSYSTEM}\" OR processImagePath CONTAINS \"NextSeason\"" \
-        > "$1" 2>&1 &
-    echo $!
+    local log_file="$1"
+    local predicate="subsystem == \"${SUBSYSTEM}\" OR processImagePath CONTAINS \"NextSeason\""
+    device_log_capture_begin "${DEVICE}" "${log_file}" "${predicate}"
 }
 
 stop_log() {
-    kill "$1" 2>/dev/null || true
-    wait "$1" 2>/dev/null || true
+    local _marker="$1"
+    local window="${2:-2m}"
+    device_log_capture_end "${window}"
 }
 
 already_ran() {
@@ -80,7 +82,7 @@ PY
         --output "${TRACE}" --time-limit "35s" --no-prompt \
         --launch -- "${APP}" -ProfileFlow "${net_flow}" || true
     xcrun xctrace export --input "${TRACE}" --har --output "${HAR}" 2>/dev/null || true
-    stop_log "${LPID}"
+    stop_log "${LPID}" "45s"
     append_manifest "network-${net_flow}" "traces/network-${net_flow}.trace" "logs/network-${net_flow}.log" "har/${net_flow}.har"
     echo "  network ${net_flow} done"
 done
@@ -100,7 +102,7 @@ for item in "stressSearchDetailsBack:200s" "stressAddRemoveWishlist:120s" "stres
         --instrument "Allocations" --instrument "Leaks" --instrument "Activity Monitor" \
         --device "${DEVICE}" --output "${TRACE}" --time-limit "${limit}" --no-prompt \
         --launch -- "${APP}" -ProfileFlow "${stress}" || true
-    stop_log "${LPID}"
+    stop_log "${LPID}" "${limit}"
     append_manifest "${stress}" "traces/${stress}.trace" "logs/${stress}.log"
     echo "  ${stress} done"
 done
@@ -115,7 +117,7 @@ if [[ "$(already_ran stress-launch-with-data)" != "yes" ]]; then
             --instrument "Allocations" --instrument "Activity Monitor" \
             --device "${DEVICE}" --output "${TRACE}" --time-limit "25s" --no-prompt \
             --launch -- "${APP}" -ProfileFlow "launchWithData" || true
-        stop_log "${LPID}"
+        stop_log "${LPID}" "35s"
         append_manifest "stress-launch-with-data" "traces/stress-launch-with-data-run${run}.trace" "logs/stress-launch-with-data-run${run}.log"
         echo "  launch ${run}/10 done"
     done
