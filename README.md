@@ -22,6 +22,13 @@ Version 1.0 is a focused, polished implementation of the core feature set (MVP),
 
 This project was developed using an AI-assisted workflow. I directed the architecture, reviewed and refined AI-generated code, tested the application, made product and UX decisions, and iterated on the design throughout development.
 
+## Screenshots
+
+Search Results:
+
+<img src="Documentation/MVP/Screenshots/MVP-Search-Results.PNG" width="160">
+
+
 ## What's Here
 
 This repository is intentionally transparent. In addition to the source code, it includes all of my discussions with AI (even including an occasional newbie question!). The goal is to demonstrate not only the finished product, but also the engineering process behind it.
@@ -38,4 +45,3 @@ This README is intentionally short due to time constraints but there is more to 
 * How AI was Used
 * Building the Project
 * Roadmap
-

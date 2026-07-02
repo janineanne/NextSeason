@@ -77,6 +77,7 @@
 		E197F42F2FF47B1700D34A28 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E197F4302FF48AA200D34A28 /* Improve Theme switcher.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Improve Theme switcher.md"; sourceTree = "<group>"; };
 		E197F5E72FF48E4100D34A28 /* Add notification options to Diagnostic menu.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Add notification options to Diagnostic menu.md"; sourceTree = "<group>"; };
+		E197FEAF2FF7134F00D34A28 /* MVP-Search-Results.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.PNG"; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
@@ -221,6 +222,7 @@
 		E102F0FA2FE5F18F0076FCDD /* MVP */ = {
 			isa = PBXGroup;
 			children = (
+				E197FEB02FF7134F00D34A28 /* Screenshots */,
 				E102F0622FE4A8D10076FCDD /* Diagrams */,
 				E1DAC54B2FDE2E1F00BD81E5 /* AI Transcripts */,
 				E17E04952FDE291A00708D7A /* ProblemStatement.md */,
@@ -357,6 +359,14 @@
 				E197F5E72FF48E4100D34A28 /* Add notification options to Diagnostic menu.md */,
 			);
 			path = "6-30-2026";
+			sourceTree = "<group>";
+		};
+		E197FEB02FF7134F00D34A28 /* Screenshots */ = {
+			isa = PBXGroup;
+			children = (
+				E197FEAF2FF7134F00D34A28 /* MVP-Search-Results.PNG */,
+			);
+			path = Screenshots;
 			sourceTree = "<group>";
 		};
 		E1DA26BE2FDDD9A800C37DAC /* Cursor Rules */ = {
