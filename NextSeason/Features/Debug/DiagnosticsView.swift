@@ -17,6 +17,7 @@ extension EnvironmentValues {
 }
 
 /// Beta diagnostics screen with local usage counters and explicit share controls.
+@MainActor
 struct DiagnosticsView: View {
     @Environment(\.analytics) private var analytics
     @Environment(\.notificationService) private var notificationService
@@ -31,9 +32,10 @@ struct DiagnosticsView: View {
     @State private var isSendingTestNotification = false
     @State private var isRunningSimulation = false
     @State private var simulatedUpdateRunner: DiagnosticsSimulatedUpdateRunner?
+    @State private var betaBuildAvailability = BetaBuildAvailability.shared
 
     private var betaValidationAvailable: Bool {
-        BetaBuildConfiguration.isAvailable
+        betaBuildAvailability.isAvailable
     }
 
     var body: some View {
@@ -41,7 +43,7 @@ struct DiagnosticsView: View {
             List {
                 Section("App") {
                     LabeledContent("Version", value: AppVersionInfo.displayString)
-                    LabeledContent("Build channel", value: betaValidationAvailable ? "Beta (DEBUG or TestFlight)" : "Production")
+                    LabeledContent("Build channel", value: betaBuildAvailability.channelDisplayName)
                     LabeledContent("Current theme", value: themeController.variant.displayName)
                     LabeledContent("Notifications enabled", value: notificationsEnabled ? "Yes" : "No")
                 }
@@ -51,8 +53,41 @@ struct DiagnosticsView: View {
                 }
 
                 Section {
-                    if !AppDiagnosticsLogger.recentBreadcrumbs().isEmpty {
-                        ForEach(AppDiagnosticsLogger.recentBreadcrumbs(), id: \.self) { entry in
+                    let launchDiagnostics = AppDiagnosticsLogger.launchDiagnostics()
+                    LabeledContent("Previous launch") {
+                        Text(launchDiagnostics.previousLaunchEndedUnexpectedly ? "Ended unexpectedly ⚠️" : "Clean or not detected")
+                            .foregroundStyle(launchDiagnostics.previousLaunchEndedUnexpectedly ? .orange : .secondary)
+                    }
+                    LabeledContent("Current launch started") {
+                        Text(formattedDate(launchDiagnostics.currentLaunchStartedAt))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Last graceful background") {
+                        Text(formattedDate(launchDiagnostics.lastGracefulExitAt))
+                            .foregroundStyle(.secondary)
+                    }
+                    if launchDiagnostics.previousLaunchEndedUnexpectedly {
+                        LabeledContent("Prior launch started") {
+                            Text(formattedDate(launchDiagnostics.previousLaunchStartedAt))
+                                .foregroundStyle(.secondary)
+                        }
+                        LabeledContent("Detected") {
+                            Text(formattedDate(launchDiagnostics.unexpectedTerminationDetectedAt))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    let priorBreadcrumbs = launchDiagnostics.priorBreadcrumbs
+                    if !priorBreadcrumbs.isEmpty {
+                        ForEach(priorBreadcrumbs, id: \.self) { entry in
+                            Text(entry)
+                                .font(.caption.monospaced())
+                        }
+                    }
+
+                    let breadcrumbs = AppDiagnosticsLogger.recentBreadcrumbs()
+                    if !breadcrumbs.isEmpty {
+                        ForEach(breadcrumbs, id: \.self) { entry in
                             Text(entry)
                                 .font(.caption.monospaced())
                         }
@@ -62,9 +97,9 @@ struct DiagnosticsView: View {
                             .foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text("Crash investigation")
+                    Text("Launch investigation")
                 } footer: {
-                    Text("Breadcrumbs and OSLog entries (subsystem: com.TrialByFyre.NextSeason) help correlate idle crashes with the last app activity. After a crash, reopen the app and share this report, or check Xcode Organizer → Crashes.")
+                    Text("This does not replace TestFlight crash reports. It only flags that the previous run did not reach a normal background transition, then keeps recent breadcrumbs so testers can share context.")
                 }
 
                 Section("Usage") {
@@ -107,6 +142,9 @@ struct DiagnosticsView: View {
                 }
             }
             .navigationTitle("Diagnostics")
+            .task {
+                await betaBuildAvailability.refresh()
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -217,7 +255,8 @@ struct DiagnosticsView: View {
               let betaRefreshDiagnostics else { return }
         simulatedUpdateRunner = DiagnosticsSimulatedUpdateRunner(
             notifications: notificationService,
-            diagnostics: betaRefreshDiagnostics
+            diagnostics: betaRefreshDiagnostics,
+            analytics: analytics
         )
     }
 
