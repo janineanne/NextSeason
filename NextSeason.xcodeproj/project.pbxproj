@@ -56,6 +56,7 @@
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
+		E197008E2FF72BFF00D34A28 /* Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
 		E197EC972FF06ED800D34A28 /* Fix UI Test Failure.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Fix UI Test Failure.md"; sourceTree = "<group>"; };
 		E197EF1D2FF31B8200D34A28 /* Instruments discussion.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Instruments discussion.pdf"; sourceTree = "<group>"; };
 		E197EF202FF31C0B00D34A28 /* Instruments Report Stage 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Instruments Report Stage 1.md"; sourceTree = "<group>"; };
@@ -323,6 +324,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		E197008D2FF72BEE00D34A28 /* 7-2-2026 */ = {
+			isa = PBXGroup;
+			children = (
+				E197008E2FF72BFF00D34A28 /* Diagnostics Work with Cursor.md */,
+			);
+			path = "7-2-2026";
+			sourceTree = "<group>";
+		};
 		E197EC962FF06EBC00D34A28 /* 6-27-2026 */ = {
 			isa = PBXGroup;
 			children = (
@@ -403,6 +412,7 @@
 				E197EF1E2FF31B8200D34A28 /* 6-28-2026 */,
 				E197EF1F2FF31B8200D34A28 /* 6-29-2026 */,
 				E197F4232FF43B3D00D34A28 /* 6-30-2026 */,
+				E197008D2FF72BEE00D34A28 /* 7-2-2026 */,
 				E1DAC54E2FDF23EE00BD81E5 /* Notes.md */,
 			);
 			path = "AI Transcripts";

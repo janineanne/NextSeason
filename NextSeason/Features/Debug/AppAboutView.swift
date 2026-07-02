@@ -64,3 +64,7 @@ struct AppAboutView: View {
         }
     }
 }
+
+#Preview {
+	AppAboutView(openDiagnostics: {})
+}
