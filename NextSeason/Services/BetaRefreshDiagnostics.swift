@@ -43,4 +43,9 @@ final class BetaRefreshDiagnostics {
         lastFetchResult = "Simulated: \(summary)"
         lastNotificationDecision = summary
     }
+
+    func recordSimulatedScenarioSummary(_ summary: String) {
+        guard BetaBuildConfiguration.isAvailable else { return }
+        lastSimulatedScenarioSummary = summary
+    }
 }

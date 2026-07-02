@@ -5,26 +5,36 @@
 
 import Foundation
 
-/// Runs a two-step simulated season update through the same detection and
-/// notification path as real refreshes, without touching user watchlist data.
+/// Runs a two-step simulated season update through the real watchlist refresh
+/// service, without touching the user's normal watchlist repository or TVMaze.
 @MainActor
 final class DiagnosticsSimulatedUpdateRunner {
     private let dataProvider: DiagnosticsSimulatedDataProvider
-    private let notifications: any NotificationDelivering
+    private let repository: SimulatedWatchlistRepository
+    private let refreshService: WatchlistRefreshService
     private let diagnostics: BetaRefreshDiagnostics
     private let now: @Sendable () -> Date
-    private var tracked: TrackedShow?
+    private var isSeeded = false
 
     init(
         dataProvider: DiagnosticsSimulatedDataProvider = DiagnosticsSimulatedDataProvider(),
         notifications: any NotificationDelivering,
         diagnostics: BetaRefreshDiagnostics,
+        analytics: any AnalyticsTracking = AnalyticsService(),
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.dataProvider = dataProvider
-        self.notifications = notifications
+        self.repository = SimulatedWatchlistRepository()
         self.diagnostics = diagnostics
         self.now = now
+        self.refreshService = WatchlistRefreshService(
+            tvMaze: dataProvider,
+            repository: repository,
+            notifications: notifications,
+            analytics: analytics,
+            diagnostics: diagnostics,
+            now: now
+        )
     }
 
     var dataPhaseLabel: String {
@@ -32,76 +42,40 @@ final class DiagnosticsSimulatedUpdateRunner {
     }
 
     func resetScenario() {
-        tracked = nil
+        repository.removeAll()
         dataProvider.reset()
+        isSeeded = false
     }
 
     @discardableResult
     func runNextStep() async -> String {
-        guard BetaBuildConfiguration.isAvailable else {
+        let betaValidationAvailable = await MainActor.run {
+            BetaBuildConfiguration.isAvailable
+        }
+        guard betaValidationAvailable else {
             return "Simulated scenarios are unavailable in production builds."
         }
 
-        let referenceDate = now()
-        if tracked == nil {
-            tracked = makeInitialTracked(at: referenceDate)
-        }
-
-        guard var currentTracked = tracked else {
-            return "Failed to initialize simulated tracked show."
+        if !isSeeded {
+            repository.seed(makeInitialTracked(at: now()))
+            isSeeded = true
         }
 
         let phase = dataProvider.currentPhase
-        let show: Show
-        do {
-            show = try await dataProvider.show(
-                id: DiagnosticsSimulatedData.showID,
-                bypassCache: true
-            )
-        } catch {
-            let message = "Simulated fetch failed: \(error.localizedDescription)"
-            diagnostics.recordSimulatedScenario(message)
-            return message
-        }
+        await refreshService.refreshAll(force: true)
 
-        let previousStatus = currentTracked.nextSeason
-        let newStatus = NextSeasonCalculator.status(for: show, now: referenceDate)
-        let evaluation = StatusChangeDetector.evaluate(
-            tracked: currentTracked,
-            newStatus: newStatus,
-            now: referenceDate
-        )
-        currentTracked = evaluation.tracked
-        tracked = currentTracked
+        let tracked = repository.show(id: DiagnosticsSimulatedData.showID)
+        let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
+        let notificationDecision = diagnostics.lastNotificationDecision
+        let summary = "Step \(phase.stepNumber) (\(phase.shortLabel)): \(statusSummary). \(notificationDecision)"
 
-        let decision = describeDecision(
-            previousStatus: previousStatus,
-            evaluation: evaluation,
-            phase: phase
-        )
-
-        if let notification = evaluation.notification {
-            let labeled = SeasonNotificationContent(
-                showID: notification.showID,
-                showName: notification.showName,
-                status: notification.status
-            )
-            await notifications.deliver(labeled)
-        }
-
+        diagnostics.recordSimulatedScenarioSummary(summary)
         dataProvider.advanceAfterRun()
+
         if phase == .updated {
-            tracked = nil
+            resetScenario()
         }
 
-        let stepLabel = phase == .baseline
-            ? "Baseline (undated next season)"
-            : "Updated (dated next season)"
-        let summary = """
-        Step \(phase == .baseline ? "1" : "2") (\(stepLabel)): \
-        \(decision)
-        """
-        diagnostics.recordSimulatedScenario(summary)
         return summary
     }
 
@@ -110,7 +84,7 @@ final class DiagnosticsSimulatedUpdateRunner {
             id: DiagnosticsSimulatedData.showID,
             name: DiagnosticsSimulatedData.showName,
             posterMediumURL: nil,
-            summaryHTML: "<p>Simulated show for TestFlight beta validation only.</p>",
+            summaryHTML: "<p>Beta diagnostics / simulated show. This is fake data for TestFlight validation only.</p>",
             tvMazeURL: nil,
             status: .running,
             nextSeason: .returningNoSeasonYet,
@@ -119,23 +93,59 @@ final class DiagnosticsSimulatedUpdateRunner {
             dateAdded: date
         )
     }
+}
 
-    private func describeDecision(
-        previousStatus: NextSeasonStatus,
-        evaluation: StatusChangeDetector.Evaluation,
-        phase: DiagnosticsSimulatedDataProvider.Phase
-    ) -> String {
-        let newStatus = evaluation.tracked.nextSeason
-        if let notification = evaluation.notification {
-            return "Notification delivered — \(notification.body)"
+@MainActor
+private final class SimulatedWatchlistRepository: WatchlistRepository {
+    private var shows: [Int: TrackedShow] = [:]
+
+    func seed(_ tracked: TrackedShow) {
+        shows[tracked.id] = tracked
+    }
+
+    func show(id: Int) -> TrackedShow? {
+        shows[id]
+    }
+
+    func removeAll() {
+        shows.removeAll()
+    }
+
+    func all() async throws -> [TrackedShow] {
+        shows.values.sorted { $0.dateAdded > $1.dateAdded }
+    }
+
+    func contains(showID: Int) async throws -> Bool {
+        shows[showID] != nil
+    }
+
+    func add(_ show: Show) async throws {
+        guard shows[show.id] == nil else { return }
+        shows[show.id] = TrackedShow(from: show)
+    }
+
+    func remove(showID: Int) async throws {
+        shows.removeValue(forKey: showID)
+    }
+
+    func updateAfterRefresh(_ tracked: TrackedShow) async throws {
+        shows[tracked.id] = tracked
+    }
+}
+
+private extension DiagnosticsSimulatedDataProvider.Phase {
+    var stepNumber: String {
+        switch self {
+        case .baseline: "1"
+        case .updated: "2"
         }
-        if evaluation.tracked.pendingChangeSignature != nil {
-            return """
-            Pending debounce (\(phase == .baseline ? "first poll" : "confirming")) — \
-            \(previousStatus.headlineSummary) → \(newStatus.headlineSummary)
-            """
+    }
+
+    var shortLabel: String {
+        switch self {
+        case .baseline: "baseline fake data"
+        case .updated: "updated fake data"
         }
-        return "No notification — \(previousStatus.headlineSummary) → \(newStatus.headlineSummary)"
     }
 }
 
@@ -145,11 +155,11 @@ private extension NextSeasonStatus {
         case .airing(let season):
             "Season \(season) airing"
         case .scheduled(let season, let premiere):
-            "Season \(season) on \(premiere.formatted(date: .abbreviated, time: .omitted))"
+            "Season \(season) premieres \(premiere.formatted(date: .abbreviated, time: .omitted))"
         case .announcedUndated(let season):
-            "Season \(season) announced (undated)"
+            "Season \(season) announced without a date"
         case .returningNoSeasonYet:
-            "Returning, no season yet"
+            "Returning, no season announced yet"
         case .ended:
             "Ended"
         case .unknown:

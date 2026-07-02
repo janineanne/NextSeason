@@ -7,24 +7,11 @@ import SwiftUI
 
 /// Required TVMaze credit-back on screens that display their data (PD-002, PD-008).
 struct TVMazeAttributionView: View {
-    @Environment(\.openDiagnostics) private var openDiagnostics
-
     var body: some View {
-        VStack(spacing: 2) {
-            Text("Data provided by TVMaze")
-                .font(.footnote)
-                .appSecondaryText()
-            if openDiagnostics != nil, !UITestingConfiguration.isEnabled {
-                Text("Version \(AppVersionInfo.displayString)")
-                    .font(.caption2)
-                    .appSecondaryText()
-                    .accessibilityHint("Long press to open diagnostics")
-                    .onLongPressGesture(minimumDuration: 0.8) {
-                        openDiagnostics?()
-                    }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .center)
+        Text("Data provided by TVMaze")
+            .font(.footnote)
+            .appSecondaryText()
+            .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 

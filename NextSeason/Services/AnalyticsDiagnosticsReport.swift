@@ -20,12 +20,14 @@ enum AppVersionInfo {
 }
 
 enum AnalyticsDiagnosticsReport {
+    @MainActor
     static func formatted(
         counters: AnalyticsCounters,
         notificationsEnabled: Bool,
         currentTheme: String,
         recentBreadcrumbs: [String] = AppDiagnosticsLogger.recentBreadcrumbs(),
         persistedBreadcrumbs: [String] = AppDiagnosticsLogger.persistedBreadcrumbsForExport(),
+        launchDiagnostics: AppLaunchDiagnostics = AppDiagnosticsLogger.launchDiagnostics(),
         betaRefreshDiagnostics: BetaRefreshDiagnostics? = nil
     ) -> String {
         let breadcrumbLines = recentBreadcrumbs.isEmpty
@@ -34,6 +36,20 @@ enum AnalyticsDiagnosticsReport {
         let priorLines = persistedBreadcrumbs.isEmpty
             ? "  (none persisted)"
             : persistedBreadcrumbs.suffix(10).map { "  \($0)" }.joined(separator: "\n")
+        let previousLaunchStatus = launchDiagnostics.previousLaunchEndedUnexpectedly
+            ? "Ended unexpectedly"
+            : "Clean or not detected"
+        let currentLaunchStarted = launchDiagnostics.currentLaunchStartedAt
+            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Unknown"
+        let previousLaunchStarted = launchDiagnostics.previousLaunchStartedAt
+            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Unknown"
+        let detectedAt = launchDiagnostics.unexpectedTerminationDetectedAt
+            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Not applicable"
+        let lastGracefulExit = launchDiagnostics.lastGracefulExitAt
+            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Never recorded"
+        let unexpectedBreadcrumbLines = launchDiagnostics.priorBreadcrumbs.isEmpty
+            ? "  (none captured)"
+            : launchDiagnostics.priorBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
 
         var betaSection = ""
         if BetaBuildConfiguration.isAvailable, let betaRefreshDiagnostics {
@@ -81,6 +97,16 @@ enum AnalyticsDiagnosticsReport {
 
         Persisted breadcrumbs (prior session, if any):
         \(priorLines)
+
+        Launch diagnostics:
+        Previous launch status: \(previousLaunchStatus)
+        Current launch started: \(currentLaunchStarted)
+        Previous unexpected launch started: \(previousLaunchStarted)
+        Unexpected termination detected: \(detectedAt)
+        Last graceful background/exit: \(lastGracefulExit)
+
+        Breadcrumbs from previous unexpected launch:
+        \(unexpectedBreadcrumbLines)
         """
     }
 }

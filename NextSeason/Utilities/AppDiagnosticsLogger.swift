@@ -6,6 +6,15 @@
 import Foundation
 import os
 
+struct AppLaunchDiagnostics: Sendable, Hashable {
+    let currentLaunchStartedAt: Date?
+    let lastGracefulExitAt: Date?
+    let previousLaunchEndedUnexpectedly: Bool
+    let previousLaunchStartedAt: Date?
+    let unexpectedTerminationDetectedAt: Date?
+    let priorBreadcrumbs: [String]
+}
+
 /// Structured OSLog output and breadcrumb trail for intermittent crash investigation.
 ///
 /// Logs use the app bundle ID as subsystem so Console.app and `log stream` can filter
@@ -16,6 +25,12 @@ enum AppDiagnosticsLogger: Sendable {
         Bundle.main.bundleIdentifier ?? "com.TrialByFyre.NextSeason"
     private nonisolated static let breadcrumbsDefaultsKey = "AppDiagnosticsLogger.breadcrumbs"
     private nonisolated static let sessionActiveDefaultsKey = "AppDiagnosticsLogger.sessionActive"
+    private nonisolated static let currentLaunchStartedAtDefaultsKey = "AppDiagnosticsLogger.currentLaunchStartedAt"
+    private nonisolated static let lastGracefulExitAtDefaultsKey = "AppDiagnosticsLogger.lastGracefulExitAt"
+    private nonisolated static let previousUnexpectedDefaultsKey = "AppDiagnosticsLogger.previousUnexpected"
+    private nonisolated static let previousUnexpectedLaunchStartedAtDefaultsKey = "AppDiagnosticsLogger.previousUnexpectedLaunchStartedAt"
+    private nonisolated static let unexpectedTerminationDetectedAtDefaultsKey = "AppDiagnosticsLogger.unexpectedTerminationDetectedAt"
+    private nonisolated static let previousUnexpectedBreadcrumbsDefaultsKey = "AppDiagnosticsLogger.previousUnexpectedBreadcrumbs"
     private nonisolated static let maxBreadcrumbs = 50
     private nonisolated static let breadcrumbStore = BreadcrumbStore()
 
@@ -26,7 +41,6 @@ enum AppDiagnosticsLogger: Sendable {
         case network
         case tasks
         case cache
-        case crash
     }
 
     nonisolated static func logger(for category: Category) -> Logger {
@@ -37,10 +51,14 @@ enum AppDiagnosticsLogger: Sendable {
 
     /// Call once during app initialization before other work runs.
     nonisolated static func recordAppLaunch() {
-        let hadActiveSession = UserDefaults.standard.bool(forKey: sessionActiveDefaultsKey)
+        let defaults = UserDefaults.standard
+        let now = Date.now
+        let hadActiveSession = defaults.bool(forKey: sessionActiveDefaultsKey)
+        let priorLaunchStartedAt = defaults.object(forKey: currentLaunchStartedAtDefaultsKey) as? Date
         let priorBreadcrumbs = loadPersistedBreadcrumbs()
 
-        UserDefaults.standard.set(true, forKey: sessionActiveDefaultsKey)
+        defaults.set(now, forKey: currentLaunchStartedAtDefaultsKey)
+        defaults.set(true, forKey: sessionActiveDefaultsKey)
 
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
@@ -48,22 +66,47 @@ enum AppDiagnosticsLogger: Sendable {
         launchLogger.notice("app_launch version=\(version, privacy: .public) build=\(build, privacy: .public)")
 
         if hadActiveSession {
+            defaults.set(true, forKey: previousUnexpectedDefaultsKey)
+            defaults.set(now, forKey: unexpectedTerminationDetectedAtDefaultsKey)
+            if let priorLaunchStartedAt {
+                defaults.set(priorLaunchStartedAt, forKey: previousUnexpectedLaunchStartedAtDefaultsKey)
+            }
+            defaults.set(Array(priorBreadcrumbs.suffix(10)), forKey: previousUnexpectedBreadcrumbsDefaultsKey)
+
             let summary = priorBreadcrumbs.suffix(10).joined(separator: " | ")
             launchLogger.fault(
                 "possible_abrupt_termination prior_breadcrumbs=\(summary, privacy: .public)"
             )
-            breadcrumb("recovery_after_abrupt_termination")
+            breadcrumb("recovery_after_unexpected_termination")
         } else {
+            defaults.set(false, forKey: previousUnexpectedDefaultsKey)
+            defaults.removeObject(forKey: previousUnexpectedLaunchStartedAtDefaultsKey)
+            defaults.removeObject(forKey: unexpectedTerminationDetectedAtDefaultsKey)
+            defaults.removeObject(forKey: previousUnexpectedBreadcrumbsDefaultsKey)
             breadcrumb("app_launch")
         }
     }
 
     /// Marks a graceful background transition so the next launch is not flagged as abrupt.
     nonisolated static func recordEnterBackground() {
+        let now = Date.now
         persistBreadcrumbs()
         UserDefaults.standard.set(false, forKey: sessionActiveDefaultsKey)
+        UserDefaults.standard.set(now, forKey: lastGracefulExitAtDefaultsKey)
         logger(for: .scene).notice("enter_background")
         breadcrumb("enter_background")
+    }
+
+    nonisolated static func launchDiagnostics() -> AppLaunchDiagnostics {
+        let defaults = UserDefaults.standard
+        return AppLaunchDiagnostics(
+            currentLaunchStartedAt: defaults.object(forKey: currentLaunchStartedAtDefaultsKey) as? Date,
+            lastGracefulExitAt: defaults.object(forKey: lastGracefulExitAtDefaultsKey) as? Date,
+            previousLaunchEndedUnexpectedly: defaults.bool(forKey: previousUnexpectedDefaultsKey),
+            previousLaunchStartedAt: defaults.object(forKey: previousUnexpectedLaunchStartedAtDefaultsKey) as? Date,
+            unexpectedTerminationDetectedAt: defaults.object(forKey: unexpectedTerminationDetectedAtDefaultsKey) as? Date,
+            priorBreadcrumbs: defaults.stringArray(forKey: previousUnexpectedBreadcrumbsDefaultsKey) ?? []
+        )
     }
 
     // MARK: - Breadcrumbs
@@ -142,28 +185,6 @@ enum AppDiagnosticsLogger: Sendable {
         logger(for: .persistence).fault(
             "model_container_init_failed error=\(String(describing: error), privacy: .public)"
         )
-    }
-
-    // MARK: - Crash diagnostic formatting
-
-    nonisolated static func logCrashDiagnosticSummary(
-        exceptionType: String,
-        signal: String,
-        terminationReason: String?,
-        crashedThread: String,
-        topFrames: [String]
-    ) {
-        let frames = topFrames.prefix(8).joined(separator: " | ")
-        logger(for: .crash).fault(
-            """
-            metrickit_crash exception=\(exceptionType, privacy: .public) \
-            signal=\(signal, privacy: .public) \
-            reason=\(terminationReason ?? "none", privacy: .public) \
-            thread=\(crashedThread, privacy: .public) \
-            frames=\(frames, privacy: .public)
-            """
-        )
-        breadcrumb("metrickit_crash:\(exceptionType)")
     }
 
     // MARK: - Private
