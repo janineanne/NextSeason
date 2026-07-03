@@ -119,7 +119,7 @@ final class DiagnosticsSimulatedUpdateRunner {
 
         let tracked = repository.show(id: DiagnosticsSimulatedData.showID)
         let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
-        let notificationDecision = diagnostics.lastNotificationDecision ?? "No notification decision recorded"
+        let notificationDecision = diagnostics.lastNotificationDecision
         let delaySeconds = Int(delay.rounded())
         let summary =
             "Delayed pipeline (\(delaySeconds)s): \(statusSummary). \(notificationDecision)"

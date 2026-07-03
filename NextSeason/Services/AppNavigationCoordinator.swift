@@ -12,6 +12,14 @@ final class AppNavigationCoordinator {
     enum Tab: Hashable {
         case search
         case watchlist
+
+        /// Index in the root `TabView`, used when handling tab-bar reselection.
+        var tabBarIndex: Int {
+            switch self {
+            case .search: 0
+            case .watchlist: 1
+            }
+        }
     }
 
     var selectedTab: Tab = .search
@@ -39,11 +47,17 @@ final class AppNavigationCoordinator {
         pendingShowID = showID
     }
 
+    /// Pops the search navigation stack to its root without changing tabs.
+    /// The search query lives in `SearchViewModel`, so it is preserved.
+    func popSearchToRoot() {
+        searchPath = NavigationPath()
+    }
+
     /// Switches to the Search tab at its root, popping any detail screen the
     /// search stack was left on (e.g. a show viewed while adding to the
     /// watchlist) so the user lands on the search screen itself.
     func showSearchRoot() {
-        searchPath = NavigationPath()
+        popSearchToRoot()
         selectedTab = .search
     }
 

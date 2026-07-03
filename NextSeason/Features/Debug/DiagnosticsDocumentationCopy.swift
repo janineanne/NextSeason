@@ -47,7 +47,7 @@ enum DiagnosticsDocumentationCopy {
 
         **Send Test Notification** delivers a sample “new season” alert right away, without \
         going through the refresh pipeline. Useful for checking that notifications appear \
-        on this device.
+        on this device. Will send blank notification if watchlist is empty.
 
         **Schedule Pipeline Test Notification** seeds a fake new-season update, runs it \
         through the real refresh and notification decision path, and schedules delivery in \

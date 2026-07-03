@@ -37,6 +37,29 @@ final class NavigationUITests: NextSeasonUITestCase {
         XCTAssertTrue(searchIdlePrompt.waitForExistence(timeout: UITestTimeout.standard))
     }
 
+    func testSearchTabReturnsToResultsAfterViewingDetailFromAnotherTab() {
+        search(for: UITestPreviewShow.name)
+
+        let result = waitForSearchResultRow(named: UITestPreviewShow.name)
+        result.tap()
+        waitForShowDetail()
+
+        app.tabBars.buttons["Watchlist"].tap()
+        XCTAssertTrue(watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended))
+
+        app.tabBars.buttons["Search"].tap()
+
+        waitForSearchResultRow(named: UITestPreviewShow.name, timeout: UITestTimeout.extended)
+        XCTAssertTrue(
+            waitForSearchFieldValue(UITestPreviewShow.name),
+            "Returning to Search should preserve the last query."
+        )
+        assertNotExists(
+            showDetailTrackButton(),
+            "Search tab should return to the results list, not a stale detail screen."
+        )
+    }
+
     func testFindShowButtonNavigatesToSearch() {
         XCTContext.runActivity(named: "Search for a show and open its detail") { _ in
             search(for: UITestPreviewShow.name)
