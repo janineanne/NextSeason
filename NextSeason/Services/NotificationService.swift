@@ -120,9 +120,8 @@ final class NotificationService: NotificationDelivering {
         await scheduleNotification(content, requestIdentifier: requestIdentifier, trigger: nil)
     }
 
-    #if DEBUG
-    /// Debug helper: schedules delivery with the system so the notification can arrive
-    /// after the app is backgrounded or terminated.
+    /// Beta diagnostics helper: schedules delivery with the system so the
+    /// notification can arrive after the app is backgrounded or terminated.
     func deliverAfterDelay(
         _ content: SeasonNotificationContent,
         requestIdentifier: String,
@@ -134,7 +133,6 @@ final class NotificationService: NotificationDelivering {
         )
         await scheduleNotification(content, requestIdentifier: requestIdentifier, trigger: trigger)
     }
-    #endif
 
     private func scheduleNotification(
         _ content: SeasonNotificationContent,

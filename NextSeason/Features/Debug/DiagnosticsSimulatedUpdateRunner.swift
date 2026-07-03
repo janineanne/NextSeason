@@ -11,6 +11,8 @@ import Foundation
 final class DiagnosticsSimulatedUpdateRunner {
     private let dataProvider: DiagnosticsSimulatedDataProvider
     private let repository: SimulatedWatchlistRepository
+    private let notificationService: NotificationService
+    private let analytics: any AnalyticsTracking
     private let refreshService: WatchlistRefreshService
     private let diagnostics: BetaRefreshDiagnostics
     private let now: @Sendable () -> Date
@@ -18,13 +20,15 @@ final class DiagnosticsSimulatedUpdateRunner {
 
     init(
         dataProvider: DiagnosticsSimulatedDataProvider = DiagnosticsSimulatedDataProvider(),
-        notifications: any NotificationDelivering,
+        notifications: NotificationService,
         diagnostics: BetaRefreshDiagnostics,
         analytics: any AnalyticsTracking = AnalyticsService(),
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.dataProvider = dataProvider
         self.repository = SimulatedWatchlistRepository()
+        self.notificationService = notifications
+        self.analytics = analytics
         self.diagnostics = diagnostics
         self.now = now
         self.refreshService = WatchlistRefreshService(
@@ -75,6 +79,53 @@ final class DiagnosticsSimulatedUpdateRunner {
         if phase == .updated {
             resetScenario()
         }
+
+        return summary
+    }
+
+    /// Seeds fake data with a dated new season, runs the real refresh + notification
+    /// decision path, and schedules delivery after a short delay for background testing.
+    @discardableResult
+    func runDelayedNewSeasonNotification(
+        delayRange: ClosedRange<TimeInterval> = 5 ... 10
+    ) async -> String {
+        let betaValidationAvailable = await MainActor.run {
+            BetaBuildConfiguration.isAvailable
+        }
+        guard betaValidationAvailable else {
+            return "Delayed pipeline tests are unavailable in production builds."
+        }
+
+        resetScenario()
+        repository.seed(makeInitialTracked(at: now()))
+        dataProvider.forcePhase(.updated)
+        isSeeded = true
+
+        let delay = TimeInterval.random(in: delayRange)
+        let delayedNotifications = DiagnosticsDelayedNotificationDelivering(
+            service: notificationService,
+            delay: delay
+        )
+        let pipelineRefresh = WatchlistRefreshService(
+            tvMaze: dataProvider,
+            repository: repository,
+            notifications: delayedNotifications,
+            analytics: analytics,
+            diagnostics: diagnostics,
+            now: now
+        )
+
+        await pipelineRefresh.refreshAll(force: true)
+
+        let tracked = repository.show(id: DiagnosticsSimulatedData.showID)
+        let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
+        let notificationDecision = diagnostics.lastNotificationDecision ?? "No notification decision recorded"
+        let delaySeconds = Int(delay.rounded())
+        let summary =
+            "Delayed pipeline (\(delaySeconds)s): \(statusSummary). \(notificationDecision)"
+
+        diagnostics.recordSimulatedScenarioSummary(summary)
+        resetScenario()
 
         return summary
     }
