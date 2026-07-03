@@ -97,6 +97,8 @@
 		E1E246C42FF82FF700E5FD11 /* 09-analytics-and-diagnostics.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "09-analytics-and-diagnostics.md"; sourceTree = "<group>"; };
 		E1E24A552FF8393B00E5FD11 /* Clean up Scripts.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Clean up Scripts.md"; sourceTree = "<group>"; };
 		E1E24C242FF84A2300E5FD11 /* Add to Diagnostics view.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Add to Diagnostics view.md"; sourceTree = "<group>"; };
+		E1E24DF32FF86FE300E5FD11 /* Discuss Search Change.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Discuss Search Change.pdf"; sourceTree = "<group>"; };
+		E1E24DF42FF86FEB00E5FD11 /* Implement Search Change.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Search Change.md"; sourceTree = "<group>"; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
 		E1F2592C2FECA491006D0E58 /* Implement Visual and UI Polish.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Visual and UI Polish.md"; sourceTree = "<group>"; };
 		E1F25BC72FEDAF46006D0E58 /* Update Release Readiness for Feedback and Analyics.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Update Release Readiness for Feedback and Analyics.pdf"; sourceTree = "<group>"; };
@@ -434,6 +436,8 @@
 				E1E244E82FF8293700E5FD11 /* Update Diagrams.pdf */,
 				E1E24A552FF8393B00E5FD11 /* Clean up Scripts.md */,
 				E1E24C242FF84A2300E5FD11 /* Add to Diagnostics view.md */,
+				E1E24DF32FF86FE300E5FD11 /* Discuss Search Change.pdf */,
+				E1E24DF42FF86FEB00E5FD11 /* Implement Search Change.md */,
 			);
 			path = "7-3-2026";
 			sourceTree = "<group>";
