@@ -20,66 +20,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # shellcheck source=lib/device-log-capture.sh
 source "${ROOT}/Scripts/lib/device-log-capture.sh"
-SCHEME="NextSeason"
-CONFIGURATION="Release"
+# shellcheck source=lib/performance-suite-common.sh
+source "${ROOT}/Scripts/lib/performance-suite-common.sh"
 DEVICE="${DEVICE_UDID:-}"
 RUNS="${RUNS:-5}"
 SUBSYSTEM="com.TrialByFyre.NextSeason"
-
-connected_device_udid() {
-    xcrun xctrace list devices 2>/dev/null | awk '
-        /^== Devices ==$/ { in_devices=1; next }
-        /^==/ { in_devices=0 }
-        in_devices && /iPhone/ {
-            if (match($0, /\(([0-9A-Fa-f-]+)\)[[:space:]]*$/)) {
-                print substr($0, RSTART + 1, RLENGTH - 2)
-                exit
-            }
-        }
-    '
-}
-
-resolve_app_path() {
-    local device="$1"
-    xcodebuild \
-        -project "${ROOT}/NextSeason.xcodeproj" \
-        -scheme "${SCHEME}" \
-        -configuration "${CONFIGURATION}" \
-        -destination "id=${device}" \
-        -showBuildSettings 2>/dev/null \
-        | awk '/TARGET_BUILD_DIR =/ { dir=$3 } /FULL_PRODUCT_NAME =/ { name=$3 } END { print dir "/" name }'
-}
-
-build_app() {
-    local device="$1"
-    echo "Building ${SCHEME} (${CONFIGURATION}) for ${device}..."
-    xcodebuild \
-        -project "${ROOT}/NextSeason.xcodeproj" \
-        -scheme "${SCHEME}" \
-        -configuration "${CONFIGURATION}" \
-        -destination "id=${device}" \
-        build
-}
-
-install_app_on_device() {
-    local app="$1"
-    local device_core="${2:-}"
-    echo "Installing app on device (required for Instruments attach permissions)..."
-    if [[ -n "${device_core}" ]]; then
-        xcrun devicectl device install app --device "${device_core}" "${app}"
-    else
-        xcrun devicectl device install app --device "${DEVICE}" "${app}" 2>/dev/null \
-            || xcrun devicectl device install app "${app}"
-    fi
-}
-
-core_device_uuid() {
-    xcrun devicectl list devices 2>/dev/null | awk '
-        /connected/ {
-            for (i=1;i<=NF;i++) if ($i ~ /^[0-9A-F-]{36}$/) { print $i; exit }
-        }
-    '
-}
 
 start_log_stream() {
     local device="$1"
@@ -221,11 +166,7 @@ main() {
     HAR_DIR="${SESSION}/har"
     mkdir -p "${TRACE_DIR}" "${LOG_DIR}" "${HAR_DIR}"
 
-    if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
-        build_app "${DEVICE}"
-    fi
-
-    APP="$(resolve_app_path "${DEVICE}")"
+    APP="$(resolve_performance_app "${DEVICE}")"
     if [[ ! -d "${APP}" ]]; then
         echo "error: app not found at ${APP}" >&2
         exit 1

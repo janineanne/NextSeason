@@ -1,15 +1,47 @@
 #!/usr/bin/env bash
+#
+# resume-performance-suite.sh
+# NextSeason
+#
 # Resume network, stress, and analysis for an existing session directory.
-set -uo pipefail
+#
+# Usage:
+#   ./Scripts/resume-performance-suite.sh .instruments/20260628-222731
+#   DEVICE_UDID=... ./Scripts/resume-performance-suite.sh SESSION_DIR
+#   APP_PATH=/path/to/NextSeason.app SKIP_BUILD=1 ./Scripts/resume-performance-suite.sh SESSION_DIR
+#
+set -euo pipefail
 
 SESSION="${1:?usage: resume-performance-suite.sh SESSION_DIR}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # shellcheck source=lib/device-log-capture.sh
 source "${ROOT}/Scripts/lib/device-log-capture.sh"
-DEVICE="${DEVICE_UDID:-00008140-001178E92EF3001C}"
-APP="${APP_PATH:-/Users/janine/Library/Developer/Xcode/DerivedData/NextSeason-edzsejwlkhbozadhjlqbhyrvklkf/Build/Products/Release-iphoneos/NextSeason.app}"
-MANIFEST="${SESSION}/manifest.json"
+# shellcheck source=lib/performance-suite-common.sh
+source "${ROOT}/Scripts/lib/performance-suite-common.sh"
 SUBSYSTEM="com.TrialByFyre.NextSeason"
+
+if [[ ! -d "${SESSION}" ]]; then
+    echo "error: session directory not found: ${SESSION}" >&2
+    exit 1
+fi
+
+MANIFEST="${SESSION}/manifest.json"
+if [[ ! -f "${MANIFEST}" ]]; then
+    echo "error: manifest not found: ${MANIFEST}" >&2
+    exit 1
+fi
+
+DEVICE="${DEVICE_UDID:-$(connected_device_udid)}"
+if [[ -z "${DEVICE}" ]]; then
+    echo "error: no connected iPhone. Set DEVICE_UDID or plug in a device." >&2
+    exit 1
+fi
+
+APP="$(resolve_performance_app "${DEVICE}")"
+if [[ ! -d "${APP}" ]]; then
+    echo "error: app not found at ${APP}" >&2
+    exit 1
+fi
 
 mkdir -p "${SESSION}/har"
 
@@ -58,6 +90,9 @@ PY
 }
 
 echo "Resuming session: ${SESSION}"
+echo "Device: ${DEVICE}"
+echo "App: ${APP}"
+echo
 
 echo ">> network captures"
 for net_flow in search showDetails addToWishlist; do
