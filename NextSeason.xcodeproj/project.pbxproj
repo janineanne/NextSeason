@@ -65,15 +65,6 @@
 		E197F2752FF39AF100D34A28 /* Fix watchlist refresh crash.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Fix watchlist refresh crash.md"; sourceTree = "<group>"; };
 		E197F2762FF39B3B00D34A28 /* Plan for fixing watchlist refresh crash.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Plan for fixing watchlist refresh crash.md"; sourceTree = "<group>"; };
 		E197F4242FF43B5000D34A28 /* Discuss ModelContainer init failures.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Discuss ModelContainer init failures.md"; sourceTree = "<group>"; };
-		E197F4252FF46A7800D34A28 /* 01_system_architecture.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 01_system_architecture.md; sourceTree = "<group>"; };
-		E197F4262FF46A7800D34A28 /* 02_app_startup_and_environment.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 02_app_startup_and_environment.md; sourceTree = "<group>"; };
-		E197F4272FF46A7800D34A28 /* 03_search_flow.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 03_search_flow.md; sourceTree = "<group>"; };
-		E197F4282FF46A7800D34A28 /* 04_show_detail_and_watchlist_flow.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 04_show_detail_and_watchlist_flow.md; sourceTree = "<group>"; };
-		E197F4292FF46A7800D34A28 /* 05_background_refresh_and_notifications.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 05_background_refresh_and_notifications.md; sourceTree = "<group>"; };
-		E197F42A2FF46A7800D34A28 /* 06_data_model.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 06_data_model.md; sourceTree = "<group>"; };
-		E197F42B2FF46A7800D34A28 /* 07_dependencies_and_boundaries.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 07_dependencies_and_boundaries.md; sourceTree = "<group>"; };
-		E197F42C2FF46A7800D34A28 /* 08_analytics_and_diagnostics.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 08_analytics_and_diagnostics.md; sourceTree = "<group>"; };
-		E197F42D2FF46A7800D34A28 /* 09_post_mvp_architecture.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 09_post_mvp_architecture.md; sourceTree = "<group>"; };
 		E197F42E2FF46A7800D34A28 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E197F42F2FF47B1700D34A28 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E197F4302FF48AA200D34A28 /* Improve Theme switcher.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Improve Theme switcher.md"; sourceTree = "<group>"; };
@@ -94,6 +85,16 @@
 		E1E2431E2FF825B800E5FD11 /* Diagnostics work with Chat GPT.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Diagnostics work with Chat GPT.pdf"; sourceTree = "<group>"; };
 		E1E2431F2FF825B800E5FD11 /* Discussion of upcoming tasks.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Discussion of upcoming tasks.pdf"; sourceTree = "<group>"; };
 		E1E244E82FF8293700E5FD11 /* Update Diagrams.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Update Diagrams.pdf"; sourceTree = "<group>"; };
+		E1E246BB2FF82FF700E5FD11 /* 01-app-architecture.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "01-app-architecture.md"; sourceTree = "<group>"; };
+		E1E246BC2FF82FF700E5FD11 /* 02-navigation-and-screens.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "02-navigation-and-screens.md"; sourceTree = "<group>"; };
+		E1E246BD2FF82FF700E5FD11 /* 03-watchlist-refresh-and-notifications.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "03-watchlist-refresh-and-notifications.md"; sourceTree = "<group>"; };
+		E1E246BE2FF82FF700E5FD11 /* 04-data-and-persistence.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "04-data-and-persistence.md"; sourceTree = "<group>"; };
+		E1E246BF2FF82FF700E5FD11 /* 05-beta-diagnostics-and-testing.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "05-beta-diagnostics-and-testing.md"; sourceTree = "<group>"; };
+		E1E246C02FF82FF700E5FD11 /* 05-search-flow.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "05-search-flow.md"; sourceTree = "<group>"; };
+		E1E246C12FF82FF700E5FD11 /* 06-show-detail-and-tracking.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "06-show-detail-and-tracking.md"; sourceTree = "<group>"; };
+		E1E246C22FF82FF700E5FD11 /* 07-beta-diagnostics-and-testing.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "07-beta-diagnostics-and-testing.md"; sourceTree = "<group>"; };
+		E1E246C32FF82FF700E5FD11 /* 08-background-refresh-scheduling.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "08-background-refresh-scheduling.md"; sourceTree = "<group>"; };
+		E1E246C42FF82FF700E5FD11 /* 09-analytics-and-diagnostics.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "09-analytics-and-diagnostics.md"; sourceTree = "<group>"; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
 		E1F2592C2FECA491006D0E58 /* Implement Visual and UI Polish.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Visual and UI Polish.md"; sourceTree = "<group>"; };
 		E1F25BC72FEDAF46006D0E58 /* Update Release Readiness for Feedback and Analyics.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Update Release Readiness for Feedback and Analyics.pdf"; sourceTree = "<group>"; };
@@ -209,15 +210,16 @@
 		E102F0622FE4A8D10076FCDD /* Diagrams */ = {
 			isa = PBXGroup;
 			children = (
-				E197F4252FF46A7800D34A28 /* 01_system_architecture.md */,
-				E197F4262FF46A7800D34A28 /* 02_app_startup_and_environment.md */,
-				E197F4272FF46A7800D34A28 /* 03_search_flow.md */,
-				E197F4282FF46A7800D34A28 /* 04_show_detail_and_watchlist_flow.md */,
-				E197F4292FF46A7800D34A28 /* 05_background_refresh_and_notifications.md */,
-				E197F42A2FF46A7800D34A28 /* 06_data_model.md */,
-				E197F42B2FF46A7800D34A28 /* 07_dependencies_and_boundaries.md */,
-				E197F42C2FF46A7800D34A28 /* 08_analytics_and_diagnostics.md */,
-				E197F42D2FF46A7800D34A28 /* 09_post_mvp_architecture.md */,
+				E1E246BB2FF82FF700E5FD11 /* 01-app-architecture.md */,
+				E1E246BC2FF82FF700E5FD11 /* 02-navigation-and-screens.md */,
+				E1E246BD2FF82FF700E5FD11 /* 03-watchlist-refresh-and-notifications.md */,
+				E1E246BE2FF82FF700E5FD11 /* 04-data-and-persistence.md */,
+				E1E246BF2FF82FF700E5FD11 /* 05-beta-diagnostics-and-testing.md */,
+				E1E246C02FF82FF700E5FD11 /* 05-search-flow.md */,
+				E1E246C12FF82FF700E5FD11 /* 06-show-detail-and-tracking.md */,
+				E1E246C22FF82FF700E5FD11 /* 07-beta-diagnostics-and-testing.md */,
+				E1E246C32FF82FF700E5FD11 /* 08-background-refresh-scheduling.md */,
+				E1E246C42FF82FF700E5FD11 /* 09-analytics-and-diagnostics.md */,
 				E197F42E2FF46A7800D34A28 /* README.md */,
 			);
 			path = Diagrams;
