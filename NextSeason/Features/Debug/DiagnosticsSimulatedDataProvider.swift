@@ -49,6 +49,12 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
         lock.unlock()
     }
 
+    func forcePhase(_ newPhase: Phase) {
+        lock.lock()
+        phase = newPhase
+        lock.unlock()
+    }
+
     func advanceAfterRun() {
         lock.lock()
         phase = phase == .baseline ? .updated : .baseline

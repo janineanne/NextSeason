@@ -30,9 +30,11 @@ struct DiagnosticsView: View {
     @State private var reportText = ""
     @State private var isForceRefreshing = false
     @State private var isSendingTestNotification = false
+    @State private var isSchedulingDelayedPipelineNotification = false
     @State private var isRunningSimulation = false
     @State private var simulatedUpdateRunner: DiagnosticsSimulatedUpdateRunner?
     @State private var betaBuildAvailability = BetaBuildAvailability.shared
+    @State private var isShowingDocumentation = false
 
     private var betaValidationAvailable: Bool {
         betaBuildAvailability.isAvailable
@@ -98,8 +100,6 @@ struct DiagnosticsView: View {
                     }
                 } header: {
                     Text("Launch investigation")
-                } footer: {
-                    Text("This does not replace TestFlight crash reports. It only flags that the previous run did not reach a normal background transition, then keeps recent breadcrumbs so testers can share context.")
                 }
 
                 Section("Usage") {
@@ -137,8 +137,6 @@ struct DiagnosticsView: View {
                     } label: {
                         Label("Copy Report", systemImage: "doc.on.doc")
                     }
-                } footer: {
-                    Text("Nothing is sent automatically. Share this report only if you choose to.")
                 }
             }
             .navigationTitle("Diagnostics")
@@ -147,9 +145,21 @@ struct DiagnosticsView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isShowingDocumentation = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("Diagnostics help")
+                    .accessibilityHint("Explains what each field and action does")
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done", action: dismiss.callAsFunction)
                 }
+            }
+            .sheet(isPresented: $isShowingDocumentation) {
+                DiagnosticsDocumentationView()
             }
             .task {
                 await refreshReport()
@@ -191,8 +201,6 @@ struct DiagnosticsView: View {
             }
         } header: {
             Text("Beta validation")
-        } footer: {
-            Text("Refresh diagnostics reflect real watchlist polling. Simulated updates use fake data only and never modify your tracked shows.")
         }
 
         Section("Beta actions") {
@@ -217,6 +225,18 @@ struct DiagnosticsView: View {
             .disabled(isSendingTestNotification)
 
             Button {
+                Task { await scheduleDelayedPipelineNotification() }
+            } label: {
+                Label(
+                    isSchedulingDelayedPipelineNotification
+                        ? "Scheduling…"
+                        : "Schedule Pipeline Test Notification",
+                    systemImage: "bell.and.waves.left.and.right"
+                )
+            }
+            .disabled(isSchedulingDelayedPipelineNotification)
+
+            Button {
                 Task { await runSimulatedUpdateScenario() }
             } label: {
                 Label(
@@ -225,12 +245,6 @@ struct DiagnosticsView: View {
                 )
             }
             .disabled(isRunningSimulation)
-
-            if let runner = simulatedUpdateRunner {
-                Text("Next simulation step uses \(runner.dataPhaseLabel.lowercased()). Tap twice (step 1 → step 2) to exercise debounce then date-backed notification.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 
@@ -286,6 +300,14 @@ struct DiagnosticsView: View {
         )
 
         isSendingTestNotification = false
+    }
+
+    private func scheduleDelayedPipelineNotification() async {
+        guard !isSchedulingDelayedPipelineNotification else { return }
+        isSchedulingDelayedPipelineNotification = true
+        prepareSimulatedUpdateRunnerIfNeeded()
+        _ = await simulatedUpdateRunner?.runDelayedNewSeasonNotification()
+        isSchedulingDelayedPipelineNotification = false
     }
 
     private func runSimulatedUpdateScenario() async {
