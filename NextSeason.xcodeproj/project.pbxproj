@@ -91,6 +91,8 @@
 		E1DAC5502FDF358800BD81E5 /* ProductSpec.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProductSpec.md; sourceTree = "<group>"; };
 		E1DAC5512FDF358800BD81E5 /* TVMazeResearch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TVMazeResearch.md; sourceTree = "<group>"; };
 		E1DAC5592FDF5A4B00BD81E5 /* NextSeasonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1E2431E2FF825B800E5FD11 /* Diagnostics work with Chat GPT.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Diagnostics work with Chat GPT.pdf"; sourceTree = "<group>"; };
+		E1E2431F2FF825B800E5FD11 /* Discussion of upcoming tasks.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Discussion of upcoming tasks.pdf"; sourceTree = "<group>"; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
 		E1F2592C2FECA491006D0E58 /* Implement Visual and UI Polish.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Visual and UI Polish.md"; sourceTree = "<group>"; };
 		E1F25BC72FEDAF46006D0E58 /* Update Release Readiness for Feedback and Analyics.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Update Release Readiness for Feedback and Analyics.pdf"; sourceTree = "<group>"; };
@@ -327,6 +329,8 @@
 		E197008D2FF72BEE00D34A28 /* 7-2-2026 */ = {
 			isa = PBXGroup;
 			children = (
+				E1E2431E2FF825B800E5FD11 /* Diagnostics work with Chat GPT.pdf */,
+				E1E2431F2FF825B800E5FD11 /* Discussion of upcoming tasks.pdf */,
 				E197008E2FF72BFF00D34A28 /* Diagnostics Work with Cursor.md */,
 			);
 			path = "7-2-2026";
