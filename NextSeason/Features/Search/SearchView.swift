@@ -70,6 +70,7 @@ struct SearchView: View {
                     }
                 }
                 .searchable(text: $viewModel.query, prompt: "Search TV shows")
+                .modifier(ReturnToSearchResultsOnActivateModifier(navigationPath: $navigationPath))
                 .onSubmit(of: .search) {
                     collapseSearchKeyboard()
                 }
@@ -313,6 +314,21 @@ struct SearchView: View {
                 }
             }
         }
+    }
+}
+
+/// When search is activated from a pushed show-detail screen, pop back to the
+/// results list while leaving the query in `SearchViewModel` untouched.
+private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
+    @Environment(\.isSearching) private var isSearching
+    @Binding var navigationPath: NavigationPath
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: isSearching) { _, searching in
+                guard searching, navigationPath.count > 0 else { return }
+                navigationPath = NavigationPath()
+            }
     }
 }
 
