@@ -21,8 +21,16 @@ struct DiagnosticsDocumentationView: View {
                     documentationText(DiagnosticsDocumentationCopy.appSection)
                 }
 
-                Section("Beta validation") {
-                    documentationText(DiagnosticsDocumentationCopy.betaValidationSection)
+                Section("Beta validation — Background") {
+                    documentationText(DiagnosticsDocumentationCopy.betaValidationBackgroundSection)
+                }
+
+                Section("Beta validation — Foreground") {
+                    documentationText(DiagnosticsDocumentationCopy.betaValidationForegroundSection)
+                }
+
+                Section("Beta validation — Simulation") {
+                    documentationText(DiagnosticsDocumentationCopy.betaValidationSimulationSection)
                 }
 
                 Section("Beta actions") {

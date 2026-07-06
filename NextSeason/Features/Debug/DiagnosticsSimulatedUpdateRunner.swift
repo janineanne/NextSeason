@@ -66,11 +66,11 @@ final class DiagnosticsSimulatedUpdateRunner {
         }
 
         let phase = dataProvider.currentPhase
-        await refreshService.refreshAll(force: true)
+        let outcome = await refreshService.refreshAll(force: true)
 
         let tracked = repository.show(id: DiagnosticsSimulatedData.showID)
         let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
-        let notificationDecision = diagnostics.lastNotificationDecision
+        let notificationDecision = outcome?.notificationDecision ?? "Refresh did not complete"
         let summary = "Step \(phase.stepNumber) (\(phase.shortLabel)): \(statusSummary). \(notificationDecision)"
 
         diagnostics.recordSimulatedScenarioSummary(summary)
@@ -115,11 +115,11 @@ final class DiagnosticsSimulatedUpdateRunner {
             now: now
         )
 
-        await pipelineRefresh.refreshAll(force: true)
+        let outcome = await pipelineRefresh.refreshAll(force: true)
 
         let tracked = repository.show(id: DiagnosticsSimulatedData.showID)
         let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
-        let notificationDecision = diagnostics.lastNotificationDecision
+        let notificationDecision = outcome?.notificationDecision ?? "Refresh did not complete"
         let delaySeconds = Int(delay.rounded())
         let summary =
             "Delayed pipeline (\(delaySeconds)s): \(statusSummary). \(notificationDecision)"

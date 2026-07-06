@@ -14,15 +14,21 @@ flowchart TB
     Diagnostics --> UsageCounters[Local usage counters]
     Diagnostics --> ShareControls[Share Report / Copy Report]
 
-    BetaValidation --> LastRefresh[Last refresh]
+    BetaValidation --> BackgroundRefresh[Last background refresh]
     BetaValidation --> NextRefresh[Next refresh window]
-    BetaValidation --> LastFetch[Last fetch result]
-    BetaValidation --> LastDecision[Last notification decision]
+    BetaValidation --> BackgroundFetch[Last background fetch result]
+    BetaValidation --> BackgroundDecision[Last background notification decision]
+    BetaValidation --> ForegroundRefresh[Last foreground refresh]
+    BetaValidation --> ForegroundFetch[Last foreground fetch result]
+    BetaValidation --> ForegroundDecision[Last foreground notification decision]
     BetaValidation --> LastSimulation[Last simulation summary]
 
     Diagnostics --> ForceRefresh[Force Refresh Now]
     ForceRefresh --> RefreshService[WatchlistRefreshService.refreshAll(force: true)]
-    RefreshService --> BetaRefreshDiagnostics[BetaRefreshDiagnostics]
+    RefreshService --> ForegroundDiagnostics[BetaRefreshDiagnostics foreground fields]
+
+    Scheduler[RefreshScheduler BGAppRefreshTask] --> RefreshServiceBackground[WatchlistRefreshService.refreshAll(recordDiagnostics: true)]
+    RefreshServiceBackground --> BackgroundDiagnostics[BetaRefreshDiagnostics background fields persisted]
 
     Diagnostics --> TestNotification[Send Test Notification]
     TestNotification --> NotificationService[NotificationService]
@@ -31,7 +37,7 @@ flowchart TB
     SimScenario --> SimRunner[DiagnosticsSimulatedUpdateRunner]
     SimRunner --> FakeData[DiagnosticsSimulatedDataProvider]
     SimRunner --> NotificationService
-    SimRunner --> BetaRefreshDiagnostics
+    SimRunner --> SimSummary[BetaRefreshDiagnostics last simulation]
     SimRunner --> Analytics[AnalyticsService]
 ```
 
