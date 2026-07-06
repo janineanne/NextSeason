@@ -21,7 +21,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: tabSelection) {
+        TabView(selection: $coordinator.selectedTab) {
             SearchView(
                 navigationPath: $coordinator.searchPath,
                 profileFlowSearchQuery: $coordinator.profileFlowSearchQuery,
@@ -62,7 +62,10 @@ struct ContentView: View {
             }
         }
         .modifier(BetaDiagnosticsPresentationModifier())
-        .onChange(of: coordinator.selectedTab) { _, tab in
+        .onChange(of: coordinator.selectedTab) { oldTab, tab in
+            if tab == .search, oldTab != .search {
+                coordinator.popSearchToRoot()
+            }
             if tab == .watchlist {
                 coordinator.notifyWatchlistDataChanged()
             }
@@ -84,20 +87,6 @@ struct ContentView: View {
                 )
             }
         }
-    }
-
-    /// Any user-driven switch to Search returns to the search root; programmatic
-    /// navigation (e.g. notification deep links) sets `selectedTab` directly.
-    private var tabSelection: Binding<AppNavigationCoordinator.Tab> {
-        Binding(
-            get: { coordinator.selectedTab },
-            set: { newTab in
-                if newTab == .search {
-                    coordinator.popSearchToRoot()
-                }
-                coordinator.selectedTab = newTab
-            }
-        )
     }
 }
 

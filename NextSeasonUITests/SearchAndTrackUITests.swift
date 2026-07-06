@@ -14,9 +14,8 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         let result = waitForSearchResultRow(named: previewShowName)
         result.tap()
 
-        XCTAssertTrue(app.navigationBars[previewShowName].waitForExistence(timeout: UITestTimeout.standard))
+        waitForShowDetail()
         XCTAssertTrue(app.staticTexts["Next Season"].waitForExistence(timeout: UITestTimeout.standard))
-        XCTAssertTrue(showDetailTrackButton().waitForExistence(timeout: UITestTimeout.standard))
     }
 
     func testTrackShowAppearsOnWatchlist() {
@@ -85,7 +84,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         let result = waitForSearchResultRow(named: previewShowName)
         result.tap()
 
-        XCTAssertTrue(app.navigationBars[previewShowName].waitForExistence(timeout: UITestTimeout.standard))
+        waitForShowDetail()
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
         waitForSearchResultRow(named: previewShowName)

@@ -32,6 +32,7 @@ struct TabBarReselectHandler: UIViewControllerRepresentable {
         var tabIndex: Int
         var onReselect: @MainActor () -> Void
         let hostingController = UIViewController()
+        private var lastSelectedIndex: Int?
 
         init(tabIndex: Int, onReselect: @escaping @MainActor () -> Void) {
             self.tabIndex = tabIndex
@@ -47,16 +48,15 @@ struct TabBarReselectHandler: UIViewControllerRepresentable {
             }
         }
 
-        func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-            guard let index = tabBarController.viewControllers?.firstIndex(of: viewController),
-                  index == tabIndex,
-                  tabBarController.selectedIndex == index
-            else { return true }
+        func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+            let selectedIndex = tabBarController.selectedIndex
+            defer { lastSelectedIndex = selectedIndex }
+
+            guard selectedIndex == tabIndex, lastSelectedIndex == tabIndex else { return }
 
             Task { @MainActor in
                 onReselect()
             }
-            return true
         }
     }
 }
