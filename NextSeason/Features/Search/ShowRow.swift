@@ -63,7 +63,6 @@ struct ShowRowLabel: View {
                     .appPrimaryText()
                 Text(subtitle)
                     .font(.subheadline)
-                    .lineLimit(2)
                     .appPrimaryText()
                 if isStale {
                     Text("No longer on TVMaze")
