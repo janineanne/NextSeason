@@ -107,7 +107,7 @@ struct SearchView: View {
                 }
                 .alert("Stay in the Loop", isPresented: $shouldPromptForNotifications) {
                     Button("Not Now", role: .cancel) {
-                        notificationService.deferAuthorizationPrompt()
+                        deferNotificationPrompt()
                     }
                     Button("Enable Notifications") {
                         Task { await confirmNotificationPrompt() }
@@ -115,13 +115,13 @@ struct SearchView: View {
                 } message: {
                     Text(FirstRunCopy.notificationPromptMessage)
                 }
-                .alert("Notifications Are Off", isPresented: $shouldShowNotificationsDeniedAlert) {
+                .alert("Notifications Not Enabled", isPresented: $shouldShowNotificationsDeniedAlert) {
                     Button("Not Now", role: .cancel) {}
                     Button("Open Settings") {
                         notificationService.openNotificationSettings()
                     }
                 } message: {
-                    Text(FirstRunCopy.notificationsDeniedMessage)
+                    Text(FirstRunCopy.notificationsSettingsReminderMessage)
                 }
         }
         .scrollDismissesKeyboard(.immediately)
@@ -207,11 +207,6 @@ struct SearchView: View {
             dismissSearchResultsHintIfNeeded()
             if await notificationService.needsAuthorizationPrompt() {
                 shouldPromptForNotifications = true
-            } else {
-                await notificationService.requestAuthorizationIfNeeded()
-                if await notificationService.isDenied() {
-                    shouldShowNotificationsDeniedAlert = true
-                }
             }
             onWatchlistChanged()
         } catch is CancellationError {
@@ -222,10 +217,19 @@ struct SearchView: View {
         }
     }
 
+    private func deferNotificationPrompt() {
+        notificationService.deferAuthorizationPrompt()
+        shouldShowNotificationsSettingsReminder()
+    }
+
+    private func shouldShowNotificationsSettingsReminder() {
+        shouldShowNotificationsDeniedAlert = true
+    }
+
     private func confirmNotificationPrompt() async {
         await notificationService.requestAuthorizationIfNeeded()
         if await notificationService.isDenied() {
-            shouldShowNotificationsDeniedAlert = true
+            shouldShowNotificationsSettingsReminder()
         }
     }
 

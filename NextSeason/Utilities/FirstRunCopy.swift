@@ -22,8 +22,8 @@ enum FirstRunCopy {
     static let notificationPromptMessage =
         "Get alerts when a tracked show's next season gets a release date or status update."
 
-    static let notificationsDeniedMessage =
-        "Enable notifications in Settings to get alerts when a tracked show's next season gets a release date or status update."
+    static let notificationsSettingsReminderMessage =
+        "You can turn on notifications in Settings to get alerts when a tracked show's next season gets a release date or status update."
 
     static let notificationsDisabledBannerMessage =
         "Turn on notifications in Settings to get alerts when a tracked show's next season gets a release date or status update."

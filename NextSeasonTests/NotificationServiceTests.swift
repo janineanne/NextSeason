@@ -51,6 +51,13 @@ struct NotificationServiceTests {
         #expect(await service.needsAuthorizationPrompt() == false)
     }
 
+    @Test("Does not request authorization after the user defers the in-app prompt")
+    func doesNotRequestWhenDeferred() async {
+        let service = makeService(authorizationStatus: .notDetermined)
+        service.deferAuthorizationPrompt()
+        #expect(await service.requestAuthorizationIfNeeded() == false)
+    }
+
     @Test("Reset clears a deferred prompt so the prompt can appear again")
     func resetDeferredPromptRestoresPromptEligibility() async {
         let service = makeService()

@@ -89,7 +89,7 @@ struct ShowDetailView: View {
         } message: {
             Text(FirstRunCopy.notificationPromptMessage)
         }
-        .alert("Notifications Are Off", isPresented: notificationsDeniedBinding(viewModel: viewModel)) {
+        .alert("Notifications Not Enabled", isPresented: notificationsDeniedBinding(viewModel: viewModel)) {
             Button("Not Now", role: .cancel) {
                 viewModel.dismissNotificationsDeniedAlert()
             }
@@ -98,7 +98,7 @@ struct ShowDetailView: View {
                 viewModel.dismissNotificationsDeniedAlert()
             }
         } message: {
-            Text(FirstRunCopy.notificationsDeniedMessage)
+            Text(FirstRunCopy.notificationsSettingsReminderMessage)
         }
         .alert("Coming Soon", isPresented: $showActorNameAlert) {
             Button("OK", role: .cancel) {}

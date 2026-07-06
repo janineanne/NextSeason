@@ -110,11 +110,6 @@ final class ShowDetailViewModel {
             analytics.track(.watchlistAdded(source: .detail, showID: show.id))
             if await notifications.needsAuthorizationPrompt() {
                 shouldPromptForNotifications = true
-            } else {
-                await notifications.requestAuthorizationIfNeeded()
-                if await notifications.isDenied() {
-                    shouldShowNotificationsDeniedAlert = true
-                }
             }
         } catch {
             analytics.trackNonFatalError(error, context: "watchlist_add_detail")
@@ -127,14 +122,19 @@ final class ShowDetailViewModel {
     func dismissNotificationPrompt() {
         shouldPromptForNotifications = false
         notifications.deferAuthorizationPrompt()
+        shouldShowNotificationsSettingsReminder()
     }
 
     func confirmNotificationPrompt() async {
         shouldPromptForNotifications = false
         await notifications.requestAuthorizationIfNeeded()
         if await notifications.isDenied() {
-            shouldShowNotificationsDeniedAlert = true
+            shouldShowNotificationsSettingsReminder()
         }
+    }
+
+    private func shouldShowNotificationsSettingsReminder() {
+        shouldShowNotificationsDeniedAlert = true
     }
 
     func dismissNotificationsDeniedAlert() {
