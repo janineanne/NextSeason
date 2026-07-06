@@ -69,7 +69,6 @@
 		E197F42F2FF47B1700D34A28 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E197F4302FF48AA200D34A28 /* Improve Theme switcher.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Improve Theme switcher.md"; sourceTree = "<group>"; };
 		E197F5E72FF48E4100D34A28 /* Add notification options to Diagnostic menu.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Add notification options to Diagnostic menu.md"; sourceTree = "<group>"; };
-		E197FEAF2FF7134F00D34A28 /* MVP-Search-Results.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.PNG"; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
@@ -100,6 +99,9 @@
 		E1E24DF32FF86FE300E5FD11 /* Discuss Search Change.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Discuss Search Change.pdf"; sourceTree = "<group>"; };
 		E1E24DF42FF86FEB00E5FD11 /* Implement Search Change.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Search Change.md"; sourceTree = "<group>"; };
 		E1E24FD42FFC30DA00E5FD11 /* Improve VoiceOver.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Improve VoiceOver.md"; sourceTree = "<group>"; };
+		E1E24FD52FFC323300E5FD11 /* MVP-Search-Results.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "MVP-Search-Results.jpeg"; sourceTree = "<group>"; };
+		E1E24FD62FFC331F00E5FD11 /* MVP-Show-Detail.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "MVP-Show-Detail.jpeg"; sourceTree = "<group>"; };
+		E1E24FD72FFC332F00E5FD11 /* MVP-Watchlist.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "MVP-Watchlist.jpeg"; sourceTree = "<group>"; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
 		E1F2592C2FECA491006D0E58 /* Implement Visual and UI Polish.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Implement Visual and UI Polish.md"; sourceTree = "<group>"; };
 		E1F25BC72FEDAF46006D0E58 /* Update Release Readiness for Feedback and Analyics.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Update Release Readiness for Feedback and Analyics.pdf"; sourceTree = "<group>"; };
@@ -385,7 +387,9 @@
 		E197FEB02FF7134F00D34A28 /* Screenshots */ = {
 			isa = PBXGroup;
 			children = (
-				E197FEAF2FF7134F00D34A28 /* MVP-Search-Results.PNG */,
+				E1E24FD52FFC323300E5FD11 /* MVP-Search-Results.jpeg */,
+				E1E24FD62FFC331F00E5FD11 /* MVP-Show-Detail.jpeg */,
+				E1E24FD72FFC332F00E5FD11 /* MVP-Watchlist.jpeg */,
 			);
 			path = Screenshots;
 			sourceTree = "<group>";
