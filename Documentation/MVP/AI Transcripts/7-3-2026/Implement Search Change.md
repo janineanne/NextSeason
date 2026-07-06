@@ -6,94 +6,6 @@ Please reread the whole NextSeason project
 
 ## Assistant
 
-I'll systematically explore the NextSeason project structure and key files to rebuild a full picture of the codebase.
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"**/*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/AGENTS.md"}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"**/*.swift"}
-```
-
-### Tool New agent
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"Documentation/MVP/*.md"}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"NextSeason/**/*.swift"}
-```
-
-## Assistant
-
-Verifying key files and checking for recent changes or documentation I may have missed.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/DecisionLog.md"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/MVPBacklog.md"}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"NextSeasonTests/*.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","limit":80}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"Documentation/**/*7-*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/README.md"}
-```
-
-## Assistant
-
 I've reread the full NextSeason project. Here's my current understanding:
 
 ## What It Is
@@ -176,138 +88,6 @@ When the user is sitting on the Search Detail page, looking at show details, and
 
 I'll trace how Search tab navigation and the toolbar Search button work, then wire it so tapping Search pops to the root while keeping the query.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AppNavigationCoordinator.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"showSearchRoot|searchPath|Search.*toolbar|toolbar","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_08c3c10e-daec-478e-87a8-d7be9533ab3","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NavigationUITests.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":80}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"toolbar|Search","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_8a19d056-08c4-4b09-abd3-cec0a03a573","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/ProfileFlowRunner.swift","offset":270}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/AppNavigationCoordinatorTests.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/AI Transcripts/6-25-2026/Fix search keyboard bug.md","limit":80}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"isPresented|dismissSearch|searchable","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_1572e4c6-8a5e-44f0-939d-3b637e356f2","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift","limit":120}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/SKILL.md","limit":100}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Diagrams/05-search-flow.md"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NextSeasonUITestCase.swift","limit":150}
-```
-
-## Assistant
-
-Using `@Environment(\.isSearching)` to detect when the nav-bar search button is tapped on a detail screen, then pop to the search root while keeping the query in `SearchViewModel`.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/.cursor/rules/swiftui-project-style.mdc"}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NextSeasonUITestCase.swift","offset":150}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"]}
-```
-
 ## Assistant
 
 I've updated `SearchView` so activating search from a show detail screen returns you to the results list with your query intact.
@@ -336,96 +116,6 @@ The fix uses `@Environment(\.isSearching)` on the same view that owns `.searchab
 ## User
 
 That works, but there's another case. If I'm on the detail page, tap the watchlist button, then tap the search button, it stays on the detail page.I think that any time the user taps Search they should be taken to the main search page, with the last search string saved if applicable.
-
-## Assistant
-
-Handling Search tab selection and re-taps so we always pop to the search root while preserving the query. Checking how tab selection is wired today.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AppNavigationCoordinator.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/AppNavigationCoordinatorTests.swift","offset":85,"limit":35}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"UITestingConfiguration\\.swift","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_22ae5c4f-f28c-43de-8d69-004a646d549","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"TabBar|UIViewControllerRepresentable","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_98748f08-bbd8-494c-9db3-6d384b90c40","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"ContentView\\.swift","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_2f3ddb5e-6567-477a-af6d-7777ec4ef30","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","limit":80}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"FileSystemSynchronized|NextSeason/","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_097aae5b-ddd8-4af5-bb69-bca9675285a","offset":0}
-```
-
-## Assistant
-
-Clearing the search navigation stack whenever the Search tab is selected, including re-taps. Adding a small tab-bar reselection handler since SwiftUI doesn't expose that.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift"}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/TabBarReselectHandler.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AppNavigationCoordinator.swift"]}
-```
 
 ## Assistant
 
@@ -460,30 +150,292 @@ This is unrelated,but can you fix the warning on 122 of DiagnosticsSimulatedUpda
 {"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsSimulatedUpdateRunner.swift"}
 ```
 
-### Tool Read Lints
+## Assistant
+
+Fixed. `BetaRefreshDiagnostics.lastNotificationDecision` is a non-optional `String` (defaults to `"No notification decision yet."`), so the `??` on line 122 was unnecessary and triggered the warning. It now matches line 73 and uses the property directly.
+
+## User
+
+Tests testSearchOpensShowDetail and testSearchResultsHintDismissesAfterOpeningDetail are failing after these changes.  Please fix those and run all the tests to check for other failures.
+
+## Assistant
+
+Investigating the failing UI tests and running the full test suite to find what broke.
+
+### Tool Read File V2
 
 ```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsSimulatedUpdateRunner.swift"]}
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift","limit":100}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NavigationUITests.swift"}
+```
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift","offset":70,"limit":60}
+```
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Investigating: detail navigation likely triggers `isSearching`, which immediately pops the stack. Fixing that and switching tab reselection to `didSelect`.
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift","offset":315}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/TabBarReselectHandler.swift"}
+```
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Isolating the failure: running the failing tests with targeted fixes.
+
+### Tool Run Terminal Command V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+The custom tab binding is firing during detail navigation. Switching to `onChange` so we only pop when switching from another tab.
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"navigationTitle|navigationBar","glob":"**/ShowDetailView.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_04475df1-4462-4de8-aba7-e192b60feb2","offset":0}
 ```
 
 ### Tool Ripgrep Raw Search
 
 ```
-{"pattern":"lastNotificationDecision","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_1505d9ef-e3f7-4ad7-9aad-d51b40822fb","offset":0}
+{"pattern":"navigationTitle","glob":"**/SearchView.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_14bd2104-ab71-4ccd-aebf-33e586e6e0f","offset":0}
 ```
+
+### Tool Run Terminal Command V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift"}
+```
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
 
 ## Assistant
 
-Removing unnecessary nil coalescing — `lastNotificationDecision` is a non-optional `String`.
+Implementing the fix: the custom `tabSelection` binding was calling `popSearchToRoot()` during NavigationLink navigation. Applying the correct approach.
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/TabBarReselectHandler.swift"}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift","limit":80}
+```
+
+### Tool Ripgrep Raw Search
+
+```
+{}
+```
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":250}
+```
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"trackShowFromDetail|func search\\(","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests","caseInsensitive":false,"multiline":false,"toolCallId":"tool_25a1b7e1-db4b-475e-8043-7eb9be455c3","offset":0}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift","offset":340}
+```
+
+### Tool Run Terminal Command V2
+
+## Assistant
+
+Detail opens fine — the tests fail because they assert `navigationBars["Severance"]`, but `ShowDetailView` never sets a navigation title. Fixing navigation properly and updating the tests.
 
 ### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Edit File V2
+
+### Tool Run Terminal Command V2
+
+### Tool Await
+
+```
+{"taskId":"856884","blockUntilMs":600000,"regex":"TEST (SUCCEEDED|FAILED)"}
+```
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"failed|Failing tests|TEST FAILED|TEST SUCCEEDED","path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/terminals/856884.txt","caseInsensitive":false,"multiline":false,"toolCallId":"tool_3d67b833-e678-4c47-91d2-12b9a58de14","offset":0}
+```
+
+### Tool Read File V2
+
+```
+{"path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/terminals/856884.txt","offset":85}
+```
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"failed|Failing tests","path":"/tmp/nextseason-full-test.log","caseInsensitive":false,"multiline":false,"toolCallId":"tool_78d13454-8043-4ed4-8cb6-3931326930d","offset":0}
+```
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Run Terminal Command V2
+
+### Tool Ripgrep Raw Search
+
+```
+{"pattern":"TEST SUCCEEDED|TEST FAILED|Failing tests","path":"/tmp/nextseason-full-test2.log","caseInsensitive":false,"multiline":false,"toolCallId":"tool_723e4a46-33bf-4914-8464-df8e973c4b8","offset":0}
+```
 
 ### Tool Read Lints
 
 ```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsSimulatedUpdateRunner.swift"]}
+{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift"]}
 ```
 
 ## Assistant
 
-Fixed. `BetaRefreshDiagnostics.lastNotificationDecision` is a non-optional `String` (defaults to `"No notification decision yet."`), so the `??` on line 122 was unnecessary and triggered the warning. It now matches line 73 and uses the property directly.
+Two separate issues were causing the failures:
+
+## Root causes
+
+1. **Custom `tabSelection` binding** — Calling `popSearchToRoot()` in the TabView setter also ran during normal NavigationLink pushes, so detail never stayed on screen.
+
+2. **Brittle UI test assertions** — `testSearchOpensShowDetail` checked `navigationBars["Severance"]`, but `ShowDetailView` never set a navigation title. Detail was opening (as `testTrackShowAppearsOnWatchlist` confirmed), but that assertion failed.
+
+## Fixes
+
+**Navigation (`ContentView`)**
+- Use `$coordinator.selectedTab` directly again
+- Pop to search root only when switching **from another tab** (`oldTab != .search`)
+- Re-tap Search tab handled via `TabBarReselectHandler` using `didSelect` (not `shouldSelect`)
+
+**Search toolbar (`SearchView`)**
+- Restored `ReturnToSearchResultsOnActivateModifier` with a guard for false→true `isSearching` only, plus a short settling window after navigation pushes
+
+**Show detail (`ShowDetailView`)**
+- Added `.navigationTitle(viewModel.displayShow.name)` for proper inline title
+
+**UI tests (`SearchAndTrackUITests`)**
+- Use `waitForShowDetail()` instead of checking the navigation bar title
+
+## Test results
+
+Full suite run: **TEST SUCCEEDED** (all unit + UI tests passing).
+
+Worth a quick manual check:
+1. Search → open detail → still works
+2. Detail → Watchlist → Search → returns to results with query
+3. Detail → tap Search tab again → returns to results
+4. Detail → tap nav-bar search button → returns to results

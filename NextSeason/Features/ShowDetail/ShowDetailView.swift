@@ -76,6 +76,7 @@ struct ShowDetailView: View {
         .appScreenBackground()
         .scrollContentBackground(.hidden)
         .tvmazeAttributionInset()
+        .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
         .appNavigationChrome()
         .alert("Stay in the Loop", isPresented: notificationPromptBinding(viewModel: viewModel)) {

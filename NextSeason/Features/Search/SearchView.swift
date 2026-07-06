@@ -322,11 +322,22 @@ struct SearchView: View {
 private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
     @Environment(\.isSearching) private var isSearching
     @Binding var navigationPath: NavigationPath
+    @State private var lastNavigationPathChange = Date.distantPast
+
+    /// Ignore search activation briefly after pushing detail; the searchable
+    /// chrome can flip `isSearching` during that transition.
+    private static let navigationSettlingInterval: TimeInterval = 0.35
 
     func body(content: Content) -> some View {
         content
-            .onChange(of: isSearching) { _, searching in
-                guard searching, navigationPath.count > 0 else { return }
+            .onChange(of: navigationPath) { _, _ in
+                lastNavigationPathChange = Date.now
+            }
+            .onChange(of: isSearching) { wasSearching, searching in
+                guard searching, !wasSearching, navigationPath.count > 0 else { return }
+                guard Date.now.timeIntervalSince(lastNavigationPathChange) > Self.navigationSettlingInterval else {
+                    return
+                }
                 navigationPath = NavigationPath()
             }
     }
