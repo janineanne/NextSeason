@@ -78,6 +78,7 @@ struct ShowDetailView: View {
         .tvmazeAttributionInset()
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
+        .betaThemeSwitcherToolbar()
         .appNavigationChrome()
         .alert("Stay in the Loop", isPresented: notificationPromptBinding(viewModel: viewModel)) {
             Button("Not Now", role: .cancel) {

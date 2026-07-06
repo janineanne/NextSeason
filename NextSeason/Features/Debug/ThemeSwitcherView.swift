@@ -154,27 +154,36 @@ private struct ThemeSampleCard: View {
     }
 }
 
-/// Floating control that opens the palette picker sheet.
-struct ThemeSwitcherButton: View {
+/// Toolbar control that opens the palette picker sheet (beta).
+struct ThemeSwitcherToolbarButton: View {
     @State private var isPresented = false
 
     var body: some View {
         Button {
             isPresented = true
         } label: {
-            Label("Theme", systemImage: "paintpalette.fill")
-                .font(.body.weight(.semibold))
-                .labelStyle(.titleAndIcon)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(.ultraThinMaterial, in: Capsule())
+            Image(systemName: "paintpalette")
         }
         .accessibilityLabel("Theme")
         .accessibilityHint("Opens the palette switcher")
-        .padding(.trailing, AppSpacing.screen)
-        .padding(.bottom, 80)
         .sheet(isPresented: $isPresented) {
             ThemeSwitcherView()
+        }
+    }
+}
+
+extension View {
+    /// Leading nav-bar entry for the beta palette picker.
+    @ViewBuilder
+    func betaThemeSwitcherToolbar() -> some View {
+        if UITestingConfiguration.isEnabled {
+            self
+        } else {
+            toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    ThemeSwitcherToolbarButton()
+                }
+            }
         }
     }
 }
