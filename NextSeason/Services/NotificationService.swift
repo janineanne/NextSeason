@@ -88,8 +88,10 @@ final class NotificationService: NotificationDelivering {
     }
 
     /// Requests permission once; returns whether alerts are allowed.
+    /// No-ops when the user previously dismissed the in-app prompt with "Not Now".
     @discardableResult
     func requestAuthorizationIfNeeded() async -> Bool {
+        guard !userDefaults.bool(forKey: Self.deferredPromptKey) else { return false }
         let status = await authorizationStatus()
         if NotificationAuthorizationPolicy.canDeliverAlerts(status) { return true }
         switch status {
