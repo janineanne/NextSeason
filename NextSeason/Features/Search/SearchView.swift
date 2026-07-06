@@ -270,23 +270,36 @@ struct SearchView: View {
             .simultaneousGesture(scrollDismissesSearchKeyboardGesture())
             .tvmazeAttributionInset()
         case .results(let shows):
-            List(shows) { show in
-                HStack(spacing: AppSpacing.tight) {
-                    NavigationLink(value: show) {
-                        ShowRowLabel(show: show)
+            List {
+                ForEach(shows) { show in
+                    HStack(spacing: AppSpacing.tight) {
+                        NavigationLink(value: show) {
+                            ShowRowLabel(show: show)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("\(AccessibilityID.Search.result).\(show.id)")
+                        ShowRowTrackButton(
+                            showID: show.id,
+                            showName: show.name,
+                            isTracked: trackedShowIDs.contains(show.id),
+                            isUpdating: updatingShowIDs.contains(show.id)
+                        ) { anchor in
+                            Task { await handleTrackButton(for: show, anchor: anchor) }
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("\(AccessibilityID.Search.result).\(show.id)")
-                    ShowRowTrackButton(
-                        showID: show.id,
-                        showName: show.name,
-                        isTracked: trackedShowIDs.contains(show.id),
-                        isUpdating: updatingShowIDs.contains(show.id)
-                    ) { anchor in
-                        Task { await handleTrackButton(for: show, anchor: anchor) }
-                    }
+                    .appListRowSurface()
                 }
-                .appListRowSurface()
+                SearchResultsLimitFooterView(query: viewModel.query)
+                    .listRowInsets(
+                        EdgeInsets(
+                            top: AppSpacing.tight,
+                            leading: AppSpacing.screen,
+                            bottom: AppSpacing.section,
+                            trailing: AppSpacing.screen
+                        )
+                    )
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
             }
             .appPlainListStyle()
             .scrollDismissesKeyboard(.immediately)

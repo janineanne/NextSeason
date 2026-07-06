@@ -19,6 +19,9 @@ enum FirstRunCopy {
     static let searchResultsHint =
         "Tap the star to track a show, or tap the row to see its next-season details."
 
+    static let searchResultsLimitMessage =
+        "Don't see your show? NextSeason shows TVMaze's top matches only. You may find more on TVMaze.com."
+
     static let notificationPromptMessage =
         "Get alerts when a tracked show's next season gets a release date or status update."
 
