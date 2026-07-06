@@ -22,7 +22,7 @@ struct SearchResultsLimitFooterView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, AppSpacing.row)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Search.resultsLimitFooter)
     }
 
