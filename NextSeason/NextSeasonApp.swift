@@ -131,15 +131,7 @@ private struct AppRootView: View {
 
     var body: some View {
         ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
-            // Beta: theme switcher left enabled for palette feedback. Before portfolio release,
-            // wrap in #if DEBUG or remove — see Release Readiness.md § Portfolio Readiness.
-            // #if DEBUG
-            .overlay(alignment: .bottomTrailing) {
-                if !UITestingConfiguration.isEnabled {
-                    ThemeSwitcherButton()
-                }
-            }
-            // #endif
+            // Beta theme switcher lives in each tab's nav bar (see `.betaThemeSwitcherToolbar()`).
             .watchlistUndoToast(
                 isPresented: undoRemoval.pendingRemoval != nil,
                 anchor: undoRemoval.toastAnchor,

@@ -54,6 +54,7 @@ struct SearchView: View {
                 .appScreenBackground()
                 .navigationTitle("NextSeason")
                 .toolbar { aboutToolbarButton }
+                .betaThemeSwitcherToolbar()
                 .navigationDestination(for: Show.self) { show in
                     ShowDetailView(
                         show: show,

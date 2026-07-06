@@ -54,6 +54,7 @@ struct WatchlistView: View {
             .navigationTitle("Watchlist")
             .navigationBarTitleDisplayMode(.large)
             .toolbar { aboutToolbarButton }
+            .betaThemeSwitcherToolbar()
             .navigationDestination(for: TrackedShow.self) { tracked in
                 ShowDetailView(
                     show: Show(tracked: tracked),
