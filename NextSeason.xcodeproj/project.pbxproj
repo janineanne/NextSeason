@@ -54,6 +54,7 @@
 		E117D6C62FEC8C7B00C02ADC /* Add Accessibility Details.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Add Accessibility Details.pdf"; sourceTree = "<group>"; };
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
+		E1678D3C2FFC5604007F7098 /* Add Notification settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Add Notification settings to About.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -452,6 +453,7 @@
 			isa = PBXGroup;
 			children = (
 				E1E24FD42FFC30DA00E5FD11 /* Improve VoiceOver.md */,
+				E1678D3C2FFC5604007F7098 /* Add Notification settings to About.md */,
 			);
 			path = "7-6-2026";
 			sourceTree = "<group>";
