@@ -77,7 +77,7 @@ struct NextSeasonApp: App {
                 AppDiagnosticsLogger.breadcrumb("refresh_scheduler_configure")
                 RefreshScheduler.configure(diagnostics: betaRefreshDiagnostics) {
                     AppDiagnosticsLogger.logTaskStart("background_watchlist_refresh")
-                    await refreshServiceForBackground.refreshAll()
+                    await refreshServiceForBackground.refreshAll(recordDiagnostics: true)
                     AppDiagnosticsLogger.logTaskComplete("background_watchlist_refresh")
                 }
                 RefreshScheduler.scheduleNextRefresh()

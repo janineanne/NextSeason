@@ -10,6 +10,12 @@ enum DiagnosticsDocumentationCopy {
     static let overview = """
         Diagnostics are available only in Debug and TestFlight builds. Use this screen to \
         validate background refresh, notifications, and launch stability during beta testing.
+
+        **Background** fields show what happened the last time iOS ran a background refresh \
+        task while the app was not in use. They are saved across app launches.
+
+        **Foreground** fields show the result of the last **Force Refresh Now** tap in this \
+        session only. Opening the app or returning from the background does not update them.
         """
 
     static let appSection = """
@@ -21,33 +27,58 @@ enum DiagnosticsDocumentationCopy {
         (system permission granted).
         """
 
-    static let betaValidationSection = """
-        These fields reflect **real watchlist polling** against TVMaze—not simulated data.
+    static let betaValidationBackgroundSection = """
+        These fields reflect **real watchlist polling** against TVMaze during a background \
+        refresh task—not simulated data. All three are **saved across app launches**.
 
-        **Last refresh** is when the app last checked tracked shows for updates.
+        **Last background refresh** is when iOS last woke the app to check tracked shows in \
+        the background. Opening Diagnostics or using the app in the foreground does not \
+        update this timestamp.
 
-        **Next refresh window** is when the next background refresh is scheduled. Production \
-        builds use a 12-hour cadence; accelerated soak-test builds may use 10 minutes.
+        **Next refresh window** is the earliest time the next background refresh is \
+        scheduled. Production builds use a 12-hour cadence; accelerated soak-test builds \
+        may use 10 minutes (see launch flags in developer docs).
 
-        **Last fetch result** summarizes the outcome of the most recent refresh (success, \
-        skipped, error, and so on).
+        **Last background fetch result** summarizes that background run—for example, \
+        how many shows were checked, whether TVMaze reported changes, or if an error occurred.
 
-        **Last notification decision** records what the notification pipeline decided after \
-        the last refresh—for example, whether an alert was sent, suppressed by debounce, or \
-        skipped because nothing changed.
+        **Last background notification decision** records what the notification pipeline \
+        decided after that background run—for example, whether an alert was sent, held for \
+        debounce, or skipped because nothing changed.
+        """
 
-        **Last simulation** appears after you run a beta action that uses fake data; it \
-        summarizes that run.
+    static let betaValidationForegroundSection = """
+        These fields update only when you tap **Force Refresh Now** in Beta actions. They \
+        reflect a **manual** refresh using live TVMaze data and your real watchlist. They \
+        are **not saved**—they reset when the app is terminated.
+
+        Automatic refreshes when you open or return to the app do not update these fields \
+        (even though the app may skip network work if a refresh ran within the last \
+        15 minutes).
+
+        **Last foreground refresh** is when that manual refresh completed.
+
+        **Last foreground fetch result** and **Last foreground notification decision** \
+        summarize the outcome the same way as the background fields above.
+        """
+
+    static let betaValidationSimulationSection = """
+        **Last simulation** appears after you run a beta action that uses fake data. It \
+        summarizes that run only and never reflects your real watchlist.
 
         Simulated updates use fake data only and never modify your tracked shows.
         """
 
     static let betaActionsSection = """
-        **Force Refresh Now** runs an immediate watchlist refresh using live TVMaze data.
+        **Force Refresh Now** runs an immediate watchlist refresh using live TVMaze data. \
+        When it finishes, check the **Last foreground refresh** fields above for the result.
 
-        **Send Test Notification** delivers a sample “new season” alert right away, without \
-        going through the refresh pipeline. Useful for checking that notifications appear \
-        on this device. Will send blank notification if watchlist is empty.
+        The notification test actions below require **Notifications enabled** (alert permission). \
+        They are disabled until permission is granted.
+
+        **Send Test Notification** delivers a sample “new season” alert right away using \
+        fake show data, without going through the refresh pipeline. Useful for confirming \
+        that notifications appear on this device.
 
         **Schedule Pipeline Test Notification** seeds a fake new-season update, runs it \
         through the real refresh and notification decision path, and schedules delivery in \
@@ -79,6 +110,10 @@ enum DiagnosticsDocumentationCopy {
     static let shareReportSection = """
         **Share Report** and **Copy Report** export a text summary of the fields above, \
         usage counters, and recent breadcrumbs.
+
+        Background refresh fields are always included. Foreground refresh fields are included \
+        only if you used **Force Refresh Now** during this session. **Last simulation** is \
+        included when present.
 
         Nothing is sent automatically. Share this report only if you choose to—for example, \
         when filing beta feedback.

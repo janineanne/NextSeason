@@ -6,6 +6,11 @@
 import Foundation
 import os
 
+struct WatchlistRefreshOutcome: Sendable, Equatable {
+    let fetchResult: String
+    let notificationDecision: String
+}
+
 /// Polls TVMaze for watchlist changes and emits notifications when appropriate.
 @MainActor
 final class WatchlistRefreshService {
@@ -40,9 +45,6 @@ final class WatchlistRefreshService {
             now: now()
         ) else {
             AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_skipped policy")
-            diagnostics?.recordRefreshSkipped(
-                reason: "Foreground policy (\(Int(RefreshPolicy.foregroundMinimumInterval / 60)) min minimum)"
-            )
             return
         }
 
@@ -51,11 +53,11 @@ final class WatchlistRefreshService {
         lastForegroundRefreshAt = now()
     }
 
-    func refreshAll(force: Bool = false) async {
+    @discardableResult
+    func refreshAll(force: Bool = false, recordDiagnostics: Bool = false) async -> WatchlistRefreshOutcome? {
         AppDiagnosticsLogger.logger(for: .cache)
             .notice("watchlist_refresh_start force=\(force, privacy: .public)")
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_start")
-        let refreshStartedAt = now()
         var fetchResult = "Completed"
         var lastNotificationDecision = "No notification (no meaningful change)"
         var refreshedShowCount = 0
@@ -67,26 +69,33 @@ final class WatchlistRefreshService {
         } catch {
             if error is CancellationError {
                 AppDiagnosticsLogger.logTaskCancel("watchlist_refresh")
-                return
+                return nil
             }
             analytics.trackNonFatalError(error, context: "watchlist_refresh_load")
-            diagnostics?.recordRefreshCompleted(
-                at: refreshStartedAt,
+            recordBackgroundDiagnosticsIfNeeded(
+                recordDiagnostics,
                 fetchResult: "Failed to load watchlist",
                 notificationDecision: lastNotificationDecision
             )
-            return
+            return WatchlistRefreshOutcome(
+                fetchResult: "Failed to load watchlist",
+                notificationDecision: lastNotificationDecision
+            )
         }
 
         guard !trackedShows.isEmpty else {
             AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_complete empty_watchlist")
             AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
-            diagnostics?.recordRefreshCompleted(
-                at: refreshStartedAt,
+            let outcome = WatchlistRefreshOutcome(
                 fetchResult: "Skipped: empty watchlist",
                 notificationDecision: lastNotificationDecision
             )
-            return
+            recordBackgroundDiagnosticsIfNeeded(
+                recordDiagnostics,
+                fetchResult: outcome.fetchResult,
+                notificationDecision: outcome.notificationDecision
+            )
+            return outcome
         }
 
         let updates: [Int: Date]
@@ -99,12 +108,15 @@ final class WatchlistRefreshService {
                 updates = try await tvMaze.updatedShows(since: period)
             } catch {
                 analytics.trackNonFatalError(error, context: "watchlist_refresh_updates")
-                diagnostics?.recordRefreshCompleted(
-                    at: refreshStartedAt,
+                recordBackgroundDiagnosticsIfNeeded(
+                    recordDiagnostics,
                     fetchResult: "Failed to fetch TVMaze updates",
                     notificationDecision: lastNotificationDecision
                 )
-                return
+                return WatchlistRefreshOutcome(
+                    fetchResult: "Failed to fetch TVMaze updates",
+                    notificationDecision: lastNotificationDecision
+                )
             }
         }
 
@@ -162,13 +174,31 @@ final class WatchlistRefreshService {
             }
         }
 
-        diagnostics?.recordRefreshCompleted(
-            at: refreshStartedAt,
+        let outcome = WatchlistRefreshOutcome(
             fetchResult: fetchResult,
             notificationDecision: lastNotificationDecision
         )
+        recordBackgroundDiagnosticsIfNeeded(
+            recordDiagnostics,
+            fetchResult: outcome.fetchResult,
+            notificationDecision: outcome.notificationDecision
+        )
         AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_complete")
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
+        return outcome
+    }
+
+    private func recordBackgroundDiagnosticsIfNeeded(
+        _ recordDiagnostics: Bool,
+        fetchResult: String,
+        notificationDecision: String
+    ) {
+        guard recordDiagnostics else { return }
+        diagnostics?.recordBackgroundRefreshCompleted(
+            at: now(),
+            fetchResult: fetchResult,
+            notificationDecision: notificationDecision
+        )
     }
 
     private static func describeNotificationDecision(

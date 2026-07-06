@@ -53,18 +53,27 @@ enum AnalyticsDiagnosticsReport {
 
         var betaSection = ""
         if BetaBuildConfiguration.isAvailable, let betaRefreshDiagnostics {
-            let lastRefresh = betaRefreshDiagnostics.lastRefreshAt
+            let lastBackgroundRefresh = betaRefreshDiagnostics.lastBackgroundRefreshAt
                 .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Never"
             let nextRefresh = betaRefreshDiagnostics.nextScheduledRefreshAt
                 .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Not scheduled yet"
             betaSection = """
 
             Beta validation:
-            Last refresh: \(lastRefresh)
+            Last background refresh: \(lastBackgroundRefresh)
             Next refresh window: \(nextRefresh)
-            Last fetch result: \(betaRefreshDiagnostics.lastFetchResult)
-            Last notification decision: \(betaRefreshDiagnostics.lastNotificationDecision)
+            Last background fetch result: \(betaRefreshDiagnostics.lastBackgroundFetchResult)
+            Last background notification decision: \(betaRefreshDiagnostics.lastBackgroundNotificationDecision)
             """
+            if let lastForegroundRefresh = betaRefreshDiagnostics.lastForegroundRefreshAt?
+                .formatted(date: .abbreviated, time: .standard) {
+                betaSection += """
+
+            Last foreground refresh: \(lastForegroundRefresh)
+            Last foreground fetch result: \(betaRefreshDiagnostics.lastForegroundFetchResult)
+            Last foreground notification decision: \(betaRefreshDiagnostics.lastForegroundNotificationDecision)
+            """
+            }
             if let simulated = betaRefreshDiagnostics.lastSimulatedScenarioSummary {
                 betaSection += "\nLast simulation: \(simulated)"
             }

@@ -25,6 +25,7 @@ struct DiagnosticsView: View {
     @Environment(\.betaRefreshDiagnostics) private var betaRefreshDiagnostics
     @Environment(AppThemeController.self) private var themeController
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var notificationsEnabled = false
     @State private var reportText = ""
@@ -168,27 +169,31 @@ struct DiagnosticsView: View {
             .onChange(of: themeController.variant) {
                 refreshReportText()
             }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                Task { await refreshNotificationStatus() }
+            }
         }
     }
 
     @ViewBuilder
     private var betaValidationSection: some View {
         Section {
-            LabeledContent("Last refresh") {
-                Text(formattedDate(betaRefreshDiagnostics?.lastRefreshAt))
+            LabeledContent("Last background refresh") {
+                Text(formattedDate(betaRefreshDiagnostics?.lastBackgroundRefreshAt))
                     .foregroundStyle(.secondary)
             }
             LabeledContent("Next refresh window") {
                 Text(formattedNextRefreshWindow)
                     .foregroundStyle(.secondary)
             }
-            LabeledContent("Last fetch result") {
-                Text(betaRefreshDiagnostics?.lastFetchResult ?? "No refresh recorded yet.")
+            LabeledContent("Last background fetch result") {
+                Text(betaRefreshDiagnostics?.lastBackgroundFetchResult ?? "No background refresh recorded yet.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            LabeledContent("Last notification decision") {
-                Text(betaRefreshDiagnostics?.lastNotificationDecision ?? "No notification decision yet.")
+            LabeledContent("Last background notification decision") {
+                Text(betaRefreshDiagnostics?.lastBackgroundNotificationDecision ?? "No background notification decision yet.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -199,11 +204,25 @@ struct DiagnosticsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            LabeledContent("Last foreground refresh") {
+                Text(formattedDate(betaRefreshDiagnostics?.lastForegroundRefreshAt))
+                    .foregroundStyle(.secondary)
+            }
+            LabeledContent("Last foreground fetch result") {
+                Text(betaRefreshDiagnostics?.lastForegroundFetchResult ?? "No foreground refresh recorded yet.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            LabeledContent("Last foreground notification decision") {
+                Text(betaRefreshDiagnostics?.lastForegroundNotificationDecision ?? "No foreground notification decision yet.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         } header: {
             Text("Beta validation")
         }
 
-        Section("Beta actions") {
+        Section {
             Button {
                 Task { await forceRefreshNow() }
             } label: {
@@ -214,38 +233,55 @@ struct DiagnosticsView: View {
             }
             .disabled(isForceRefreshing || refreshService == nil)
 
-            Button {
-                Task { await sendTestNotification() }
-            } label: {
-                Label(
-                    isSendingTestNotification ? "Sending…" : "Send Test Notification",
-                    systemImage: "bell.badge"
-                )
+            notificationActionButton(
+                isLoading: isSendingTestNotification,
+                loadingTitle: "Sending…",
+                title: "Send Test Notification",
+                systemImage: "bell.badge"
+            ) {
+                await sendTestNotification()
             }
-            .disabled(isSendingTestNotification)
 
-            Button {
-                Task { await scheduleDelayedPipelineNotification() }
-            } label: {
-                Label(
-                    isSchedulingDelayedPipelineNotification
-                        ? "Scheduling…"
-                        : "Schedule Pipeline Test Notification",
-                    systemImage: "bell.and.waves.left.and.right"
-                )
+            notificationActionButton(
+                isLoading: isSchedulingDelayedPipelineNotification,
+                loadingTitle: "Scheduling…",
+                title: "Schedule Pipeline Test Notification",
+                systemImage: "bell.and.waves.left.and.right"
+            ) {
+                await scheduleDelayedPipelineNotification()
             }
-            .disabled(isSchedulingDelayedPipelineNotification)
 
-            Button {
-                Task { await runSimulatedUpdateScenario() }
-            } label: {
-                Label(
-                    isRunningSimulation ? "Running…" : "Run Simulated Update Scenario",
-                    systemImage: "play.rectangle.on.rectangle"
-                )
+            notificationActionButton(
+                isLoading: isRunningSimulation,
+                loadingTitle: "Running…",
+                title: "Run Simulated Update Scenario",
+                systemImage: "play.rectangle.on.rectangle"
+            ) {
+                await runSimulatedUpdateScenario()
             }
-            .disabled(isRunningSimulation)
+        } header: {
+            Text("Beta actions")
+        } footer: {
+            if !notificationsEnabled {
+                Text("Notification test actions require alert permission. Enable notifications in Settings, then return here.")
+            }
         }
+    }
+
+    private func notificationActionButton(
+        isLoading: Bool,
+        loadingTitle: String,
+        title: String,
+        systemImage: String,
+        action: @escaping () async -> Void
+    ) -> some View {
+        Button {
+            Task { await action() }
+        } label: {
+            Label(isLoading ? loadingTitle : title, systemImage: systemImage)
+        }
+        .disabled(isLoading || !notificationsEnabled)
+        .foregroundStyle(notificationsEnabled ? .primary : .secondary)
     }
 
     private var formattedNextRefreshWindow: String {
@@ -277,7 +313,14 @@ struct DiagnosticsView: View {
     private func forceRefreshNow() async {
         guard let refreshService, !isForceRefreshing else { return }
         isForceRefreshing = true
-        await refreshService.refreshAll(force: true)
+        let outcome = await refreshService.refreshAll(force: true)
+        if let outcome {
+            betaRefreshDiagnostics?.recordForegroundRefreshCompleted(
+                at: .now,
+                fetchResult: outcome.fetchResult,
+                notificationDecision: outcome.notificationDecision
+            )
+        }
         isForceRefreshing = false
     }
 
@@ -292,11 +335,6 @@ struct DiagnosticsView: View {
                 showName: DiagnosticsSimulatedData.showName,
                 status: .scheduled(season: 3, premiere: premiere)
             )
-        )
-        betaRefreshDiagnostics?.recordRefreshCompleted(
-            at: .now,
-            fetchResult: "Test notification requested",
-            notificationDecision: "Delivered test notification for \(DiagnosticsSimulatedData.showName)"
         )
 
         isSendingTestNotification = false
@@ -319,9 +357,13 @@ struct DiagnosticsView: View {
     }
 
     private func refreshReport() async {
+        await refreshNotificationStatus()
+        refreshReportText()
+    }
+
+    private func refreshNotificationStatus() async {
         let status = await notificationService.authorizationStatus()
         notificationsEnabled = NotificationAuthorizationPolicy.canDeliverAlerts(status)
-        refreshReportText()
     }
 
     private func refreshReportText() {
