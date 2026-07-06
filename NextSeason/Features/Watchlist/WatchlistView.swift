@@ -160,6 +160,7 @@ struct WatchlistView: View {
                             ShowRowLabel(tracked: tracked)
                         }
                         .buttonStyle(.plain)
+                        .showDetailLinkAccessibility()
                         .accessibilityIdentifier("\(AccessibilityID.Watchlist.row).\(tracked.id)")
 
                         ShowRowTrackButton(

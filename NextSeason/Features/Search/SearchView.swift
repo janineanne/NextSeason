@@ -278,6 +278,7 @@ struct SearchView: View {
                             ShowRowLabel(show: show)
                         }
                         .buttonStyle(.plain)
+                        .showDetailLinkAccessibility()
                         .accessibilityIdentifier("\(AccessibilityID.Search.result).\(show.id)")
                         ShowRowTrackButton(
                             showID: show.id,

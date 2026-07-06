@@ -18,6 +18,7 @@ struct SearchResultsHintView: View {
             .padding(.horizontal, AppSpacing.screen)
             .padding(.vertical, AppSpacing.tight)
             .background(themeColors.background)
+            .accessibilityAddTraits(.isStaticText)
             .accessibilityIdentifier(AccessibilityID.Search.resultsHint)
     }
 }

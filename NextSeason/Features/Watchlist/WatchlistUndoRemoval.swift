@@ -14,8 +14,7 @@ final class WatchlistUndoRemoval {
     private(set) var toastAnchor: CGRect?
 
     static var undoWindowSeconds: TimeInterval {
-        // Keep the undo window long enough for UI tests to find the toast.
-        UITestingConfiguration.isEnabled ? 30 : 5
+        AccessibilityPreferences.undoRemovalWindowSeconds()
     }
 
     private let repository: any WatchlistRepository

@@ -24,10 +24,37 @@ This project was developed using an AI-assisted workflow. I directed the archite
 
 ## Screenshots
 
-Search Results:
+<table>
 
-<img src="Documentation/MVP/Screenshots/MVP-Search-Results.PNG" width="160">
+<tr>
 
+<td align="center">
+
+Search Results
+
+<img src="Documentation/MVP/Screenshots/MVP-Search-Results.jpeg" width="220">
+
+</td>
+
+<td align="center">
+
+Show Details
+
+<img src="Documentation/MVP/Screenshots/MVP-Show-Detail.jpeg" width="220">
+
+</td>
+
+<td align="center">
+
+Watchlist
+
+<img src="Documentation/MVP/Screenshots/MVP-Watchlist.jpeg" width="220">
+
+</td>
+
+</tr>
+
+</table>
 
 ## What's Here
 

@@ -147,6 +147,8 @@ struct ShowDetailView: View {
                         .appSecondaryText()
                 }
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(headerAccessibilityLabel(for: viewModel))
             Spacer(minLength: AppSpacing.tight)
             ShowRowTrackButton(
                 showID: viewModel.displayShow.id,
@@ -158,6 +160,20 @@ struct ShowDetailView: View {
                 Task { await handleTrackButtonTap(viewModel: viewModel, anchor: anchor) }
             }
         }
+    }
+
+    private func headerAccessibilityLabel(for viewModel: ShowDetailViewModel) -> String {
+        var parts = [
+            viewModel.displayShow.name,
+            viewModel.displayShow.status.displayLabel,
+        ]
+        if let network = viewModel.displayShow.network {
+            parts.append(network)
+        }
+        if !viewModel.displayShow.genres.isEmpty {
+            parts.append(viewModel.displayShow.genres.genreDisplayLine)
+        }
+        return parts.joined(separator: ", ")
     }
 
     private func handleTrackButtonTap(viewModel: ShowDetailViewModel, anchor: CGRect) async {
@@ -202,7 +218,7 @@ struct ShowDetailView: View {
 
     @ViewBuilder
     private func nextSeasonSection(viewModel: ShowDetailViewModel) -> some View {
-        VStack(alignment: .leading, spacing: AppSpacing.tight) {
+        let card = VStack(alignment: .leading, spacing: AppSpacing.tight) {
             Text("Next Season")
                 .font(.headline)
                 .appPrimaryText()
@@ -246,6 +262,28 @@ struct ShowDetailView: View {
         }
         .padding(AppSpacing.row)
         .appSurfaceCard()
+
+        if case .failed = viewModel.loadState {
+            card.accessibilityElement(children: .contain)
+        } else {
+            card
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(nextSeasonAccessibilityLabel(for: viewModel))
+        }
+    }
+
+    private func nextSeasonAccessibilityLabel(for viewModel: ShowDetailViewModel) -> String {
+        switch viewModel.loadState {
+        case .loading:
+            return "Next Season, Checking next season status"
+        case .loaded:
+            if let status = viewModel.nextSeasonStatus {
+                return "Next Season, \(status.headline)"
+            }
+            return "Next Season"
+        case .failed(let message):
+            return "Next Season, \(message)"
+        }
     }
 
     @ViewBuilder

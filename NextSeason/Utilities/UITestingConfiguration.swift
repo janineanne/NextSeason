@@ -59,4 +59,9 @@ extension View {
             .accessibilityLabel(label)
             .accessibilityIdentifier(identifier)
     }
+
+    /// VoiceOver hint for list rows that push show detail.
+    func showDetailLinkAccessibility() -> some View {
+        accessibilityHint("Opens show details")
+    }
 }

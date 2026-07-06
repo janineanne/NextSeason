@@ -43,7 +43,6 @@ struct NotificationsDisabledBanner: View {
         .listRowInsets(EdgeInsets(top: 8, leading: AppSpacing.screen, bottom: 8, trailing: AppSpacing.screen))
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
-        .accessibilityElement(children: .combine)
     }
 }
 
