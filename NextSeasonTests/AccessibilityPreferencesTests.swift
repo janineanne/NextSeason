@@ -6,6 +6,7 @@
 import Testing
 @testable import NextSeason
 
+@MainActor
 struct AccessibilityPreferencesTests {
     @Test("Undo window is longer for VoiceOver and UI tests")
     func undoRemovalWindowSeconds() {
