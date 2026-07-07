@@ -6,7 +6,7 @@ networking, notification, and testing strategies adopted for the MVP.
 **Implementation status:** Slices 1 (Guest Search) and 2 (Save & Notify) are
 **implemented** in the app target. This document remains the design reference; for
 a diagram-first view of the running MVP, see
-[`Diagrams/01_system_architecture.md`](Diagrams/01_system_architecture.md).
+[`Diagrams/01-app-architecture.md`](Diagrams/01-app-architecture.md).
 
 Companion docs: [`ProductSpec.md`](ProductSpec.md),
 [`TVMazeResearch.md`](TVMazeResearch.md).
@@ -297,7 +297,7 @@ Notes & trade-offs:
 
 **Implemented in Slice 2 (local notifications only).** Push notifications and a
 cloud notification service are post-MVP (see
-[`Diagrams/07_post_mvp_architecture.md`](Diagrams/07_post_mvp_architecture.md)).
+[`../Post-MVP/Post-MVP Roadmap.md`](../Post-MVP/Post-MVP%20Roadmap.md)).
 
 - **`NotificationService`** wraps `UNUserNotificationCenter`: permission request,
   scheduling **local** notifications, and tap handling that routes to the
@@ -422,5 +422,5 @@ are **resolved** in the shipped MVP unless noted as post-MVP.
 - **Resolved (Slice 2):** local notification copy and meaningful-change triggers
   implemented via `StatusChangeDetector` and debounce rules (PD-008).
 - **Post-MVP:** push notifications, user accounts, and cloud watchlist sync.
-  See [`Diagrams/07_post_mvp_architecture.md`](Diagrams/07_post_mvp_architecture.md).
+  See [`../Post-MVP/Post-MVP Roadmap.md`](../Post-MVP/Post-MVP%20Roadmap.md).
 ```

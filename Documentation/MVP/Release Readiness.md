@@ -332,23 +332,6 @@ app after Search idle improvements. If implemented:
 - Second launch: no repeated welcome sheet (when implemented); idle guidance still
   works.
 
-## ChatGPT's version of this section
-
-The first-run experience is in good shape for beta testing.
-
-**Implemented**
-- Empty search state includes a friendly prompt and "Try an Example" buttons to help new users get started.
-- Watchlist empty state clearly explains the feature and how to add shows.
-- Search automatically focuses on the search field when appropriate.
-- Example searches reduce the chance that a first-time user encounters an empty screen.
-
-**Watch During Beta**
-- Observe whether users naturally understand that they must search before adding shows.
-- Note whether users discover the Watchlist without prompting.
-- Ask testers whether the example searches are helpful or if different examples would better demonstrate the app.
-- Consider whether an optional one-time onboarding tip would improve discoverability, but avoid adding onboarding unless beta feedback indicates it is necessary.
-
----
 
 ## Beta Feedback
 
@@ -472,11 +455,9 @@ Verify:
 
 ### Status
 
-Accessibility is considered MVP-ready from an implementation standpoint (combined
-row labels, hidden decorative images, descriptive track controls). A **full manual
-accessibility pass** (Dynamic Type, VoiceOver, Increased Contrast, Xcode audit) is
-planned before portfolio release. Visual polish introduced `AppMutedText` and accent
-primary text — verify contrast during that pass.
+Accessibility is MVP-ready for beta. VoiceOver, Dynamic Type, and touch-target improvements have been implemented, including combined row labels, hidden decorative images, descriptive track controls, and layout adjustments for larger text sizes. Continue to re-check accessibility during beta and after visual changes, but the planned MVP accessibility pass is no longer outstanding.
+
+Visual polish introduced `AppMutedText` and accent primary text; keep contrast verification in the manual beta checklist, especially in Light Mode, Dark Mode, and Increased Contrast.
 
 ### Dynamic Type
 
@@ -518,10 +499,9 @@ Run Xcode's Accessibility Audit / Accessibility Inspector and resolve any report
 
 ## Release Decision
 
-Complete the Accessibility Review manual verification steps before distributing the
-app to resume reviewers and initial beta testers. Visual polish and core flows are
-implemented; no known critical defects block an internal beta once accessibility
-sign-off is complete.
+Accessibility, visual polish, and core flows are implemented. No known critical
+defects block initial beta distribution or portfolio review. Continue to capture beta
+feedback and address any accessibility regressions introduced by future changes.
 
 ---
 
