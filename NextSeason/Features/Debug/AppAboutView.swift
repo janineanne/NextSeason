@@ -125,5 +125,5 @@ struct AppAboutView: View {
 
 #Preview {
     AppAboutView(openDiagnostics: {})
-        .environment(\.notificationService, NotificationService())
+        .environment(\.notificationService, NotificationService(analytics: RecordingAnalyticsService()))
 }

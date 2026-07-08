@@ -58,6 +58,8 @@
 		E16792F02FFC7DBD007F7098 /* 6-16-2026 Review of Phase 4 Slice 2.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "6-16-2026 Review of Phase 4 Slice 2.pdf"; sourceTree = "<group>"; };
 		E16792F12FFC7E1E007F7098 /* 6-15-2026 Review of Phase 4 Slice 1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "6-15-2026 Review of Phase 4 Slice 1.pdf"; sourceTree = "<group>"; };
 		E16795C82FFD6526007F7098 /* 7-7-2026 Final Review.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "7-7-2026 Final Review.pdf"; sourceTree = "<group>"; };
+		E16797BE2FFEE4FA007F7098 /* 7-8-2026 Indepth Code Review.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "7-8-2026 Indepth Code Review.pdf"; sourceTree = "<group>"; };
+		E16797C12FFEE58C007F7098 /* 7-8-2026 Implement Items from Indepth Code Review.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-8-2026 Implement Items from Indepth Code Review.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -344,6 +346,8 @@
 				E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */,
 				E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */,
 				E16795C82FFD6526007F7098 /* 7-7-2026 Final Review.pdf */,
+				E16797BE2FFEE4FA007F7098 /* 7-8-2026 Indepth Code Review.pdf */,
+				E16797C12FFEE58C007F7098 /* 7-8-2026 Implement Items from Indepth Code Review.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

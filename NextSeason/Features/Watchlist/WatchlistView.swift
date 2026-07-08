@@ -28,7 +28,7 @@ struct WatchlistView: View {
 
     init(
         navigationPath: Binding<NavigationPath>,
-        tvMaze: any TVMazeService = TVMazeClient(),
+        tvMaze: any TVMazeService,
         watchlistReloadToken: Int = 0,
         onFindShow: @escaping () -> Void = {},
         onWatchlistChanged: @escaping () -> Void = {}
@@ -237,6 +237,9 @@ struct WatchlistView: View {
     let repository = InMemoryWatchlistRepository()
     WatchlistView(navigationPath: $path, tvMaze: TVMazeClient())
         .environment(\.watchlistRepository, repository)
-        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(repository: repository))
+        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(
+            repository: repository,
+            analytics: RecordingAnalyticsService()
+        ))
 }
 #endif

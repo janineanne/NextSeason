@@ -33,8 +33,12 @@ struct WatchlistViewModelTests {
     @Test("Reload loads tracked shows from persistence")
     func reloadLoadsTrackedShows() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository)
-        let viewModel = WatchlistViewModel(repository: repository, undoRemoval: undoRemoval)
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            undoRemoval: undoRemoval,
+            analytics: RecordingAnalyticsService()
+        )
         try await repository.add(sampleShow)
 
         await viewModel.reload()
@@ -47,8 +51,12 @@ struct WatchlistViewModelTests {
     @Test("A pending removal keeps the show visible in the loaded list")
     func pendingRemovalKeepsRowVisible() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository)
-        let viewModel = WatchlistViewModel(repository: repository, undoRemoval: undoRemoval)
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            undoRemoval: undoRemoval,
+            analytics: RecordingAnalyticsService()
+        )
         try await repository.add(sampleShow)
         await viewModel.reload()
         let tracked = try #require((try await repository.all()).first)
@@ -63,8 +71,12 @@ struct WatchlistViewModelTests {
     @Test("Committing a pending removal reloads an empty watchlist")
     func commitPendingRemovalReloadsList() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository)
-        let viewModel = WatchlistViewModel(repository: repository, undoRemoval: undoRemoval)
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            undoRemoval: undoRemoval,
+            analytics: RecordingAnalyticsService()
+        )
         try await repository.add(sampleShow)
         await viewModel.reload()
         let tracked = try #require((try await repository.all()).first)
@@ -80,8 +92,12 @@ struct WatchlistViewModelTests {
     @Test("Animated removal drops the row from the loaded list")
     func removeShowAnimatedDropsRow() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository)
-        let viewModel = WatchlistViewModel(repository: repository, undoRemoval: undoRemoval)
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            undoRemoval: undoRemoval,
+            analytics: RecordingAnalyticsService()
+        )
         try await repository.add(sampleShow)
         await viewModel.reload()
         let tracked = try #require((try await repository.all()).first)
@@ -95,8 +111,12 @@ struct WatchlistViewModelTests {
     @Test("Undo clears the pending removal flag")
     func undoPendingRemovalClearsPendingState() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository)
-        let viewModel = WatchlistViewModel(repository: repository, undoRemoval: undoRemoval)
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            undoRemoval: undoRemoval,
+            analytics: RecordingAnalyticsService()
+        )
         try await repository.add(sampleShow)
         await viewModel.reload()
         let tracked = try #require((try await repository.all()).first)

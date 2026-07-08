@@ -22,7 +22,8 @@ struct NotificationServiceTests {
     ) -> NotificationService {
         NotificationService(
             userDefaults: makeDefaults(),
-            authorizationStatusForTesting: authorizationStatus
+            authorizationStatusForTesting: authorizationStatus,
+            analytics: RecordingAnalyticsService()
         )
     }
 

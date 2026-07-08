@@ -53,7 +53,7 @@ struct WatchlistUndoRemovalTests {
     @Test("Requesting removal defers persistence until commit")
     func requestRemovalDefersPersistence() async throws {
         let repository = InMemoryWatchlistRepository()
-        let coordinator = WatchlistUndoRemoval(repository: repository)
+        let coordinator = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
         try await repository.add(sampleShow)
         let tracked = try #require((try await repository.all()).first)
 
@@ -77,7 +77,7 @@ struct WatchlistUndoRemovalTests {
     @Test("Undo cancels a pending removal without touching persistence")
     func undoLeavesRepositoryUntouched() async throws {
         let repository = InMemoryWatchlistRepository()
-        let coordinator = WatchlistUndoRemoval(repository: repository)
+        let coordinator = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
         try await repository.add(sampleShow)
         let tracked = try #require((try await repository.all()).first)
 
@@ -93,7 +93,7 @@ struct WatchlistUndoRemovalTests {
     @Test("A new pending removal commits the previous show")
     func replacingPendingRemovalCommitsPrevious() async throws {
         let repository = InMemoryWatchlistRepository()
-        let coordinator = WatchlistUndoRemoval(repository: repository)
+        let coordinator = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
         try await repository.add(sampleShow)
         try await repository.add(secondShow)
         let first = try #require((try await repository.all()).first { $0.id == sampleShow.id })

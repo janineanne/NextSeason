@@ -31,7 +31,7 @@ final class WatchlistViewModel {
         repository: any WatchlistRepository,
         refreshService: WatchlistRefreshService? = nil,
         undoRemoval: WatchlistUndoRemoval,
-        analytics: any AnalyticsTracking = AnalyticsService()
+        analytics: any AnalyticsTracking
     ) {
         self.repository = repository
         self.refreshService = refreshService

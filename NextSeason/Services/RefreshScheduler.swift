@@ -28,7 +28,8 @@ enum RefreshScheduler {
             forTaskWithIdentifier: taskIdentifier,
             using: .main
         ) { task in
-            MainActor.assumeIsolated {
+            // BGTaskScheduler delivers this closure on the main queue when `using: .main`.
+            Task { @MainActor in
                 handleAppRefresh(task)
             }
         }
@@ -68,12 +69,11 @@ enum RefreshScheduler {
         }
     }
 
+    @MainActor
     static func scheduleNextRefresh() {
         let interval = BackgroundRefreshConfiguration.refreshInterval
         let nextRefreshAt = Date(timeIntervalSinceNow: interval)
-        MainActor.assumeIsolated {
-            diagnostics?.recordNextScheduledRefresh(at: nextRefreshAt)
-        }
+        diagnostics?.recordNextScheduledRefresh(at: nextRefreshAt)
         let request = BGAppRefreshTaskRequest(identifier: taskIdentifier)
         request.earliestBeginDate = nextRefreshAt
         do {

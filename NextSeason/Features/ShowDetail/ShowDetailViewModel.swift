@@ -25,15 +25,15 @@ final class ShowDetailViewModel {
 
     private let service: any TVMazeService
     private let repository: any WatchlistRepository
-    private let notifications: NotificationService
+    private let notifications: any NotificationManaging
     private let analytics: any AnalyticsTracking
 
     init(
         show: Show,
-        service: any TVMazeService = TVMazeClient(),
+        service: any TVMazeService,
         repository: any WatchlistRepository,
-        notifications: NotificationService,
-        analytics: any AnalyticsTracking = AnalyticsService(),
+        notifications: any NotificationManaging,
+        analytics: any AnalyticsTracking,
         initialIsTracked: Bool = false
     ) {
         self.initialShow = show
@@ -85,13 +85,17 @@ final class ShowDetailViewModel {
     /// in-flight optimistic update.
     func refreshTrackedState() async {
         guard !isUpdatingWatchlist else { return }
-        if let tracked = try? await repository.contains(showID: initialShow.id) {
-            isTracked = tracked
+        do {
+            isTracked = try await repository.contains(showID: initialShow.id)
+        } catch is CancellationError {
+            return
+        } catch {
+            analytics.trackNonFatalError(error, context: "show_detail_refresh_tracked_state")
         }
     }
 
     func trackedShow() async -> TrackedShow? {
-        try? await repository.all().first { $0.id == initialShow.id }
+        try? await repository.trackedShow(showID: initialShow.id)
     }
 
     func applyTrackedState(_ tracked: Bool) {

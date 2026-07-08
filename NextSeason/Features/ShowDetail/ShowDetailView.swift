@@ -20,10 +20,10 @@ struct ShowDetailView: View {
 
     init(
         show: Show,
-        service: any TVMazeService = TVMazeClient(),
+        service: any TVMazeService,
         repository: any WatchlistRepository,
-        notifications: NotificationService,
-        analytics: any AnalyticsTracking = AnalyticsService(),
+        notifications: any NotificationManaging,
+        analytics: any AnalyticsTracking,
         isTracked: Bool = false,
         onWatchlistChanged: @escaping () -> Void = {},
         onProfileFlowDetailLoaded: (() -> Void)? = nil
@@ -329,7 +329,8 @@ struct ShowDetailView: View {
             show: .preview,
             service: PreviewTVMazeService(stub: .preview),
             repository: InMemoryWatchlistRepository(),
-            notifications: NotificationService()
+            notifications: NotificationService(analytics: RecordingAnalyticsService()),
+            analytics: RecordingAnalyticsService()
         )
     }
 }
@@ -340,7 +341,8 @@ struct ShowDetailView: View {
             show: .previewMissingSummary,
             service: PreviewTVMazeService(stub: .previewMissingSummary),
             repository: InMemoryWatchlistRepository(),
-            notifications: NotificationService()
+            notifications: NotificationService(analytics: RecordingAnalyticsService()),
+            analytics: RecordingAnalyticsService()
         )
     }
 }

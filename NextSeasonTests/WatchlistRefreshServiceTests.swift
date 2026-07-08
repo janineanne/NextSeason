@@ -101,6 +101,7 @@ struct WatchlistRefreshServiceTests {
             tvMaze: tvMaze,
             repository: repository,
             notifications: notifications,
+            analytics: RecordingAnalyticsService(),
             now: now
         )
     }
