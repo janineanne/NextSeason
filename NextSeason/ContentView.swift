@@ -15,7 +15,7 @@ struct ContentView: View {
 
     private let tvMaze: any TVMazeService
 
-    init(coordinator: AppNavigationCoordinator, tvMaze: any TVMazeService = TVMazeClient()) {
+    init(coordinator: AppNavigationCoordinator, tvMaze: any TVMazeService) {
         _coordinator = Bindable(coordinator)
         self.tvMaze = tvMaze
     }
@@ -90,62 +90,13 @@ struct ContentView: View {
     }
 }
 
-/// Presents beta diagnostics only in DEBUG or TestFlight builds.
-@MainActor
-private struct BetaDiagnosticsPresentationModifier: ViewModifier {
-    @State private var activeSheet: BetaDiagnosticsSheet?
-    @State private var betaBuildAvailability = BetaBuildAvailability.shared
-
-    func body(content: Content) -> some View {
-        if betaBuildAvailability.isAvailable {
-            content
-                .environment(\.openAppAbout) {
-                    guard !UITestingConfiguration.isEnabled else { return }
-                    activeSheet = .about
-                }
-                .environment(\.openDiagnostics) {
-                    guard !UITestingConfiguration.isEnabled else { return }
-                    activeSheet = .diagnostics
-                }
-                .sheet(item: $activeSheet) { sheet in
-                    switch sheet {
-                    case .about:
-                        AppAboutView {
-                            activeSheet = .diagnostics
-                        }
-                    case .diagnostics:
-                        DiagnosticsView()
-                    }
-                }
-                .task {
-                    await betaBuildAvailability.refresh()
-                }
-        } else {
-            content
-                .task {
-                    await betaBuildAvailability.refresh()
-                }
-        }
-    }
-}
-
-private enum BetaDiagnosticsSheet: Identifiable {
-    case about
-    case diagnostics
-
-    var id: String {
-        switch self {
-        case .about:
-            return "about"
-        case .diagnostics:
-            return "diagnostics"
-        }
-    }
-}
-
 #Preview {
-    ContentView(coordinator: AppNavigationCoordinator())
-        .environment(\.watchlistRepository, InMemoryWatchlistRepository())
-        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(repository: InMemoryWatchlistRepository()))
+    let repository = InMemoryWatchlistRepository()
+    ContentView(coordinator: AppNavigationCoordinator(), tvMaze: TVMazeClient())
+        .environment(\.watchlistRepository, repository)
+        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(
+            repository: repository,
+            analytics: RecordingAnalyticsService()
+        ))
         .appThemePreview()
 }

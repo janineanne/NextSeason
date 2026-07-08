@@ -8,85 +8,28 @@ import SwiftUI
 
 @main
 struct NextSeasonApp: App {
-    private let modelContainer: ModelContainer
-    private let watchlistRepository: any WatchlistRepository
-    private let refreshService: WatchlistRefreshService
-    private let watchlistUndoRemoval: WatchlistUndoRemoval
-    private let analyticsService = AnalyticsService()
-    private let betaRefreshDiagnostics = BetaRefreshDiagnostics()
-    @State private var notificationService: NotificationService
+    private let composition: AppCompositionRoot
     @State private var navigationCoordinator = AppNavigationCoordinator()
     @State private var themeController = AppThemeController()
 
     init() {
-        if !UITestingConfiguration.isEnabled {
-            AppDiagnosticsLogger.recordAppLaunch()
-            MetricKitDiagnosticsSubscriber.installIfNeeded()
-        }
-
         let coordinator = AppNavigationCoordinator()
         _navigationCoordinator = State(initialValue: coordinator)
-        _notificationService = State(initialValue: NotificationService(analytics: analyticsService))
-
-        if !UITestingConfiguration.isEnabled {
-            NotificationRouting.setCoordinator(coordinator)
-            NotificationRouting.setAnalytics(analyticsService)
-            NotificationRouting.install()
-        }
 
         do {
-			let repository: any WatchlistRepository
-            if UITestingConfiguration.isEnabled {
-                let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-                modelContainer = try ModelContainer(
-                    for: TrackedShowEntity.self,
-                    configurations: configuration
-                )
-                repository = InMemoryWatchlistRepository()
+            let root = try AppCompositionRoot()
+            composition = root
+
+            if !UITestingConfiguration.isEnabled {
+                root.configureNonUITestRuntime(navigationCoordinator: coordinator)
             } else {
-                let container = try ModelContainer(for: TrackedShowEntity.self)
-                modelContainer = container
-                repository = SwiftDataWatchlistRepository(context: ModelContext(container))
+                #if DEBUG
+                FirstRunPreferences.resetSearchResultsHintForTesting()
+                #endif
             }
-            watchlistRepository = repository
-            refreshService = WatchlistRefreshService(
-                repository: repository,
-                analytics: analyticsService,
-                diagnostics: betaRefreshDiagnostics
-            )
-            watchlistUndoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analyticsService)
         } catch {
             AppDiagnosticsLogger.logModelContainerInitFailure(error)
             fatalError("Failed to create ModelContainer: \(error)")
-        }
-
-        if !UITestingConfiguration.isEnabled {
-            if BackgroundRefreshConfiguration.forceAcceleratedForSoakTest
-                || ProcessInfo.processInfo.arguments.contains(BackgroundRefreshConfiguration.launchFlag)
-            {
-                BackgroundRefreshConfiguration.persistAcceleratedModeIfRequested()
-                if BackgroundRefreshConfiguration.isAccelerated {
-                    AppDiagnosticsLogger.breadcrumb("background_refresh_accelerated_10m")
-                }
-            } else {
-                BackgroundRefreshConfiguration.clearPersistedAcceleratedMode()
-            }
-            RefreshScheduler.registerBackgroundTask()
-            let refreshServiceForBackground = refreshService
-            MainActor.assumeIsolated {
-                AppDiagnosticsLogger.breadcrumb("refresh_scheduler_configure")
-                RefreshScheduler.configure(diagnostics: betaRefreshDiagnostics) {
-                    AppDiagnosticsLogger.logTaskStart("background_watchlist_refresh")
-                    await refreshServiceForBackground.refreshAll(recordDiagnostics: true)
-                    AppDiagnosticsLogger.logTaskComplete("background_watchlist_refresh")
-                }
-                RefreshScheduler.scheduleNextRefresh()
-            }
-            analyticsService.track(.appLaunched)
-        } else {
-            #if DEBUG
-            FirstRunPreferences.resetSearchResultsHintForTesting()
-            #endif
         }
     }
 
@@ -94,30 +37,31 @@ struct NextSeasonApp: App {
         WindowGroup {
             AppRootView(
                 navigationCoordinator: navigationCoordinator,
-                undoRemoval: watchlistUndoRemoval,
-                refreshService: refreshService
+                undoRemoval: composition.watchlistUndoRemoval,
+                refreshService: composition.refreshService,
+                tvMaze: composition.tvMaze
             )
             .environment(themeController)
             .appThemeColors(from: themeController)
             .appThemeIcon(from: themeController)
-            .environment(\.watchlistRepository, watchlistRepository)
-            .environment(\.watchlistRefreshService, refreshService)
-            .environment(\.watchlistUndoRemoval, watchlistUndoRemoval)
-            .environment(\.notificationService, notificationService)
-            .environment(\.analytics, analyticsService)
-            .environment(\.betaRefreshDiagnostics, betaRefreshDiagnostics)
+            .environment(\.watchlistRepository, composition.watchlistRepository)
+            .environment(\.watchlistRefreshService, composition.refreshService)
+            .environment(\.watchlistUndoRemoval, composition.watchlistUndoRemoval)
+            .environment(\.notificationService, composition.notificationService)
+            .environment(\.analytics, composition.analyticsService)
+            .environment(\.betaRefreshDiagnostics, composition.betaRefreshDiagnostics)
             .task {
                 guard let flow = ProfileFlowConfiguration.activeFlow else { return }
                 await ProfileFlowRunner(
                     flow: flow,
                     coordinator: navigationCoordinator,
-                    repository: watchlistRepository,
-                    tvMaze: TVMazeClient(),
-                    analytics: analyticsService
+                    repository: composition.watchlistRepository,
+                    tvMaze: composition.tvMaze,
+                    analytics: composition.analyticsService
                 ).run()
             }
         }
-        .modelContainer(modelContainer)
+        .modelContainer(composition.modelContainer)
     }
 }
 
@@ -128,6 +72,7 @@ private struct AppRootView: View {
     @Bindable var navigationCoordinator: AppNavigationCoordinator
     @Bindable var undoRemoval: WatchlistUndoRemoval
     let refreshService: WatchlistRefreshService
+    let tvMaze: any TVMazeService
 
     var body: some View {
         ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
@@ -169,6 +114,6 @@ private struct AppRootView: View {
             return PreviewTVMazeService(stub: .preview)
         }
         #endif
-        return TVMazeClient()
+        return tvMaze
     }
 }

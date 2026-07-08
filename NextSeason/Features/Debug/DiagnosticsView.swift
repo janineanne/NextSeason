@@ -302,7 +302,9 @@ struct DiagnosticsView: View {
     private func prepareSimulatedUpdateRunnerIfNeeded() {
         guard betaValidationAvailable,
               simulatedUpdateRunner == nil,
-              let betaRefreshDiagnostics else { return }
+              let betaRefreshDiagnostics,
+              let notificationService = notificationService as? NotificationService
+        else { return }
         simulatedUpdateRunner = DiagnosticsSimulatedUpdateRunner(
             notifications: notificationService,
             diagnostics: betaRefreshDiagnostics,
@@ -379,7 +381,7 @@ struct DiagnosticsView: View {
 #Preview {
     DiagnosticsView()
         .environment(\.analytics, RecordingAnalyticsService())
-        .environment(\.notificationService, NotificationService())
+        .environment(\.notificationService, NotificationService(analytics: RecordingAnalyticsService()))
         .environment(\.betaRefreshDiagnostics, BetaRefreshDiagnostics())
         .environment(AppThemeController.preview)
 }

@@ -76,17 +76,28 @@ final class AppNavigationCoordinator {
         guard let showID = pendingShowID else { return }
         pendingShowID = nil
 
-        if let tracked = try? await repository.all().first(where: { $0.id == showID }) {
-            selectedTab = .watchlist
-            watchlistPath.append(tracked)
-            analytics.track(.appOpenedFromNotification(showID: showID))
+        do {
+            if let tracked = try await repository.trackedShow(showID: showID) {
+                selectedTab = .watchlist
+                watchlistPath.append(tracked)
+                analytics.track(.appOpenedFromNotification(showID: showID))
+                return
+            }
+        } catch is CancellationError {
             return
+        } catch {
+            analytics.trackNonFatalError(error, context: "notification_navigation_watchlist_lookup")
         }
 
-        if let show = try? await tvMaze.show(id: showID) {
+        do {
+            let show = try await tvMaze.show(id: showID)
             selectedTab = .search
             searchPath.append(show)
             analytics.track(.appOpenedFromNotification(showID: showID))
+        } catch is CancellationError {
+            return
+        } catch {
+            analytics.trackNonFatalError(error, context: "notification_navigation_show_lookup")
         }
     }
 }

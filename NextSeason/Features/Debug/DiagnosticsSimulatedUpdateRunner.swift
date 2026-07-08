@@ -22,7 +22,7 @@ final class DiagnosticsSimulatedUpdateRunner {
         dataProvider: DiagnosticsSimulatedDataProvider = DiagnosticsSimulatedDataProvider(),
         notifications: NotificationService,
         diagnostics: BetaRefreshDiagnostics,
-        analytics: any AnalyticsTracking = AnalyticsService(),
+        analytics: any AnalyticsTracking,
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.dataProvider = dataProvider
@@ -164,6 +164,14 @@ private final class SimulatedWatchlistRepository: WatchlistRepository {
 
     func all() async throws -> [TrackedShow] {
         shows.values.sorted { $0.dateAdded > $1.dateAdded }
+    }
+
+    func trackedShow(showID: Int) async throws -> TrackedShow? {
+        shows[showID]
+    }
+
+    func trackedShowIDs() async throws -> Set<Int> {
+        Set(shows.keys)
     }
 
     func contains(showID: Int) async throws -> Bool {

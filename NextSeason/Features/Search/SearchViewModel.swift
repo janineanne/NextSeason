@@ -26,8 +26,8 @@ final class SearchViewModel {
     private var displayedQuery: String?
 
     init(
-        service: any TVMazeService = TVMazeClient(),
-        analytics: any AnalyticsTracking = AnalyticsService(),
+        service: any TVMazeService,
+        analytics: any AnalyticsTracking,
         debounce: Duration = .milliseconds(300)
     ) {
         self.service = service

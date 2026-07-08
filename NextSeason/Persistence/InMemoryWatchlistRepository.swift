@@ -14,6 +14,14 @@ final class InMemoryWatchlistRepository: WatchlistRepository {
         shows.values.sorted { $0.dateAdded > $1.dateAdded }
     }
 
+    func trackedShow(showID: Int) async throws -> TrackedShow? {
+        shows[showID]
+    }
+
+    func trackedShowIDs() async throws -> Set<Int> {
+        Set(shows.keys)
+    }
+
     func contains(showID: Int) async throws -> Bool {
         shows[showID] != nil
     }

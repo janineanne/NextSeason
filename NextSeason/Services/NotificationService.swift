@@ -13,9 +13,27 @@ protocol NotificationDelivering: AnyObject {
     func deliver(_ content: SeasonNotificationContent) async
 }
 
+/// Permission prompts, settings, and delivery used by SwiftUI and view models.
+@MainActor
+protocol NotificationManaging: NotificationDelivering {
+    func authorizationStatus() async -> UNAuthorizationStatus
+    func needsAuthorizationPrompt() async -> Bool
+    func deferAuthorizationPrompt()
+    func isDenied() async -> Bool
+    func openNotificationSettings()
+    @discardableResult
+    func requestAuthorizationIfNeeded() async -> Bool
+    func deliver(_ content: SeasonNotificationContent, requestIdentifier: String) async
+    func deliverAfterDelay(
+        _ content: SeasonNotificationContent,
+        requestIdentifier: String,
+        delay: TimeInterval
+    ) async
+}
+
 /// Wraps local notification permission and delivery (FR-011, FR-012).
 @MainActor
-final class NotificationService: NotificationDelivering {
+final class NotificationService: NotificationManaging {
     private let center: UNUserNotificationCenter
     private let userDefaults: UserDefaults
     private let analytics: any AnalyticsTracking
@@ -26,7 +44,7 @@ final class NotificationService: NotificationDelivering {
     init(
         center: UNUserNotificationCenter = .current(),
         userDefaults: UserDefaults = .standard,
-        analytics: any AnalyticsTracking = AnalyticsService()
+        analytics: any AnalyticsTracking
     ) {
         self.center = center
         self.userDefaults = userDefaults
@@ -40,7 +58,7 @@ final class NotificationService: NotificationDelivering {
     init(
         userDefaults: UserDefaults,
         authorizationStatusForTesting: UNAuthorizationStatus,
-        analytics: any AnalyticsTracking = AnalyticsService()
+        analytics: any AnalyticsTracking
     ) {
         self.center = .current()
         self.userDefaults = userDefaults

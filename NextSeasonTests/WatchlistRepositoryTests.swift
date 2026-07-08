@@ -52,6 +52,20 @@ struct WatchlistRepositoryTests {
         #expect(try await repository.all().count == 1)
     }
 
+    @Test("Tracked show lookup returns a single show without loading the full watchlist")
+    func trackedShowLookup() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let show = sampleShow
+        try await repository.add(show)
+
+        let tracked = try await repository.trackedShow(showID: show.id)
+        #expect(tracked?.name == show.name)
+
+        let ids = try await repository.trackedShowIDs()
+        #expect(ids == [show.id])
+        #expect(try await repository.trackedShow(showID: 999) == nil)
+    }
+
     @Test("Removing a show deletes it from the watchlist")
     func removeShow() async throws {
         let repository = InMemoryWatchlistRepository()

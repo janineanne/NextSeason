@@ -10,6 +10,8 @@ import Foundation
 @MainActor
 protocol WatchlistRepository: AnyObject {
     func all() async throws -> [TrackedShow]
+    func trackedShow(showID: Int) async throws -> TrackedShow?
+    func trackedShowIDs() async throws -> Set<Int>
     func contains(showID: Int) async throws -> Bool
     func add(_ show: Show) async throws
     func remove(showID: Int) async throws

@@ -27,6 +27,16 @@ final class SwiftDataWatchlistRepository: WatchlistRepository {
         return result
     }
 
+    func trackedShow(showID: Int) async throws -> TrackedShow? {
+        guard let entity = try entity(for: showID) else { return nil }
+        return try entity.toDomain()
+    }
+
+    func trackedShowIDs() async throws -> Set<Int> {
+        let descriptor = FetchDescriptor<TrackedShowEntity>()
+        return Set(try context.fetch(descriptor).map(\.tvMazeID))
+    }
+
     func contains(showID: Int) async throws -> Bool {
         var descriptor = FetchDescriptor<TrackedShowEntity>(
             predicate: #Predicate { $0.tvMazeID == showID }

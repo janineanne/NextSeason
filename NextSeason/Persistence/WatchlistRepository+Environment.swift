@@ -23,6 +23,8 @@ private final class UnconfiguredWatchlistRepository: WatchlistRepository {
     }
 
     func all() async throws -> [TrackedShow] { fail() }
+    func trackedShow(showID: Int) async throws -> TrackedShow? { fail() }
+    func trackedShowIDs() async throws -> Set<Int> { fail() }
     func contains(showID: Int) async throws -> Bool { fail() }
     func add(_ show: Show) async throws { fail() }
     func remove(showID: Int) async throws { fail() }

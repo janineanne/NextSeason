@@ -10,7 +10,6 @@ struct SearchView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
-    @Environment(\.analytics) private var analytics
     @Environment(\.dismissSearch) private var dismissSearch
     @Environment(\.openAppAbout) private var openAppAbout
 
@@ -19,12 +18,11 @@ struct SearchView: View {
     private let onProfileFlowSearchSettled: (() -> Void)?
     private let onProfileFlowDetailLoaded: (() -> Void)?
     private let tvMaze: any TVMazeService
+    private let analytics: any AnalyticsTracking
     private let onWatchlistChanged: () -> Void
     @State private var viewModel: SearchViewModel
-    @State private var trackedShowIDs: Set<Int> = []
-    @State private var updatingShowIDs: Set<Int> = []
-    @State private var shouldPromptForNotifications = false
-    @State private var shouldShowNotificationsDeniedAlert = false
+    @State private var watchlistTracking = SearchWatchlistTracking()
+    @State private var notificationPrompt = WatchlistNotificationPromptState()
     @State private var isScrollDismissingKeyboard = false
     @AppStorage(FirstRunPreferences.searchResultsHintDismissedKey)
     private var searchResultsHintDismissed = false
@@ -34,8 +32,8 @@ struct SearchView: View {
         profileFlowSearchQuery: Binding<String?> = .constant(nil),
         onProfileFlowSearchSettled: (() -> Void)? = nil,
         onProfileFlowDetailLoaded: (() -> Void)? = nil,
-        tvMaze: any TVMazeService = TVMazeClient(),
-        analytics: any AnalyticsTracking = AnalyticsService(),
+        tvMaze: any TVMazeService,
+        analytics: any AnalyticsTracking,
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
         _navigationPath = navigationPath
@@ -43,6 +41,7 @@ struct SearchView: View {
         self.onProfileFlowSearchSettled = onProfileFlowSearchSettled
         self.onProfileFlowDetailLoaded = onProfileFlowDetailLoaded
         self.tvMaze = tvMaze
+        self.analytics = analytics
         self.onWatchlistChanged = onWatchlistChanged
         _viewModel = State(initialValue: SearchViewModel(service: tvMaze, analytics: analytics))
     }
@@ -62,7 +61,7 @@ struct SearchView: View {
                         repository: repository,
                         notifications: notificationService,
                         analytics: analytics,
-                        isTracked: trackedShowIDs.contains(show.id),
+                        isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
                         onWatchlistChanged: onWatchlistChanged,
                         onProfileFlowDetailLoaded: onProfileFlowDetailLoaded
                     )
@@ -73,57 +72,32 @@ struct SearchView: View {
                 .searchable(text: $viewModel.query, prompt: "Search TV shows")
                 .modifier(ReturnToSearchResultsOnActivateModifier(navigationPath: $navigationPath))
                 .onSubmit(of: .search) {
-                    collapseSearchKeyboard()
+                    collapseSearchKeyboard(dismissSearch: dismissSearch)
                 }
                 .task(id: viewModel.query) {
                     await viewModel.search()
                 }
-                .onChange(of: profileFlowSearchQuery) { _, query in
-                    guard let query, !query.isEmpty else { return }
-                    viewModel.query = query
-                    profileFlowSearchQuery = nil
-                }
-                .onChange(of: viewModel.state) { _, state in
-                    guard ProfileFlowConfiguration.isEnabled else { return }
-                    switch state {
-                    case .results, .empty, .failed:
-                        onProfileFlowSearchSettled?()
-                    default:
-                        break
-                    }
-                }
+                .searchProfileFlow(
+                    profileFlowSearchQuery: $profileFlowSearchQuery,
+                    viewModel: viewModel,
+                    onProfileFlowSearchSettled: onProfileFlowSearchSettled
+                )
                 .task {
-                    await refreshTrackedShowIDs()
+                    await refreshTrackedShows()
                 }
-                .onChange(of: navigationPath) {
+                .task(id: navigationPath.count) {
                     if navigationPath.count > 0 {
                         dismissSearchResultsHintIfNeeded()
                     }
-                    // Returning from a detail screen may have changed tracking
-                    // state, so refresh the controls shown in the results list.
-                    Task { await refreshTrackedShowIDs() }
+                    await refreshTrackedShows()
                 }
-                .onChange(of: undoRemoval?.pendingRemoval?.id) { _, _ in
-                    Task { await refreshTrackedShowIDs() }
+                .task(id: undoRemoval?.pendingRemoval?.id) {
+                    await refreshTrackedShows()
                 }
-                .alert("Stay in the Loop", isPresented: $shouldPromptForNotifications) {
-                    Button("Not Now", role: .cancel) {
-                        deferNotificationPrompt()
-                    }
-                    Button("Enable Notifications") {
-                        Task { await confirmNotificationPrompt() }
-                    }
-                } message: {
-                    Text(FirstRunCopy.notificationPromptMessage)
-                }
-                .alert("Notifications Not Enabled", isPresented: $shouldShowNotificationsDeniedAlert) {
-                    Button("Not Now", role: .cancel) {}
-                    Button("Open Settings") {
-                        notificationService.openNotificationSettings()
-                    }
-                } message: {
-                    Text(FirstRunCopy.notificationsSettingsReminderMessage)
-                }
+                .watchlistNotificationPromptAlerts(
+                    prompt: notificationPrompt,
+                    notificationService: notificationService
+                )
         }
         .scrollDismissesKeyboard(.immediately)
         .appNavigationChrome()
@@ -144,94 +118,24 @@ struct SearchView: View {
         }
     }
 
-    /// Dismisses the keyboard but keeps the query visible in the search field.
-    private func collapseSearchKeyboard() {
-        dismissSearch()
-        // `isPresented = false` collapses searchable and clears the visible query;
-        // resign first responder ends editing while the nav-bar search text stays put.
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil,
-            from: nil,
-            for: nil
+    private func refreshTrackedShows() async {
+        await watchlistTracking.refresh(
+            repository: repository,
+            excludingPendingRemovalFrom: undoRemoval,
+            analytics: analytics
         )
     }
 
-    /// Nav-bar `.searchable` often ignores `scrollDismissesKeyboard`; drag is a reliable fallback.
-    private func scrollDismissesSearchKeyboardGesture() -> some Gesture {
-        DragGesture(minimumDistance: 8, coordinateSpace: .local)
-            .onChanged { value in
-                guard !isScrollDismissingKeyboard else { return }
-                guard abs(value.translation.height) > 4 else { return }
-                isScrollDismissingKeyboard = true
-                collapseSearchKeyboard()
-            }
-            .onEnded { _ in
-                isScrollDismissingKeyboard = false
-            }
-    }
-
-    private func refreshTrackedShowIDs() async {
-        if let shows = try? await repository.all() {
-            var ids = Set(shows.map(\.id))
-            if let pendingID = undoRemoval?.pendingRemoval?.id {
-                ids.remove(pendingID)
-            }
-            trackedShowIDs = ids
-        }
-    }
-
-    private func handleTrackButton(for show: Show, anchor: CGRect) async {
-        guard !updatingShowIDs.contains(show.id) else { return }
-
-        if trackedShowIDs.contains(show.id) {
-            guard let undoRemoval,
-                  let tracked = try? await repository.all().first(where: { $0.id == show.id })
-            else { return }
-            undoRemoval.requestRemoval(
-                tracked,
-                anchor: anchor,
-                source: .search,
-                onCommitted: onWatchlistChanged
-            )
-            trackedShowIDs.remove(show.id)
-            return
-        }
-
-        updatingShowIDs.insert(show.id)
-        defer { updatingShowIDs.remove(show.id) }
-
-        do {
-            try await repository.add(show)
-            trackedShowIDs.insert(show.id)
-            analytics.track(.watchlistAdded(source: .search, showID: show.id))
-            dismissSearchResultsHintIfNeeded()
-            if await notificationService.needsAuthorizationPrompt() {
-                shouldPromptForNotifications = true
-            }
-            onWatchlistChanged()
-        } catch is CancellationError {
-            return
-        } catch {
-            analytics.trackNonFatalError(error, context: "watchlist_add_search")
-            await refreshTrackedShowIDs()
-        }
-    }
-
-    private func deferNotificationPrompt() {
-        notificationService.deferAuthorizationPrompt()
-        shouldShowNotificationsSettingsReminder()
-    }
-
-    private func shouldShowNotificationsSettingsReminder() {
-        shouldShowNotificationsDeniedAlert = true
-    }
-
-    private func confirmNotificationPrompt() async {
-        await notificationService.requestAuthorizationIfNeeded()
-        if await notificationService.isDenied() {
-            shouldShowNotificationsSettingsReminder()
-        }
+    private var watchlistTrackingContext: SearchWatchlistTrackingContext {
+        SearchWatchlistTrackingContext(
+            repository: repository,
+            undoRemoval: undoRemoval,
+            notificationService: notificationService,
+            notificationPrompt: notificationPrompt,
+            analytics: analytics,
+            onWatchlistChanged: onWatchlistChanged,
+            onSearchResultsHintDismissed: dismissSearchResultsHintIfNeeded
+        )
     }
 
     private func dismissSearchResultsHintIfNeeded() {
@@ -268,7 +172,10 @@ struct SearchView: View {
             }
             .appPlainListStyle()
             .scrollDismissesKeyboard(.immediately)
-            .simultaneousGesture(scrollDismissesSearchKeyboardGesture())
+            .searchScrollKeyboardDismissGesture(
+                isScrollDismissingKeyboard: $isScrollDismissingKeyboard,
+                dismissSearch: dismissSearch
+            )
             .tvmazeAttributionInset()
         case .results(let shows):
             List {
@@ -283,10 +190,16 @@ struct SearchView: View {
                         ShowRowTrackButton(
                             showID: show.id,
                             showName: show.name,
-                            isTracked: trackedShowIDs.contains(show.id),
-                            isUpdating: updatingShowIDs.contains(show.id)
+                            isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
+                            isUpdating: watchlistTracking.updatingShowIDs.contains(show.id)
                         ) { anchor in
-                            Task { await handleTrackButton(for: show, anchor: anchor) }
+                            Task {
+                                await watchlistTracking.handleTrackButton(
+                                    for: show,
+                                    anchor: anchor,
+                                    context: watchlistTrackingContext
+                                )
+                            }
                         }
                     }
                     .appListRowSurface()
@@ -305,7 +218,10 @@ struct SearchView: View {
             }
             .appPlainListStyle()
             .scrollDismissesKeyboard(.immediately)
-            .simultaneousGesture(scrollDismissesSearchKeyboardGesture())
+            .searchScrollKeyboardDismissGesture(
+                isScrollDismissingKeyboard: $isScrollDismissingKeyboard,
+                dismissSearch: dismissSearch
+            )
             .searchResultsHintInset(isVisible: !searchResultsHintDismissed)
             .tvmazeAttributionInset()
         case .empty:
@@ -362,10 +278,19 @@ private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
     }
 }
 
+#if DEBUG
 #Preview {
     @Previewable @State var path = NavigationPath()
     let repository = InMemoryWatchlistRepository()
-    SearchView(navigationPath: $path)
-        .environment(\.watchlistRepository, repository)
-        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(repository: repository))
+    SearchView(
+        navigationPath: $path,
+        tvMaze: TVMazeClient(),
+        analytics: RecordingAnalyticsService()
+    )
+    .environment(\.watchlistRepository, repository)
+    .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(
+        repository: repository,
+        analytics: RecordingAnalyticsService()
+    ))
 }
+#endif

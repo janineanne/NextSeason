@@ -34,6 +34,7 @@ struct SearchViewModelTests {
     func emptyQueryStaysIdle() async {
         let viewModel = SearchViewModel(
             service: MockService { _ in Issue.record("service should not be called"); return [] },
+            analytics: RecordingAnalyticsService(),
             debounce: .zero
         )
         viewModel.query = "   "
@@ -45,6 +46,7 @@ struct SearchViewModelTests {
     func resultsPopulateState() async {
         let viewModel = SearchViewModel(
             service: MockService { _ in [.preview] },
+            analytics: RecordingAnalyticsService(),
             debounce: .zero
         )
         viewModel.query = "severance"
@@ -56,6 +58,7 @@ struct SearchViewModelTests {
     func noMatchesYieldEmpty() async {
         let viewModel = SearchViewModel(
             service: MockService { _ in [] },
+            analytics: RecordingAnalyticsService(),
             debounce: .zero
         )
         viewModel.query = "no-such-show"
@@ -67,6 +70,7 @@ struct SearchViewModelTests {
     func serviceErrorYieldsFailed() async {
         let viewModel = SearchViewModel(
             service: MockService { _ in throw TestError() },
+            analytics: RecordingAnalyticsService(),
             debounce: .zero
         )
         viewModel.query = "severance"
@@ -78,6 +82,7 @@ struct SearchViewModelTests {
     func clearingQueryReturnsToIdle() async {
         let viewModel = SearchViewModel(
             service: MockService { _ in [.preview] },
+            analytics: RecordingAnalyticsService(),
             debounce: .zero
         )
         viewModel.query = FirstRunCopy.exampleSearchQuery
@@ -100,6 +105,7 @@ struct SearchViewModelTests {
                 counter.value += 1
                 return [.preview]
             },
+            analytics: RecordingAnalyticsService(),
             debounce: .zero
         )
         viewModel.query = "severance"

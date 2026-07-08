@@ -12,6 +12,9 @@ struct WatchlistRefreshOutcome: Sendable, Equatable {
 }
 
 /// Polls TVMaze for watchlist changes and emits notifications when appropriate.
+///
+/// Remains `@MainActor` because `WatchlistRepository` is MainActor-bound for SwiftData;
+/// network work still runs off the actor while awaiting `TVMazeService`.
 @MainActor
 final class WatchlistRefreshService {
     private let tvMaze: any TVMazeService
@@ -23,10 +26,10 @@ final class WatchlistRefreshService {
     private var lastForegroundRefreshAt: Date?
 
     init(
-        tvMaze: any TVMazeService = TVMazeClient(),
+        tvMaze: any TVMazeService,
         repository: any WatchlistRepository,
-        notifications: any NotificationDelivering = NotificationService(),
-        analytics: any AnalyticsTracking = AnalyticsService(),
+        notifications: any NotificationDelivering,
+        analytics: any AnalyticsTracking,
         diagnostics: BetaRefreshDiagnostics? = nil,
         now: @escaping @Sendable () -> Date = { .now }
     ) {

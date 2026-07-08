@@ -23,7 +23,7 @@ final class WatchlistUndoRemoval {
     private var pendingOnCommitted: (() -> Void)?
     private var pendingRemovalSource: WatchlistActionSource?
 
-    init(repository: any WatchlistRepository, analytics: any AnalyticsTracking = AnalyticsService()) {
+    init(repository: any WatchlistRepository, analytics: any AnalyticsTracking) {
         self.repository = repository
         self.analytics = analytics
     }
