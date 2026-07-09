@@ -114,7 +114,9 @@ struct AppAboutView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     AppAboutView(openDiagnostics: {})
         .environment(\.notificationService, NotificationService(analytics: RecordingAnalyticsService()))
 }
+#endif
