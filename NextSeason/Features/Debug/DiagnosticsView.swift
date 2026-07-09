@@ -21,6 +21,7 @@ extension EnvironmentValues {
 struct DiagnosticsView: View {
     @Environment(\.analytics) private var analytics
     @Environment(\.notificationService) private var notificationService
+    @Environment(\.watchlistRepository) private var repository
     @Environment(\.watchlistRefreshService) private var refreshService
     @Environment(\.betaRefreshDiagnostics) private var betaRefreshDiagnostics
     @Environment(AppThemeController.self) private var themeController
@@ -164,7 +165,6 @@ struct DiagnosticsView: View {
             }
             .task {
                 await refreshReport()
-                prepareSimulatedUpdateRunnerIfNeeded()
             }
             .onChange(of: themeController.variant) {
                 refreshReportText()
@@ -299,17 +299,27 @@ struct DiagnosticsView: View {
         return date.formatted(date: .abbreviated, time: .standard)
     }
 
-    private func prepareSimulatedUpdateRunnerIfNeeded() {
-        guard betaValidationAvailable,
-              simulatedUpdateRunner == nil,
-              let betaRefreshDiagnostics,
-              let notificationService = notificationService as? NotificationService
-        else { return }
+    private static let testNotificationDelaySeconds: TimeInterval = 5
+
+    private func watchlistTestShow() async -> TrackedShow? {
+        try? await repository.all().first
+    }
+
+    private func prepareSimulatedUpdateRunner(using template: TrackedShow?) {
+        guard betaValidationAvailable, let betaRefreshDiagnostics else { return }
         simulatedUpdateRunner = DiagnosticsSimulatedUpdateRunner(
+            pipelineTemplate: template,
             notifications: notificationService,
             diagnostics: betaRefreshDiagnostics,
             analytics: analytics
         )
+    }
+
+    private func recordMissingWatchlistTestShow() {
+        betaRefreshDiagnostics?.recordSimulatedScenarioSummary(
+            "Track a show on the watchlist to send a test notification."
+        )
+        refreshReportText()
     }
 
     private func forceRefreshNow() async {
@@ -329,15 +339,26 @@ struct DiagnosticsView: View {
     private func sendTestNotification() async {
         guard !isSendingTestNotification else { return }
         isSendingTestNotification = true
+        await refreshNotificationStatus()
 
-        let premiere = Calendar.current.date(byAdding: .month, value: 1, to: .now) ?? .now
-        await notificationService.deliver(
-            SeasonNotificationContent(
-                showID: DiagnosticsSimulatedData.showID,
-                showName: DiagnosticsSimulatedData.showName,
-                status: .scheduled(season: 3, premiere: premiere)
-            )
+        guard let tracked = await watchlistTestShow() else {
+            recordMissingWatchlistTestShow()
+            isSendingTestNotification = false
+            return
+        }
+
+        let content = DiagnosticsSimulatedData.notificationContent(from: tracked)
+        // System-scheduled delivery is more reliable than an immediate (nil-trigger)
+        // request, especially when backgrounding the app to verify the alert.
+        await notificationService.deliverAfterDelay(
+            content,
+            requestIdentifier: "debug-test-\(UUID().uuidString)",
+            delay: Self.testNotificationDelaySeconds
         )
+        betaRefreshDiagnostics?.recordSimulatedScenarioSummary(
+            "Test notification scheduled for \(tracked.name): \(content.body)"
+        )
+        refreshReportText()
 
         isSendingTestNotification = false
     }
@@ -345,7 +366,12 @@ struct DiagnosticsView: View {
     private func scheduleDelayedPipelineNotification() async {
         guard !isSchedulingDelayedPipelineNotification else { return }
         isSchedulingDelayedPipelineNotification = true
-        prepareSimulatedUpdateRunnerIfNeeded()
+        guard let tracked = await watchlistTestShow() else {
+            recordMissingWatchlistTestShow()
+            isSchedulingDelayedPipelineNotification = false
+            return
+        }
+        prepareSimulatedUpdateRunner(using: tracked)
         _ = await simulatedUpdateRunner?.runDelayedNewSeasonNotification()
         isSchedulingDelayedPipelineNotification = false
     }
@@ -353,7 +379,12 @@ struct DiagnosticsView: View {
     private func runSimulatedUpdateScenario() async {
         guard !isRunningSimulation else { return }
         isRunningSimulation = true
-        prepareSimulatedUpdateRunnerIfNeeded()
+        guard let tracked = await watchlistTestShow() else {
+            recordMissingWatchlistTestShow()
+            isRunningSimulation = false
+            return
+        }
+        prepareSimulatedUpdateRunner(using: tracked)
         _ = await simulatedUpdateRunner?.runNextStep()
         isRunningSimulation = false
     }
@@ -364,8 +395,7 @@ struct DiagnosticsView: View {
     }
 
     private func refreshNotificationStatus() async {
-        let status = await notificationService.authorizationStatus()
-        notificationsEnabled = NotificationAuthorizationPolicy.canDeliverAlerts(status)
+        notificationsEnabled = await notificationService.canDeliverVisibleAlerts()
     }
 
     private func refreshReportText() {
@@ -382,6 +412,7 @@ struct DiagnosticsView: View {
     DiagnosticsView()
         .environment(\.analytics, RecordingAnalyticsService())
         .environment(\.notificationService, NotificationService(analytics: RecordingAnalyticsService()))
+        .environment(\.watchlistRepository, InMemoryWatchlistRepository())
         .environment(\.betaRefreshDiagnostics, BetaRefreshDiagnostics())
         .environment(AppThemeController.preview)
 }

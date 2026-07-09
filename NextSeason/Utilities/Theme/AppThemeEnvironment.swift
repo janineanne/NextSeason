@@ -6,7 +6,7 @@
 import SwiftUI
 
 private struct AppThemeColorsKey: EnvironmentKey {
-    static let defaultValue = AppThemeColors.colors(for: .lavender, colorScheme: .light)
+    static let defaultValue = AppThemeColors.colors(for: .warmSlate, colorScheme: .light)
 }
 
 extension EnvironmentValues {
@@ -34,7 +34,7 @@ extension View {
     }
 
     /// Applies a palette for SwiftUI previews without a theme controller.
-    func appThemePreview(_ variant: AppPaletteVariant = .lavender) -> some View {
+    func appThemePreview(_ variant: AppPaletteVariant = .warmSlate) -> some View {
         modifier(AppThemePreviewModifier(variant: variant))
     }
 }

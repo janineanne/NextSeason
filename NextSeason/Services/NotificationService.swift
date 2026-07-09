@@ -20,7 +20,10 @@ protocol NotificationManaging: NotificationDelivering {
     func needsAuthorizationPrompt() async -> Bool
     func deferAuthorizationPrompt()
     func isDenied() async -> Bool
+    func canDeliverVisibleAlerts() async -> Bool
     func openNotificationSettings()
+    /// Shows the system permission dialog when still `.notDetermined`; otherwise opens Settings.
+    func enableNotificationsFromSettingsEntryPoint() async
     @discardableResult
     func requestAuthorizationIfNeeded() async -> Bool
     func deliver(_ content: SeasonNotificationContent, requestIdentifier: String) async
@@ -100,9 +103,45 @@ final class NotificationService: NotificationManaging {
         return await authorizationStatus() == .denied
     }
 
+    /// True when alert banners can be shown (permission granted and alerts enabled).
+    func canDeliverVisibleAlerts() async -> Bool {
+        guard !UITestingConfiguration.isEnabled else { return false }
+        #if DEBUG
+        if let authorizationStatusForTesting {
+            return NotificationAuthorizationPolicy.canDeliverAlerts(authorizationStatusForTesting)
+        }
+        #endif
+        let settings = await center.notificationSettings()
+        return NotificationAuthorizationPolicy.canDeliverAlerts(from: settings)
+    }
+
     func openNotificationSettings() {
+        // The general app settings page does not expose the notifications toggle
+        // after the user taps "Don't Allow". iOS 16+ provides a dedicated deep link.
+        if let url = URL(string: UIApplication.openNotificationSettingsURLString),
+           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+            return
+        }
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
+    }
+
+    /// Entry point for Watchlist banner, About, and post-deny alerts.
+    /// If permission was never requested (including after "Not Now"), shows the system dialog.
+    func enableNotificationsFromSettingsEntryPoint() async {
+        guard !UITestingConfiguration.isEnabled else { return }
+        let status = await authorizationStatus()
+        switch status {
+        case .notDetermined:
+            // Clear a prior "Not Now" deferral so the system prompt can appear.
+            userDefaults.removeObject(forKey: Self.deferredPromptKey)
+            _ = await requestAuthorizationIfNeeded()
+        case .denied, .authorized, .provisional, .ephemeral:
+            openNotificationSettings()
+        @unknown default:
+            openNotificationSettings()
+        }
     }
 
     /// Requests permission once; returns whether alerts are allowed.
@@ -160,11 +199,13 @@ final class NotificationService: NotificationManaging {
         trigger: UNNotificationTrigger?
     ) async {
         let settings = await center.notificationSettings()
-        guard NotificationAuthorizationPolicy.canDeliverAlerts(settings.authorizationStatus) else { return }
+        guard NotificationAuthorizationPolicy.canDeliverAlerts(from: settings) else { return }
 
         let notification = UNMutableNotificationContent()
-        notification.title = content.title
-        notification.body = content.body
+        let title = content.title
+        let body = content.body
+        notification.title = title
+        notification.body = body
         notification.sound = .default
         notification.userInfo = ["showID": content.showID]
 

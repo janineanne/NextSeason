@@ -27,7 +27,9 @@ private final class UnconfiguredNotificationService: NotificationManaging {
     func needsAuthorizationPrompt() async -> Bool { fail() }
     func deferAuthorizationPrompt() { fail() }
     func isDenied() async -> Bool { fail() }
+    func canDeliverVisibleAlerts() async -> Bool { fail() }
     func openNotificationSettings() { fail() }
+    func enableNotificationsFromSettingsEntryPoint() async { fail() }
     @discardableResult
     func requestAuthorizationIfNeeded() async -> Bool { fail() }
     func deliver(_ content: SeasonNotificationContent) async { fail() }

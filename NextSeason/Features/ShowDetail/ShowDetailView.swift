@@ -10,6 +10,7 @@ import SwiftUI
 struct ShowDetailView: View {
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.appThemeColors) private var themeColors
+    @Environment(\.openAppAbout) private var openAppAbout
 
     @State private var viewModel: ShowDetailViewModel
     @State private var showActorNameAlert = false
@@ -78,6 +79,7 @@ struct ShowDetailView: View {
         .tvmazeAttributionInset()
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar { aboutToolbarButton }
         .betaThemeSwitcherToolbar()
         .appNavigationChrome()
         .alert("Stay in the Loop", isPresented: notificationPromptBinding(viewModel: viewModel)) {
@@ -105,6 +107,21 @@ struct ShowDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(FirstRunCopy.actorDetailsPlannedMessage)
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var aboutToolbarButton: some ToolbarContent {
+        if let openAppAbout {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    openAppAbout()
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .accessibilityLabel("About NextSeason")
+                .accessibilityHint("Shows version and beta diagnostics")
+            }
         }
     }
 

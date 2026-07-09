@@ -10,6 +10,32 @@ import Foundation
 nonisolated enum DiagnosticsSimulatedData {
     static let showID = 777_777
     static let showName = "Beta diagnostics / simulated"
+
+    /// Builds notification content from a tracked watchlist show, matching the
+    /// legacy debug test notification behavior.
+    static func notificationContent(from tracked: TrackedShow) -> SeasonNotificationContent {
+        SeasonNotificationContent(
+            showID: tracked.id,
+            showName: tracked.name,
+            status: tracked.nextSeason
+        )
+    }
+
+    /// Seeds the simulated pipeline with a watchlist show reset to an undated state.
+    static func pipelineSeed(from tracked: TrackedShow, at date: Date) -> TrackedShow {
+        TrackedShow(
+            id: tracked.id,
+            name: tracked.name,
+            posterMediumURL: tracked.posterMediumURL,
+            summaryHTML: tracked.summaryHTML,
+            tvMazeURL: tracked.tvMazeURL,
+            status: tracked.status,
+            nextSeason: .returningNoSeasonYet,
+            sourceUpdatedAt: date.addingTimeInterval(-86_400),
+            lastCheckedAt: date.addingTimeInterval(-86_400),
+            dateAdded: tracked.dateAdded
+        )
+    }
 }
 
 /// Fake TVMaze data for beta validation. Returns baseline season data on the first
@@ -20,11 +46,20 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
         case updated
     }
 
+    let showID: Int
+    let showName: String
+
     private let lock = NSLock()
     private nonisolated(unsafe) var phase: Phase = .baseline
     private let now: @Sendable () -> Date
 
-    init(now: @escaping @Sendable () -> Date = { .now }) {
+    init(
+        showID: Int = DiagnosticsSimulatedData.showID,
+        showName: String = DiagnosticsSimulatedData.showName,
+        now: @escaping @Sendable () -> Date = { .now }
+    ) {
+        self.showID = showID
+        self.showName = showName
         self.now = now
     }
 
@@ -64,14 +99,14 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
     func searchShows(matching query: String) async throws -> [Show] { [] }
 
     func show(id: Int, bypassCache: Bool) async throws -> Show {
-        guard id == DiagnosticsSimulatedData.showID else {
+        guard id == showID else {
             throw TVMazeError.notFound
         }
         return makeShow(for: currentPhase)
     }
 
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
-        [DiagnosticsSimulatedData.showID: now()]
+        [showID: now()]
     }
 
     private func makeShow(for phase: Phase) -> Show {
@@ -116,8 +151,8 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
         }
 
         return Show(
-            id: DiagnosticsSimulatedData.showID,
-            name: DiagnosticsSimulatedData.showName,
+            id: showID,
+            name: showName,
             tvMazeURL: nil,
             summaryHTML: "<p>Simulated show for TestFlight beta validation only.</p>",
             posterMediumURL: nil,

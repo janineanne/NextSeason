@@ -11,28 +11,40 @@ import Foundation
 final class DiagnosticsSimulatedUpdateRunner {
     private let dataProvider: DiagnosticsSimulatedDataProvider
     private let repository: SimulatedWatchlistRepository
-    private let notificationService: NotificationService
+    private let notificationService: any NotificationManaging
     private let analytics: any AnalyticsTracking
     private let refreshService: WatchlistRefreshService
     private let diagnostics: BetaRefreshDiagnostics
     private let now: @Sendable () -> Date
     private var isSeeded = false
+    private var pipelineTemplate: TrackedShow?
 
     init(
         dataProvider: DiagnosticsSimulatedDataProvider = DiagnosticsSimulatedDataProvider(),
-        notifications: NotificationService,
+        pipelineTemplate: TrackedShow? = nil,
+        notifications: any NotificationManaging,
         diagnostics: BetaRefreshDiagnostics,
         analytics: any AnalyticsTracking,
         now: @escaping @Sendable () -> Date = { .now }
     ) {
-        self.dataProvider = dataProvider
+        if let pipelineTemplate {
+            self.dataProvider = DiagnosticsSimulatedDataProvider(
+                showID: pipelineTemplate.id,
+                showName: pipelineTemplate.name,
+                now: now
+            )
+            self.pipelineTemplate = pipelineTemplate
+        } else {
+            self.dataProvider = dataProvider
+            self.pipelineTemplate = nil
+        }
         self.repository = SimulatedWatchlistRepository()
         self.notificationService = notifications
         self.analytics = analytics
         self.diagnostics = diagnostics
         self.now = now
         self.refreshService = WatchlistRefreshService(
-            tvMaze: dataProvider,
+            tvMaze: self.dataProvider,
             repository: repository,
             notifications: notifications,
             analytics: analytics,
@@ -68,7 +80,7 @@ final class DiagnosticsSimulatedUpdateRunner {
         let phase = dataProvider.currentPhase
         let outcome = await refreshService.refreshAll(force: true)
 
-        let tracked = repository.show(id: DiagnosticsSimulatedData.showID)
+        let tracked = repository.show(id: dataProvider.showID)
         let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
         let notificationDecision = outcome?.notificationDecision ?? "Refresh did not complete"
         let summary = "Step \(phase.stepNumber) (\(phase.shortLabel)): \(statusSummary). \(notificationDecision)"
@@ -117,7 +129,7 @@ final class DiagnosticsSimulatedUpdateRunner {
 
         let outcome = await pipelineRefresh.refreshAll(force: true)
 
-        let tracked = repository.show(id: DiagnosticsSimulatedData.showID)
+        let tracked = repository.show(id: dataProvider.showID)
         let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
         let notificationDecision = outcome?.notificationDecision ?? "Refresh did not complete"
         let delaySeconds = Int(delay.rounded())
@@ -131,9 +143,12 @@ final class DiagnosticsSimulatedUpdateRunner {
     }
 
     private func makeInitialTracked(at date: Date) -> TrackedShow {
-        TrackedShow(
-            id: DiagnosticsSimulatedData.showID,
-            name: DiagnosticsSimulatedData.showName,
+        if let pipelineTemplate {
+            return DiagnosticsSimulatedData.pipelineSeed(from: pipelineTemplate, at: date)
+        }
+        return TrackedShow(
+            id: dataProvider.showID,
+            name: dataProvider.showName,
             posterMediumURL: nil,
             summaryHTML: "<p>Beta diagnostics / simulated show. This is fake data for TestFlight validation only.</p>",
             tvMazeURL: nil,

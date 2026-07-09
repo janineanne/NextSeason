@@ -18,4 +18,9 @@ nonisolated enum NotificationAuthorizationPolicy {
             false
         }
     }
+
+    /// True when the system will present visible alert banners for this app.
+    static func canDeliverAlerts(from settings: UNNotificationSettings) -> Bool {
+        canDeliverAlerts(settings.authorizationStatus) && settings.alertSetting == .enabled
+    }
 }

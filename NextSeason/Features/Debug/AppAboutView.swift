@@ -105,20 +105,11 @@ struct AppAboutView: View {
     }
 
     private func refreshNotificationStatus() async {
-        let status = await notificationService.authorizationStatus()
-        notificationsEnabled = NotificationAuthorizationPolicy.canDeliverAlerts(status)
+        notificationsEnabled = await notificationService.canDeliverVisibleAlerts()
     }
 
     private func handleNotificationsTap() async {
-        let status = await notificationService.authorizationStatus()
-        switch status {
-        case .notDetermined:
-            await notificationService.requestAuthorizationIfNeeded()
-        case .denied, .authorized, .provisional, .ephemeral:
-            notificationService.openNotificationSettings()
-        @unknown default:
-            notificationService.openNotificationSettings()
-        }
+        await notificationService.enableNotificationsFromSettingsEntryPoint()
         await refreshNotificationStatus()
     }
 }

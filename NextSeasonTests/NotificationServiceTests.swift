@@ -68,4 +68,16 @@ struct NotificationServiceTests {
         service.resetDeferredPromptForTesting()
         #expect(await service.needsAuthorizationPrompt())
     }
+
+    @Test("Settings entry point clears defer when permission is still undetermined")
+    func settingsEntryPointClearsDeferWhenUndetermined() async {
+        let service = makeService()
+        service.deferAuthorizationPrompt()
+        #expect(await service.needsAuthorizationPrompt() == false)
+
+        await service.enableNotificationsFromSettingsEntryPoint()
+
+        // User explicitly opted in; the system prompt would appear on a real device.
+        #expect(await service.needsAuthorizationPrompt())
+    }
 }
