@@ -60,6 +60,7 @@
 		E16795C82FFD6526007F7098 /* 7-7-2026 Final Review.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "7-7-2026 Final Review.pdf"; sourceTree = "<group>"; };
 		E16797BE2FFEE4FA007F7098 /* 7-8-2026 Indepth Code Review.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "7-8-2026 Indepth Code Review.pdf"; sourceTree = "<group>"; };
 		E16797C12FFEE58C007F7098 /* 7-8-2026 Implement Items from Indepth Code Review.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-8-2026 Implement Items from Indepth Code Review.md"; sourceTree = "<group>"; };
+		E16799C930004ACC007F7098 /* 7-9-2026 Bug fixes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-9-2026 Bug fixes.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -348,6 +349,7 @@
 				E16795C82FFD6526007F7098 /* 7-7-2026 Final Review.pdf */,
 				E16797BE2FFEE4FA007F7098 /* 7-8-2026 Indepth Code Review.pdf */,
 				E16797C12FFEE58C007F7098 /* 7-8-2026 Implement Items from Indepth Code Review.md */,
+				E16799C930004ACC007F7098 /* 7-9-2026 Bug fixes.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

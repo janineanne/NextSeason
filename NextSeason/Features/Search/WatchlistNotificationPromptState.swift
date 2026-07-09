@@ -14,7 +14,6 @@ final class WatchlistNotificationPromptState {
 
     func deferPrompt(using notificationService: any NotificationManaging) {
         notificationService.deferAuthorizationPrompt()
-        shouldShowNotificationsSettingsReminder()
     }
 
     func shouldShowNotificationsSettingsReminder() {
@@ -49,7 +48,7 @@ struct WatchlistNotificationPromptAlerts: ViewModifier {
             .alert("Notifications Not Enabled", isPresented: $prompt.shouldShowNotificationsDeniedAlert) {
                 Button("Not Now", role: .cancel) {}
                 Button("Open Settings") {
-                    notificationService.openNotificationSettings()
+                    Task { await notificationService.enableNotificationsFromSettingsEntryPoint() }
                 }
             } message: {
                 Text(FirstRunCopy.notificationsSettingsReminderMessage)

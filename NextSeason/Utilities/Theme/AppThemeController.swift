@@ -18,7 +18,7 @@ final class AppThemeController {
         }
     }
 
-    init(variant: AppPaletteVariant = .lavender) {
+    init(variant: AppPaletteVariant = .warmSlate) {
         if let raw = UserDefaults.standard.string(forKey: Self.storageKey),
            let saved = AppPaletteVariant(rawValue: raw) {
             self.variant = saved

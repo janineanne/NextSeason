@@ -9,7 +9,13 @@ import SwiftUI
 struct NotificationsDisabledBanner: View {
     @Environment(\.appThemeColors) private var themeColors
 
+    let buttonTitle: String
     let openSettings: () -> Void
+
+    init(buttonTitle: String = "Open Settings", openSettings: @escaping () -> Void) {
+        self.buttonTitle = buttonTitle
+        self.openSettings = openSettings
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: AppSpacing.row) {
@@ -25,7 +31,7 @@ struct NotificationsDisabledBanner: View {
                 Text(FirstRunCopy.notificationsDisabledBannerMessage)
                     .font(.subheadline)
                     .appSecondaryText()
-                Button("Open Settings", action: openSettings)
+                Button(buttonTitle, action: openSettings)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
                     .padding(.top, 2)

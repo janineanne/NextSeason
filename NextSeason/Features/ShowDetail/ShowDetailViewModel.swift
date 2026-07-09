@@ -126,7 +126,6 @@ final class ShowDetailViewModel {
     func dismissNotificationPrompt() {
         shouldPromptForNotifications = false
         notifications.deferAuthorizationPrompt()
-        shouldShowNotificationsSettingsReminder()
     }
 
     func confirmNotificationPrompt() async {
@@ -146,6 +145,6 @@ final class ShowDetailViewModel {
     }
 
     func openNotificationSettings() {
-        notifications.openNotificationSettings()
+        Task { await notifications.enableNotificationsFromSettingsEntryPoint() }
     }
 }

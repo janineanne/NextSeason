@@ -76,13 +76,14 @@ enum DiagnosticsDocumentationCopy {
         The notification test actions below require **Notifications enabled** (alert permission). \
         They are disabled until permission is granted.
 
-        **Send Test Notification** delivers a sample “new season” alert right away using \
-        fake show data, without going through the refresh pipeline. Useful for confirming \
-        that notifications appear on this device.
+        **Send Test Notification** delivers a sample “new season” alert using the first \
+        tracked watchlist show, without going through the refresh pipeline. Useful for \
+        confirming that notifications appear on this device.
 
-        **Schedule Pipeline Test Notification** seeds a fake new-season update, runs it \
-        through the real refresh and notification decision path, and schedules delivery in \
-        5–10 seconds so you can background the app and confirm the alert arrives.
+        **Schedule Pipeline Test Notification** seeds a fake new-season update for that \
+        same watchlist show, runs it through the real refresh and notification decision \
+        path, and schedules delivery in 5–10 seconds so you can background the app and \
+        confirm the alert arrives. Track at least one show first.
 
         **Run Simulated Update Scenario** is a two-step exercise: tap once for baseline fake \
         data (step 1), then tap again for updated fake data (step 2) to exercise debounce \

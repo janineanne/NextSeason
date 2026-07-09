@@ -13,6 +13,7 @@ struct WatchlistView: View {
     @Environment(\.analytics) private var analytics
     @Environment(\.appThemeColors) private var themeColors
     @Environment(\.openAppAbout) private var openAppAbout
+    @Environment(\.scenePhase) private var scenePhase
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
@@ -24,7 +25,8 @@ struct WatchlistView: View {
     /// Bumped when the user selects the Watchlist tab so the list reloads.
     private let watchlistReloadToken: Int
     @State private var viewModel: WatchlistViewModel?
-    @State private var notificationsDenied = false
+    @State private var notificationsDisabled = false
+    @State private var notificationEnablementButtonTitle = "Enable Notifications"
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -80,11 +82,14 @@ struct WatchlistView: View {
                     )
                 }
                 await viewModel?.reload()
-                notificationsDenied = await notificationService.isDenied()
+                await refreshNotificationsDisabledState()
             }
             .onAppear {
                 analytics.track(.watchlistViewed)
-                Task { await viewModel?.reload() }
+                Task {
+                    await viewModel?.reload()
+                    await refreshNotificationsDisabledState()
+                }
             }
             .onDisappear {
                 AppDiagnosticsLogger.breadcrumb("watchlist_disappear")
@@ -96,7 +101,11 @@ struct WatchlistView: View {
             }
             .refreshable {
                 await viewModel?.refreshFromNetwork()
-                notificationsDenied = await notificationService.isDenied()
+                await refreshNotificationsDisabledState()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                Task { await refreshNotificationsDisabledState() }
             }
             .onChange(of: undoRemoval?.pendingRemoval?.id) { oldId, newId in
                 guard let oldId, newId == nil else { return }
@@ -126,6 +135,14 @@ struct WatchlistView: View {
         }
     }
 
+    private func refreshNotificationsDisabledState() async {
+        notificationsDisabled = await notificationService.canDeliverVisibleAlerts() == false
+        let status = await notificationService.authorizationStatus()
+        notificationEnablementButtonTitle = status == .notDetermined
+            ? "Enable Notifications"
+            : "Open Settings"
+    }
+
     @ViewBuilder
     private func content(for viewModel: WatchlistViewModel) -> some View {
         @Bindable var viewModel = viewModel
@@ -139,14 +156,16 @@ struct WatchlistView: View {
             // so removing the last row doesn't tear the List down mid-animation,
             // which crashes UICollectionView with "invalid number of items".
             List {
-                if notificationsDenied {
-                    NotificationsDisabledBanner {
-                        notificationService.openNotificationSettings()
+                if notificationsDisabled {
+                    NotificationsDisabledBanner(
+                        buttonTitle: notificationEnablementButtonTitle
+                    ) {
+                        Task { await notificationService.enableNotificationsFromSettingsEntryPoint() }
                     }
                 }
                 // Keeps the list scroll-backed so the large navigation title renders
                 // when the watchlist is empty (zero tracked shows, no banner).
-                if viewModel.shows.isEmpty, !notificationsDenied {
+                if viewModel.shows.isEmpty, !notificationsDisabled {
                     Color.clear
                         .frame(height: 1)
                         .listRowInsets(EdgeInsets())

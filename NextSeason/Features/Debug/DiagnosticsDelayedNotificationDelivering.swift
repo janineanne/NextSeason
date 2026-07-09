@@ -9,10 +9,10 @@ import Foundation
 /// background the app before the alert arrives.
 @MainActor
 final class DiagnosticsDelayedNotificationDelivering: NotificationDelivering {
-    private let service: NotificationService
+    private let service: any NotificationManaging
     private let delay: TimeInterval
 
-    init(service: NotificationService, delay: TimeInterval) {
+    init(service: any NotificationManaging, delay: TimeInterval) {
         self.service = service
         self.delay = delay
     }

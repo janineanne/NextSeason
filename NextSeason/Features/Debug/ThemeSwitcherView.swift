@@ -12,7 +12,7 @@ struct ThemeSwitcherView: View {
     @Environment(\.analytics) private var analytics
     @Environment(\.dismiss) private var dismiss
 
-    @State private var draftVariant: AppPaletteVariant = .lavender
+    @State private var draftVariant: AppPaletteVariant = .warmSlate
 
     private var draftColors: AppThemeColors {
         AppThemeColors.colors(for: draftVariant, colorScheme: colorScheme)
