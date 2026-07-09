@@ -90,6 +90,7 @@ struct ContentView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let repository = InMemoryWatchlistRepository()
     ContentView(coordinator: AppNavigationCoordinator(), tvMaze: TVMazeClient())
@@ -100,3 +101,4 @@ struct ContentView: View {
         ))
         .appThemePreview()
 }
+#endif
