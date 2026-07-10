@@ -151,7 +151,7 @@ struct DiagnosticsView: View {
                     Button {
                         isShowingDocumentation = true
                     } label: {
-                        Image(systemName: "info.circle")
+                        Image(systemName: "questionmark.circle")
                     }
                     .accessibilityLabel("Diagnostics help")
                     .accessibilityHint("Explains what each field and action does")
