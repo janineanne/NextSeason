@@ -5,6 +5,25 @@
 
 import XCTest
 
+// MARK: - Overview
+//
+// This file is the shared base class and harness for the UI test target — it is
+// not a test case itself and contains no `test...()` methods. The actual UI test
+// classes (e.g. `NavigationUITests`, `SearchAndTrackUITests`) subclass
+// `NextSeasonUITestCase` to inherit its setup and helpers, which keeps the
+// individual test files small and consistent.
+//
+// It provides:
+//   • App launch: `setUp()` launches the app once with the `-UITesting` argument
+//     (switching the app to stubbed network data) and waits for foreground.
+//   • Shared constants that keep tests and the app in sync: accessibility IDs
+//     (`UITestAccessibilityID`), sentinel search queries (`UITestSearchQuery`,
+//     must match `UITestingConfiguration.SearchQuery` in the app target),
+//     timeouts (`UITestTimeout`), and stub show data (`UITestPreviewShow`).
+//   • Reusable element accessors (e.g. `searchField`, `watchlistEmptyState`) and
+//     interaction/assertion helpers (e.g. `search(for:)`, `clearSearchField()`,
+//     `waitForSearchResultRow(...)`, `assertExists(...)`, `recordFailureContext(...)`).
+
 enum UITestLaunchArgument {
     static let uiTesting = "-UITesting"
 }
