@@ -36,7 +36,7 @@
 		E102EAB32FE3572D0076FCDD /* 6-17-2026 Improve Transcript File Organization.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-17-2026 Improve Transcript File Organization.md"; sourceTree = "<group>"; };
 		E102EFC62FE36AE50076FCDD /* 6-17-2026 Add UI Tests.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-17-2026 Add UI Tests.md"; sourceTree = "<group>"; };
 		E102F0F82FE5E84C0076FCDD /* 6-18-2026 Implement Review Items for Notifications.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-18-2026 Implement Review Items for Notifications.md"; sourceTree = "<group>"; };
-		E102F0F92FE5F0F60076FCDD /* Building Post-MVP Planning Documents.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Building Post-MVP Planning Documents.pdf"; sourceTree = "<group>"; };
+		E102F0F92FE5F0F60076FCDD /* 6-19-2026 Building Post-MVP Planning Documents.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "6-19-2026 Building Post-MVP Planning Documents.pdf"; sourceTree = "<group>"; };
 		E102F1002FE5F3D70076FCDD /* Post-MVP Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Post-MVP Roadmap.md"; sourceTree = "<group>"; };
 		E117D3C52FEB2C2000C02ADC /* 6-23-2026 Plan Search Improvements.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "6-23-2026 Plan Search Improvements.pdf"; sourceTree = "<group>"; };
 		E117D3C62FEB2C2900C02ADC /* 6-23-2026 Search Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-23-2026 Search Discussion.md"; sourceTree = "<group>"; };
@@ -224,17 +224,11 @@
 		E102F0FD2FE5F2100076FCDD /* AI Transcripts */ = {
 			isa = PBXGroup;
 			children = (
-				E102F0FE2FE5F2260076FCDD /* 6-19-2026 */,
+				E102F0F92FE5F0F60076FCDD /* 6-19-2026 Building Post-MVP Planning Documents.pdf */,
+				E167A5F430058C25007F7098 /* 7-13-2026 Post-MVP-Roadmap-Discussion.md */,
+				E167A5F5300595E7007F7098 /* 7-13-2026 Engagement-Challenge-Solutions.md */,
 			);
 			path = "AI Transcripts";
-			sourceTree = "<group>";
-		};
-		E102F0FE2FE5F2260076FCDD /* 6-19-2026 */ = {
-			isa = PBXGroup;
-			children = (
-				E102F0F92FE5F0F60076FCDD /* Building Post-MVP Planning Documents.pdf */,
-			);
-			path = "6-19-2026";
 			sourceTree = "<group>";
 		};
 		E13811C42FDB795C009C141B = {
@@ -360,8 +354,6 @@
 				E1679DD9300551EC007F7098 /* 7-13-2026 Launch on non-empty Watchlist.md */,
 				E1679DDA300561BD007F7098 /* 7-13-2026 Improve Notifications.md */,
 				E167A3ED30058305007F7098 /* 7-13-2026 Remove Example Button.md */,
-				E167A5F430058C25007F7098 /* 7-13-2026 Post-MVP-Roadmap-Discussion.md */,
-				E167A5F5300595E7007F7098 /* 7-13-2026 Engagement-Challenge-Solutions.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
