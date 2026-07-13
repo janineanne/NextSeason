@@ -110,23 +110,24 @@ nonisolated struct SeasonNotificationContent: Sendable {
     let showName: String
     let status: NextSeasonStatus
 
-    var title: String { "Next season update" }
+    /// The show name leads the notification so it's clear which show updated.
+    var title: String { showName }
 
     var body: String {
         switch status {
         case .airing(let season):
-            return "\(showName): Season \(season) is now airing."
+            return "Season \(season) is now airing."
         case .scheduled(let season, let premiere):
             let date = premiere.formatted(date: .abbreviated, time: .omitted)
-            return "\(showName): Season \(season) premieres \(date)."
+            return "Season \(season) premieres \(date)."
         case .announcedUndated(let season):
-            return "\(showName): Season \(season) announced — date to be confirmed."
+            return "Season \(season) announced — date to be confirmed."
         case .returningNoSeasonYet:
-            return "\(showName): Returning — watch for next season news."
+            return "Returning — watch for next season news."
         case .ended:
-            return "\(showName) has ended."
+            return "This series has ended."
         case .unknown:
-            return "\(showName): Next season status updated."
+            return "There's a next season update."
         }
     }
 }

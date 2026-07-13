@@ -52,11 +52,14 @@ struct AppCompositionRoot {
         )
     }
 
-    func configureNonUITestRuntime(navigationCoordinator: AppNavigationCoordinator) {
+    func configureNonUITestRuntime() {
         AppDiagnosticsLogger.recordAppLaunch()
         MetricKitDiagnosticsSubscriber.installIfNeeded()
 
-        NotificationRouting.setCoordinator(navigationCoordinator)
+        // The tap coordinator is attached from the view layer (see ContentView) so
+        // routing always targets the exact AppNavigationCoordinator instance SwiftUI
+        // observes. Installing the delegate here lets a launch-from-notification tap
+        // buffer until the coordinator attaches.
         NotificationRouting.setAnalytics(analyticsService)
         NotificationRouting.install()
 
