@@ -43,8 +43,32 @@ final class AppNavigationCoordinator {
     private(set) var pendingShowID: Int?
     private(set) var watchlistReloadToken = 0
 
+    /// Guards the one-time cold-launch tab decision so foreground returns keep the
+    /// user on whatever tab they were last using.
+    private var didResolveInitialTab = false
+
     func queueShowNavigation(showID: Int) {
         pendingShowID = showID
+    }
+
+    /// Cold-launch landing tab: Watchlist when it already has at least one show,
+    /// otherwise Search. Runs once per launch; it does not override a notification
+    /// deep link and is never re-run on a foreground return.
+    func resolveInitialTab(repository: any WatchlistRepository) async {
+        guard !didResolveInitialTab else { return }
+        didResolveInitialTab = true
+
+        // Profile flows drive navigation themselves; leave the default tab alone.
+        guard !ProfileFlowConfiguration.isEnabled else { return }
+        // A notification deep link picks the tab itself (see resolvePendingNavigation).
+        guard pendingShowID == nil else { return }
+
+        do {
+            let trackedIDs = try await repository.trackedShowIDs()
+            selectedTab = trackedIDs.isEmpty ? .search : .watchlist
+        } catch {
+            selectedTab = .search
+        }
     }
 
     /// Pops the search navigation stack to its root without changing tabs.
