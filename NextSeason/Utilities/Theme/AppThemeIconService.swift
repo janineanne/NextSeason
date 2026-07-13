@@ -6,34 +6,32 @@
 import SwiftUI
 import UIKit
 
-/// Maps the active palette and color scheme to alternate app icon names for theme preview builds.
+/// Maps the active palette to an alternate app icon for theme preview builds.
+///
+/// Light/dark artwork lives inside each icon set as appearance variants (see the
+/// `Assets.xcassets/AppIcon*` sets), so iOS swaps the light/dark rendering
+/// automatically. We only call `setAlternateIconName` when the user deliberately
+/// changes the palette — never on a system light/dark change, which previously
+/// triggered the "You have changed the icon" alert on every appearance switch.
 @MainActor
 enum AppThemeIconService {
-    /// `nil` selects the primary icon (`AppIcon`, lavender light).
-    static func alternateIconName(for variant: AppPaletteVariant, colorScheme: ColorScheme) -> String? {
-        switch (variant, colorScheme) {
-        case (.lavender, .light):
+    /// `nil` selects the primary icon (`AppIcon`, the Lavender palette).
+    static func alternateIconName(for variant: AppPaletteVariant) -> String? {
+        switch variant {
+        case .lavender:
             nil
-        case (.lavender, .dark):
-            "LavenderDark"
-        case (.tealUtility, .light):
-            "TealUtilityLight"
-        case (.tealUtility, .dark):
-            "TealUtilityDark"
-        case (.warmSlate, .light):
-            "WarmSlateLight"
-        case (.warmSlate, .dark):
-            "WarmSlateDark"
-        @unknown default:
-            nil
+        case .tealUtility:
+            "AppIcon-TealUtility"
+        case .warmSlate:
+            "AppIcon-WarmSlate"
         }
     }
 
-    static func syncIcon(variant: AppPaletteVariant, colorScheme: ColorScheme) {
+    static func syncIcon(variant: AppPaletteVariant) {
         guard !UITestingConfiguration.isEnabled else { return }
         guard UIApplication.shared.supportsAlternateIcons else { return }
 
-        let desiredName = alternateIconName(for: variant, colorScheme: colorScheme)
+        let desiredName = alternateIconName(for: variant)
         guard !matchesCurrentIcon(desiredName) else { return }
 
         UIApplication.shared.setAlternateIconName(desiredName) { error in
@@ -45,85 +43,27 @@ enum AppThemeIconService {
         }
     }
 
-    /// Re-reads the system appearance after returning from Settings, then updates the icon.
-    static func syncIconAfterForegroundReturn(variant: AppPaletteVariant, fallback colorScheme: ColorScheme) {
-        let scheme = resolvedSystemColorScheme(fallback: colorScheme)
-        syncIcon(variant: variant, colorScheme: scheme)
-    }
-
-    /// iOS may report the asset-catalog name (`AppIcon-TealUtilityLight`) while we request the
-    /// Info.plist key (`TealUtilityLight`). Treat those as equivalent.
     private static func matchesCurrentIcon(_ desiredName: String?) -> Bool {
         let current = UIApplication.shared.alternateIconName
-
-        if desiredName == current {
-            return true
-        }
 
         if desiredName == nil {
             return current == nil || current == "AppIcon"
         }
 
-        guard let desiredName, let current else {
-            return false
-        }
-
-        return current == "AppIcon-\(desiredName)"
-    }
-
-    private static func resolvedSystemColorScheme(fallback: ColorScheme) -> ColorScheme {
-        let style = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first { $0.activationState == .foregroundActive || $0.activationState == .foregroundInactive }?
-            .traitCollection.userInterfaceStyle
-            ?? UITraitCollection.current.userInterfaceStyle
-
-        switch style {
-        case .dark:
-            return .dark
-        case .light:
-            return .light
-        case .unspecified:
-            return fallback
-        @unknown default:
-            return fallback
-        }
+        return desiredName == current
     }
 }
 
 private struct AppThemeIconUpdater: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.scenePhase) private var scenePhase
-
     var controller: AppThemeController
 
     func body(content: Content) -> some View {
         content
             .onAppear {
-                AppThemeIconService.syncIconAfterForegroundReturn(
-                    variant: controller.variant,
-                    fallback: colorScheme
-                )
+                AppThemeIconService.syncIcon(variant: controller.variant)
             }
-            .onChange(of: controller.variant) { _, _ in
-                AppThemeIconService.syncIcon(
-                    variant: controller.variant,
-                    colorScheme: colorScheme
-                )
-            }
-            .onChange(of: colorScheme) { _, scheme in
-                AppThemeIconService.syncIcon(
-                    variant: controller.variant,
-                    colorScheme: scheme
-                )
-            }
-            .onChange(of: scenePhase) { _, phase in
-                guard phase == .active else { return }
-                AppDiagnosticsLogger.breadcrumb("theme_icon_sync_foreground")
-                AppThemeIconService.syncIconAfterForegroundReturn(
-                    variant: controller.variant,
-                    fallback: colorScheme
-                )
+            .onChange(of: controller.variant) { _, variant in
+                AppThemeIconService.syncIcon(variant: variant)
             }
     }
 }
