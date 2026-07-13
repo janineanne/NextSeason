@@ -38,7 +38,7 @@ struct AppNavigationCoordinatorTests {
         defer { NotificationRouting.resetForTesting() }
 
         let coordinator = AppNavigationCoordinator()
-        NotificationRouting.routeToShow(showID: 44933)
+        NotificationRouting.routeToShow(showID: 44933, animated: false)
         #expect(coordinator.pendingShowID == nil)
 
         NotificationRouting.setCoordinator(coordinator)
@@ -78,10 +78,17 @@ struct AppNavigationCoordinatorTests {
         )
 
         #expect(coordinator.selectedTab == .watchlist)
-        #expect(coordinator.watchlistPath.count == 1)
+        // The push is deferred until WatchlistView is on screen (avoids SwiftUI
+        // dropping a push made in the same update as the tab switch).
+        #expect(coordinator.pendingWatchlistDetail?.id == show.id)
+        #expect(coordinator.watchlistPath.isEmpty)
         #expect(coordinator.pendingShowID == nil)
         #expect(tvMaze.fetchedIDs.isEmpty)
         #expect(analytics.events.contains(.appOpenedFromNotification(showID: show.id)))
+
+        coordinator.applyPendingWatchlistDetail()
+        #expect(coordinator.watchlistPath.count == 1)
+        #expect(coordinator.pendingWatchlistDetail == nil)
     }
 
     @Test("Find a Show clears the search stack and selects the search tab")

@@ -41,6 +41,10 @@ struct ContentView: View {
                 navigationPath: $coordinator.watchlistPath,
                 tvMaze: tvMaze,
                 watchlistReloadToken: coordinator.watchlistReloadToken,
+                pendingDetailToken: coordinator.pendingWatchlistDetail?.id,
+                onApplyPendingDetail: {
+                    coordinator.applyPendingWatchlistDetail()
+                },
                 onFindShow: {
                     coordinator.showSearchRoot()
                 },
@@ -71,6 +75,12 @@ struct ContentView: View {
             }
         }
         .task {
+            if !UITestingConfiguration.isEnabled {
+                // Attach the exact coordinator SwiftUI observes so notification taps
+                // route into this view's navigation state; this also flushes any
+                // launch-time tap that NotificationRouting buffered before attach.
+                NotificationRouting.setCoordinator(coordinator)
+            }
             await coordinator.resolveInitialTab(repository: repository)
             await coordinator.resolvePendingNavigation(
                 repository: repository,

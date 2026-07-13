@@ -24,6 +24,12 @@ struct WatchlistView: View {
     private let onWatchlistChanged: () -> Void
     /// Bumped when the user selects the Watchlist tab so the list reloads.
     private let watchlistReloadToken: Int
+    /// Identifies a pending notification deep link so this view can push its detail
+    /// once its `NavigationStack` is on screen. Changes when a new deep link arrives.
+    private let pendingDetailToken: Int?
+    /// Applies the pending notification deep link (see `pendingDetailToken`). The
+    /// coordinator decides whether the push animates based on the tap context.
+    private let onApplyPendingDetail: () -> Void
     @State private var viewModel: WatchlistViewModel?
     @State private var notificationsDisabled = false
     @State private var notificationEnablementButtonTitle = "Enable Notifications"
@@ -32,12 +38,16 @@ struct WatchlistView: View {
         navigationPath: Binding<NavigationPath>,
         tvMaze: any TVMazeService,
         watchlistReloadToken: Int = 0,
+        pendingDetailToken: Int? = nil,
+        onApplyPendingDetail: @escaping () -> Void = {},
         onFindShow: @escaping () -> Void = {},
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
         _navigationPath = navigationPath
         self.tvMaze = tvMaze
         self.watchlistReloadToken = watchlistReloadToken
+        self.pendingDetailToken = pendingDetailToken
+        self.onApplyPendingDetail = onApplyPendingDetail
         self.onFindShow = onFindShow
         self.onWatchlistChanged = onWatchlistChanged
     }
@@ -86,10 +96,18 @@ struct WatchlistView: View {
             }
             .onAppear {
                 analytics.track(.watchlistViewed)
+                // Apply a deep link that arrived while this tab was off screen; the
+                // stack is now mounted so the push lands instead of being dropped.
+                onApplyPendingDetail()
                 Task {
                     await viewModel?.reload()
                     await refreshNotificationsDisabledState()
                 }
+            }
+            .onChange(of: pendingDetailToken) { _, token in
+                // A deep link arrived while the watchlist is already on screen.
+                guard token != nil else { return }
+                onApplyPendingDetail()
             }
             .onDisappear {
                 AppDiagnosticsLogger.breadcrumb("watchlist_disappear")

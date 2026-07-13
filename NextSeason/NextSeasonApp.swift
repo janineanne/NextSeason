@@ -21,7 +21,7 @@ struct NextSeasonApp: App {
             composition = root
 
             if !UITestingConfiguration.isEnabled {
-                root.configureNonUITestRuntime(navigationCoordinator: coordinator)
+                root.configureNonUITestRuntime()
             } else {
                 #if DEBUG
                 FirstRunPreferences.resetSearchResultsHintForTesting()

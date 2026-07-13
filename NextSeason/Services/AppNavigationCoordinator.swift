@@ -43,12 +43,55 @@ final class AppNavigationCoordinator {
     private(set) var pendingShowID: Int?
     private(set) var watchlistReloadToken = 0
 
+    /// A tracked show whose detail should be pushed onto the Watchlist tab once
+    /// that tab's `NavigationStack` is on screen. The push is deferred (rather than
+    /// appended immediately in `resolvePendingNavigation`) because pushing in the
+    /// same update as the tab switch makes SwiftUI drop it and leave the user on
+    /// the list. `WatchlistView` calls `applyPendingWatchlistDetail()` once mounted.
+    private(set) var pendingWatchlistDetail: TrackedShow?
+
+    /// Whether the pending deep-link push should animate. Determined by whether the
+    /// app was already foreground-active when the notification was tapped: an in-app
+    /// tap animates like normal navigation, while a launch/foreground tap does not
+    /// (so the detail page is already in place rather than visibly sliding in).
+    private var pendingWatchlistDetailAnimated = false
+
+    /// Whether the queued navigation (`pendingShowID`) originated from an in-app tap.
+    private var pendingNavigationAnimated = false
+
     /// Guards the one-time cold-launch tab decision so foreground returns keep the
     /// user on whatever tab they were last using.
     private var didResolveInitialTab = false
 
-    func queueShowNavigation(showID: Int) {
+    /// - Parameter animated: `true` when the tap happened while the app was already
+    ///   foreground-active (in-app navigation), `false` for a launch/foreground tap.
+    func queueShowNavigation(showID: Int, animated: Bool = false) {
         pendingShowID = showID
+        pendingNavigationAnimated = animated
+    }
+
+    /// Pushes a deferred notification deep link onto the Watchlist stack. Called by
+    /// `WatchlistView` from `onAppear`/`onChange` so the push lands after that tab's
+    /// `NavigationStack` is mounted. Safe to call repeatedly; it no-ops once the
+    /// pending show has been consumed. The animation is decided by the tap context
+    /// captured in `resolvePendingNavigation`, not by which callback triggers it.
+    func applyPendingWatchlistDetail() {
+        guard let tracked = pendingWatchlistDetail else { return }
+        pendingWatchlistDetail = nil
+        guard pendingWatchlistDetailAnimated else {
+            // Launch / foreground: push without animation so the detail page is
+            // already in place, rather than visibly sliding in.
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                watchlistPath = NavigationPath()
+                watchlistPath.append(tracked)
+            }
+            return
+        }
+        // In-app deep link while the Watchlist is already on screen: animate the push.
+        watchlistPath = NavigationPath()
+        watchlistPath.append(tracked)
     }
 
     /// Cold-launch landing tab: Watchlist when it already has at least one show,
@@ -103,7 +146,8 @@ final class AppNavigationCoordinator {
         do {
             if let tracked = try await repository.trackedShow(showID: showID) {
                 selectedTab = .watchlist
-                watchlistPath.append(tracked)
+                pendingWatchlistDetail = tracked
+                pendingWatchlistDetailAnimated = pendingNavigationAnimated
                 analytics.track(.appOpenedFromNotification(showID: showID))
                 return
             }
