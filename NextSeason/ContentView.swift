@@ -71,6 +71,7 @@ struct ContentView: View {
             }
         }
         .task {
+            await coordinator.resolveInitialTab(repository: repository)
             await coordinator.resolvePendingNavigation(
                 repository: repository,
                 tvMaze: tvMaze,
