@@ -64,6 +64,7 @@
 		E1679BD1300549E5007F7098 /* 7-13-2026 Fix Dark Mode bugs.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-13-2026 Fix Dark Mode bugs.md"; sourceTree = "<group>"; };
 		E1679DD9300551EC007F7098 /* 7-13-2026 Launch on non-empty Watchlist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-13-2026 Launch on non-empty Watchlist.md"; sourceTree = "<group>"; };
 		E1679DDA300561BD007F7098 /* 7-13-2026 Improve Notifications.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-13-2026 Improve Notifications.md"; sourceTree = "<group>"; };
+		E167A3ED30058305007F7098 /* 7-13-2026 Remove Example Button.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-13-2026 Remove Example Button.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -356,6 +357,7 @@
 				E1679BD1300549E5007F7098 /* 7-13-2026 Fix Dark Mode bugs.md */,
 				E1679DD9300551EC007F7098 /* 7-13-2026 Launch on non-empty Watchlist.md */,
 				E1679DDA300561BD007F7098 /* 7-13-2026 Improve Notifications.md */,
+				E167A3ED30058305007F7098 /* 7-13-2026 Remove Example Button.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

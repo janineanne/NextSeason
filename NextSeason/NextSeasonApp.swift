@@ -25,6 +25,7 @@ struct NextSeasonApp: App {
             } else {
                 #if DEBUG
                 FirstRunPreferences.resetSearchResultsHintForTesting()
+                FirstRunPreferences.resetFirstSearchCompletedForTesting()
                 #endif
             }
         } catch {

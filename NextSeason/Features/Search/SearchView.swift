@@ -26,6 +26,8 @@ struct SearchView: View {
     @State private var isScrollDismissingKeyboard = false
     @AppStorage(FirstRunPreferences.searchResultsHintDismissedKey)
     private var searchResultsHintDismissed = false
+    @AppStorage(FirstRunPreferences.hasCompletedFirstSearchKey)
+    private var hasCompletedFirstSearch = false
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -76,6 +78,9 @@ struct SearchView: View {
                 }
                 .task(id: viewModel.query) {
                     await viewModel.search()
+                }
+                .onChange(of: viewModel.state) { _, newState in
+                    markFirstSearchCompletedIfNeeded(for: newState)
                 }
                 .searchProfileFlow(
                     profileFlowSearchQuery: $profileFlowSearchQuery,
@@ -143,6 +148,18 @@ struct SearchView: View {
         searchResultsHintDismissed = true
     }
 
+    /// Once the user reaches a real search outcome, they've demonstrated they
+    /// know how to search, so retire the "Try an Example" affordance for good.
+    private func markFirstSearchCompletedIfNeeded(for state: SearchViewModel.State) {
+        guard !hasCompletedFirstSearch else { return }
+        switch state {
+        case .results, .empty:
+            hasCompletedFirstSearch = true
+        case .idle, .loading, .failed:
+            break
+        }
+    }
+
     @ViewBuilder
     private var content: some View {
         switch viewModel.state {
@@ -154,12 +171,14 @@ struct SearchView: View {
                 Text(FirstRunCopy.searchIdleDescription)
                     .appSecondaryText()
             } actions: {
-                Button(FirstRunCopy.tryExampleButtonTitle) {
-                    analytics.track(.exampleSearchUsed)
-                    viewModel.query = FirstRunCopy.exampleSearchQuery
+                if !hasCompletedFirstSearch {
+                    Button(FirstRunCopy.tryExampleButtonTitle) {
+                        analytics.track(.exampleSearchUsed)
+                        viewModel.query = FirstRunCopy.exampleSearchQuery
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier(AccessibilityID.Search.tryExampleButton)
                 }
-                .buttonStyle(.borderedProminent)
-                .accessibilityIdentifier(AccessibilityID.Search.tryExampleButton)
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier(AccessibilityID.Search.idlePrompt)
