@@ -51,30 +51,38 @@ Potential approaches:
 TVMaze already provides fuzzy matching, alternate-name (AKA) support,
 partial-title matching, punctuation tolerance, and relevance-based ranking.
 
-Future work should therefore focus on features that add value beyond the
-underlying API rather than duplicating its behavior.
-
-Potential improvements:
-
-- Support common abbreviations and acronyms (GoT, SVU, TNG, etc.).
-- Experiment with app-specific result ordering.
-- Collect beta analytics before investing additional engineering effort.
+Future work should focus on addressing real user pain points rather than
+re-implementing functionality the underlying API already provides.
 
 ### Recommended Analytics
 
-Before investing in significant search work, instrument the search flow to
-measure whether users are actually experiencing problems.
+Before investing in additional search work, instrument the search flow to
+understand how people are actually using it.
 
 Suggested events:
 
 - `search_performed`
-- query length
-- result count
-- `show_selected` (yes/no)
+- Query length
+- Result count
+- Whether a show was selected
 
-If searches with 10 results frequently end without a selection, that provides
-evidence that the TVMaze API limit is hurting usability. If almost all searches
-lead to a selection, additional search work can remain a low priority.
+If searches that return the maximum 10 results frequently end without a
+selection, that is strong evidence that the current API limitation is hurting
+usability. If most searches lead to a successful selection, search improvements
+can remain a lower priority.
+
+### Potential Improvements
+
+Priority should be guided by analytics and beta feedback.
+
+- Remove the current 10-result limitation if it proves to be a significant user problem.
+- Evaluate multi-provider search (see below) as the preferred long-term solution.
+- Support common abbreviations and acronyms only if real-world usage demonstrates a need.
+
+TVMaze's relevance ordering is generally good enough that custom result ranking
+is unlikely to provide meaningful value. Unless beta feedback uncovers a
+specific, repeatable weakness, the application should continue to present
+results in the order supplied by the provider.
 
 ## Evaluate Multi-Provider Search
 
@@ -136,72 +144,44 @@ Priority: High
 
 ## Streaming Provider Information
 
-### Motivation
+Users occasionally want to know where a show is currently available to stream,
+particularly after receiving a notification that a new season has been released.
+However, streaming availability changes frequently, varies by country, and is
+not reliably represented by TVMaze's crowdsourced data.
 
-Knowing where a season is available is often more valuable than knowing that it exists.
+Future work in this area should be driven by user demand rather than implemented
+proactively.
 
-### Potential Features
+### Evaluate User Interest
 
-Display availability on:
+Collect beta feedback and App Store feedback to determine whether users are
+actually looking for streaming availability within the app, or whether they
+typically use other services to answer that question.
 
-- Netflix
-- Hulu
-- Disney+
-- Max
-- Apple TV+
-- Prime Video
+### Potential Improvements
 
-Priority: High
+If there is sufficient demand:
+
+- Evaluate integration with a dedicated streaming availability provider (such as TMDb watch providers or JustWatch) that offers regional streaming information.
+- Display current streaming availability for the user's region when reliable data is available.
+- Consider deep-linking directly to supported streaming services where practical.
+
+TVMaze's streaming provider information should not be used for this feature, as
+its crowdsourced nature makes it incomplete and unsuitable as a primary data
+source.
 
 ---
 
 ## Preferred Services
 
-### Potential Features
+### Potential Features (Dependent on Reliable Streaming Data)
 
-- Track subscribed services.
-- Filter unavailable content.
-- Prioritize relevant notifications.
+* Allow users to record which streaming services they subscribe to.
+* Highlight shows currently available on those services.
+* Filter or group watchlist entries by streaming availability.
+* Tailor notifications with current streaming availability when appropriate.
 
 Priority: High
-
----
-
-# Product Intelligence
-
-## Recommendations
-
-### Potential Features
-
-- Similar shows.
-- Genre recommendations.
-- Watchlist-based suggestions.
-
-Priority: Medium
-
----
-
-## Actor Tracking
-
-### Potential Features
-
-- Follow actors.
-- Actor-based discovery.
-- Notifications for new projects.
-
-Priority: Medium
-
----
-
-## Network and Studio Tracking
-
-### Potential Features
-
-- Follow networks.
-- Follow streaming providers.
-- New series announcements.
-
-Priority: Medium
 
 ---
 
@@ -273,8 +253,7 @@ Candidate approaches (evaluate privacy, cost, and maintenance):
 Keep the existing privacy constraints: no search text, show titles, or other PII
 in event payloads.
 
-Remove the beta-only analytics tap target from show summaries before portfolio
-release (see Release Readiness.md, Portfolio Readiness).
+Transition the Diagnostics screen from a beta testing tool into a production support feature. Remove developer-only actions while retaining user-visible status information and the ability to generate or send a diagnostic report for troubleshooting.
 
 ## Future Investigation
 
