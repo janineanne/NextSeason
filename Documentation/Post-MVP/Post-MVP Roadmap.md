@@ -120,6 +120,54 @@ Priority: High
 
 ---
 
+
+
+## Intelligent Monitoring Experience
+
+The long-term vision for NextSeason is to quietly monitor the TV shows users care about and let them know when there is something worth knowing. Future enhancements should reinforce user confidence that the app is actively monitoring on their behalf without encouraging unnecessary engagement.
+
+### Monitoring Confidence
+
+- Display a monitoring summary at the top of the watchlist (for example: "Monitoring 18 shows").
+- Show the last successful background refresh time.
+- Clearly indicate when everything is up to date.
+- Surface when background refresh has not run recently so users understand why updates may be delayed.
+
+### Immediate Value
+
+After adding a show to the watchlist, present a richer status summary instead of a simple confirmation.
+
+Examples:
+
+- Current status (Running, Returning, Ended, etc.).
+- Latest known season and premiere information.
+- A brief explanation that NextSeason will monitor the show and notify the user when its status changes.
+
+### Update Awareness
+
+- Display a "Since your last visit" summary when tracked shows have changed.
+- Maintain unread update indicators until the user has acknowledged the changes.
+- Consider an update history so users can review previously announced changes.
+
+These features should complement notifications rather than replace them, ensuring users can easily see what changed even if they missed a notification.
+
+### Apple Platform Integration
+
+Investigate deeper integration with App Intents, Siri, Apple Intelligence, and widgets.
+
+Potential features:
+
+- Siri/App Intents to add or remove shows from the watchlist.
+- Siri queries about the status of tracked shows.
+- Siri summaries describing what has changed since the user's last visit.
+- Home Screen widgets that display monitoring status or recent updates.
+
+These capabilities should operate on the user's watchlist and application data rather than attempting to become a general entertainment news assistant.
+
+Priority: High
+
+---
+
 ## Notification Enhancements
 
 ### Potential Features
