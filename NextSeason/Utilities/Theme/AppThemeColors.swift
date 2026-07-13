@@ -92,7 +92,9 @@ private extension AppThemeColors {
         background: Color(red: 0.110, green: 0.098, blue: 0.090),
         surface: Color(red: 0.161, green: 0.145, blue: 0.141),
         accent: Color(red: 0.796, green: 0.835, blue: 0.882),
-        controlTint: Color(red: 0.200, green: 0.255, blue: 0.333),
+        // Dark palettes use a light control tint so nav-bar/tab-bar controls stay
+        // legible on the dark background (the light-mode slate was invisible here).
+        controlTint: Color(red: 0.796, green: 0.835, blue: 0.882),
         mutedText: Color(red: 0.659, green: 0.635, blue: 0.620),
         trackedStar: Color(red: 1.000, green: 0.839, blue: 0.337),
         warning: Color(red: 1.000, green: 0.584, blue: 0.235)

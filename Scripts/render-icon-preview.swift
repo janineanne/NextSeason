@@ -1,48 +1,61 @@
 import AppKit
 
+private typealias RGB = (red: CGFloat, green: CGFloat, blue: CGFloat)
+
+/// One rendered appearance (light or dark) of a palette's icon.
+private struct IconAppearance {
+    let fileName: String
+    let background: RGB
+    let foreground: RGB
+}
+
+/// A single appearance-aware app icon set. iOS swaps `light`/`dark` automatically
+/// based on the system appearance, so we no longer generate per-scheme icon sets.
 private struct ThemeIconSpec {
     let assetName: String
-    let fileName: String
-    let background: (red: CGFloat, green: CGFloat, blue: CGFloat)
-    let foreground: (red: CGFloat, green: CGFloat, blue: CGFloat)
+    let light: IconAppearance
+    let dark: IconAppearance
 }
 
 private let themeIcons: [ThemeIconSpec] = [
     ThemeIconSpec(
         assetName: "AppIcon",
-        fileName: "AppIcon.png",
-        background: (0.902, 0.886, 0.933),
-        foreground: (0.365, 0.306, 0.443)
+        light: IconAppearance(
+            fileName: "AppIcon.png",
+            background: (0.902, 0.886, 0.933),
+            foreground: (0.365, 0.306, 0.443)
+        ),
+        dark: IconAppearance(
+            fileName: "AppIcon-Dark.png",
+            background: (0.149, 0.129, 0.196),
+            foreground: (0.659, 0.596, 0.769)
+        )
     ),
     ThemeIconSpec(
-        assetName: "AppIcon-LavenderDark",
-        fileName: "AppIcon-LavenderDark.png",
-        background: (0.149, 0.129, 0.196),
-        foreground: (0.659, 0.596, 0.769)
+        assetName: "AppIcon-TealUtility",
+        light: IconAppearance(
+            fileName: "AppIcon-TealUtility.png",
+            background: (0.941, 0.949, 0.945),
+            foreground: (0.051, 0.420, 0.388)
+        ),
+        dark: IconAppearance(
+            fileName: "AppIcon-TealUtility-Dark.png",
+            background: (0.102, 0.114, 0.110),
+            foreground: (0.431, 0.792, 0.737)
+        )
     ),
     ThemeIconSpec(
-        assetName: "AppIcon-TealUtilityLight",
-        fileName: "AppIcon-TealUtilityLight.png",
-        background: (0.941, 0.949, 0.945),
-        foreground: (0.051, 0.420, 0.388)
-    ),
-    ThemeIconSpec(
-        assetName: "AppIcon-TealUtilityDark",
-        fileName: "AppIcon-TealUtilityDark.png",
-        background: (0.102, 0.114, 0.110),
-        foreground: (0.431, 0.792, 0.737)
-    ),
-    ThemeIconSpec(
-        assetName: "AppIcon-WarmSlateLight",
-        fileName: "AppIcon-WarmSlateLight.png",
-        background: (0.969, 0.961, 0.949),
-        foreground: (0.200, 0.255, 0.333)
-    ),
-    ThemeIconSpec(
-        assetName: "AppIcon-WarmSlateDark",
-        fileName: "AppIcon-WarmSlateDark.png",
-        background: (0.110, 0.098, 0.090),
-        foreground: (0.796, 0.835, 0.882)
+        assetName: "AppIcon-WarmSlate",
+        light: IconAppearance(
+            fileName: "AppIcon-WarmSlate.png",
+            background: (0.969, 0.961, 0.949),
+            foreground: (0.200, 0.255, 0.333)
+        ),
+        dark: IconAppearance(
+            fileName: "AppIcon-WarmSlate-Dark.png",
+            background: (0.110, 0.098, 0.090),
+            foreground: (0.796, 0.835, 0.882)
+        )
     ),
 ]
 
@@ -214,7 +227,7 @@ private func equalMarginLayout(
     )
 }
 
-private func drawIcon(spec: ThemeIconSpec) throws -> CGImage {
+private func drawIcon(appearance: IconAppearance) throws -> CGImage {
     let colorSpace = CGColorSpaceCreateDeviceRGB()
     let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue)
     guard let ctx = CGContext(
@@ -230,7 +243,7 @@ private func drawIcon(spec: ThemeIconSpec) throws -> CGImage {
     }
 
     let canvas = CGFloat(IconLayout.pixelSize)
-    ctx.setFillColor(nsColor(spec.background).cgColor)
+    ctx.setFillColor(nsColor(appearance.background).cgColor)
     ctx.addPath(
         CGPath(
             roundedRect: CGRect(x: 0, y: 0, width: canvas, height: canvas),
@@ -241,7 +254,7 @@ private func drawIcon(spec: ThemeIconSpec) throws -> CGImage {
     )
     ctx.fillPath()
 
-    let accent = nsColor(spec.foreground)
+    let accent = nsColor(appearance.foreground)
     guard
         let tvSymbol = tintedSymbol(named: "sparkles.tv", pointSize: IconLayout.tvPointSize, color: accent),
         let calendarSymbol = tintedSymbol(named: "calendar", pointSize: IconLayout.calendarPointSize, color: accent)
@@ -252,7 +265,7 @@ private func drawIcon(spec: ThemeIconSpec) throws -> CGImage {
     let layout = equalMarginLayout(
         tvSymbol: tvSymbol,
         calendarSymbol: calendarSymbol,
-        background: spec.background
+        background: appearance.background
     )
     let rects = symbolLayout(groupOriginX: layout.groupOriginX, groupTop: layout.groupTop, canvasHeight: canvas)
     NSGraphicsContext.saveGraphicsState()
@@ -276,66 +289,35 @@ private func pngData(from image: CGImage) throws -> Data {
     return png
 }
 
-private func resizedPNG(from image: CGImage, pixelSize: Int) throws -> Data {
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue)
-    guard let ctx = CGContext(
-        data: nil,
-        width: pixelSize,
-        height: pixelSize,
-        bitsPerComponent: 8,
-        bytesPerRow: 0,
-        space: colorSpace,
-        bitmapInfo: bitmapInfo.rawValue
-    ) else {
-        throw NSError(domain: "IconPreview", code: 5, userInfo: [NSLocalizedDescriptionKey: "Failed to create resize context"])
-    }
-
-    ctx.interpolationQuality = .high
-    ctx.draw(image, in: CGRect(x: 0, y: 0, width: pixelSize, height: pixelSize))
-
-    guard let resized = ctx.makeImage() else {
-        throw NSError(domain: "IconPreview", code: 6, userInfo: [NSLocalizedDescriptionKey: "Failed to resize icon"])
-    }
-
-    return try pngData(from: resized)
-}
-
 private func writeAppIconSet(spec: ThemeIconSpec, assetsRoot: URL) throws {
     let iconSetURL = assetsRoot.appendingPathComponent("\(spec.assetName).appiconset", isDirectory: true)
     try FileManager.default.createDirectory(at: iconSetURL, withIntermediateDirectories: true)
 
-    let sourceImage = try drawIcon(spec: spec)
-    try pngData(from: sourceImage).write(to: iconSetURL.appendingPathComponent(spec.fileName))
+    let lightImage = try drawIcon(appearance: spec.light)
+    try pngData(from: lightImage).write(to: iconSetURL.appendingPathComponent(spec.light.fileName))
 
-    let isAlternateIcon = spec.assetName != "AppIcon"
-    if isAlternateIcon {
-        try resizedPNG(from: sourceImage, pixelSize: 120).write(to: iconSetURL.appendingPathComponent("\(spec.assetName)-120.png"))
-        try resizedPNG(from: sourceImage, pixelSize: 152).write(to: iconSetURL.appendingPathComponent("\(spec.assetName)-152.png"))
-    }
+    let darkImage = try drawIcon(appearance: spec.dark)
+    try pngData(from: darkImage).write(to: iconSetURL.appendingPathComponent(spec.dark.fileName))
 
-    let baseName = spec.assetName
-    let legacyEntries = isAlternateIcon
-        ? """
-        {
-          "filename" : "\(baseName)-120.png",
-          "idiom" : "iphone",
-          "scale" : "2x",
-          "size" : "60x60"
-        },
-        {
-          "filename" : "\(baseName)-152.png",
-          "idiom" : "ipad",
-          "scale" : "2x",
-          "size" : "76x76"
-        },
-        """
-        : ""
+    // Single 1024 image per appearance; iOS renders all sizes and swaps the
+    // dark variant automatically (no `setAlternateIconName` for light/dark).
     let contents = """
     {
       "images" : [
-        \(legacyEntries){
-          "filename" : "\(spec.fileName)",
+        {
+          "filename" : "\(spec.light.fileName)",
+          "idiom" : "universal",
+          "platform" : "ios",
+          "size" : "1024x1024"
+        },
+        {
+          "appearances" : [
+            {
+              "appearance" : "luminosity",
+              "value" : "dark"
+            }
+          ],
+          "filename" : "\(spec.dark.fileName)",
           "idiom" : "universal",
           "platform" : "ios",
           "size" : "1024x1024"
@@ -347,7 +329,7 @@ private func writeAppIconSet(spec: ThemeIconSpec, assetsRoot: URL) throws {
       }
     }
     """
-    try contents.write(to: iconSetURL.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
+    try (contents + "\n").write(to: iconSetURL.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
 }
 
 let assetsRoot = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)

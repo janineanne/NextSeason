@@ -213,7 +213,7 @@ Exits with code 1 if any automated check fails.
 
 ### `render-icon-preview.swift`
 
-Generates app icon PNGs and `.appiconset` bundles for all theme variants (default, Lavender, Teal Utility, Warm Slate — light and dark).
+Generates app icon PNGs and `.appiconset` bundles for each theme variant (Lavender, Teal Utility, Warm Slate). Each set is appearance-aware: it contains a light (`Any`) and a dark (`luminosity: dark`) 1024×1024 image, so iOS swaps light/dark automatically without a `setAlternateIconName` call.
 
 **Usage:**
 
@@ -221,7 +221,7 @@ Generates app icon PNGs and `.appiconset` bundles for all theme variants (defaul
 swift Scripts/render-icon-preview.swift NextSeason/Assets.xcassets
 ```
 
-Writes icon sets under the given Assets catalog path (e.g. `AppIcon.appiconset`, `AppIcon-LavenderDark.appiconset`, etc.).
+Writes one icon set per palette under the given Assets catalog path: `AppIcon.appiconset` (Lavender, primary), `AppIcon-TealUtility.appiconset`, and `AppIcon-WarmSlate.appiconset`.
 
 Requires macOS (uses AppKit).
 

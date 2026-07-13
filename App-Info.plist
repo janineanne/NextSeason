@@ -10,30 +10,15 @@
 	<dict>
 		<key>CFBundleAlternateIcons</key>
 		<dict>
-			<key>LavenderDark</key>
+			<key>AppIcon-TealUtility</key>
 			<dict>
 				<key>CFBundleIconName</key>
-				<string>AppIcon-LavenderDark</string>
+				<string>AppIcon-TealUtility</string>
 			</dict>
-			<key>TealUtilityDark</key>
+			<key>AppIcon-WarmSlate</key>
 			<dict>
 				<key>CFBundleIconName</key>
-				<string>AppIcon-TealUtilityDark</string>
-			</dict>
-			<key>TealUtilityLight</key>
-			<dict>
-				<key>CFBundleIconName</key>
-				<string>AppIcon-TealUtilityLight</string>
-			</dict>
-			<key>WarmSlateDark</key>
-			<dict>
-				<key>CFBundleIconName</key>
-				<string>AppIcon-WarmSlateDark</string>
-			</dict>
-			<key>WarmSlateLight</key>
-			<dict>
-				<key>CFBundleIconName</key>
-				<string>AppIcon-WarmSlateLight</string>
+				<string>AppIcon-WarmSlate</string>
 			</dict>
 		</dict>
 		<key>CFBundlePrimaryIcon</key>
