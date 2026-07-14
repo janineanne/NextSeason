@@ -14,7 +14,9 @@
 
 ## What is NextSeason TV?
 
-I built NextSeason TV because I wanted a production-quality SwiftUI application that would showcase both modern iOS engineering practices and an AI-assisted software development workflow. Things are changing rapidly in this industry and it's essential to keep up with them.
+NextSeason quietly monitors the TV shows you care about and lets you know when there’s something worth knowing.
+
+I built NextSeason TV because I wanted a production-quality SwiftUI application that would showcase both modern iOS engineering practices and an AI-assisted software development workflow. Things are changing rapidly in this industry and it's essential to keep up with them. I built it also because it's an app I will use myself.
 
 NextSeason TV is an iPhone app that lets users build a watchlist of television shows and receive notifications when a new season is announced.
 
