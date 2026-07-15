@@ -120,54 +120,6 @@ Priority: High
 
 ---
 
-
-
-## Intelligent Monitoring Experience
-
-The long-term vision for NextSeason is to quietly monitor the TV shows users care about and let them know when there is something worth knowing. Future enhancements should reinforce user confidence that the app is actively monitoring on their behalf without encouraging unnecessary engagement.
-
-### Monitoring Confidence
-
-- Display a monitoring summary at the top of the watchlist (for example: "Monitoring 18 shows").
-- Show the last successful background refresh time.
-- Clearly indicate when everything is up to date.
-- Surface when background refresh has not run recently so users understand why updates may be delayed.
-
-### Immediate Value
-
-After adding a show to the watchlist, present a richer status summary instead of a simple confirmation.
-
-Examples:
-
-- Current status (Running, Returning, Ended, etc.).
-- Latest known season and premiere information.
-- A brief explanation that NextSeason will monitor the show and notify the user when its status changes.
-
-### Update Awareness
-
-- Display a "Since your last visit" summary when tracked shows have changed.
-- Maintain unread update indicators until the user has acknowledged the changes.
-- Consider an update history so users can review previously announced changes.
-
-These features should complement notifications rather than replace them, ensuring users can easily see what changed even if they missed a notification.
-
-### Apple Platform Integration
-
-Investigate deeper integration with App Intents, Siri, Apple Intelligence, and widgets.
-
-Potential features:
-
-- Siri/App Intents to add or remove shows from the watchlist.
-- Siri queries about the status of tracked shows.
-- Siri summaries describing what has changed since the user's last visit.
-- Home Screen widgets that display monitoring status or recent updates.
-
-These capabilities should operate on the user's watchlist and application data rather than attempting to become a general entertainment news assistant.
-
-Priority: High
-
----
-
 ## Notification Enhancements
 
 ### Potential Features
@@ -342,3 +294,45 @@ The following are not currently aligned with the product vision:
 - Complex media database features.
 
 NextSeason should remain focused on helping users know when new seasons of shows become available.
+
+
+---
+
+# Cloud Sync, Accounts & Notification Infrastructure
+
+## Cloud Synchronization
+
+- Add CloudKit synchronization for watchlist backup and seamless multi-device access.
+- Define migration and conflict resolution behavior.
+- Preserve useful offline operation wherever practical.
+
+## Identity & Accounts
+
+- Evaluate the minimum identity model required for synchronization and server-side services.
+- Determine whether iCloud identity is sufficient or whether Sign in with Apple is appropriate.
+- Support multiple registered devices per user.
+- Define account recovery, privacy, and data deletion behavior.
+
+## Server-Side Monitoring
+
+The MVP performs monitoring on the user's device using background refresh and local notifications. While this avoids requiring a backend, it may not provide sufficient long-term reliability because iOS schedules background execution opportunistically and users may not open the app for extended periods.
+
+Investigate moving the canonical monitoring process to backend infrastructure:
+
+- Check each tracked show once on behalf of all interested users rather than independently on every device.
+- Detect meaningful changes centrally and distribute them to subscribed users.
+- Record change history to support features such as "What's New Since My Last Visit?"
+- Optimize polling frequency based on show state where appropriate.
+
+## Remote Notifications
+
+Evaluate replacing or augmenting local notifications with APNs remote notifications.
+
+Potential benefits include:
+
+- Reliable delivery even when the app has not been opened recently.
+- Notifications delivered to all of a user's registered devices.
+- Consistent notification timing.
+- Foundation for future cross-device experiences and cloud-backed features.
+
+During any migration, consider retaining local monitoring as a temporary fallback until the backend architecture has proven reliable.
