@@ -913,4 +913,385 @@ You can download the updated document here:
 One thing I intentionally **didn't** add is the one-line product vision ("NextSeason quietly monitors the TV shows you care about and lets you know when there's something worth knowing."). That's not really roadmap content. I actually think it belongs somewhere more prominent—perhaps at the top of your README, on your website, or even in an internal product vision document—because it's become the guiding principle behind all of these future decisions.
 
 ---
+
+# you asked
+
+message time: 2026-07-14 17:17:04
+
+I just thought of a couple more things which we should consider for the post-MVP roadmap:
+
+- should we consider adding login again?  We postponed it from MVP
+- are local notifications sufficient?  I'm thinking we might want to go with regular (?) notifications that will go to all of the user's devices, but I believe that requires a backend or paying for a service?
+
+---
+
+# chatgpt response
+
+I think both deserve to be on the roadmap, but I'd treat them very differently.
+
+## 1. User Accounts / Cloud Sync
+
+This was postponed from MVP, and I think that was absolutely the right decision. But now I think it's becoming one of the bigger strategic questions for the app.
+
+The real question isn't:
+
+> "Should we have login?"
+
+It's:
+
+> **"What problems would accounts solve?"**
+
+Some examples:
+
+- Sync watchlists across devices.
+- Restore a watchlist after replacing a phone.
+- Support iPad, Mac, Apple TV, or Vision Pro without manual setup.
+- Future web app.
+- Shared watchlists (probably much later).
+- Cloud backup.
+
+If none of those matter, don't build accounts.
+
+If users start asking, "I bought a new iPhone and lost all my shows," then it moves way up the priority list.
+
+I'd actually call the roadmap section something like:
+
+## Cloud Sync & User Accounts
+
+with items such as:
+
+- Evaluate iCloud-only synchronization.
+- Evaluate Sign in with Apple.
+- Investigate multi-device synchronization.
+- Automatic watchlist backup and recovery.
+- Account architecture for future platform expansion.
+
+Notice I intentionally said **evaluate**. You don't yet know whether the right answer is:
+
+- iCloud/CloudKit
+- Sign in with Apple
+- Firebase
+- Supabase
+- Your own backend
+
+Don't commit to an implementation before you know the product needs.
+
+---
+
+## 2. Remote Notifications
+
+This one is different.
+
+I actually think this is much more likely to become necessary.
+
+Today your app works like this:
+
+```
+TVMaze
+      ↓
+iPhone wakes up
+      ↓
+Checks watchlist
+      ↓
+Schedules local notification
+```
+
+That works remarkably well for MVP.
+
+But it has limitations:
+
+- iOS decides when background refresh happens.
+- The app must have run recently.
+- Refresh frequency isn't guaranteed.
+- If the user has multiple devices, only the device that did the check knows about it.
+- Updates are detected independently on every device.
+
+Eventually you may want:
+
+```
+Backend
+    ↓
+Checks every user's watchlist
+    ↓
+Detects changes
+    ↓
+APNs push notification
+    ↓
+Every device receives it
+```
+
+That has several advantages.
+
+- Faster detection.
+- Consistent timing.
+- One check instead of hundreds.
+- Notifications on every device.
+- Easier analytics.
+- Easier future features.
+
+---
+
+## But...
+
+It also completely changes the architecture.
+
+Now you need:
+
+- user accounts
+- APNs
+- backend
+- database
+- security
+- server costs
+- operational monitoring
+
+That's a huge jump.
+
+---
+
+## I think there's actually a middle ground.
+
+I wouldn't put:
+
+> Remote Notifications
+
+on the roadmap.
+
+I'd put:
+
+## Notification Infrastructure Evolution
+
+Under it:
+
+- Evaluate server-driven notifications.
+- Evaluate cross-device notification delivery.
+- Investigate notification reliability improvements.
+- Determine cost/complexity tradeoffs of backend infrastructure.
+- Preserve the ability to continue operating without a backend where practical.
+
+That last bullet is important.
+
+One of the things I like about NextSeason today is that it doesn't require an account.
+
+That's increasingly rare.
+
+I'd be reluctant to give that up unless the benefits are compelling.
+
+---
+
+## One other thought
+
+These two roadmap items are actually connected.
+
+I can imagine the roadmap looking like this:
+
+```
+Cloud Sync & User Accounts
+    ↓
+Backend Infrastructure
+    ↓
+Remote Notifications
+```
+
+because each one naturally enables the next.
+
+That also means they probably shouldn't be immediate post-MVP work.
+
+I'd consider them **Phase 2** features, after you've validated that people actually want the app.
+
+---
+
+I think you've been making a lot of good product decisions lately by asking, "What's the smallest thing that solves the user's problem?" These fit that philosophy too.
+
+- **Cloud sync** should exist because users don't want to lose their watchlists—not because every app "needs accounts."
+- **Remote notifications** should exist because they noticeably improve reliability and cross-device experience—not because local notifications are somehow "wrong."
+
+Until you see evidence that local notifications are holding the app back, I'd keep enjoying one of your app's current strengths: it works entirely on the user's device, with no login, no subscription, and no server to maintain. That's a pretty attractive value proposition in its own right.
+
+---
+
+# you asked
+
+message time: 2026-07-14 17:22:30
+
+I don't think there's any doubt we'll need some kind of Cloud sync.
+
+I hadn't thought of moving checking the watchlist to the backend, but it makes sense.  Each show is only going to have a new season once a year.  If the user puts the show on the watchlist right after they finish watching the current season, and they only care about one show, it could be almost a year before the check will find a new season to notify about.  It seems like the odds that the app is still running in the background are pretty small.
+
+---
+
+# chatgpt response
+
+That changes the priority substantially: this is no longer mainly about cross-device polish; it may be a reliability requirement for the core promise. I’m checking the current Apple constraints so we can frame the roadmap accurately.
+
+Exactly. I think you’ve identified a **fundamental flaw in relying on device-side background refresh as the long-term notification mechanism**.
+
+Apple describes `BGAppRefreshTask` as a way to refresh content opportunistically, not as a mechanism for regular execution. Apple’s own guidance says scheduling is influenced by user behavior: iOS is more likely to give background time to apps the person uses regularly. ([Apple Developer](https://developer.apple.com/documentation/uikit/using-background-tasks-to-update-your-app?utm_source=chatgpt.com))
+
+That is almost the inverse of NextSeason’s intended use:
+
+- The user adds a show.
+- The app successfully removes the need to keep checking.
+- The user therefore stops opening the app.
+- iOS increasingly has little reason to run it.
+- Months later, the show is renewed, but NextSeason may never check and therefore never notify them.
+
+The better NextSeason performs as a quiet utility, the less dependable its current implementation may become.
+
+## The backend changes the model
+
+Instead of every device repeatedly asking TVMaze whether every show has changed, the server could maintain one shared record for each show:
+
+```text
+NextSeason backend checks Widow’s Bay
+                ↓
+Detects a meaningful status change
+                ↓
+Finds every user tracking Widow’s Bay
+                ↓
+Sends an APNs notification to their registered devices
+```
+
+That is much more efficient than treating every user’s watchlist as an independent checking job. A show tracked by 10,000 users still needs to be checked only once per interval, after which the backend fans the update out to interested users.
+
+Apple’s remote-notification architecture expects a server—or a third-party provider acting as one—to create notifications and send them through APNs. APNs can retain a notification temporarily when a device is offline and deliver it when the device reconnects. ([Apple Developer](https://developer.apple.com/documentation/usernotifications?utm_source=chatgpt.com))
+
+## Cloud sync and backend monitoring are related, but not identical
+
+I would now separate three decisions:
+
+### 1. Cloud watchlist sync
+
+This is nearly certain.
+
+SwiftData can use CloudKit to synchronize model data automatically among devices using the same iCloud account. That could provide watchlist backup and cross-device synchronization without requiring a conventional NextSeason username and password. ([Apple Developer](https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices?utm_source=chatgpt.com))
+
+### 2. Server-side show monitoring
+
+This is also looking increasingly necessary because it makes detection independent of whether the user has opened the app recently.
+
+The backend would ideally monitor **shows**, not repeatedly process every full user watchlist. It would store something like:
+
+```text
+Show
+- external show ID
+- latest known status
+- latest known season
+- last checked
+- next scheduled check
+```
+
+Then separately:
+
+```text
+Subscription
+- user or installation
+- show ID
+- notification preference
+```
+
+### 3. Remote push delivery
+
+Once the backend detects a change, it sends a visible notification through APNs to each registered device. Each device has its own APNs token, so “all devices” means the backend keeps the user’s current device-token registrations and sends to each applicable token. ([Apple Developer](https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CommunicatingwithAPNs.html?utm_source=chatgpt.com))
+
+This is different from a silent background notification asking the app to wake up and do the checking. Apple explicitly says background notifications are low priority and are not guaranteed, so that would reproduce much of the same reliability problem. The server should perform the actual check and send an ordinary user-visible push when something changes. ([Apple Developer](https://developer.apple.com/documentation/usernotifications/pushing-background-updates-to-your-app?utm_source=chatgpt.com))
+
+## Does this require “login”?
+
+Not necessarily in the traditional sense.
+
+There are several plausible identities:
+
+- **iCloud identity**, with CloudKit handling the user’s private synchronized data.
+- **Sign in with Apple**, giving the backend a durable user identity.
+- **Anonymous installation identity**, upgraded or linked later.
+- Some hybrid where CloudKit syncs the watchlist but the app securely registers show subscriptions and device tokens with your backend.
+
+However, backend notification subscriptions need a stable way to associate:
+
+- the watchlist,
+- the user or installation,
+- and all of that user’s device tokens.
+
+So while you might avoid a visible login screen initially, you probably cannot avoid having an identity model internally.
+
+## What this means for the roadmap
+
+I would no longer describe server-driven notifications as a vague future evaluation. I would promote this to an architectural initiative, something like:
+
+### Cloud Sync, Accounts & Notification Infrastructure
+
+**Cloud synchronization**
+- Add CloudKit synchronization for watchlist backup and multi-device access.
+- Define conflict resolution and migration behavior.
+- Preserve useful offline operation.
+
+**Identity**
+- Determine whether iCloud identity is sufficient or whether Sign in with Apple is required.
+- Support multiple device registrations for one user.
+- Define account recovery, deletion, and privacy behavior.
+
+**Server-side monitoring**
+- Move canonical show checking from individual devices to shared backend infrastructure.
+- Check each actively tracked show once and distribute detected changes to all subscribed users.
+- Vary check frequency based on show state where appropriate.
+- Record change history to support “What’s new since I last checked?”
+
+**Remote notifications**
+- Deliver user-visible notifications through APNs.
+- Send to all appropriately registered devices.
+- Handle expired device tokens and notification preferences.
+- Retain local checking temporarily as a fallback during migration, then decide whether it remains worthwhile.
+
+The important conclusion is that this is not merely an enhancement to make notifications appear on an iPad too. It may be essential to making the original product promise truthful:
+
+> **NextSeason quietly monitors the TV shows you care about and lets you know when there’s something worth knowing.**
+
+To make that promise reliably over a year of user inactivity, the monitoring probably cannot live solely inside the user’s phone.
+
+---
+
+# you asked
+
+message time: 2026-07-14 17:26:36
+
+Sounds good. Please update the version of Post-MVP Roadmap that you made for me to download yesterday with these additional thoughts and make it available for download again.
+
+---
+
+# chatgpt response
+
+Done! I added a new **"Cloud Sync, Accounts & Notification Infrastructure"** section covering:
+
+- **Cloud Synchronization**
+  - CloudKit-based watchlist sync
+  - Backup and multi-device support
+  - Migration and conflict resolution
+
+- **Identity & Accounts**
+  - Evaluating the appropriate identity model
+  - Sign in with Apple vs. iCloud identity
+  - Multiple registered devices
+  - Privacy and account lifecycle
+
+- **Server-Side Monitoring**
+  - Why device-side background refresh is likely insufficient long-term
+  - Moving monitoring to a shared backend
+  - Checking each show once for all interested users
+  - Maintaining change history for future features like "What's New Since My Last Visit?"
+
+- **Remote Notifications**
+  - APNs-based notifications to all registered devices
+  - Improved reliability
+  - Migration strategy and temporary local fallback
+
+I also made the wording reflect what I think we've now concluded: this isn't just an enhancement, it's likely part of the long-term architecture required to fulfill the product's promise reliably.
+
+You can download it here:
+
+**[📄 Post-MVP Roadmap Updated v2.md](sandbox:/mnt/data/Post-MVP%20Roadmap%20Updated%20v2.md)**
+
+One thing I'd probably do in a future cleanup pass (not yet) is reorganize the roadmap into **major initiatives** rather than a flat list of feature areas. After the discussions over the last couple of days, I think the app is naturally clustering into themes like **Intelligent Monitoring**, **Platform Integration**, **Cloud Infrastructure**, and **Search & Data Quality**. It's getting to the point where that structure would make the roadmap read more like a coherent product strategy than an accumulation of good ideas.
+
+---
 Powered by [AI Exporter](https://saveai.net)
