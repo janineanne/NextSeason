@@ -49,6 +49,18 @@ struct AppAboutView: View {
                         }
                     }
                     .accessibilityHint(notificationsAccessibilityHint)
+
+                    VStack(alignment: .leading, spacing: AppSpacing.tight) {
+                        Text("How notifications work")
+                            .font(.subheadline.weight(.semibold))
+                            .appPrimaryText()
+                        Text(notificationsExplanation)
+                            .font(.subheadline)
+                            .appSecondaryText()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("How notifications work. \(notificationsExplanation)")
                 } footer: {
                     Text(notificationsFooterText)
                 }
@@ -89,6 +101,9 @@ struct AppAboutView: View {
             }
         }
     }
+
+    private let notificationsExplanation =
+        "NextSeason periodically checks your watchlist for new seasons and will notify you when one is found. iOS decides when apps may perform background checks, so opening the app occasionally helps keep your watchlist up to date."
 
     private var notificationsFooterText: String {
         if notificationsEnabled {
