@@ -9,11 +9,12 @@ import UserNotifications
 
 @MainActor
 struct NotificationServiceTests {
-    private static let suiteName = "NotificationServiceTests"
-
+    /// A unique suite per service so tests running in parallel can't clobber one
+    /// another's defer flag through a shared `UserDefaults` domain.
     private func makeDefaults() -> UserDefaults {
-        let defaults = UserDefaults(suiteName: Self.suiteName)!
-        defaults.removePersistentDomain(forName: Self.suiteName)
+        let suiteName = "NotificationServiceTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
         return defaults
     }
 

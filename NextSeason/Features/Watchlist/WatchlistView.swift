@@ -182,8 +182,9 @@ struct WatchlistView: View {
                     }
                 }
                 // Keeps the list scroll-backed so the large navigation title renders
-                // when the watchlist is empty (zero tracked shows, no banner).
-                if viewModel.shows.isEmpty, !notificationsDisabled {
+                // when there are no rows to show (empty watchlist or no search
+                // matches, and no banner).
+                if viewModel.filteredShows.isEmpty, !notificationsDisabled {
                     Color.clear
                         .frame(height: 1)
                         .listRowInsets(EdgeInsets())
@@ -191,7 +192,7 @@ struct WatchlistView: View {
                         .listRowBackground(Color.clear)
                         .accessibilityHidden(true)
                 }
-                ForEach(viewModel.shows) { tracked in
+                ForEach(viewModel.filteredShows) { tracked in
                     HStack(spacing: AppSpacing.tight) {
                         NavigationLink(value: tracked) {
                             ShowRowLabel(tracked: tracked)
@@ -222,12 +223,19 @@ struct WatchlistView: View {
                     .appListRowSurface()
                 }
             }
-            .animation(.easeInOut(duration: 0.35), value: viewModel.shows.map(\.id))
+            .animation(.easeInOut(duration: 0.35), value: viewModel.filteredShows.map(\.id))
             .appPlainListStyle()
             .tvmazeAttributionInset()
+            .searchable(
+                text: $viewModel.searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search Watchlist"
+            )
             .overlay {
                 if viewModel.shows.isEmpty, viewModel.pendingRemoval == nil {
                     emptyState
+                } else if viewModel.filteredShows.isEmpty {
+                    noSearchResults(query: viewModel.searchText)
                 }
             }
         case .failed(let message):
@@ -265,6 +273,19 @@ struct WatchlistView: View {
         .onAppear {
             analytics.track(.emptyWatchlistShown)
         }
+    }
+
+    private func noSearchResults(query: String) -> some View {
+        ContentUnavailableView {
+            Label("No Matches", systemImage: "magnifyingglass")
+                .appPrimaryText()
+        } description: {
+            Text("No tracked shows match “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”.")
+                .appSecondaryText()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(themeColors.surface)
+        .accessibilityIdentifier(AccessibilityID.Watchlist.noResults)
     }
 }
 

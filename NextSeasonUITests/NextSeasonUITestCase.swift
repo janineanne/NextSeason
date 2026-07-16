@@ -44,6 +44,7 @@ enum UITestAccessibilityID {
 
     enum Watchlist {
         static let emptyState = "watchlist.emptyState"
+        static let noResults = "watchlist.noResults"
         static let row = "watchlist.row"
         static let trackButton = "watchlist.track"
         static let undoButton = "watchlist.undo"
@@ -82,6 +83,72 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
 
     var watchlistEmptyState: XCUIElement {
         app.descendants(matching: .any)[UITestAccessibilityID.Watchlist.emptyState]
+    }
+
+    var watchlistNoResults: XCUIElement {
+        app.descendants(matching: .any)[UITestAccessibilityID.Watchlist.noResults]
+    }
+
+    /// The watchlist's own search field (distinct from the Search tab field).
+    var watchlistSearchField: XCUIElement {
+        app.searchFields[watchlistSearchFieldPlaceholder]
+    }
+
+    /// Placeholder `.searchable` exposes as the watchlist field's `value` when empty.
+    private var watchlistSearchFieldPlaceholder: String { "Search Watchlist" }
+
+    /// Returns user-entered watchlist search text, ignoring the placeholder/empty value.
+    func watchlistSearchFieldText() -> String? {
+        guard let value = watchlistSearchField.value as? String else { return nil }
+        guard !value.isEmpty, value != watchlistSearchFieldPlaceholder else { return nil }
+        return value
+    }
+
+    func searchWatchlist(for query: String) {
+        let field = watchlistSearchField
+        assertExists(field, "Watchlist should expose the “Search Watchlist” field before typing.")
+
+        if watchlistSearchFieldText() != nil {
+            clearWatchlistSearchField()
+        }
+
+        focusSearchField(field)
+        field.typeText(query)
+
+        // Dismiss the keyboard so list rows and the tab bar stay tappable.
+        if app.keyboards.buttons["Search"].waitForExistence(timeout: 1) {
+            app.keyboards.buttons["Search"].tap()
+        }
+    }
+
+    func clearWatchlistSearchField() {
+        let field = watchlistSearchField
+        assertExists(field, "Watchlist search field should exist before clearing.")
+        focusSearchField(field)
+
+        let clearCandidates = [
+            field.buttons["Clear text"],
+            app.buttons["Clear text"],
+            app.navigationBars.buttons["Clear text"]
+        ]
+        for clearButton in clearCandidates where clearButton.waitForExistence(timeout: 1) {
+            clearButton.tap()
+            if watchlistSearchFieldText() == nil { return }
+        }
+
+        guard watchlistSearchFieldText() != nil else { return }
+
+        field.press(forDuration: 1.0)
+        if app.menuItems["Select All"].waitForExistence(timeout: 1) {
+            app.menuItems["Select All"].tap()
+        } else {
+            field.typeKey("a", modifierFlags: [.command])
+        }
+        field.typeKey(XCUIKeyboardKey.delete.rawValue, modifierFlags: [])
+
+        if app.keyboards.buttons["Search"].waitForExistence(timeout: 1) {
+            app.keyboards.buttons["Search"].tap()
+        }
     }
 
     var searchNoResults: XCUIElement {
@@ -288,18 +355,35 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
         return button
     }
 
+    /// Taps `field` and waits for the keyboard, retrying the tap a few times.
+    /// XCUITest can drop synthesized key events when typing races the focus
+    /// handoff to a `.searchable` field, so callers must confirm focus first.
+    @discardableResult
+    func focusSearchField(_ field: XCUIElement, timeout: TimeInterval = UITestTimeout.standard) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            field.tap()
+            if app.keyboards.element.waitForExistence(timeout: 1) {
+                return true
+            }
+        }
+        return app.keyboards.element.exists
+    }
+
     func search(for query: String) {
         let searchField = self.searchField
         assertExists(
             searchField,
             "Search tab should expose the “Search TV shows” field before typing."
         )
-        searchField.tap()
 
         if searchFieldText(in: searchField) != nil {
             clearSearchField(clearingField: searchField)
         }
 
+        // Focus immediately before typing so any prior keyboard dismissal (e.g.
+        // from clearing) can't leave the field unfocused when key events arrive.
+        focusSearchField(searchField)
         searchField.typeText(query)
 
         // Dismiss the keyboard so the track button and tab bar stay tappable.
@@ -317,7 +401,7 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
         let searchField = field ?? self.searchField
         assertExists(searchField, "Search field should exist before clearing.")
 
-        searchField.tap()
+        focusSearchField(searchField)
 
         let clearCandidates = [
             searchField.buttons["Clear text"],
