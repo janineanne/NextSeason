@@ -20,13 +20,18 @@ final class ShowDetailViewModel {
     private(set) var loadState: LoadState = .loading
     private(set) var isTracked = false
     private(set) var isUpdatingWatchlist = false
-    private(set) var shouldPromptForNotifications = false
-    private(set) var shouldShowNotificationsDeniedAlert = false
+
+    /// Shared state driving the post-track notification prompt alerts, reused
+    /// verbatim by the search flow via `watchlistNotificationPromptAlerts`.
+    let notificationPrompt = WatchlistNotificationPromptState()
 
     private let service: any TVMazeService
     private let repository: any WatchlistRepository
     private let notifications: any NotificationManaging
     private let analytics: any AnalyticsTracking
+
+    /// Notification service used by the shared prompt alerts modifier.
+    var notificationService: any NotificationManaging { notifications }
 
     init(
         show: Show,
@@ -113,7 +118,7 @@ final class ShowDetailViewModel {
             isTracked = true
             analytics.track(.watchlistAdded(source: .detail, showID: show.id))
             if await notifications.needsAuthorizationPrompt() {
-                shouldPromptForNotifications = true
+                notificationPrompt.shouldPromptForNotifications = true
             }
         } catch {
             analytics.trackNonFatalError(error, context: "watchlist_add_detail")
@@ -121,30 +126,5 @@ final class ShowDetailViewModel {
                 loadState = .failed(error.localizedDescription)
             }
         }
-    }
-
-    func dismissNotificationPrompt() {
-        shouldPromptForNotifications = false
-        notifications.deferAuthorizationPrompt()
-    }
-
-    func confirmNotificationPrompt() async {
-        shouldPromptForNotifications = false
-        await notifications.requestAuthorizationIfNeeded()
-        if await notifications.isDenied() {
-            shouldShowNotificationsSettingsReminder()
-        }
-    }
-
-    private func shouldShowNotificationsSettingsReminder() {
-        shouldShowNotificationsDeniedAlert = true
-    }
-
-    func dismissNotificationsDeniedAlert() {
-        shouldShowNotificationsDeniedAlert = false
-    }
-
-    func openNotificationSettings() {
-        Task { await notifications.enableNotificationsFromSettingsEntryPoint() }
     }
 }
