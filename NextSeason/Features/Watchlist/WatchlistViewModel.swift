@@ -20,6 +20,18 @@ final class WatchlistViewModel {
     /// diff removals and animate instead of replacing the whole list.
     private(set) var shows: [TrackedShow] = []
 
+    /// User-entered text from the watchlist search bar. Filtering is local; the
+    /// full `shows` list stays intact so removals still animate correctly.
+    var searchText = ""
+
+    /// `shows` narrowed to the current search query. Matching is
+    /// case- and diacritic-insensitive on the show name.
+    var filteredShows: [TrackedShow] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return shows }
+        return shows.filter { $0.name.localizedStandardContains(query) }
+    }
+
     var pendingRemoval: TrackedShow? { removalCoordinator.pendingRemoval }
 
     private let repository: any WatchlistRepository
