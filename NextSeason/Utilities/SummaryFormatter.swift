@@ -20,21 +20,6 @@ nonisolated enum SummaryFormatter {
         return !plainText(fromHTML: html).isEmpty
     }
 
-    /// Custom URL scheme for actor-name taps in summaries (analytics + placeholder UX).
-    static let actorNameTapScheme = "nextseason-analytics"
-
-    /// Like `attributedString(from:)`, but bold segments are tappable via the
-    /// custom URL scheme without changing their appearance. TVMaze summaries use
-    /// `<b>` / `<strong>` for actor and character names.
-    static func attributedStringWithTappableActorNames(from html: String) -> AttributedString {
-        var attributed = attributedString(fromPlainText: plainText(fromHTML: html))
-        for run in attributed.runs {
-            guard run.inlinePresentationIntent?.contains(.stronglyEmphasized) == true else { continue }
-            attributed[run.range].link = URL(string: "\(actorNameTapScheme)://actor-name")!
-        }
-        return attributed
-    }
-
     static func attributedString(from html: String) -> AttributedString {
         attributedString(fromPlainText: plainText(fromHTML: html))
     }

@@ -26,7 +26,6 @@ enum AnalyticsEvent: Equatable, Sendable {
     case emptySearchResultsShown
     case themeSelected(variant: AppPaletteVariant)
     case nonFatalError(category: AnalyticsErrorCategory, context: String)
-    case actorNameTapped(showID: Int)
 }
 
 enum WatchlistActionSource: String, Sendable {
@@ -117,7 +116,6 @@ extension AnalyticsEvent {
         case .emptySearchResultsShown: "empty_search_results_shown"
         case .themeSelected: "theme_selected"
         case .nonFatalError: "non_fatal_error"
-        case .actorNameTapped: "actor_name_tapped"
         }
     }
 
@@ -133,8 +131,7 @@ extension AnalyticsEvent {
              let .showDetailViewed(showID),
              let .watchlistItemOpened(showID),
              let .notificationTapped(showID),
-             let .appOpenedFromNotification(showID),
-             let .actorNameTapped(showID):
+             let .appOpenedFromNotification(showID):
             ["show_id": String(showID)]
         case let .watchlistAdded(source, showID),
              let .watchlistRemoved(source, showID):

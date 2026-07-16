@@ -30,7 +30,4 @@ enum FirstRunCopy {
 
     static let notificationsDisabledBannerMessage =
         "Enable notifications to get alerts when a tracked show's next season gets a release date or status update."
-
-    static let actorDetailsPlannedMessage =
-        "Actor details are planned for a future release."
 }

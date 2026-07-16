@@ -13,7 +13,6 @@ struct ShowDetailView: View {
     @Environment(\.openAppAbout) private var openAppAbout
 
     @State private var viewModel: ShowDetailViewModel
-    @State private var showActorNameAlert = false
 
     private let analytics: any AnalyticsTracking
     private let onWatchlistChanged: () -> Void
@@ -86,11 +85,6 @@ struct ShowDetailView: View {
             prompt: viewModel.notificationPrompt,
             notificationService: viewModel.notificationService
         )
-        .alert("Coming Soon", isPresented: $showActorNameAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(FirstRunCopy.actorDetailsPlannedMessage)
-        }
     }
 
     @ToolbarContentBuilder
@@ -278,18 +272,9 @@ struct ShowDetailView: View {
                     Text("About")
                         .font(.headline)
                         .appPrimaryText()
-                    Text(SummaryFormatter.attributedStringWithTappableActorNames(from: html))
+                    Text(SummaryFormatter.attributedString(from: html))
                         .font(.body)
                         .appSecondaryText()
-                        .tint(themeColors.mutedText)
-                        .environment(\.openURL, OpenURLAction { url in
-                            if url.scheme == SummaryFormatter.actorNameTapScheme {
-                                analytics.track(.actorNameTapped(showID: viewModel.displayShow.id))
-                                showActorNameAlert = true
-                                return .handled
-                            }
-                            return .systemAction
-                        })
                 }
                 if let url = viewModel.displayShow.tvMazeURL {
                     Link(destination: url) {

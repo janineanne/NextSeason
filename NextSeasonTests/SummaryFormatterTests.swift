@@ -8,27 +8,6 @@ import Foundation
 @testable import NextSeason
 
 struct SummaryFormatterTests {
-    @Test("Bold actor-name segments receive tap links without changing visible text")
-    func tappableActorNameLinks() {
-        let result = SummaryFormatter.attributedStringWithTappableActorNames(
-            from: "<p>Mark Scout <b>Adam Scott</b> leads a team at Lumon.</p>"
-        )
-        #expect(String(result.characters) == "Mark Scout Adam Scott leads a team at Lumon.")
-        let linkedRun = result.runs.first { $0.link != nil }
-        #expect(linkedRun != nil)
-        #expect(linkedRun?.link?.scheme == SummaryFormatter.actorNameTapScheme)
-        #expect(linkedRun?.link?.host == "actor-name")
-    }
-
-    @Test("Summaries without bold markup have no actor-name links")
-    func summariesWithoutBoldHaveNoLinks() {
-        let result = SummaryFormatter.attributedStringWithTappableActorNames(
-            from: "<p>Mark Scout leads a team at Lumon Industries.</p>"
-        )
-        #expect(String(result.characters).contains("Mark Scout leads a team"))
-        #expect(result.runs.contains { $0.link != nil } == false)
-    }
-
     @Test("Tags are stripped, leaving plain text")
     func plainText() {
         let result = SummaryFormatter.attributedString(from: "<p>Hello world</p>")

@@ -127,7 +127,6 @@ struct DiagnosticsView: View {
                         value: String(counters.notificationRemindersScheduled)
                     )
                     LabeledContent("Theme selections", value: String(counters.themeSelections))
-                    LabeledContent("Actor name taps", value: String(counters.actorNameTaps))
                 }
 
                 Section {

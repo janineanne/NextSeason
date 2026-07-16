@@ -77,6 +77,8 @@
 		E167A813300818BE007F7098 /* 6-19-2026 Building Post-MVP Planning Documents.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-19-2026 Building Post-MVP Planning Documents.md"; sourceTree = "<group>"; };
 		E167AA1A300850AB007F7098 /* Post-MVP Roadmap - Editorial Revision v2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Post-MVP Roadmap - Editorial Revision v2.md"; sourceTree = "<group>"; };
 		E167AA1C30093F55007F7098 /* 7-16-2026 Fix Notification Bug.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Fix Notification Bug.md"; sourceTree = "<group>"; };
+		E167AC23300941D9007F7098 /* 7-15-2025 Feature Removal Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-15-2025 Feature Removal Discussion.md"; sourceTree = "<group>"; };
+		E167AC2430094782007F7098 /* 7-15-2026 Implement Removal of Tappable Actor Names.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-15-2026 Implement Removal of Tappable Actor Names.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -358,6 +360,8 @@
 				E1679DDA300561BD007F7098 /* 7-13-2026 Improve Notifications.md */,
 				E167A3ED30058305007F7098 /* 7-13-2026 Remove Example Button.md */,
 				E167AA1C30093F55007F7098 /* 7-16-2026 Fix Notification Bug.md */,
+				E167AC23300941D9007F7098 /* 7-15-2025 Feature Removal Discussion.md */,
+				E167AC2430094782007F7098 /* 7-15-2026 Implement Removal of Tappable Actor Names.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

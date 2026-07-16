@@ -51,7 +51,6 @@ enum AnalyticsEvent {
     case emptySearchResultsShown
     case themeSelected(variant: AppPaletteVariant)
     case nonFatalError(category: AnalyticsErrorCategory, context: String)
-    case actorNameTapped(showID: Int)
 }
 ```
 
@@ -87,7 +86,6 @@ Stored counters:
 -   Notification permission grants
 -   Notification reminders scheduled
 -   Theme selections
--   Actor name taps
 
 Only aggregate counts are stored.
 
@@ -131,7 +129,6 @@ Notification permission requests: 2
 Notification permission grants: 1
 Notification reminders scheduled: 4
 Theme selections: 3
-Actor name taps: 2
 Notifications enabled: true
 Current theme: Lavender (Current)
 ```
@@ -206,26 +203,6 @@ Avoid recording:
 -   Typing every character
 
 These produce large amounts of data with little product value.
-
-------------------------------------------------------------------------
-
-# Actor Names
-
-TVMaze summaries use `<b>` / `<strong>` for actor and character names. During
-beta, those bold segments are tappable in the About section on show detail
-(`SummaryFormatter.attributedStringWithTappableActorNames`, `ShowDetailView`).
-
-When the user taps a name:
-
-1. Show an alert titled **Coming Soon** with the message: “Actor details are
-   planned for a future release.” (`FirstRunCopy.actorDetailsPlannedMessage`)
-2. Record `actorNameTapped` and increment the local actor-name counter
-
-Summaries without bold markup have nothing tappable — that is expected when
-TVMaze does not highlight names.
-
-Before portfolio release, decide whether to keep the placeholder alert, replace
-it with real actor detail navigation, or remove tappable names entirely.
 
 ------------------------------------------------------------------------
 
