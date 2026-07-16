@@ -379,7 +379,6 @@ Revisit the need for an in-app feedback screen only if beta testing demonstrates
 - Empty watchlist shown
 - Empty search results shown
 - Non-fatal errors (API failures, decoding errors, notification scheduling failures)
-- Actor name tapped (shows a “coming soon” placeholder; increments diagnostics counter)
 
 ### Design Notes
 

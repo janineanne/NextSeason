@@ -97,7 +97,6 @@ enum AnalyticsDiagnosticsReport {
         Notification permission grants: \(counters.notificationPermissionGrants)
         Notification reminders scheduled: \(counters.notificationRemindersScheduled)
         Theme selections: \(counters.themeSelections)
-        Actor name taps: \(counters.actorNameTaps)
         Notifications enabled: \(notificationsEnabled)
         Current theme: \(currentTheme)
 
