@@ -82,27 +82,10 @@ struct ShowDetailView: View {
         .toolbar { aboutToolbarButton }
         .betaThemeSwitcherToolbar()
         .appNavigationChrome()
-        .alert("Stay in the Loop", isPresented: notificationPromptBinding(viewModel: viewModel)) {
-            Button("Not Now", role: .cancel) {
-                viewModel.dismissNotificationPrompt()
-            }
-            Button("Enable Notifications") {
-                Task { await viewModel.confirmNotificationPrompt() }
-            }
-        } message: {
-            Text(FirstRunCopy.notificationPromptMessage)
-        }
-        .alert("Notifications Not Enabled", isPresented: notificationsDeniedBinding(viewModel: viewModel)) {
-            Button("Not Now", role: .cancel) {
-                viewModel.dismissNotificationsDeniedAlert()
-            }
-            Button("Open Settings") {
-                viewModel.openNotificationSettings()
-                viewModel.dismissNotificationsDeniedAlert()
-            }
-        } message: {
-            Text(FirstRunCopy.notificationsSettingsReminderMessage)
-        }
+        .watchlistNotificationPromptAlerts(
+            prompt: viewModel.notificationPrompt,
+            notificationService: viewModel.notificationService
+        )
         .alert("Coming Soon", isPresented: $showActorNameAlert) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -123,24 +106,6 @@ struct ShowDetailView: View {
                 .accessibilityHint("Shows version and beta diagnostics")
             }
         }
-    }
-
-    private func notificationsDeniedBinding(viewModel: ShowDetailViewModel) -> Binding<Bool> {
-        Binding(
-            get: { viewModel.shouldShowNotificationsDeniedAlert },
-            set: { isPresented in
-                if !isPresented { viewModel.dismissNotificationsDeniedAlert() }
-            }
-        )
-    }
-
-    private func notificationPromptBinding(viewModel: ShowDetailViewModel) -> Binding<Bool> {
-        Binding(
-            get: { viewModel.shouldPromptForNotifications },
-            set: { isPresented in
-                if !isPresented { viewModel.dismissNotificationPrompt() }
-            }
-        )
     }
 
     private func header(viewModel: ShowDetailViewModel) -> some View {
