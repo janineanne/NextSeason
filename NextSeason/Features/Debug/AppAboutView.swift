@@ -49,7 +49,6 @@ private struct AppAboutToolbarButtonModifier: ViewModifier {
 struct AppAboutView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.notificationService) private var notificationService
-    @Environment(\.scenePhase) private var scenePhase
     @State private var betaBuildAvailability = BetaBuildAvailability.shared
     @State private var notificationsEnabled = false
 
@@ -58,10 +57,7 @@ struct AppAboutView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("App") {
-                    LabeledContent("Version", value: AppVersionInfo.displayString)
-                    LabeledContent("Build channel", value: betaBuildAvailability.channelDisplayName)
-                }
+                BetaAppInfoSection(channelDisplayName: betaBuildAvailability.channelDisplayName)
 
                 Section {
                     Button {
@@ -123,10 +119,7 @@ struct AppAboutView: View {
                 await betaBuildAvailability.refresh()
                 await refreshNotificationStatus()
             }
-            .onChange(of: scenePhase) { _, phase in
-                guard phase == .active else { return }
-                Task { await refreshNotificationStatus() }
-            }
+            .refreshNotificationDeliveryStatus($notificationsEnabled)
         }
     }
 

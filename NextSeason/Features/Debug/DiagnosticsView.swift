@@ -26,7 +26,6 @@ struct DiagnosticsView: View {
     @Environment(\.betaRefreshDiagnostics) private var betaRefreshDiagnostics
     @Environment(AppThemeController.self) private var themeController
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
 
     @State private var notificationsEnabled = false
     @State private var reportText = ""
@@ -45,12 +44,11 @@ struct DiagnosticsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("App") {
-                    LabeledContent("Version", value: AppVersionInfo.displayString)
-                    LabeledContent("Build channel", value: betaBuildAvailability.channelDisplayName)
-                    LabeledContent("Current theme", value: themeController.variant.displayName)
-                    LabeledContent("Notifications enabled", value: notificationsEnabled ? "Yes" : "No")
-                }
+                BetaAppInfoSection(
+                    channelDisplayName: betaBuildAvailability.channelDisplayName,
+                    themeDisplayName: themeController.variant.displayName,
+                    notificationsEnabledLabel: notificationsEnabled ? "Yes" : "No"
+                )
 
                 if betaValidationAvailable {
                     betaValidationSection
@@ -168,10 +166,7 @@ struct DiagnosticsView: View {
             .onChange(of: themeController.variant) {
                 refreshReportText()
             }
-            .onChange(of: scenePhase) { _, phase in
-                guard phase == .active else { return }
-                Task { await refreshNotificationStatus() }
-            }
+            .refreshNotificationDeliveryStatus($notificationsEnabled)
         }
     }
 

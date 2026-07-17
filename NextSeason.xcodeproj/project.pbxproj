@@ -143,6 +143,11 @@
 			path = NextSeason;
 			sourceTree = "<group>";
 		};
+		E1SHARED012FE400000076FCDD /* NextSeasonShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NextSeasonShared;
+			sourceTree = "<group>";
+		};
 		E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NextSeasonTests;
@@ -248,6 +253,7 @@
 				E13811E42FDCAFE0009C141B /* AGENTS.md */,
 				E1F0A0012FE200000076FCDD /* App-Info.plist */,
 				E13811CF2FDB795C009C141B /* NextSeason */,
+				E1SHARED012FE400000076FCDD /* NextSeasonShared */,
 				E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */,
 				E1UI00022FE400000076FCDD /* NextSeasonUITests */,
 				E13811CE2FDB795C009C141B /* Products */,
@@ -389,6 +395,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				E13811CF2FDB795C009C141B /* NextSeason */,
+				E1SHARED012FE400000076FCDD /* NextSeasonShared */,
 			);
 			name = NextSeason;
 			packageProductDependencies = (
@@ -435,6 +442,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				E1UI00022FE400000076FCDD /* NextSeasonUITests */,
+				E1SHARED012FE400000076FCDD /* NextSeasonShared */,
 			);
 			name = NextSeasonUITests;
 			packageProductDependencies = (
