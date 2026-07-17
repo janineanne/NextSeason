@@ -11,7 +11,6 @@ struct SearchView: View {
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.dismissSearch) private var dismissSearch
-    @Environment(\.openAppAbout) private var openAppAbout
 
     @Binding var navigationPath: NavigationPath
     @Binding var profileFlowSearchQuery: String?
@@ -54,7 +53,7 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .appScreenBackground()
                 .navigationTitle("NextSeason")
-                .toolbar { aboutToolbarButton }
+                .appAboutToolbarButton()
                 .betaThemeSwitcherToolbar()
                 .navigationDestination(for: Show.self) { show in
                     ShowDetailView(
@@ -106,21 +105,6 @@ struct SearchView: View {
         }
         .scrollDismissesKeyboard(.immediately)
         .appNavigationChrome()
-    }
-
-    @ToolbarContentBuilder
-    private var aboutToolbarButton: some ToolbarContent {
-        if let openAppAbout {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    openAppAbout()
-                } label: {
-                    Image(systemName: "info.circle")
-                }
-                .accessibilityLabel("About NextSeason")
-                .accessibilityHint("Shows version and beta diagnostics")
-            }
-        }
     }
 
     private func refreshTrackedShows() async {

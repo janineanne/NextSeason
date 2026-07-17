@@ -60,13 +60,16 @@ final class SearchWatchlistTracking {
         defer { updatingShowIDs.remove(show.id) }
 
         do {
-            try await context.repository.add(show)
+            try await WatchlistAdding.add(
+                show,
+                source: .search,
+                repository: context.repository,
+                analytics: context.analytics,
+                notifications: context.notificationService,
+                prompt: context.notificationPrompt
+            )
             trackedShowIDs.insert(show.id)
-            context.analytics.track(.watchlistAdded(source: .search, showID: show.id))
             context.onSearchResultsHintDismissed()
-            if await context.notificationService.needsAuthorizationPrompt() {
-                context.notificationPrompt.shouldPromptForNotifications = true
-            }
             context.onWatchlistChanged()
         } catch is CancellationError {
             return

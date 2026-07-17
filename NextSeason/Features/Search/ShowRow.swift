@@ -99,6 +99,11 @@ struct ShowRowLabel: View {
         return parts.joined(separator: ", ")
     }
 
+    // Intentionally duplicated with ShowDetailView.poster rather than a shared
+    // PosterImage helper. Extraction and custom loaders did not fix the
+    // pre-existing detail-page banding (visible on cold loads such as Try an
+    // Example) and a full-decode cache made search rows slower, so keep the
+    // original inline AsyncImage at each call site.
     private var poster: some View {
         AsyncImage(url: posterURL) { phase in
             switch phase {

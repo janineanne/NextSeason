@@ -12,7 +12,6 @@ struct WatchlistView: View {
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.analytics) private var analytics
     @Environment(\.appThemeColors) private var themeColors
-    @Environment(\.openAppAbout) private var openAppAbout
     @Environment(\.scenePhase) private var scenePhase
 
     @Binding var navigationPath: NavigationPath
@@ -65,7 +64,7 @@ struct WatchlistView: View {
             .appScreenBackground()
             .navigationTitle("Watchlist")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar { aboutToolbarButton }
+            .appAboutToolbarButton()
             .betaThemeSwitcherToolbar()
             .navigationDestination(for: TrackedShow.self) { tracked in
                 ShowDetailView(
@@ -136,21 +135,6 @@ struct WatchlistView: View {
             }
         }
         .appNavigationChrome()
-    }
-
-    @ToolbarContentBuilder
-    private var aboutToolbarButton: some ToolbarContent {
-        if let openAppAbout {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    openAppAbout()
-                } label: {
-                    Image(systemName: "info.circle")
-                }
-                .accessibilityLabel("About NextSeason")
-                .accessibilityHint("Shows version and beta diagnostics")
-            }
-        }
     }
 
     private func refreshNotificationsDisabledState() async {

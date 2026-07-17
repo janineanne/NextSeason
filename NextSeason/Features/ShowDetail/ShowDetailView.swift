@@ -10,7 +10,6 @@ import SwiftUI
 struct ShowDetailView: View {
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.appThemeColors) private var themeColors
-    @Environment(\.openAppAbout) private var openAppAbout
 
     @State private var viewModel: ShowDetailViewModel
 
@@ -78,28 +77,13 @@ struct ShowDetailView: View {
         .tvmazeAttributionInset()
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar { aboutToolbarButton }
+        .appAboutToolbarButton()
         .betaThemeSwitcherToolbar()
         .appNavigationChrome()
         .watchlistNotificationPromptAlerts(
             prompt: viewModel.notificationPrompt,
             notificationService: viewModel.notificationService
         )
-    }
-
-    @ToolbarContentBuilder
-    private var aboutToolbarButton: some ToolbarContent {
-        if let openAppAbout {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    openAppAbout()
-                } label: {
-                    Image(systemName: "info.circle")
-                }
-                .accessibilityLabel("About NextSeason")
-                .accessibilityHint("Shows version and beta diagnostics")
-            }
-        }
     }
 
     private func header(viewModel: ShowDetailViewModel) -> some View {
@@ -174,6 +158,7 @@ struct ShowDetailView: View {
         }
     }
 
+    // Intentionally duplicated with ShowRowLabel.poster — see the comment there.
     private func poster(viewModel: ShowDetailViewModel) -> some View {
         AsyncImage(url: viewModel.displayShow.posterMediumURL) { phase in
             switch phase {

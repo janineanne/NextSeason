@@ -81,6 +81,7 @@
 		E167AE2E30097AA1007F7098 /* Post-MVP Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Post-MVP Roadmap.md"; sourceTree = "<group>"; };
 		E167AE2F30099758007F7098 /* 7-16-2026 Product MVP Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Product MVP Discussion.md"; sourceTree = "<group>"; };
 		E167AE3130099B9C007F7098 /* 7-16-2026 Implement Watchlist Search.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Implement Watchlist Search.md"; sourceTree = "<group>"; };
+		E167B03B3009D883007F7098 /* 7-16-2026 Add Note about Notification Reliability.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Add Note about Notification Reliability.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -366,6 +367,7 @@
 				E167AC2430094782007F7098 /* 7-16-2026 Implement Removal of Tappable Actor Names.md */,
 				E167AE2F30099758007F7098 /* 7-16-2026 Product MVP Discussion.md */,
 				E167AE3130099B9C007F7098 /* 7-16-2026 Implement Watchlist Search.md */,
+				E167B03B3009D883007F7098 /* 7-16-2026 Add Note about Notification Reliability.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
