@@ -16,6 +16,34 @@ extension EnvironmentValues {
     }
 }
 
+extension View {
+    /// Adds the standard trailing "About NextSeason" toolbar button when an
+    /// About entry point is available in the environment.
+    func appAboutToolbarButton() -> some View {
+        modifier(AppAboutToolbarButtonModifier())
+    }
+}
+
+private struct AppAboutToolbarButtonModifier: ViewModifier {
+    @Environment(\.openAppAbout) private var openAppAbout
+
+    func body(content: Content) -> some View {
+        content.toolbar {
+            if let openAppAbout {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        openAppAbout()
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("About NextSeason")
+                    .accessibilityHint("Shows version and beta diagnostics")
+                }
+            }
+        }
+    }
+}
+
 /// Lightweight beta-only About sheet used as the Diagnostics entry point.
 @MainActor
 struct AppAboutView: View {

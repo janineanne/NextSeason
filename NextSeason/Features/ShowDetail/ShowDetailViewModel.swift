@@ -114,12 +114,15 @@ final class ShowDetailViewModel {
         defer { isUpdatingWatchlist = false }
 
         do {
-            try await repository.add(show)
+            try await WatchlistAdding.add(
+                show,
+                source: .detail,
+                repository: repository,
+                analytics: analytics,
+                notifications: notifications,
+                prompt: notificationPrompt
+            )
             isTracked = true
-            analytics.track(.watchlistAdded(source: .detail, showID: show.id))
-            if await notifications.needsAuthorizationPrompt() {
-                notificationPrompt.shouldPromptForNotifications = true
-            }
         } catch {
             analytics.trackNonFatalError(error, context: "watchlist_add_detail")
             if fullShow != nil {
