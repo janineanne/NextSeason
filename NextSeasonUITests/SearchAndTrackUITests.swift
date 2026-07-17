@@ -65,7 +65,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         trackButton.tap()
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             )
@@ -95,7 +95,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
     }
 
     func testSearchWithNoResultsShowsFallbackGuidance() {
-        search(for: UITestSearchQuery.noResults)
+        search(for: UITestingSearchQuery.noResults)
 
         XCTAssertTrue(
             searchNoResults.waitForExistence(timeout: UITestTimeout.extended),
@@ -104,7 +104,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
     }
 
     func testSearchFailureShowsRetryState() {
-        search(for: UITestSearchQuery.failure)
+        search(for: UITestingSearchQuery.failure)
 
         XCTAssertTrue(
             app.staticTexts["Something Went Wrong"].waitForExistence(timeout: UITestTimeout.extended),
@@ -125,7 +125,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         let trackButton = showDetailTrackButton()
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Track",
                 timeout: UITestTimeout.standard
             ),
@@ -134,7 +134,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         trackButton.tap()
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             ),
@@ -146,7 +146,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         result.tap()
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.extended
             ),
@@ -167,7 +167,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         )
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             ),
@@ -189,7 +189,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         )
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Track",
                 timeout: UITestTimeout.standard
             ),
@@ -254,7 +254,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         XCTAssertFalse(watchlistEmptyState.exists)
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.Watchlist.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Watchlist.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.standard
             ),
@@ -288,7 +288,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         )
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Track",
                 timeout: UITestTimeout.standard
             ),
@@ -299,7 +299,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
 
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.standard
             ),
@@ -331,7 +331,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         trackButton.tap()
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             ),
@@ -350,7 +350,7 @@ final class SearchAndTrackUITests: NextSeasonUITestCase {
         trackButton.tap()
         XCTAssertTrue(
             waitForButton(
-                "\(UITestAccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             )
