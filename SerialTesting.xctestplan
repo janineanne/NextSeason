@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "54965A50-7DBE-4B03-AABC-7B7275D18B6F",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:NextSeason.xcodeproj",
+        "identifier" : "E1DAC5582FDF5A4B00BD81E5",
+        "name" : "NextSeasonTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:NextSeason.xcodeproj",
+        "identifier" : "E1UI00032FE400000076FCDD",
+        "name" : "NextSeasonUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
