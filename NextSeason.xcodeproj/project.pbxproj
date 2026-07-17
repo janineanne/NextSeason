@@ -82,6 +82,8 @@
 		E167AE2F30099758007F7098 /* 7-16-2026 Product MVP Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Product MVP Discussion.md"; sourceTree = "<group>"; };
 		E167AE3130099B9C007F7098 /* 7-16-2026 Implement Watchlist Search.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Implement Watchlist Search.md"; sourceTree = "<group>"; };
 		E167B03B3009D883007F7098 /* 7-16-2026 Add Note about Notification Reliability.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Add Note about Notification Reliability.md"; sourceTree = "<group>"; };
+		E167B990300AD276007F7098 /* TestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TestPlan.xctestplan; sourceTree = "<group>"; };
+		E167BA9D300AD59C007F7098 /* SerialTesting.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SerialTesting.xctestplan; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -143,14 +145,14 @@
 			path = NextSeason;
 			sourceTree = "<group>";
 		};
-		E1SHARED012FE400000076FCDD /* NextSeasonShared */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NextSeasonShared;
-			sourceTree = "<group>";
-		};
 		E1DAC55A2FDF5A4B00BD81E5 /* NextSeasonTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NextSeasonTests;
+			sourceTree = "<group>";
+		};
+		E1SHARED012FE400000076FCDD /* NextSeasonShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NextSeasonShared;
 			sourceTree = "<group>";
 		};
 		E1UI00022FE400000076FCDD /* NextSeasonUITests */ = {
@@ -247,6 +249,8 @@
 		E13811C42FDB795C009C141B = {
 			isa = PBXGroup;
 			children = (
+				E167BA9D300AD59C007F7098 /* SerialTesting.xctestplan */,
+				E167B990300AD276007F7098 /* TestPlan.xctestplan */,
 				E197F42F2FF47B1700D34A28 /* README.md */,
 				E1DA26BF2FDDDE6000C37DAC /* Documentation */,
 				E1DA26BE2FDDD9A800C37DAC /* Cursor Rules */,
@@ -441,8 +445,8 @@
 				E1UI00082FE400000076FCDD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E1UI00022FE400000076FCDD /* NextSeasonUITests */,
 				E1SHARED012FE400000076FCDD /* NextSeasonShared */,
+				E1UI00022FE400000076FCDD /* NextSeasonUITests */,
 			);
 			name = NextSeasonUITests;
 			packageProductDependencies = (
