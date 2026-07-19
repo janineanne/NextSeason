@@ -45,22 +45,32 @@ struct ShowDetailView: View {
     var body: some View {
         detailContent(viewModel: viewModel)
             .task(id: viewModel.initialShow.id) {
-                await viewModel.load()
+                // Opening detail abandons any in-flight undo toast from search/watchlist
+                // so the banner does not cover detail content.
+                cancelPendingRemovalForDetailPresentation()
+                await viewModel.load(undoRemoval: undoRemoval)
             }
             .onAppear {
                 analytics.track(.showDetailViewed(showID: viewModel.initialShow.id))
+                cancelPendingRemovalForDetailPresentation()
                 // Reconcile tracked state on reappear (e.g. returning to this screen
                 // after the show was removed on the Watchlist tab).
-                Task { await viewModel.refreshTrackedState() }
+                Task { await viewModel.refreshTrackedState(undoRemoval: undoRemoval) }
             }
-            .onChange(of: undoRemoval?.pendingRemoval?.id) { oldValue, newValue in
-                guard oldValue == viewModel.initialShow.id, newValue == nil else { return }
-                Task { await viewModel.refreshTrackedState() }
+            .onChange(of: undoRemoval?.pendingRemoval?.id) { _, _ in
+                Task { await viewModel.refreshTrackedState(undoRemoval: undoRemoval) }
             }
             .onChange(of: viewModel.loadState) { _, loadState in
                 guard ProfileFlowConfiguration.isEnabled, loadState == .loaded else { return }
                 onProfileFlowDetailLoaded?()
             }
+    }
+
+    /// Dismisses a pending undoable removal when Show Detail is presented.
+    /// Removals started from this screen keep their toast (onAppear already ran).
+    private func cancelPendingRemovalForDetailPresentation() {
+        guard undoRemoval?.pendingRemoval != nil else { return }
+        _ = undoRemoval?.undoRemoval()
     }
 
     private func detailContent(viewModel: ShowDetailViewModel) -> some View {
@@ -137,25 +147,11 @@ struct ShowDetailView: View {
     }
 
     private func handleTrackButtonTap(viewModel: ShowDetailViewModel, anchor: CGRect) async {
-        if undoRemoval?.pendingRemoval?.id == viewModel.initialShow.id {
-            undoRemoval?.undoRemoval()
-            await viewModel.refreshTrackedState()
-            return
-        }
-
-        if viewModel.isTracked {
-            guard let undoRemoval, let tracked = await viewModel.trackedShow() else { return }
-            undoRemoval.requestRemoval(
-                tracked,
-                anchor: anchor,
-                source: .detail,
-                onCommitted: onWatchlistChanged
-            )
-            viewModel.applyTrackedState(false)
-        } else {
-            await viewModel.addToWatchlist()
-            onWatchlistChanged()
-        }
+        await viewModel.handleTrackButton(
+            anchor: anchor,
+            undoRemoval: undoRemoval,
+            onWatchlistChanged: onWatchlistChanged
+        )
     }
 
     // Intentionally duplicated with ShowRowLabel.poster — see the comment there.
@@ -215,7 +211,7 @@ struct ShowDetailView: View {
                             .foregroundStyle(themeColors.warning)
                     }
                     Button("Try Again") {
-                        Task { await viewModel.load() }
+                        Task { await viewModel.load(undoRemoval: undoRemoval) }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -12,7 +12,6 @@ struct WatchlistView: View {
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.analytics) private var analytics
     @Environment(\.appThemeColors) private var themeColors
-    @Environment(\.scenePhase) private var scenePhase
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
@@ -30,8 +29,7 @@ struct WatchlistView: View {
     /// coordinator decides whether the push animates based on the tap context.
     private let onApplyPendingDetail: () -> Void
     @State private var viewModel: WatchlistViewModel?
-    @State private var notificationsDisabled = false
-    @State private var notificationEnablementButtonTitle = "Enable Notifications"
+    @State private var notificationStatus = NotificationStatusPresentation.unknown
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -91,7 +89,7 @@ struct WatchlistView: View {
                     )
                 }
                 await viewModel?.reload()
-                await refreshNotificationsDisabledState()
+                await refreshNotificationStatus()
             }
             .onAppear {
                 analytics.track(.watchlistViewed)
@@ -100,7 +98,7 @@ struct WatchlistView: View {
                 onApplyPendingDetail()
                 Task {
                     await viewModel?.reload()
-                    await refreshNotificationsDisabledState()
+                    await refreshNotificationStatus()
                 }
             }
             .onChange(of: pendingDetailToken) { _, token in
@@ -108,22 +106,11 @@ struct WatchlistView: View {
                 guard token != nil else { return }
                 onApplyPendingDetail()
             }
-            .onDisappear {
-                AppDiagnosticsLogger.breadcrumb("watchlist_disappear")
-                Task { [viewModel] in
-                    AppDiagnosticsLogger.logTaskStart("watchlist_commit_on_disappear")
-                    await viewModel?.commitPendingRemovalIfNeeded()
-                    AppDiagnosticsLogger.logTaskComplete("watchlist_commit_on_disappear")
-                }
-            }
             .refreshable {
                 await viewModel?.refreshFromNetwork()
-                await refreshNotificationsDisabledState()
+                await refreshNotificationStatus()
             }
-            .onChange(of: scenePhase) { _, phase in
-                guard phase == .active else { return }
-                Task { await refreshNotificationsDisabledState() }
-            }
+            .refreshNotificationStatus($notificationStatus)
             .onChange(of: undoRemoval?.pendingRemoval?.id) { oldId, newId in
                 guard let oldId, newId == nil else { return }
                 Task { @MainActor in
@@ -137,12 +124,8 @@ struct WatchlistView: View {
         .appNavigationChrome()
     }
 
-    private func refreshNotificationsDisabledState() async {
-        notificationsDisabled = await notificationService.canDeliverVisibleAlerts() == false
-        let status = await notificationService.authorizationStatus()
-        notificationEnablementButtonTitle = status == .notDetermined
-            ? "Enable Notifications"
-            : "Open Settings"
+    private func refreshNotificationStatus() async {
+        notificationStatus = await NotificationStatusPresentation.load(using: notificationService)
     }
 
     @ViewBuilder
@@ -158,9 +141,9 @@ struct WatchlistView: View {
             // so removing the last row doesn't tear the List down mid-animation,
             // which crashes UICollectionView with "invalid number of items".
             List {
-                if notificationsDisabled {
+                if notificationStatus.showsDisabledBanner {
                     NotificationsDisabledBanner(
-                        buttonTitle: notificationEnablementButtonTitle
+                        buttonTitle: notificationStatus.enablementButtonTitle
                     ) {
                         Task { await notificationService.enableNotificationsFromSettingsEntryPoint() }
                     }
@@ -168,7 +151,7 @@ struct WatchlistView: View {
                 // Keeps the list scroll-backed so the large navigation title renders
                 // when there are no rows to show (empty watchlist or no search
                 // matches, and no banner).
-                if viewModel.filteredShows.isEmpty, !notificationsDisabled {
+                if viewModel.filteredShows.isEmpty, !notificationStatus.showsDisabledBanner {
                     Color.clear
                         .frame(height: 1)
                         .listRowInsets(EdgeInsets())

@@ -50,7 +50,7 @@ struct AppAboutView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.notificationService) private var notificationService
     @State private var betaBuildAvailability = BetaBuildAvailability.shared
-    @State private var notificationsEnabled = false
+    @State private var notificationStatus = NotificationStatusPresentation.unknown
 
     let openDiagnostics: () -> Void
 
@@ -64,11 +64,11 @@ struct AppAboutView: View {
                         Task { await handleNotificationsTap() }
                     } label: {
                         LabeledContent {
-                            Text(notificationsEnabled ? "Enabled" : "Disabled")
+                            Text(notificationStatus.statusLabel)
                         } label: {
                             Label(
                                 "Notifications",
-                                systemImage: notificationsEnabled ? "bell.fill" : "bell.slash"
+                                systemImage: notificationStatus.symbolName
                             )
                         }
                     }
@@ -119,7 +119,7 @@ struct AppAboutView: View {
                 await betaBuildAvailability.refresh()
                 await refreshNotificationStatus()
             }
-            .refreshNotificationDeliveryStatus($notificationsEnabled)
+            .refreshNotificationStatus($notificationStatus)
         }
     }
 
@@ -127,21 +127,21 @@ struct AppAboutView: View {
         "NextSeason periodically checks your watchlist for new seasons and will notify you when one is found. iOS decides when apps may perform background checks, so opening the app occasionally helps keep your watchlist up to date."
 
     private var notificationsFooterText: String {
-        if notificationsEnabled {
+        if notificationStatus.canDeliverVisibleAlerts {
             return "Opens Settings where you can manage notification preferences."
         }
         return FirstRunCopy.notificationsSettingsReminderMessage
     }
 
     private var notificationsAccessibilityHint: String {
-        if notificationsEnabled {
+        if notificationStatus.canDeliverVisibleAlerts {
             return "Opens Settings to manage notifications."
         }
         return "Opens notification settings or asks for permission."
     }
 
     private func refreshNotificationStatus() async {
-        notificationsEnabled = await notificationService.canDeliverVisibleAlerts()
+        notificationStatus = await NotificationStatusPresentation.load(using: notificationService)
     }
 
     private func handleNotificationsTap() async {
