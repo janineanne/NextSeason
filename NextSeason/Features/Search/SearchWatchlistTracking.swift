@@ -18,11 +18,10 @@ final class SearchWatchlistTracking {
         analytics: any AnalyticsTracking
     ) async {
         do {
-            var ids = try await repository.trackedShowIDs()
-            if let pendingID = undoRemoval?.pendingRemoval?.id {
-                ids.remove(pendingID)
-            }
-            trackedShowIDs = ids
+            trackedShowIDs = try await WatchlistEffectiveTracking.trackedIDs(
+                repository: repository,
+                undoRemoval: undoRemoval
+            )
         } catch is CancellationError {
             return
         } catch {
@@ -37,49 +36,68 @@ final class SearchWatchlistTracking {
     ) async {
         guard !updatingShowIDs.contains(show.id) else { return }
 
-        if trackedShowIDs.contains(show.id) {
-            guard let undoRemoval = context.undoRemoval else { return }
-            do {
-                guard let tracked = try await context.repository.trackedShow(showID: show.id) else { return }
-                undoRemoval.requestRemoval(
-                    tracked,
-                    anchor: anchor,
-                    source: .search,
-                    onCommitted: context.onWatchlistChanged
-                )
-                trackedShowIDs.remove(show.id)
-            } catch is CancellationError {
-                return
-            } catch {
-                context.analytics.trackNonFatalError(error, context: "search_watchlist_tracking_lookup")
+        let isTracked = trackedShowIDs.contains(show.id)
+        let isPendingRemoval = context.undoRemoval?.pendingRemoval?.id == show.id
+        // Only the add path needs an in-flight lock; untrack/undo update local
+        // star state immediately. Capture before await so defer still clears.
+        let shouldLockForAdd = !isTracked && !isPendingRemoval
+
+        if shouldLockForAdd {
+            updatingShowIDs.insert(show.id)
+        }
+        defer {
+            if shouldLockForAdd {
+                updatingShowIDs.remove(show.id)
             }
-            return
         }
 
-        updatingShowIDs.insert(show.id)
-        defer { updatingShowIDs.remove(show.id) }
-
         do {
-            try await WatchlistAdding.add(
+            let outcome = try await WatchlistAdding.toggle(
                 show,
+                isTracked: isTracked,
+                anchor: anchor,
                 source: .search,
                 repository: context.repository,
+                undoRemoval: context.undoRemoval,
                 analytics: context.analytics,
                 notifications: context.notificationService,
-                prompt: context.notificationPrompt
+                prompt: context.notificationPrompt,
+                onRemovalCommitted: context.onWatchlistChanged
             )
-            trackedShowIDs.insert(show.id)
-            context.onSearchResultsHintDismissed()
-            context.onWatchlistChanged()
+            apply(outcome, for: show.id, context: context)
         } catch is CancellationError {
             return
         } catch {
-            context.analytics.trackNonFatalError(error, context: "watchlist_add_search")
-            await refresh(
-                repository: context.repository,
-                excludingPendingRemovalFrom: context.undoRemoval,
-                analytics: context.analytics
-            )
+            let errorContext = isTracked || isPendingRemoval
+                ? "search_watchlist_tracking_lookup"
+                : "watchlist_add_search"
+            context.analytics.trackNonFatalError(error, context: errorContext)
+            if shouldLockForAdd {
+                await refresh(
+                    repository: context.repository,
+                    excludingPendingRemovalFrom: context.undoRemoval,
+                    analytics: context.analytics
+                )
+            }
+        }
+    }
+
+    private func apply(
+        _ outcome: WatchlistAdding.ToggleOutcome,
+        for showID: Int,
+        context: SearchWatchlistTrackingContext
+    ) {
+        switch outcome {
+        case .undidPendingRemoval:
+            trackedShowIDs.insert(showID)
+        case .removalRequested:
+            trackedShowIDs.remove(showID)
+        case .added:
+            trackedShowIDs.insert(showID)
+            context.onSearchResultsHintDismissed()
+            context.onWatchlistChanged()
+        case .ignored:
+            break
         }
     }
 }

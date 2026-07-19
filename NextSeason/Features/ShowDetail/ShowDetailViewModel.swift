@@ -61,10 +61,10 @@ final class ShowDetailViewModel {
     /// Loads full show details (seasons + next episode) and tracked status.
     /// Tracked status is fetched in parallel with the network request so the
     /// toolbar reflects search-row changes without waiting on TVMaze.
-    func load() async {
+    func load(undoRemoval: WatchlistUndoRemoval?) async {
         loadState = .loading
         AppDiagnosticsLogger.breadcrumb("show_detail_load:\(initialShow.id)")
-        async let trackedRefresh: Void = refreshTrackedState()
+        async let trackedRefresh: Void = refreshTrackedState(undoRemoval: undoRemoval)
 
         do {
             fullShow = try await service.show(id: initialShow.id)
@@ -84,14 +84,18 @@ final class ShowDetailViewModel {
         }
     }
 
-    /// Re-reads tracked status from the repository so the Track control reflects
-    /// changes made elsewhere (e.g. the show was removed on the Watchlist tab)
-    /// when this screen reappears. Skipped mid-toggle to avoid clobbering an
-    /// in-flight optimistic update.
-    func refreshTrackedState() async {
+    /// Re-reads effective tracked status (persisted, excluding a pending undoable
+    /// removal) so the Track control matches search and other surfaces when this
+    /// screen reappears. Skipped mid-toggle to avoid clobbering an in-flight
+    /// optimistic update.
+    func refreshTrackedState(undoRemoval: WatchlistUndoRemoval?) async {
         guard !isUpdatingWatchlist else { return }
         do {
-            isTracked = try await repository.contains(showID: initialShow.id)
+            isTracked = try await WatchlistEffectiveTracking.isTracked(
+                showID: initialShow.id,
+                repository: repository,
+                undoRemoval: undoRemoval
+            )
         } catch is CancellationError {
             return
         } catch {
@@ -99,33 +103,60 @@ final class ShowDetailViewModel {
         }
     }
 
-    func trackedShow() async -> TrackedShow? {
-        try? await repository.trackedShow(showID: initialShow.id)
-    }
-
-    func applyTrackedState(_ tracked: Bool) {
-        isTracked = tracked
-    }
-
-    func addToWatchlist() async {
+    /// Shared track/untrack orchestration; local star state updates from the outcome.
+    func handleTrackButton(
+        anchor: CGRect,
+        undoRemoval: WatchlistUndoRemoval?,
+        onWatchlistChanged: @escaping () -> Void
+    ) async {
         guard !isUpdatingWatchlist else { return }
+
         let show = fullShow ?? initialShow
-        isUpdatingWatchlist = true
-        defer { isUpdatingWatchlist = false }
+        let wasTracked = isTracked
+        let isPendingRemoval = undoRemoval?.pendingRemoval?.id == show.id
+        let shouldLockForAdd = !wasTracked && !isPendingRemoval
+
+        if shouldLockForAdd {
+            isUpdatingWatchlist = true
+        }
+        defer {
+            if shouldLockForAdd {
+                isUpdatingWatchlist = false
+            }
+        }
 
         do {
-            try await WatchlistAdding.add(
+            let outcome = try await WatchlistAdding.toggle(
                 show,
+                isTracked: wasTracked,
+                anchor: anchor,
                 source: .detail,
                 repository: repository,
+                undoRemoval: undoRemoval,
                 analytics: analytics,
                 notifications: notifications,
-                prompt: notificationPrompt
+                prompt: notificationPrompt,
+                onRemovalCommitted: onWatchlistChanged
             )
-            isTracked = true
+            switch outcome {
+            case .undidPendingRemoval:
+                await refreshTrackedState(undoRemoval: undoRemoval)
+            case .removalRequested:
+                isTracked = false
+            case .added:
+                isTracked = true
+                onWatchlistChanged()
+            case .ignored:
+                break
+            }
+        } catch is CancellationError {
+            return
         } catch {
-            analytics.trackNonFatalError(error, context: "watchlist_add_detail")
-            if fullShow != nil {
+            let errorContext = wasTracked || isPendingRemoval
+                ? "show_detail_watchlist_lookup"
+                : "watchlist_add_detail"
+            analytics.trackNonFatalError(error, context: errorContext)
+            if shouldLockForAdd, fullShow != nil {
                 loadState = .failed(error.localizedDescription)
             }
         }

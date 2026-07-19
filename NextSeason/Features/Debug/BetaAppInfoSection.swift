@@ -24,28 +24,3 @@ struct BetaAppInfoSection: View {
         }
     }
 }
-
-extension View {
-    /// Refreshes a notifications-enabled flag when the scene becomes active.
-    func refreshNotificationDeliveryStatus(_ enabled: Binding<Bool>) -> some View {
-        modifier(NotificationDeliveryStatusRefreshModifier(notificationsEnabled: enabled))
-    }
-}
-
-private struct NotificationDeliveryStatusRefreshModifier: ViewModifier {
-    @Environment(\.notificationService) private var notificationService
-    @Environment(\.scenePhase) private var scenePhase
-    @Binding var notificationsEnabled: Bool
-
-    func body(content: Content) -> some View {
-        content
-            .onChange(of: scenePhase) { _, phase in
-                guard phase == .active else { return }
-                Task { await refresh() }
-            }
-    }
-
-    private func refresh() async {
-        notificationsEnabled = await notificationService.canDeliverVisibleAlerts()
-    }
-}

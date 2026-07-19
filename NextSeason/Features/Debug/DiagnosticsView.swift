@@ -27,7 +27,7 @@ struct DiagnosticsView: View {
     @Environment(AppThemeController.self) private var themeController
     @Environment(\.dismiss) private var dismiss
 
-    @State private var notificationsEnabled = false
+    @State private var notificationStatus = NotificationStatusPresentation.unknown
     @State private var reportText = ""
     @State private var isForceRefreshing = false
     @State private var isSendingTestNotification = false
@@ -47,7 +47,7 @@ struct DiagnosticsView: View {
                 BetaAppInfoSection(
                     channelDisplayName: betaBuildAvailability.channelDisplayName,
                     themeDisplayName: themeController.variant.displayName,
-                    notificationsEnabledLabel: notificationsEnabled ? "Yes" : "No"
+                    notificationsEnabledLabel: notificationStatus.diagnosticsEnabledLabel
                 )
 
                 if betaValidationAvailable {
@@ -166,7 +166,7 @@ struct DiagnosticsView: View {
             .onChange(of: themeController.variant) {
                 refreshReportText()
             }
-            .refreshNotificationDeliveryStatus($notificationsEnabled)
+            .refreshNotificationStatus($notificationStatus)
         }
     }
 
@@ -256,7 +256,7 @@ struct DiagnosticsView: View {
         } header: {
             Text("Beta actions")
         } footer: {
-            if !notificationsEnabled {
+            if !notificationStatus.canDeliverVisibleAlerts {
                 Text("Notification test actions require alert permission. Enable notifications in Settings, then return here.")
             }
         }
@@ -274,8 +274,8 @@ struct DiagnosticsView: View {
         } label: {
             Label(isLoading ? loadingTitle : title, systemImage: systemImage)
         }
-        .disabled(isLoading || !notificationsEnabled)
-        .foregroundStyle(notificationsEnabled ? .primary : .secondary)
+        .disabled(isLoading || !notificationStatus.canDeliverVisibleAlerts)
+        .foregroundStyle(notificationStatus.canDeliverVisibleAlerts ? .primary : .secondary)
     }
 
     private var formattedNextRefreshWindow: String {
@@ -389,12 +389,12 @@ struct DiagnosticsView: View {
     }
 
     private func refreshNotificationStatus() async {
-        notificationsEnabled = await notificationService.canDeliverVisibleAlerts()
+        notificationStatus = await NotificationStatusPresentation.load(using: notificationService)
     }
 
     private func refreshReportText() {
         reportText = analytics.diagnosticsReport(
-            notificationsEnabled: notificationsEnabled,
+            notificationsEnabled: notificationStatus.canDeliverVisibleAlerts,
             currentTheme: themeController.variant.displayName,
             betaRefreshDiagnostics: betaRefreshDiagnostics
         )

@@ -8,6 +8,7 @@ import SwiftUI
 /// The app's root view: Search and Watchlist tabs (Slice 2).
 struct ContentView: View {
     @Environment(\.watchlistRepository) private var repository
+    @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.analytics) private var analytics
     @Environment(\.appThemeColors) private var themeColors
 
@@ -69,6 +70,15 @@ struct ContentView: View {
         .onChange(of: coordinator.selectedTab) { oldTab, tab in
             if tab == .search, oldTab != .search {
                 coordinator.popSearchToRoot()
+            }
+            // Commit deferred removals when leaving the Watchlist tab — not when
+            // pushing Show Detail (NavigationStack onDisappear would false-trigger).
+            if oldTab == .watchlist, tab != .watchlist {
+                Task {
+                    AppDiagnosticsLogger.logTaskStart("watchlist_commit_on_leave_tab")
+                    await undoRemoval?.commitPendingRemovalIfNeeded()
+                    AppDiagnosticsLogger.logTaskComplete("watchlist_commit_on_leave_tab")
+                }
             }
             if tab == .watchlist {
                 coordinator.notifyWatchlistDataChanged()
