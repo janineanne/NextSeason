@@ -32,7 +32,7 @@ struct AppThemeColors: Equatable, Sendable {
         case (.warmSlate, .dark):
             warmSlateDark
         @unknown default:
-            warmSlateLight
+            tealUtilityLight
         }
     }
 }

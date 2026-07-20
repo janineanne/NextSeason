@@ -54,7 +54,8 @@ struct SearchView: View {
                 .appScreenBackground()
                 .navigationTitle("NextSeason")
                 .appAboutToolbarButton()
-                .betaThemeSwitcherToolbar()
+                // Theme switcher parked; see ThemeSwitcherView.swift status comment.
+                // .betaThemeSwitcherToolbar()
                 .navigationDestination(for: Show.self) { show in
                     ShowDetailView(
                         show: show,
