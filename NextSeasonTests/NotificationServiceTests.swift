@@ -78,7 +78,8 @@ struct NotificationServiceTests {
 
         await service.enableNotificationsFromSettingsEntryPoint()
 
-        // User explicitly opted in; the system prompt would appear on a real device.
+        // Defer is cleared; injected `.notDetermined` status means the in-app
+        // prompt is eligible again. The system dialog is not shown in unit tests.
         #expect(await service.needsAuthorizationPrompt())
     }
 }

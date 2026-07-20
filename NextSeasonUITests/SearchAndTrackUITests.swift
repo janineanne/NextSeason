@@ -5,8 +5,15 @@
 
 import XCTest
 
-final class SearchAndTrackUITests: NextSeasonUITestCase {
+@MainActor
+final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
+    var app: XCUIApplication!
     private let previewShowName = "Severance"
+
+    override func setUp() async throws {
+        try await super.setUp()
+        try await launchUITestingApp()
+    }
 
     func testSearchOpensShowDetail() {
         search(for: previewShowName)

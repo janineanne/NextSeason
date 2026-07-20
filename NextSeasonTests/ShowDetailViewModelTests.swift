@@ -1,0 +1,249 @@
+//
+//  ShowDetailViewModelTests.swift
+//  NextSeasonTests
+//
+
+import CoreGraphics
+import Foundation
+import Testing
+import UserNotifications
+@testable import NextSeason
+
+@MainActor
+struct ShowDetailViewModelTests {
+    private var sampleShow: Show {
+        Show(
+            id: 44933,
+            name: "Severance",
+            tvMazeURL: URL(string: "https://www.tvmaze.com/shows/44933/severance"),
+            summaryHTML: "<p>A workplace thriller.</p>",
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: TVMazeDate.dateOnly("2022-02-18"),
+            ended: nil,
+            network: "Apple TV",
+            genres: ["Drama"],
+            averageRuntime: 49,
+            seasons: [],
+            nextEpisode: nil,
+            updatedAt: .now
+        )
+    }
+
+    private func makeNotificationService(analytics: any AnalyticsTracking) -> NotificationService {
+        let suiteName = "ShowDetailViewModelTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        return NotificationService(
+            userDefaults: defaults,
+            authorizationStatusForTesting: .denied,
+            analytics: analytics
+        )
+    }
+
+    private final class StubTVMazeService: TVMazeService, @unchecked Sendable {
+        private let showToReturn: Show?
+
+        init(showToReturn: Show? = nil) {
+            self.showToReturn = showToReturn
+        }
+
+        func searchShows(matching query: String) async throws -> [Show] { [] }
+
+        func show(id: Int, bypassCache: Bool) async throws -> Show {
+            if let showToReturn { return showToReturn }
+            Issue.record("Unexpected show fetch in watchlist-toggle tests")
+            throw TVMazeError.notFound
+        }
+
+        func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] { [:] }
+    }
+
+    /// Fails the removal lookup, while `contains` reports the show as absent so
+    /// a post-failure refresh can clear stale local tracked state.
+    private final class FailingTrackedShowLookupRepository: WatchlistRepository {
+        func all() async throws -> [TrackedShow] { [] }
+
+        func trackedShow(showID: Int) async throws -> TrackedShow? {
+            throw URLError(.cannotConnectToHost)
+        }
+
+        func trackedShowIDs() async throws -> Set<Int> { [] }
+
+        func contains(showID: Int) async throws -> Bool { false }
+
+        func add(_ show: Show) async throws {}
+
+        func remove(showID: Int) async throws {}
+
+        func updateAfterRefresh(_ tracked: TrackedShow) async throws {}
+    }
+
+    /// Fails the removal lookup, while `contains` still reports the show as
+    /// persisted — simulating a lookup error without a successful removal.
+    private final class FailingLookupStillPersistedRepository: WatchlistRepository {
+        let showID: Int
+
+        init(showID: Int) {
+            self.showID = showID
+        }
+
+        func all() async throws -> [TrackedShow] { [] }
+
+        func trackedShow(showID: Int) async throws -> TrackedShow? {
+            throw URLError(.cannotConnectToHost)
+        }
+
+        func trackedShowIDs() async throws -> Set<Int> { [showID] }
+
+        func contains(showID: Int) async throws -> Bool { showID == self.showID }
+
+        func add(_ show: Show) async throws {}
+
+        func remove(showID: Int) async throws {}
+
+        func updateAfterRefresh(_ tracked: TrackedShow) async throws {}
+    }
+
+    private final class FailingAddRepository: WatchlistRepository {
+        func all() async throws -> [TrackedShow] { [] }
+
+        func trackedShow(showID: Int) async throws -> TrackedShow? { nil }
+
+        func trackedShowIDs() async throws -> Set<Int> { [] }
+
+        func contains(showID: Int) async throws -> Bool { false }
+
+        func add(_ show: Show) async throws {
+            throw URLError(.cannotConnectToHost)
+        }
+
+        func remove(showID: Int) async throws {}
+
+        func updateAfterRefresh(_ tracked: TrackedShow) async throws {}
+    }
+
+    @Test("Stale tracked state reconciles when removal lookup finds nothing")
+    func removalIgnoredReconcilesTrackedState() async {
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analytics)
+        let viewModel = ShowDetailViewModel(
+            show: sampleShow,
+            service: StubTVMazeService(),
+            repository: repository,
+            notifications: makeNotificationService(analytics: analytics),
+            analytics: analytics,
+            initialIsTracked: true
+        )
+
+        await viewModel.handleTrackButton(
+            anchor: .zero,
+            undoRemoval: undoRemoval,
+            onWatchlistChanged: {}
+        )
+
+        #expect(viewModel.isTracked == false)
+        #expect(viewModel.watchlistActionErrorMessage == nil)
+    }
+
+    @Test("Removal lookup failure reports analytics, refreshes, and shows a generic alert")
+    func removalLookupFailureReportsAndRefreshes() async {
+        let repository = FailingTrackedShowLookupRepository()
+        let analytics = RecordingAnalyticsService()
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analytics)
+        let viewModel = ShowDetailViewModel(
+            show: sampleShow,
+            service: StubTVMazeService(),
+            repository: repository,
+            notifications: makeNotificationService(analytics: analytics),
+            analytics: analytics,
+            initialIsTracked: true
+        )
+
+        await viewModel.handleTrackButton(
+            anchor: .zero,
+            undoRemoval: undoRemoval,
+            onWatchlistChanged: {}
+        )
+
+        #expect(
+            analytics.events.contains {
+                if case .nonFatalError(_, let context) = $0 {
+                    return context == "show_detail_watchlist_lookup"
+                }
+                return false
+            }
+        )
+        #expect(viewModel.isTracked == false)
+        #expect(viewModel.watchlistActionErrorMessage == WatchlistTracking.updateFailedMessage)
+    }
+
+    @Test("Removal lookup failure keeps the star when persistence still contains the show")
+    func removalLookupFailurePreservesStarWhenStillPersisted() async {
+        let repository = FailingLookupStillPersistedRepository(showID: sampleShow.id)
+        let analytics = RecordingAnalyticsService()
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analytics)
+        let viewModel = ShowDetailViewModel(
+            show: sampleShow,
+            service: StubTVMazeService(),
+            repository: repository,
+            notifications: makeNotificationService(analytics: analytics),
+            analytics: analytics,
+            initialIsTracked: true
+        )
+
+        await viewModel.handleTrackButton(
+            anchor: .zero,
+            undoRemoval: undoRemoval,
+            onWatchlistChanged: {}
+        )
+
+        #expect(viewModel.isTracked)
+        #expect(viewModel.watchlistActionErrorMessage == WatchlistTracking.updateFailedMessage)
+        #expect(
+            analytics.events.contains {
+                if case .nonFatalError(_, let context) = $0 {
+                    return context == "show_detail_watchlist_lookup"
+                }
+                return false
+            }
+        )
+    }
+
+    @Test("Add failure keeps loaded content and surfaces a watchlist error")
+    func addFailureDoesNotReplaceLoadedContent() async {
+        let repository = FailingAddRepository()
+        let analytics = RecordingAnalyticsService()
+        let viewModel = ShowDetailViewModel(
+            show: sampleShow,
+            service: StubTVMazeService(showToReturn: sampleShow),
+            repository: repository,
+            notifications: makeNotificationService(analytics: analytics),
+            analytics: analytics,
+            initialIsTracked: false
+        )
+
+        await viewModel.load(undoRemoval: nil)
+        #expect(viewModel.loadState == .loaded)
+
+        await viewModel.handleTrackButton(
+            anchor: .zero,
+            undoRemoval: nil,
+            onWatchlistChanged: {}
+        )
+
+        #expect(viewModel.loadState == .loaded)
+        #expect(viewModel.isTracked == false)
+        #expect(viewModel.watchlistActionErrorMessage == WatchlistTracking.updateFailedMessage)
+        #expect(
+            analytics.events.contains {
+                if case .nonFatalError(_, let context) = $0 {
+                    return context == "watchlist_add_detail"
+                }
+                return false
+            }
+        )
+    }
+}

@@ -94,6 +94,19 @@ struct ShowDetailView: View {
             prompt: viewModel.notificationPrompt,
             notificationService: viewModel.notificationService
         )
+        .alert(
+            "Couldn't Update Watchlist",
+            isPresented: Binding(
+                get: { viewModel.watchlistActionErrorMessage != nil },
+                set: { if !$0 { viewModel.clearWatchlistActionError() } }
+            )
+        ) {
+            Button("OK", role: .cancel) {
+                viewModel.clearWatchlistActionError()
+            }
+        } message: {
+            Text(viewModel.watchlistActionErrorMessage ?? "")
+        }
     }
 
     private func header(viewModel: ShowDetailViewModel) -> some View {

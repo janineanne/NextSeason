@@ -29,7 +29,10 @@ struct WatchlistView: View {
     /// coordinator decides whether the push animates based on the tap context.
     private let onApplyPendingDetail: () -> Void
     @State private var viewModel: WatchlistViewModel?
-    @State private var notificationStatus = NotificationStatusPresentation.unknown
+    @State private var notificationStatus = NotificationStatusModel()
+    /// True after `.task(id:)` finishes its first (or token-driven) reload, so
+    /// `.onAppear` only refreshes on later tab returns — not during first load.
+    @State private var hasCompletedInitialLoad = false
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -79,27 +82,17 @@ struct WatchlistView: View {
                 }
             }
             .task(id: watchlistReloadToken) {
-                guard let undoRemoval else { return }
-                if viewModel == nil {
-                    viewModel = WatchlistViewModel(
-                        repository: repository,
-                        refreshService: refreshService,
-                        undoRemoval: undoRemoval,
-                        analytics: analytics
-                    )
-                }
-                await viewModel?.reload()
-                await refreshNotificationStatus()
+                await prepareAndReload()
             }
             .onAppear {
                 analytics.track(.watchlistViewed)
                 // Apply a deep link that arrived while this tab was off screen; the
                 // stack is now mounted so the push lands instead of being dropped.
                 onApplyPendingDetail()
-                Task {
-                    await viewModel?.reload()
-                    await refreshNotificationStatus()
-                }
+                // First presentation is owned by `.task(id:)`. Refresh here only
+                // after that initial load has finished (tab return / reappear).
+                guard hasCompletedInitialLoad else { return }
+                Task { await reloadScreen() }
             }
             .onChange(of: pendingDetailToken) { _, token in
                 // A deep link arrived while the watchlist is already on screen.
@@ -108,24 +101,39 @@ struct WatchlistView: View {
             }
             .refreshable {
                 await viewModel?.refreshFromNetwork()
-                await refreshNotificationStatus()
+                await notificationStatus.refresh(using: notificationService)
             }
-            .refreshNotificationStatus($notificationStatus)
+            .refreshNotificationStatus(notificationStatus)
             .onChange(of: undoRemoval?.pendingRemoval?.id) { oldId, newId in
-                guard let oldId, newId == nil else { return }
-                Task { @MainActor in
-                    guard try await repository.contains(showID: oldId) == false else { return }
-                    withAnimation(.easeInOut(duration: 0.35)) {
-                        viewModel?.removeShow(showID: oldId)
-                    }
-                }
+                Task { await viewModel?.handlePendingRemovalIDChange(from: oldId, to: newId) }
             }
         }
         .appNavigationChrome()
     }
 
-    private func refreshNotificationStatus() async {
-        notificationStatus = await NotificationStatusPresentation.load(using: notificationService)
+    /// Creates the view model on first need, then reloads list + notification status.
+    private func prepareAndReload() async {
+        guard let undoRemoval else { return }
+        if viewModel == nil {
+            viewModel = WatchlistViewModel(
+                repository: repository,
+                refreshService: refreshService,
+                undoRemoval: undoRemoval,
+                analytics: analytics
+            )
+        }
+        await reloadScreen()
+        hasCompletedInitialLoad = true
+    }
+
+    private func reloadScreen() async {
+        await viewModel?.reload()
+        await notificationStatus.refresh(using: notificationService)
+    }
+
+    private func enableNotificationsFromBanner() async {
+        await notificationService.enableNotificationsFromSettingsEntryPoint()
+        await notificationStatus.refresh(using: notificationService)
     }
 
     @ViewBuilder
@@ -145,7 +153,7 @@ struct WatchlistView: View {
                     NotificationsDisabledBanner(
                         buttonTitle: notificationStatus.enablementButtonTitle
                     ) {
-                        Task { await notificationService.enableNotificationsFromSettingsEntryPoint() }
+                        Task { await enableNotificationsFromBanner() }
                     }
                 }
                 // Keeps the list scroll-backed so the large navigation title renders
@@ -181,8 +189,7 @@ struct WatchlistView: View {
                                 viewModel.requestRemoval(
                                     tracked,
                                     anchor: anchor,
-                                    source: .watchlist,
-                                    onCommitted: {}
+                                    source: .watchlist
                                 )
                             }
                         }
@@ -214,7 +221,7 @@ struct WatchlistView: View {
                     .appSecondaryText()
             } actions: {
                 Button("Try Again") {
-                    Task { await viewModel.load() }
+                    Task { await viewModel.reload() }
                 }
             }
         }

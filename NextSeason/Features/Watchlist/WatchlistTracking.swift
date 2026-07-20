@@ -1,5 +1,5 @@
 //
-//  WatchlistAdding.swift
+//  WatchlistTracking.swift
 //  NextSeason
 //
 
@@ -7,7 +7,11 @@ import Foundation
 
 /// Shared watchlist track/untrack orchestration used by search rows and show detail.
 @MainActor
-enum WatchlistAdding {
+enum WatchlistTracking {
+    /// Generic user-facing copy for thrown watchlist add/remove failures.
+    static let updateFailedMessage =
+        "NextSeason couldn’t update your Watchlist. Please try again."
+
     /// Result of a track-button tap after shared side effects have run.
     enum ToggleOutcome: Equatable {
         /// A pending undoable removal for this show was cancelled.

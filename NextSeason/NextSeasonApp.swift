@@ -88,6 +88,19 @@ private struct AppRootView: View {
                     }
                 }
             )
+            .alert(
+                "Couldn't Update Watchlist",
+                isPresented: Binding(
+                    get: { undoRemoval.removalErrorMessage != nil },
+                    set: { if !$0 { undoRemoval.clearRemovalError() } }
+                )
+            ) {
+                Button("OK", role: .cancel) {
+                    undoRemoval.clearRemovalError()
+                }
+            } message: {
+                Text(undoRemoval.removalErrorMessage ?? "")
+            }
             .onChange(of: scenePhase) { previousPhase, phase in
                 guard !UITestingConfiguration.isEnabled else { return }
                 AppDiagnosticsLogger.logScenePhase(

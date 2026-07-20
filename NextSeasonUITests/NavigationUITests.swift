@@ -5,7 +5,14 @@
 
 import XCTest
 
-final class NavigationUITests: NextSeasonUITestCase {
+@MainActor
+final class NavigationUITests: XCTestCase, NextSeasonUITesting {
+    var app: XCUIApplication!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        try await launchUITestingApp()
+    }
     func testLaunchShowsSearchTab() {
         XCTAssertTrue(
             searchIdlePrompt.waitForExistence(timeout: UITestTimeout.standard),

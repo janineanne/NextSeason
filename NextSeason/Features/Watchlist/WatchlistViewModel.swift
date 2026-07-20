@@ -39,6 +39,8 @@ final class WatchlistViewModel {
     private let removalCoordinator: WatchlistUndoRemoval
     private let analytics: any AnalyticsTracking
 
+    private var reloadGeneration = 0
+
     init(
         repository: any WatchlistRepository,
         refreshService: WatchlistRefreshService? = nil,
@@ -51,21 +53,23 @@ final class WatchlistViewModel {
         self.analytics = analytics
     }
 
-    func load() async {
-        await reload()
-    }
-
     /// Re-reads the watchlist from persistence without flashing the loading
     /// spinner, so `.task(id:)` cancellations cannot strand the list in
     /// `.loading` when the reload token bumps in quick succession.
+    /// Concurrent reloads keep only the newest result so a slower older fetch
+    /// cannot overwrite fresher data.
     func reload() async {
+        reloadGeneration += 1
+        let generation = reloadGeneration
         do {
             let fetched = try await repository.all()
+            guard generation == reloadGeneration else { return }
             shows = fetched
             state = .loaded
         } catch is CancellationError {
             return
         } catch {
+            guard generation == reloadGeneration else { return }
             state = .failed(error.localizedDescription)
             analytics.trackNonFatalError(error, context: "watchlist_reload")
         }
@@ -78,14 +82,22 @@ final class WatchlistViewModel {
     }
 
     /// Starts the undo window for removing `tracked`. The row stays visible
-    /// until the removal is committed or the user confirms with OK.
+    /// until the removal is committed or the user confirms with OK. On commit
+    /// (including when a later pending removal replaces this one), the row is
+    /// removed from the displayed list.
     func requestRemoval(
         _ tracked: TrackedShow,
         anchor: CGRect,
-        source: WatchlistActionSource = .watchlist,
-        onCommitted: @escaping () -> Void = {}
+        source: WatchlistActionSource = .watchlist
     ) {
-        removalCoordinator.requestRemoval(tracked, anchor: anchor, source: source, onCommitted: onCommitted)
+        let showID = tracked.id
+        removalCoordinator.requestRemoval(
+            tracked,
+            anchor: anchor,
+            source: source
+        ) { [weak self] in
+            self?.removeShowAnimated(showID: showID)
+        }
     }
 
     func undoPendingRemoval() {
@@ -114,6 +126,14 @@ final class WatchlistViewModel {
         withAnimation(.easeInOut(duration: 0.35)) {
             removeShow(showID: showID)
         }
+    }
+
+    /// Reacts when a pending removal ID clears. If persistence dropped the show
+    /// (commit), animates the row away; an undo leaves the list unchanged.
+    func handlePendingRemovalIDChange(from oldID: Int?, to newID: Int?) async {
+        guard let oldID, newID == nil else { return }
+        guard await showWasRemoved(showID: oldID) else { return }
+        removeShowAnimated(showID: oldID)
     }
 
     private func showWasRemoved(showID: Int) async -> Bool {
