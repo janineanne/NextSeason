@@ -2,6 +2,13 @@
 //  ThemeSwitcherView.swift
 //  NextSeason
 //
+// STATUS: Parked — excluded from the NextSeason build target.
+// The app is locked to AppPaletteVariant.tealUtility (see AppThemeController).
+// Call sites of `.betaThemeSwitcherToolbar()` are commented out in SearchView,
+// WatchlistView, and ShowDetailView. To restore: re-add this file to the target
+// membership and uncomment those call sites (and UserDefaults restore in
+// AppThemeController).
+//
 
 import SwiftUI
 
@@ -12,7 +19,7 @@ struct ThemeSwitcherView: View {
     @Environment(\.analytics) private var analytics
     @Environment(\.dismiss) private var dismiss
 
-    @State private var draftVariant: AppPaletteVariant = .warmSlate
+    @State private var draftVariant: AppPaletteVariant = .tealUtility
 
     private var draftColors: AppThemeColors {
         AppThemeColors.colors(for: draftVariant, colorScheme: colorScheme)

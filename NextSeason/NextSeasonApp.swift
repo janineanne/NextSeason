@@ -77,7 +77,8 @@ private struct AppRootView: View {
 
     var body: some View {
         ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
-            // Beta theme switcher lives in each tab's nav bar (see `.betaThemeSwitcherToolbar()`).
+            // Theme switcher parked; see ThemeSwitcherView.swift status comment.
+            // Previously: beta theme switcher lived in each tab's nav bar via `.betaThemeSwitcherToolbar()`.
             .watchlistUndoToast(
                 isPresented: undoRemoval.pendingRemoval != nil,
                 anchor: undoRemoval.toastAnchor,

@@ -66,7 +66,8 @@ struct WatchlistView: View {
             .navigationTitle("Watchlist")
             .navigationBarTitleDisplayMode(.large)
             .appAboutToolbarButton()
-            .betaThemeSwitcherToolbar()
+            // Theme switcher parked; see ThemeSwitcherView.swift status comment.
+            // .betaThemeSwitcherToolbar()
             .navigationDestination(for: TrackedShow.self) { tracked in
                 ShowDetailView(
                     show: Show(tracked: tracked),
