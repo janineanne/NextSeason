@@ -115,7 +115,7 @@ New users should immediately understand how to track a show.
 **Watchlist tab**
 
 - Actionable empty state with a prominent "Find a Show" button that switches to the Search tab at root (clears stale search navigation via `showSearchRoot()`).
-- Edit button in the toolbar when the watchlist has shows; exposes delete controls (swipe-to-delete still works).
+- Edit button in the toolbar when the watchlist has shows; exposes delete controls (removal is performed using the trailing star button with undo support).
 - Empty-state overlay pattern keeps the list mounted when empty to avoid a UICollectionView crash on last delete.
 - Edit mode resets when the last show is deleted (no stuck edit mode).
 
@@ -519,3 +519,8 @@ The application should demonstrate product thinking, engineering judgment, and e
 
 
 ---
+
+
+## Documentation note
+
+This document reflects the current MVP implementation. Historical planning notes have been removed or updated as features were completed.

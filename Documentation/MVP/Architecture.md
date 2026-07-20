@@ -1,3 +1,5 @@
+> **Note:** This document primarily captures the original MVP architectural design. As the project evolved, implementation details diverged in several areas (navigation coordination, watchlist tracking workflow, notification state management, diagnostics, etc.). Treat this as a design-history document rather than a precise description of the current implementation.
+
 # Architecture
 
 Phase 3 architecture blueprint for NextSeason. Defines the data model, persistence,

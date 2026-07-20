@@ -1,338 +1,173 @@
-# NextSeason - Post MVP Roadmap
+# NextSeason -- Post-MVP Roadmap
 
 ## Purpose
 
-This document captures potential future enhancements after the initial beta release.
+This document captures planned enhancements and longer-term ideas
+following the MVP.
 
-Items here are intentionally lower priority than release readiness work.
+The roadmap is organized by area rather than by release number. Within
+each area, items are generally ordered from the work most likely to
+happen next toward longer-term ideas. Priorities should continue to
+evolve based on user feedback, analytics, and real-world usage.
 
-Future priorities should be informed by user behavior, beta feedback, and analytics.
-
----
-
-# Data Persistence & Recovery
+# Engineering & Reliability
 
 ## SwiftData Migration Strategy
 
-Before making future changes to `TrackedShowEntity` or other persistent models:
-
-- Add and test a SwiftData migration plan.
-- Verify that upgrades from previous TestFlight and App Store versions preserve user data.
-- Include migration testing in release validation whenever the persistent schema changes.
-- Keep representative stores from older app versions to validate real-world upgrade scenarios.
+-   Add and test a SwiftData migration plan before changing persistent
+    models.
+-   Verify upgrades preserve user data.
+-   Include migration testing in release validation.
+-   Keep representative stores from older versions for testing.
 
 ## Persistence Recovery
 
-The MVP intentionally terminates if the SwiftData `ModelContainer` cannot be created because the application cannot function meaningfully without persistence.
+Replace the startup `fatalError` with a user-facing recovery flow before
+App Store release.
 
-Before App Store release, replace the startup `fatalError` with a user-facing recovery flow.
-
-Potential recovery options:
-
-- Log detailed diagnostics before presenting recovery options.
-- Allow users to reset local data and recreate the persistent store if it becomes corrupted.
-- Explain the consequences of resetting local data before proceeding.
-- Offer users the option to export diagnostic information before resetting the persistent store.
+-   Log diagnostics before recovery.
+-   Allow resetting the local store.
+-   Explain consequences before resetting.
+-   Allow exporting diagnostics before reset.
 
 ## Crash Loop Prevention
 
-Prevent users from becoming permanently locked out of the application because of a damaged persistent store.
-
-Potential approaches:
-
-- Detect repeated launch failures.
-- Offer a "Reset Local Data" recovery option.
-- Preserve diagnostic information to help investigate failures before resetting.
+-   Detect repeated launch failures.
+-   Offer a **Reset Local Data** option.
+-   Preserve diagnostics for troubleshooting.
 
 # Core Product Improvements
 
 ## Search
 
-TVMaze already provides fuzzy matching, alternate-name (AKA) support,
-partial-title matching, punctuation tolerance, and relevance-based ranking.
-
-Future work should focus on addressing real user pain points rather than
-re-implementing functionality the underlying API already provides.
+TVMaze already provides fuzzy matching, AKA support, partial-title
+matching, punctuation tolerance, and relevance ordering.
 
 ### Recommended Analytics
 
-Before investing in additional search work, instrument the search flow to
-understand how people are actually using it.
+-   `search_performed`
+-   Query length
+-   Result count
+-   Whether a show was selected
 
-Suggested events:
+### Necessary Improvements
 
-- `search_performed`
-- Query length
-- Result count
-- Whether a show was selected
-
-If searches that return the maximum 10 results frequently end without a
-selection, that is strong evidence that the current API limitation is hurting
-usability. If most searches lead to a successful selection, search improvements
-can remain a lower priority.
+-   Eliminate the current 10-result limitation (must be done before first App Store release).
 
 ### Potential Improvements
 
-Priority should be guided by analytics and beta feedback.
+- Support common abbreviations and acronyms if users demonstrate a need.
+- Continue refining search quality based on analytics and user feedback.
 
-- Remove the current 10-result limitation if it proves to be a significant user problem.
-- Evaluate multi-provider search (see below) as the preferred long-term solution.
-- Support common abbreviations and acronyms only if real-world usage demonstrates a need.
+Continue using TVMaze's relevance ordering where appropriate, while allowing another provider to supply broader search results if it improves discoverability.
 
-TVMaze's relevance ordering is generally good enough that custom result ranking
-is unlikely to provide meaningful value. Unless beta feedback uncovers a
-specific, repeatable weakness, the application should continue to present
-results in the order supplied by the provider.
+## Search Provider Independence
 
-## Evaluate Multi-Provider Search
+Reduce dependence on a single metadata provider while improving search coverage.
 
-TVMaze's public search API is limited to 10 results with no pagination.
-
-If search quality becomes a meaningful user pain point, investigate a
-multi-provider architecture:
-
-- Use TMDb (or another search-focused provider) for user-facing search.
-- Continue using TVMaze for season, episode, and next-airing metadata.
-- Map provider IDs when a show is selected.
-
-Benefits:
-
-- Unlimited paginated search results.
-- Better discovery of obscure shows.
-- Preserve the existing notification and season-tracking implementation.
-
-Pursue only if beta feedback and analytics demonstrate that the current TVMaze
-search limitations materially impact users.
-
-
----
+-   Use one or more search-focused providers.
+-   Continue using the most appropriate metadata provider for season tracking.
+-   Map provider IDs when a show is selected.
+-   Design the search layer so providers can be added or replaced with minimal user impact.
 
 ## Watchlist Management
 
-### Potential Features
-
-- Sorting options.
-- Filtering options.
-- Grouping options.
+- Support swipe-to-delete in the Watchlist, in addition to tapping the star.
+- User-selectable sorting.
+- Filtering by show status.
 - Hide ended shows.
+- Optional grouping by status.
 
-Priority: High
-
----
+Watchlist search should use simple title matching rather than
+discovery-oriented fuzzy search.
 
 ## Notification Enhancements
 
-### Potential Features
+-   Global notification preferences.
+-   Per-show preferences.
+-   Quiet hours.
+-   Notification history.
+-   Additional notification categories.
 
-- Notification settings.
-- Per-show notification preferences.
-- Quiet hours.
-- Notification history.
-- Different notification types.
+## Streaming Availability
 
-Examples:
+Implement only if users demonstrate meaningful demand.
 
-- Season announced.
-- Release date announced.
-- Season available.
+If sufficient demand exists:
 
-Priority: High
+-   Integrate with a dedicated streaming provider.
+-   Display current regional availability.
+-   Deep-link to supported services.
 
----
+Do not use TVMaze's crowdsourced provider data.
 
-# Streaming Availability
+### Dependent Future Features
 
-## Streaming Provider Information
-
-Users occasionally want to know where a show is currently available to stream,
-particularly after receiving a notification that a new season has been released.
-However, streaming availability changes frequently, varies by country, and is
-not reliably represented by TVMaze's crowdsourced data.
-
-Future work in this area should be driven by user demand rather than implemented
-proactively.
-
-### Evaluate User Interest
-
-Collect beta feedback and App Store feedback to determine whether users are
-actually looking for streaming availability within the app, or whether they
-typically use other services to answer that question.
-
-### Potential Improvements
-
-If there is sufficient demand:
-
-- Evaluate integration with a dedicated streaming availability provider (such as TMDb watch providers or JustWatch) that offers regional streaming information.
-- Display current streaming availability for the user's region when reliable data is available.
-- Consider deep-linking directly to supported streaming services where practical.
-
-TVMaze's streaming provider information should not be used for this feature, as
-its crowdsourced nature makes it incomplete and unsuitable as a primary data
-source.
-
----
-
-## Preferred Services
-
-### Potential Features (Dependent on Reliable Streaming Data)
-
-* Allow users to record which streaming services they subscribe to.
-* Highlight shows currently available on those services.
-* Filter or group watchlist entries by streaming availability.
-* Tailor notifications with current streaming availability when appropriate.
-
-Priority: High
-
----
+-   Record subscribed services.
+-   Highlight available shows.
+-   Filter/group by availability.
+-   Tailor notifications.
 
 # Platform Features
 
-## User Accounts
+## Apple Platform Expansion
 
-### Motivation
+Potential platforms:
 
-Allow synchronization across devices.
+After Cloud Sync is implemented:
 
-### Potential Features
+- iPad
+- Mac
+- Apple TV companion app
 
-- Sign in with Apple.
-- Cloud sync.
-- Cross-device watchlists.
+Vision Pro is not currently planned.
 
-Priority: Medium
+## Cross-Device Sync
 
----
+-   Cloud sync.
+-   Cross-device watchlists.
+-   Backup and restore.
+-   Device migration.
 
-## Cloud Backup
+## Monitoring & Notifications
 
-### Potential Features
-
-- Backup and restore.
-- Device migration support.
-
-Priority: Medium
-
----
-
-# Product Analytics
-
-## MVP State (Local Logging Only)
-
-The MVP implements analytics behind an `AnalyticsTracking` abstraction
-(`AnalyticsService`), with a default provider that logs structured events via
-`os.Logger` on the user's device. Events are anonymous (query length, not search
-text; show IDs; error categories — see Release Readiness.md).
-
-**What this is good for today:**
-
-- Verifying instrumentation during development and internal testing
-- Debugging flows on devices you control (Xcode console, Console.app)
-- Keeping call sites stable before a remote provider is chosen
-
-**What it does not provide:**
-
-- Aggregate behavior across beta testers or production users
-- Answers to product questions unless logs are manually captured from a device
-
-For multi-user beta, treat TestFlight crash reports and the structured feedback
-form as primary inputs until remote collection is added.
-
-## Post-MVP: Remote Collection
-
-To make analytics useful for prioritization after beta, add a second
-`AnalyticsTracking` implementation that sends the same `AnalyticsEvent` payloads
-to a centralized service. No changes should be required at instrumentation call
-sites.
-
-Candidate approaches (evaluate privacy, cost, and maintenance):
-
-- Privacy-focused SDKs (e.g. TelemetryDeck)
-- General analytics platforms (e.g. Firebase Analytics, Mixpanel)
-- A minimal first-party backend (event name + parameters only)
-
-Keep the existing privacy constraints: no search text, show titles, or other PII
-in event payloads.
-
-Transition the Diagnostics screen from a beta testing tool into a production support feature. Remove developer-only actions while retaining user-visible status information and the ability to generate or send a diagnostic report for troubleshooting.
-
-## Future Investigation
-
-Use analytics and feedback to answer questions such as:
-
-- What are users searching for?
-- What shows are most tracked?
-- Which notifications are most useful?
-- Which features are requested most often?
-
-Future development should be driven by observed user behavior whenever possible.
-
----
-
-# Business Options
-
-Evaluate only after validating user demand.
-
-## Possible Models
-
-- One-time purchase.
-- Premium upgrade.
-- Subscription.
-- Affiliate revenue.
-
-No monetization strategy should compromise the simplicity of the product.
-
----
-
-# Explicit Non-Goals
-
-The following are not currently aligned with the product vision:
-
-- Social networking.
-- User reviews.
-- Episode tracking.
-- Discussion forums.
-- Complex media database features.
-
-NextSeason should remain focused on helping users know when new seasons of shows become available.
-
-
----
-
-# Cloud Sync, Accounts & Notification Infrastructure
-
-## Cloud Synchronization
-
-- Add CloudKit synchronization for watchlist backup and seamless multi-device access.
-- Define migration and conflict resolution behavior.
-- Preserve useful offline operation wherever practical.
+- Move season monitoring to a backend service.
+- Deliver reliable push notifications even when the app is not running.
+- Reduce dependence on background app refresh.
+- Keep notification delivery consistent across all of a user’s devices.
 
 ## Identity & Accounts
 
-- Evaluate the minimum identity model required for synchronization and server-side services.
-- Determine whether iCloud identity is sufficient or whether Sign in with Apple is appropriate.
-- Support multiple registered devices per user.
-- Define account recovery, privacy, and data deletion behavior.
+Introduce user accounts only if they become necessary to support Cloud Sync or backend monitoring.
 
-## Server-Side Monitoring
+# Product Analytics
 
-The MVP performs monitoring on the user's device using background refresh and local notifications. While this avoids requiring a backend, it may not provide sufficient long-term reliability because iOS schedules background execution opportunistically and users may not open the app for extended periods.
+Transition Diagnostics into a production support feature while retaining diagnostic report generation. Continue using lightweight, privacy-preserving analytics to guide future product decisions.
 
-Investigate moving the canonical monitoring process to backend infrastructure:
+# Business Options
 
-- Check each tracked show once on behalf of all interested users rather than independently on every device.
-- Detect meaningful changes centrally and distribute them to subscribed users.
-- Record change history to support features such as "What's New Since My Last Visit?"
-- Optimize polling frequency based on show state where appropriate.
+-   One-time purchase.
+-   Premium upgrade.
+-   Subscription.
+-   Affiliate revenue.
+-   Validate monetization only after the core product demonstrates user retention.
 
-## Remote Notifications
+# Product Principles
 
-Evaluate replacing or augmenting local notifications with APNs remote notifications.
+-   Remain focused on season tracking.
+-   Avoid unnecessary complexity.
+-   Favor privacy.
+-   Work well without requiring an account.
+-   Integrate naturally with Apple's platforms.
+-   Earn user trust through reliability.
+-   Do one thing exceptionally well before expanding scope.
 
-Potential benefits include:
+# Explicit Non-Goals
 
-- Reliable delivery even when the app has not been opened recently.
-- Notifications delivered to all of a user's registered devices.
-- Consistent notification timing.
-- Foundation for future cross-device experiences and cloud-backed features.
-
-During any migration, consider retaining local monitoring as a temporary fallback until the backend architecture has proven reliable.
+-   Social networking.
+-   User reviews.
+-   Episode tracking.
+-   Discussion forums.
+-   General TV discovery.
+-   Recommendation engines.
+-   Comprehensive media database features.
