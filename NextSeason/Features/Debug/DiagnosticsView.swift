@@ -27,7 +27,7 @@ struct DiagnosticsView: View {
     @Environment(AppThemeController.self) private var themeController
     @Environment(\.dismiss) private var dismiss
 
-    @State private var notificationStatus = NotificationStatusPresentation.unknown
+    @State private var notificationStatus = NotificationStatusModel()
     @State private var reportText = ""
     @State private var isForceRefreshing = false
     @State private var isSendingTestNotification = false
@@ -166,7 +166,7 @@ struct DiagnosticsView: View {
             .onChange(of: themeController.variant) {
                 refreshReportText()
             }
-            .refreshNotificationStatus($notificationStatus)
+            .refreshNotificationStatus(notificationStatus)
         }
     }
 
@@ -333,7 +333,7 @@ struct DiagnosticsView: View {
     private func sendTestNotification() async {
         guard !isSendingTestNotification else { return }
         isSendingTestNotification = true
-        await refreshNotificationStatus()
+        await notificationStatus.refresh(using: notificationService)
 
         guard let tracked = await watchlistTestShow() else {
             recordMissingWatchlistTestShow()
@@ -384,12 +384,8 @@ struct DiagnosticsView: View {
     }
 
     private func refreshReport() async {
-        await refreshNotificationStatus()
+        await notificationStatus.refresh(using: notificationService)
         refreshReportText()
-    }
-
-    private func refreshNotificationStatus() async {
-        notificationStatus = await NotificationStatusPresentation.load(using: notificationService)
     }
 
     private func refreshReportText() {

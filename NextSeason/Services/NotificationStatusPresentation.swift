@@ -56,25 +56,21 @@ nonisolated struct NotificationStatusPresentation: Equatable, Sendable {
 
 extension View {
     /// Refreshes notification presentation when the scene becomes active.
-    func refreshNotificationStatus(_ status: Binding<NotificationStatusPresentation>) -> some View {
-        modifier(NotificationStatusRefreshModifier(status: status))
+    func refreshNotificationStatus(_ model: NotificationStatusModel) -> some View {
+        modifier(NotificationStatusRefreshModifier(model: model))
     }
 }
 
 private struct NotificationStatusRefreshModifier: ViewModifier {
     @Environment(\.notificationService) private var notificationService
     @Environment(\.scenePhase) private var scenePhase
-    @Binding var status: NotificationStatusPresentation
+    let model: NotificationStatusModel
 
     func body(content: Content) -> some View {
         content
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else { return }
-                Task { await refresh() }
+                Task { await model.refresh(using: notificationService) }
             }
-    }
-
-    private func refresh() async {
-        status = await NotificationStatusPresentation.load(using: notificationService)
     }
 }

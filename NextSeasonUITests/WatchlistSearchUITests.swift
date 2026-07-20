@@ -5,7 +5,14 @@
 
 import XCTest
 
-final class WatchlistSearchUITests: NextSeasonUITestCase {
+@MainActor
+final class WatchlistSearchUITests: XCTestCase, NextSeasonUITesting {
+    var app: XCUIApplication!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        try await launchUITestingApp()
+    }
     private let previewShowName = UITestPreviewShow.name
 
     func testWatchlistExposesSearchFieldWhenShowsTracked() {

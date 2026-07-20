@@ -1,5 +1,5 @@
 //
-//  NextSeasonUITestCase.swift
+//  NextSeasonUITesting.swift
 //  NextSeasonUITests
 //
 
@@ -7,20 +7,17 @@ import XCTest
 
 // MARK: - Overview
 //
-// This file is the shared base class and harness for the UI test target — it is
-// not a test case itself and contains no `test...()` methods. The actual UI test
-// classes (e.g. `NavigationUITests`, `SearchAndTrackUITests`) subclass
-// `NextSeasonUITestCase` to inherit its setup and helpers, which keeps the
-// individual test files small and consistent.
+// Shared UI-test harness as a protocol + extension — not an XCTestCase subclass —
+// so Xcode does not list a phantom un-runnable suite. Concrete test classes
+// (e.g. `NavigationUITests`) conform to `NextSeasonUITesting` and call
+// `launchUITestingApp()` from `setUp()`.
 //
 // It provides:
-//   • App launch: `setUp()` launches the app once with the `-UITesting` argument
-//     (switching the app to stubbed network data) and waits for foreground.
+//   • App launch: `launchUITestingApp()` with the `-UITesting` argument
+//     (stubbed network data) and a foreground wait.
 //   • Shared constants from NextSeasonShared: `AccessibilityID`,
 //     `UITestingSearchQuery`, and `UITestingLaunchArgument`.
-//   • Reusable element accessors (e.g. `searchField`, `watchlistEmptyState`) and
-//     interaction/assertion helpers (e.g. `search(for:)`, `clearSearchField()`,
-//     `waitForSearchResultRow(...)`, `assertExists(...)`, `recordFailureContext(...)`).
+//   • Reusable element accessors and interaction/assertion helpers.
 
 enum UITestTimeout {
     static let standard: TimeInterval = 5
@@ -35,11 +32,14 @@ enum UITestPreviewShow {
     static let id = 44933
 }
 
-/// Shared setup for UI tests: launches the app with stubbed network data.
+/// Shared UI-test surface: launched app + helpers. Conform from an `XCTestCase`.
 @MainActor
-class NextSeasonUITestCase: XCTestCase, Sendable {
-    var app: XCUIApplication!
+protocol NextSeasonUITesting: AnyObject {
+    var app: XCUIApplication! { get set }
+}
 
+@MainActor
+extension NextSeasonUITesting where Self: XCTestCase {
     private var searchFieldPlaceholder: String { "Search TV shows" }
     private var watchlistSearchFieldPlaceholder: String { "Search Watchlist" }
 
@@ -88,8 +88,8 @@ class NextSeasonUITestCase: XCTestCase, Sendable {
         return app.buttons["OK"]
     }
 
-    override func setUp() async throws {
-        try await super.setUp()
+    /// Launches the app with stubbed network data for UI tests.
+    func launchUITestingApp() async throws {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments = [UITestingLaunchArgument.uiTesting]

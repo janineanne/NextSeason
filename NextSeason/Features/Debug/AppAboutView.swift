@@ -50,7 +50,7 @@ struct AppAboutView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.notificationService) private var notificationService
     @State private var betaBuildAvailability = BetaBuildAvailability.shared
-    @State private var notificationStatus = NotificationStatusPresentation.unknown
+    @State private var notificationStatus = NotificationStatusModel()
 
     let openDiagnostics: () -> Void
 
@@ -117,9 +117,9 @@ struct AppAboutView: View {
             }
             .task {
                 await betaBuildAvailability.refresh()
-                await refreshNotificationStatus()
+                await notificationStatus.refresh(using: notificationService)
             }
-            .refreshNotificationStatus($notificationStatus)
+            .refreshNotificationStatus(notificationStatus)
         }
     }
 
@@ -140,13 +140,9 @@ struct AppAboutView: View {
         return "Opens notification settings or asks for permission."
     }
 
-    private func refreshNotificationStatus() async {
-        notificationStatus = await NotificationStatusPresentation.load(using: notificationService)
-    }
-
     private func handleNotificationsTap() async {
         await notificationService.enableNotificationsFromSettingsEntryPoint()
-        await refreshNotificationStatus()
+        await notificationStatus.refresh(using: notificationService)
     }
 }
 

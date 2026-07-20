@@ -20,6 +20,9 @@ final class ShowDetailViewModel {
     private(set) var loadState: LoadState = .loading
     private(set) var isTracked = false
     private(set) var isUpdatingWatchlist = false
+    /// User-visible watchlist toggle failure; kept separate from `loadState` so a
+    /// save error does not replace already-loaded next-season content.
+    private(set) var watchlistActionErrorMessage: String?
 
     /// Shared state driving the post-track notification prompt alerts, reused
     /// verbatim by the search flow via `watchlistNotificationPromptAlerts`.
@@ -103,6 +106,10 @@ final class ShowDetailViewModel {
         }
     }
 
+    func clearWatchlistActionError() {
+        watchlistActionErrorMessage = nil
+    }
+
     /// Shared track/untrack orchestration; local star state updates from the outcome.
     func handleTrackButton(
         anchor: CGRect,
@@ -115,6 +122,7 @@ final class ShowDetailViewModel {
         let wasTracked = isTracked
         let isPendingRemoval = undoRemoval?.pendingRemoval?.id == show.id
         let shouldLockForAdd = !wasTracked && !isPendingRemoval
+        watchlistActionErrorMessage = nil
 
         if shouldLockForAdd {
             isUpdatingWatchlist = true
@@ -126,7 +134,7 @@ final class ShowDetailViewModel {
         }
 
         do {
-            let outcome = try await WatchlistAdding.toggle(
+            let outcome = try await WatchlistTracking.toggle(
                 show,
                 isTracked: wasTracked,
                 anchor: anchor,
@@ -147,7 +155,8 @@ final class ShowDetailViewModel {
                 isTracked = true
                 onWatchlistChanged()
             case .ignored:
-                break
+                // Repo/UI mismatch (e.g. show already gone) — reconcile the star.
+                await refreshTrackedState(undoRemoval: undoRemoval)
             }
         } catch is CancellationError {
             return
@@ -156,8 +165,16 @@ final class ShowDetailViewModel {
                 ? "show_detail_watchlist_lookup"
                 : "watchlist_add_detail"
             analytics.trackNonFatalError(error, context: errorContext)
-            if shouldLockForAdd, fullShow != nil {
-                loadState = .failed(error.localizedDescription)
+            // Thrown failures (add or removal lookup) get a generic alert.
+            // Benign `.ignored` above stays silent after reconcile.
+            watchlistActionErrorMessage = WatchlistTracking.updateFailedMessage
+            if shouldLockForAdd {
+                // Keep `loadState` intact — watchlist failures are not fetch failures.
+                // Skip refresh while `isUpdatingWatchlist` is true; restore prior star.
+                isTracked = wasTracked
+            } else {
+                // Removal/lookup failure: re-read persistence now that we are not locked.
+                await refreshTrackedState(undoRemoval: undoRemoval)
             }
         }
     }

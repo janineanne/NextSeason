@@ -74,7 +74,6 @@
 		E167A811300817EE007F7098 /* 7-7-2026 Final Review.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-7-2026 Final Review.md"; sourceTree = "<group>"; };
 		E167A8123008181C007F7098 /* 7-8-2026 Indepth Code Review.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-8-2026 Indepth Code Review.md"; sourceTree = "<group>"; };
 		E167A813300818BE007F7098 /* 6-19-2026 Building Post-MVP Planning Documents.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-19-2026 Building Post-MVP Planning Documents.md"; sourceTree = "<group>"; };
-		E167AA1A300850AB007F7098 /* Post-MVP Roadmap - Editorial Revision v2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Post-MVP Roadmap - Editorial Revision v2.md"; sourceTree = "<group>"; };
 		E167AA1C30093F55007F7098 /* 7-16-2026 Fix Notification Bug.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Fix Notification Bug.md"; sourceTree = "<group>"; };
 		E167AC23300941D9007F7098 /* 7-16-2025 Feature Removal Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2025 Feature Removal Discussion.md"; sourceTree = "<group>"; };
 		E167AC2430094782007F7098 /* 7-16-2026 Implement Removal of Tappable Actor Names.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Implement Removal of Tappable Actor Names.md"; sourceTree = "<group>"; };
@@ -233,7 +232,6 @@
 			isa = PBXGroup;
 			children = (
 				E167AE2E30097AA1007F7098 /* Post-MVP Roadmap.md */,
-				E167AA1A300850AB007F7098 /* Post-MVP Roadmap - Editorial Revision v2.md */,
 				E102F0FD2FE5F2100076FCDD /* AI Transcripts */,
 			);
 			path = "Post-MVP";

@@ -155,6 +155,13 @@ final class NotificationService: NotificationManaging {
         case .denied:
             return false
         case .notDetermined:
+            #if DEBUG
+            // When tests inject authorization status, never present the system
+            // permission dialog — it blocks the unit-test process until dismissed.
+            if authorizationStatusForTesting != nil {
+                return false
+            }
+            #endif
             do {
                 let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
                 analytics.track(

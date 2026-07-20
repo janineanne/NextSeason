@@ -52,7 +52,7 @@ final class SearchWatchlistTracking {
         }
 
         do {
-            let outcome = try await WatchlistAdding.toggle(
+            let outcome = try await WatchlistTracking.toggle(
                 show,
                 isTracked: isTracked,
                 anchor: anchor,
@@ -64,7 +64,17 @@ final class SearchWatchlistTracking {
                 prompt: context.notificationPrompt,
                 onRemovalCommitted: context.onWatchlistChanged
             )
-            apply(outcome, for: show.id, context: context)
+            switch outcome {
+            case .ignored:
+                // Repo/UI mismatch (e.g. show already gone) — reconcile stars.
+                await refresh(
+                    repository: context.repository,
+                    excludingPendingRemovalFrom: context.undoRemoval,
+                    analytics: context.analytics
+                )
+            default:
+                apply(outcome, for: show.id, context: context)
+            }
         } catch is CancellationError {
             return
         } catch {
@@ -72,18 +82,16 @@ final class SearchWatchlistTracking {
                 ? "search_watchlist_tracking_lookup"
                 : "watchlist_add_search"
             context.analytics.trackNonFatalError(error, context: errorContext)
-            if shouldLockForAdd {
-                await refresh(
-                    repository: context.repository,
-                    excludingPendingRemovalFrom: context.undoRemoval,
-                    analytics: context.analytics
-                )
-            }
+            await refresh(
+                repository: context.repository,
+                excludingPendingRemovalFrom: context.undoRemoval,
+                analytics: context.analytics
+            )
         }
     }
 
     private func apply(
-        _ outcome: WatchlistAdding.ToggleOutcome,
+        _ outcome: WatchlistTracking.ToggleOutcome,
         for showID: Int,
         context: SearchWatchlistTrackingContext
     ) {
