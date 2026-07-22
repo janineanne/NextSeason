@@ -77,7 +77,6 @@
 		E167AA1C30093F55007F7098 /* 7-16-2026 Fix Notification Bug.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Fix Notification Bug.md"; sourceTree = "<group>"; };
 		E167AC23300941D9007F7098 /* 7-16-2025 Feature Removal Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2025 Feature Removal Discussion.md"; sourceTree = "<group>"; };
 		E167AC2430094782007F7098 /* 7-16-2026 Implement Removal of Tappable Actor Names.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Implement Removal of Tappable Actor Names.md"; sourceTree = "<group>"; };
-		E167AE2E30097AA1007F7098 /* Post-MVP Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Post-MVP Roadmap.md"; sourceTree = "<group>"; };
 		E167AE2F30099758007F7098 /* 7-16-2026 Product MVP Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Product MVP Discussion.md"; sourceTree = "<group>"; };
 		E167AE3130099B9C007F7098 /* 7-16-2026 Implement Watchlist Search.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Implement Watchlist Search.md"; sourceTree = "<group>"; };
 		E167B03B3009D883007F7098 /* 7-16-2026 Add Note about Notification Reliability.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-16-2026 Add Note about Notification Reliability.md"; sourceTree = "<group>"; };
@@ -89,6 +88,11 @@
 		E167CAF1300ED865007F7098 /* 7-20-2026 Implement Code Review Findings.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-20-2026 Implement Code Review Findings.md"; sourceTree = "<group>"; };
 		E167CC0E300EDAEA007F7098 /* 7-20-2026 Set Theme to Teal and Hide Switcher.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-20-2026 Set Theme to Teal and Hide Switcher.md"; sourceTree = "<group>"; };
 		E167CE47300EE881007F7098 /* 7-20-2026 Project Code and Documentation Review.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-20-2026 Project Code and Documentation Review.md"; sourceTree = "<group>"; };
+		E167D080301040BB007F7098 /* NextSeason - App Store Readiness Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "NextSeason - App Store Readiness Roadmap.md"; sourceTree = "<group>"; };
+		E167D081301040BB007F7098 /* NextSeason - Product Evolution Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "NextSeason - Product Evolution Roadmap.md"; sourceTree = "<group>"; };
+		E167D0823010418F007F7098 /* 7-21-2026 Post-MVP Roadmap Split 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-21-2026 Post-MVP Roadmap Split 1.md"; sourceTree = "<group>"; };
+		E167D0833010419B007F7098 /* 7-21-2026 Post-MVP Roadmap Split 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-21-2026 Post-MVP Roadmap Split 2.md"; sourceTree = "<group>"; };
+		E167D084301041A4007F7098 /* 7-21-2026 Add AI Feature to Post-App Store Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-21-2026 Add AI Feature to Post-App Store Roadmap.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -247,7 +251,8 @@
 		E102F0FC2FE5F1F40076FCDD /* Post-MVP */ = {
 			isa = PBXGroup;
 			children = (
-				E167AE2E30097AA1007F7098 /* Post-MVP Roadmap.md */,
+				E167D080301040BB007F7098 /* NextSeason - App Store Readiness Roadmap.md */,
+				E167D081301040BB007F7098 /* NextSeason - Product Evolution Roadmap.md */,
 				E102F0FD2FE5F2100076FCDD /* AI Transcripts */,
 			);
 			path = "Post-MVP";
@@ -259,6 +264,9 @@
 				E167A813300818BE007F7098 /* 6-19-2026 Building Post-MVP Planning Documents.md */,
 				E167A5F430058C25007F7098 /* 7-13-2026 Post-MVP-Roadmap-Discussion.md */,
 				E167A7FD30070C2E007F7098 /* 7-14-2026 Post-MVP Roadmap Discussion.md */,
+				E167D0823010418F007F7098 /* 7-21-2026 Post-MVP Roadmap Split 1.md */,
+				E167D0833010419B007F7098 /* 7-21-2026 Post-MVP Roadmap Split 2.md */,
+				E167D084301041A4007F7098 /* 7-21-2026 Add AI Feature to Post-App Store Roadmap.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
