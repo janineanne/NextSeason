@@ -1,74 +1,25 @@
-# NextSeason -- Post-MVP Roadmap
+# NextSeason -- Product Evolution Roadmap
+
+## Related Documentation
+
+The current implementation architecture is documented in the Mermaid diagrams under `Documentation/Diagrams/`. Those diagrams describe the existing codebase and are updated as implementation changes. This roadmap intentionally focuses on planned work rather than current architecture.
+
+As major post-launch features such as cloud sync, backend notifications, and multi-provider search are implemented, new architecture diagrams should be added alongside the existing implementation diagrams.
+
+
 
 ## Purpose
 
-This document captures planned enhancements and longer-term ideas
-following the MVP.
-
-The roadmap is organized by area rather than by release number. Within
-each area, items are generally ordered from the work most likely to
-happen next toward longer-term ideas. Priorities should continue to
-evolve based on user feedback, analytics, and real-world usage.
-
-# Engineering & Reliability
-
-## SwiftData Migration Strategy
-
--   Add and test a SwiftData migration plan before changing persistent
-    models.
--   Verify upgrades preserve user data.
--   Include migration testing in release validation.
--   Keep representative stores from older versions for testing.
-
-## Persistence Recovery
-
-Replace the startup `fatalError` with a user-facing recovery flow before
-App Store release.
-
--   Log diagnostics before recovery.
--   Allow resetting the local store.
--   Explain consequences before resetting.
--   Allow exporting diagnostics before reset.
-
-## Crash Loop Prevention
-
--   Detect repeated launch failures.
--   Offer a **Reset Local Data** option.
--   Preserve diagnostics for troubleshooting.
+This document captures enhancements planned after the initial App Store release. Content has been preserved from the original roadmap and reorganized by release timing rather than topic.
 
 # Core Product Improvements
 
 ## Search
 
-TVMaze already provides fuzzy matching, AKA support, partial-title
-matching, punctuation tolerance, and relevance ordering.
-
-### Recommended Analytics
-
--   `search_performed`
--   Query length
--   Result count
--   Whether a show was selected
-
-### Necessary Improvements
-
--   Eliminate the current 10-result limitation (must be done before first App Store release).
-
 ### Potential Improvements
 
 - Support common abbreviations and acronyms if users demonstrate a need.
 - Continue refining search quality based on analytics and user feedback.
-
-Continue using TVMaze's relevance ordering where appropriate, while allowing another provider to supply broader search results if it improves discoverability.
-
-## Search Provider Independence
-
-Reduce dependence on a single metadata provider while improving search coverage.
-
--   Use one or more search-focused providers.
--   Continue using the most appropriate metadata provider for season tracking.
--   Map provider IDs when a show is selected.
--   Design the search layer so providers can be added or replaced with minimal user impact.
 
 ## Watchlist Management
 
@@ -107,6 +58,28 @@ Do not use TVMaze's crowdsourced provider data.
 -   Highlight available shows.
 -   Filter/group by availability.
 -   Tailor notifications.
+
+
+## AI-Assisted Show Insights
+
+Explore Apple's on-device Foundation Models to provide concise, privacy-preserving viewing insights on the Show Details screen.
+
+Potential capabilities:
+
+- Generate a brief "Why you might like this" summary.
+- Highlight the types of viewers the show is best suited for.
+- Describe tone and pacing in a few concise bullet points.
+- Produce consistent, spoiler-free summaries that fit naturally within the existing UI.
+
+Implementation principles:
+
+- Use Apple's on-device Foundation Models when available.
+- Cache generated insights so each show is processed only once.
+- Gracefully fall back to the standard TVMaze description on unsupported devices or OS versions.
+- Clearly identify this as a feature available only on supported versions of iOS, ensuring the app continues to provide a complete experience on older devices.
+- Keep AI optional, unobtrusive, and focused on helping users decide whether to add a show to their Watchlist.
+- Preserve user privacy by performing generation on-device whenever possible.
+
 
 # Platform Features
 
