@@ -25,16 +25,21 @@ enum WatchlistTracking {
     }
 
     /// Persists the show, records analytics, and arms the notification prompt when needed.
+    ///
+    /// Search hits omit seasons / next episode. When those are missing, this loads the
+    /// full `/shows/:id` payload so stored `nextSeason` matches show detail.
     static func add(
         _ show: Show,
         source: WatchlistActionSource,
         repository: any WatchlistRepository,
+        tvMaze: any TVMazeService,
         analytics: any AnalyticsTracking,
         notifications: any NotificationManaging,
         prompt: WatchlistNotificationPromptState
     ) async throws {
-        try await repository.add(show)
-        analytics.track(.watchlistAdded(source: source, showID: show.id))
+        let showToStore = try await resolvedShowForTracking(show, tvMaze: tvMaze)
+        try await repository.add(showToStore)
+        analytics.track(.watchlistAdded(source: source, showID: showToStore.id))
         if await notifications.needsAuthorizationPrompt() {
             prompt.shouldPromptForNotifications = true
         }
@@ -47,6 +52,7 @@ enum WatchlistTracking {
         anchor: CGRect,
         source: WatchlistActionSource,
         repository: any WatchlistRepository,
+        tvMaze: any TVMazeService,
         undoRemoval: WatchlistUndoRemoval?,
         analytics: any AnalyticsTracking,
         notifications: any NotificationManaging,
@@ -76,10 +82,20 @@ enum WatchlistTracking {
             show,
             source: source,
             repository: repository,
+            tvMaze: tvMaze,
             analytics: analytics,
             notifications: notifications,
             prompt: prompt
         )
         return .added
+    }
+
+    /// Uses the caller's show when it already has season data; otherwise fetches detail.
+    private static func resolvedShowForTracking(
+        _ show: Show,
+        tvMaze: any TVMazeService
+    ) async throws -> Show {
+        guard show.seasons.isEmpty else { return show }
+        return try await tvMaze.show(id: show.id)
     }
 }

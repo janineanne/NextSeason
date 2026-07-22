@@ -32,6 +32,47 @@ final class WatchlistViewModel {
         return shows.filter { $0.name.localizedStandardContains(query) }
     }
 
+    /// Non-empty status sections for the current filter, in display order.
+    /// Empty sections are omitted. Coming Soon sorts by premiere date (soonest
+    /// first); every other section sorts alphabetically by show name.
+    var filteredSectionGroups: [WatchlistSectionGroup] {
+        Self.sectionGroups(from: filteredShows)
+    }
+
+    static func sectionGroups(from shows: [TrackedShow]) -> [WatchlistSectionGroup] {
+        var buckets: [WatchlistSection: [TrackedShow]] = [:]
+        for show in shows {
+            let section = WatchlistSection.section(for: show.nextSeason)
+            buckets[section, default: []].append(show)
+        }
+
+        return WatchlistSection.allCases.compactMap { section in
+            guard var sectionShows = buckets[section], !sectionShows.isEmpty else {
+                return nil
+            }
+            if section == .comingSoon {
+                sectionShows.sort(by: Self.comingSoonSort)
+            } else {
+                sectionShows.sort(by: Self.alphabeticalSort)
+            }
+            return WatchlistSectionGroup(section: section, shows: sectionShows)
+        }
+    }
+
+    private static func comingSoonSort(_ lhs: TrackedShow, _ rhs: TrackedShow) -> Bool {
+        switch (lhs.nextSeason, rhs.nextSeason) {
+        case let (.scheduled(_, leftDate), .scheduled(_, rightDate)):
+            if leftDate != rightDate { return leftDate < rightDate }
+            return alphabeticalSort(lhs, rhs)
+        default:
+            return alphabeticalSort(lhs, rhs)
+        }
+    }
+
+    private static func alphabeticalSort(_ lhs: TrackedShow, _ rhs: TrackedShow) -> Bool {
+        lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+    }
+
     var pendingRemoval: TrackedShow? { removalCoordinator.pendingRemoval }
 
     private let repository: any WatchlistRepository
@@ -77,7 +118,8 @@ final class WatchlistViewModel {
 
     func refreshFromNetwork() async {
         await removalCoordinator.commitPendingRemovalIfNeeded()
-        await refreshService?.refreshAll(force: true)
+        // Pull-to-refresh is interactive — update rows silently; don't alert.
+        await refreshService?.refreshAll(force: true, deliverNotifications: false)
         await reload()
     }
 

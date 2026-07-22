@@ -119,6 +119,7 @@ struct SearchView: View {
     private var watchlistTrackingContext: SearchWatchlistTrackingContext {
         SearchWatchlistTrackingContext(
             repository: repository,
+            tvMaze: tvMaze,
             undoRemoval: undoRemoval,
             notificationService: notificationService,
             notificationPrompt: notificationPrompt,

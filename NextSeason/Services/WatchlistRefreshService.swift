@@ -56,10 +56,20 @@ final class WatchlistRefreshService {
         lastForegroundRefreshAt = now()
     }
 
+    /// - Parameter force: When true, re-fetches every tracked show instead of
+    ///   consulting TVMaze's updates map.
+    /// - Parameter deliverNotifications: When false, status is still updated and
+    ///   dedupe signatures recorded, but no local notification is scheduled.
+    ///   Use for interactive pull-to-refresh where the user can see the list.
+    /// - Parameter recordDiagnostics: When true, writes a beta diagnostics sample.
     @discardableResult
-    func refreshAll(force: Bool = false, recordDiagnostics: Bool = false) async -> WatchlistRefreshOutcome? {
+    func refreshAll(
+        force: Bool = false,
+        deliverNotifications: Bool = true,
+        recordDiagnostics: Bool = false
+    ) async -> WatchlistRefreshOutcome? {
         AppDiagnosticsLogger.logger(for: .cache)
-            .notice("watchlist_refresh_start force=\(force, privacy: .public)")
+            .notice("watchlist_refresh_start force=\(force, privacy: .public) notify=\(deliverNotifications, privacy: .public)")
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_start")
         var fetchResult = "Completed"
         var lastNotificationDecision = "No notification (no meaningful change)"
@@ -125,7 +135,13 @@ final class WatchlistRefreshService {
 
         for var tracked in trackedShows {
             if !force {
-                guard let updatedAt = updates[tracked.id], updatedAt > tracked.sourceUpdatedAt else {
+                let serverChanged = updates[tracked.id].map { $0 > tracked.sourceUpdatedAt } ?? false
+                // `nextSeason` also depends on the calendar (airing → returning when a
+                // season ends, scheduled → airing on premiere). Search-track used to
+                // persist `.returningNoSeasonYet` without season data; re-check that
+                // case even when TVMaze's `updated` epoch is unchanged.
+                let needsRecheck = Self.needsCalendarOrStatusRecheck(tracked.nextSeason)
+                guard serverChanged || needsRecheck else {
                     skippedShowCount += 1
                     continue
                 }
@@ -148,11 +164,15 @@ final class WatchlistRefreshService {
                 refreshedShowCount += 1
                 lastNotificationDecision = Self.describeNotificationDecision(
                     for: tracked.name,
-                    evaluation: evaluation
+                    evaluation: evaluation,
+                    deliverNotifications: deliverNotifications
                 )
-                if let notification = evaluation.notification {
+                if deliverNotifications, let notification = evaluation.notification {
                     await notifications.deliver(notification)
                 }
+            } catch is CancellationError {
+                AppDiagnosticsLogger.logTaskCancel("watchlist_refresh_show")
+                return nil
             } catch TVMazeError.notFound {
                 tracked.isStale = true
                 tracked.lastCheckedAt = now()
@@ -206,14 +226,29 @@ final class WatchlistRefreshService {
 
     private static func describeNotificationDecision(
         for showName: String,
-        evaluation: StatusChangeDetector.Evaluation
+        evaluation: StatusChangeDetector.Evaluation,
+        deliverNotifications: Bool
     ) -> String {
         if let notification = evaluation.notification {
-            return "Delivered for \(showName): \(notification.body)"
+            if deliverNotifications {
+                return "Delivered for \(showName): \(notification.body)"
+            }
+            return "Suppressed for \(showName) (interactive refresh): \(notification.body)"
         }
         if evaluation.tracked.pendingChangeSignature != nil {
             return "Pending debounce for \(showName)"
         }
         return "No notification for \(showName) (no meaningful change)"
+    }
+
+    /// Statuses that can change without TVMaze bumping `updated` (calendar drift,
+    /// or a previously incomplete `.returningNoSeasonYet` snapshot).
+    private static func needsCalendarOrStatusRecheck(_ status: NextSeasonStatus) -> Bool {
+        switch status {
+        case .airing, .scheduled, .returningNoSeasonYet:
+            true
+        case .announcedUndated, .ended, .unknown:
+            false
+        }
     }
 }

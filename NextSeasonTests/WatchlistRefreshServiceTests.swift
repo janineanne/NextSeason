@@ -194,6 +194,140 @@ struct WatchlistRefreshServiceTests {
         #expect(Set(tvMaze.fetchedShowIDs) == Set([showID, 82]))
     }
 
+    @Test("Force refresh recomputes next-season status even when TVMaze reports no update")
+    func forceRefreshCorrectsStaleReturningStatus() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let tvMaze = MockTVMazeService()
+        let notifications = RecordingNotificationService()
+        // Mid-season "now" so S2 is still airing.
+        let airingNow = TVMazeDate.dateOnly("2026-06-14")!
+        let service = makeService(
+            repository: repository,
+            tvMaze: tvMaze,
+            notifications: notifications,
+            now: { airingNow }
+        )
+
+        // Simulate a search-track snapshot: Running, but nextSeason was computed
+        // without season rows and stuck on returning.
+        let searchStub = Show(
+            id: showID,
+            name: "Severance",
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [],
+            nextEpisode: nil,
+            updatedAt: airingNow
+        )
+        try await repository.add(searchStub)
+
+        var tracked = try await repository.all()[0]
+        #expect(tracked.nextSeason == .returningNoSeasonYet)
+        // TVMaze "updated" matches the stored epoch, so an updates-only refresh
+        // would previously skip forever.
+        tracked.sourceUpdatedAt = airingNow
+        try await repository.updateAfterRefresh(tracked)
+
+        let airingShow = Show(
+            id: showID,
+            name: "Severance",
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [
+                season(1, premiere: "2025-01-01", end: "2025-03-01"),
+                season(2, premiere: "2026-06-01", end: "2026-08-01"),
+            ],
+            nextEpisode: nil,
+            updatedAt: airingNow
+        )
+        tvMaze.updates = [:]
+        tvMaze.shows[showID] = airingShow
+
+        // Returning snapshots are re-checked even without a server `updated` bump.
+        await service.refreshAll()
+        #expect(tvMaze.fetchedShowIDs == [showID])
+        #expect(try await repository.all()[0].nextSeason == .airing(season: 2))
+
+        await service.refreshAll(force: true)
+        #expect(tvMaze.fetchedShowIDs == [showID, showID])
+        #expect(try await repository.all()[0].nextSeason == .airing(season: 2))
+    }
+
+    @Test("Interactive force refresh updates status without delivering notifications")
+    func interactiveForceRefreshSuppressesNotifications() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let tvMaze = MockTVMazeService()
+        let notifications = RecordingNotificationService()
+        let airingNow = TVMazeDate.dateOnly("2026-06-14")!
+        let service = makeService(
+            repository: repository,
+            tvMaze: tvMaze,
+            notifications: notifications,
+            now: { airingNow }
+        )
+
+        let searchStub = Show(
+            id: showID,
+            name: "Severance",
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [],
+            nextEpisode: nil,
+            updatedAt: airingNow
+        )
+        try await repository.add(searchStub)
+
+        tvMaze.shows[showID] = Show(
+            id: showID,
+            name: "Severance",
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [
+                season(1, premiere: "2025-01-01", end: "2025-03-01"),
+                season(2, premiere: "2026-06-01", end: "2026-08-01"),
+            ],
+            nextEpisode: nil,
+            updatedAt: airingNow
+        )
+
+        let outcome = await service.refreshAll(force: true, deliverNotifications: false)
+        #expect(try await repository.all()[0].nextSeason == .airing(season: 2))
+        #expect(notifications.delivered.isEmpty)
+        #expect(outcome?.notificationDecision.contains("Suppressed") == true)
+    }
+
     @Test("A 404 from TVMaze marks the tracked show stale without delivering a notification")
     func notFoundMarksShowStale() async throws {
         let repository = InMemoryWatchlistRepository()
