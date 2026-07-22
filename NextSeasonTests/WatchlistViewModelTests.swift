@@ -49,6 +49,23 @@ struct WatchlistViewModelTests {
         return viewModel
     }
 
+    private func trackedShow(
+        id: Int,
+        name: String,
+        nextSeason: NextSeasonStatus
+    ) -> TrackedShow {
+        TrackedShow(
+            id: id,
+            name: name,
+            posterMediumURL: nil,
+            status: .running,
+            nextSeason: nextSeason,
+            sourceUpdatedAt: .now,
+            lastCheckedAt: .now,
+            dateAdded: .now
+        )
+    }
+
     @Test("Reload loads tracked shows from persistence")
     func reloadLoadsTrackedShows() async throws {
         let repository = InMemoryWatchlistRepository()
@@ -295,6 +312,94 @@ struct WatchlistViewModelTests {
 
         #expect(viewModel.filteredShows.count == 1)
         #expect(viewModel.shows.count == 2)
+    }
+
+    @Test("Section groups follow status order and omit empty sections")
+    func sectionGroupsFollowStatusOrderAndOmitEmptySections() {
+        let premiere = TVMazeDate.dateOnly("2026-09-01")!
+        let shows = [
+            trackedShow(id: 1, name: "Unknown Show", nextSeason: .unknown),
+            trackedShow(id: 2, name: "Ended Show", nextSeason: .ended),
+            trackedShow(id: 3, name: "Airing Show", nextSeason: .airing(season: 2)),
+            trackedShow(id: 4, name: "Waiting Show", nextSeason: .returningNoSeasonYet),
+            trackedShow(id: 5, name: "Coming Show", nextSeason: .scheduled(season: 3, premiere: premiere)),
+        ]
+
+        let groups = WatchlistViewModel.sectionGroups(from: shows)
+
+        #expect(groups.map(\.section) == [
+            .airingNow,
+            .comingSoon,
+            .waitingForADate,
+            .ended,
+            .unknown,
+        ])
+        #expect(groups.map { $0.shows.map(\.id) } == [[3], [5], [4], [2], [1]])
+    }
+
+    @Test("Waiting for a Date includes announced-undated and returning shows")
+    func waitingSectionIncludesAnnouncedAndReturning() {
+        let groups = WatchlistViewModel.sectionGroups(from: [
+            trackedShow(id: 1, name: "Announced", nextSeason: .announcedUndated(season: 4)),
+            trackedShow(id: 2, name: "Returning", nextSeason: .returningNoSeasonYet),
+        ])
+
+        #expect(groups.map(\.section) == [.waitingForADate])
+        #expect(groups[0].shows.map(\.id) == [1, 2])
+    }
+
+    @Test("Coming Soon sorts by premiere date ascending")
+    func comingSoonSortsByPremiereDate() {
+        let earlier = TVMazeDate.dateOnly("2026-08-01")!
+        let later = TVMazeDate.dateOnly("2026-12-01")!
+        let groups = WatchlistViewModel.sectionGroups(from: [
+            trackedShow(id: 1, name: "Later", nextSeason: .scheduled(season: 2, premiere: later)),
+            trackedShow(id: 2, name: "Earlier", nextSeason: .scheduled(season: 3, premiere: earlier)),
+        ])
+
+        #expect(groups.map(\.section) == [.comingSoon])
+        #expect(groups[0].shows.map(\.name) == ["Earlier", "Later"])
+    }
+
+    @Test("Non-Coming Soon sections sort alphabetically by name")
+    func nonComingSoonSectionsSortAlphabetically() {
+        let groups = WatchlistViewModel.sectionGroups(from: [
+            trackedShow(id: 1, name: "Zebra", nextSeason: .airing(season: 1)),
+            trackedShow(id: 2, name: "aardvark", nextSeason: .airing(season: 2)),
+            trackedShow(id: 3, name: "Middle", nextSeason: .ended),
+            trackedShow(id: 4, name: "Alpha", nextSeason: .ended),
+        ])
+
+        #expect(groups.map(\.section) == [.airingNow, .ended])
+        #expect(groups[0].shows.map(\.name) == ["aardvark", "Zebra"])
+        #expect(groups[1].shows.map(\.name) == ["Alpha", "Middle"])
+    }
+
+    @Test("Filtered section groups honor the search query")
+    func filteredSectionGroupsHonorSearchQuery() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            undoRemoval: undoRemoval,
+            analytics: RecordingAnalyticsService()
+        )
+        try await repository.add(makeShow(id: 1, name: "Severance"))
+        try await repository.add(makeShow(id: 2, name: "The Bear"))
+        await viewModel.reload()
+
+        var severance = try #require(viewModel.shows.first { $0.id == 1 })
+        var bear = try #require(viewModel.shows.first { $0.id == 2 })
+        severance.nextSeason = .airing(season: 2)
+        bear.nextSeason = .ended
+        try await repository.updateAfterRefresh(severance)
+        try await repository.updateAfterRefresh(bear)
+        await viewModel.reload()
+
+        viewModel.searchText = "Bear"
+
+        #expect(viewModel.filteredSectionGroups.map(\.section) == [.ended])
+        #expect(viewModel.filteredSectionGroups[0].shows.map(\.id) == [2])
     }
 
     @Test("A slower older reload cannot overwrite a newer reload result")

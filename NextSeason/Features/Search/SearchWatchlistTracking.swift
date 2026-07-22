@@ -58,6 +58,7 @@ final class SearchWatchlistTracking {
                 anchor: anchor,
                 source: .search,
                 repository: context.repository,
+                tvMaze: context.tvMaze,
                 undoRemoval: context.undoRemoval,
                 analytics: context.analytics,
                 notifications: context.notificationService,

@@ -33,6 +33,8 @@ struct WatchlistView: View {
     /// True after `.task(id:)` finishes its first (or token-driven) reload, so
     /// `.onAppear` only refreshes on later tab returns — not during first load.
     @State private var hasCompletedInitialLoad = false
+    /// Sections the user has collapsed. Missing IDs are treated as expanded.
+    @State private var collapsedSections: Set<WatchlistSection> = []
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -100,10 +102,6 @@ struct WatchlistView: View {
                 guard token != nil else { return }
                 onApplyPendingDetail()
             }
-            .refreshable {
-                await viewModel?.refreshFromNetwork()
-                await notificationStatus.refresh(using: notificationService)
-            }
             .refreshNotificationStatus(notificationStatus)
             .onChange(of: undoRemoval?.pendingRemoval?.id) { oldId, newId in
                 Task { await viewModel?.handlePendingRemovalIDChange(from: oldId, to: newId) }
@@ -168,37 +166,46 @@ struct WatchlistView: View {
                         .listRowBackground(Color.clear)
                         .accessibilityHidden(true)
                 }
-                ForEach(viewModel.filteredShows) { tracked in
-                    HStack(spacing: AppSpacing.tight) {
-                        NavigationLink(value: tracked) {
-                            ShowRowLabel(tracked: tracked)
-                        }
-                        .buttonStyle(.plain)
-                        .showDetailLinkAccessibility()
-                        .accessibilityIdentifier("\(AccessibilityID.Watchlist.row).\(tracked.id)")
+                ForEach(viewModel.filteredSectionGroups) { group in
+                    WatchlistCollapsibleSection(
+                        title: group.section.title,
+                        shows: group.shows,
+                        isExpanded: expansionBinding(for: group.section)
+                    ) { tracked in
+                        HStack(spacing: AppSpacing.tight) {
+                            NavigationLink(value: tracked) {
+                                ShowRowLabel(tracked: tracked)
+                            }
+                            .buttonStyle(.plain)
+                            .showDetailLinkAccessibility()
+                            .accessibilityIdentifier("\(AccessibilityID.Watchlist.row).\(tracked.id)")
 
-                        ShowRowTrackButton(
-                            showID: tracked.id,
-                            showName: tracked.name,
-                            isTracked: !viewModel.isPendingRemoval(tracked),
-                            isUpdating: false,
-                            trackButtonIdentifier: AccessibilityID.Watchlist.trackButton
-                        ) { anchor in
-                            if viewModel.isPendingRemoval(tracked) {
-                                viewModel.undoPendingRemoval()
-                            } else {
-                                viewModel.requestRemoval(
-                                    tracked,
-                                    anchor: anchor,
-                                    source: .watchlist
-                                )
+                            ShowRowTrackButton(
+                                showID: tracked.id,
+                                showName: tracked.name,
+                                isTracked: !viewModel.isPendingRemoval(tracked),
+                                isUpdating: false,
+                                trackButtonIdentifier: AccessibilityID.Watchlist.trackButton
+                            ) { anchor in
+                                if viewModel.isPendingRemoval(tracked) {
+                                    viewModel.undoPendingRemoval()
+                                } else {
+                                    viewModel.requestRemoval(
+                                        tracked,
+                                        anchor: anchor,
+                                        source: .watchlist
+                                    )
+                                }
                             }
                         }
+                        .appListRowSurface()
                     }
-                    .appListRowSurface()
                 }
             }
-            .animation(.easeInOut(duration: 0.35), value: viewModel.filteredShows.map(\.id))
+            .animation(
+                .easeInOut(duration: 0.35),
+                value: viewModel.filteredShows.map { "\($0.id):\($0.nextSeason.headline)" }
+            )
             .appPlainListStyle()
             .tvmazeAttributionInset()
             .searchable(
@@ -206,6 +213,10 @@ struct WatchlistView: View {
                 placement: .navigationBarDrawer(displayMode: .always),
                 prompt: "Search Watchlist"
             )
+            .refreshable {
+                await viewModel.refreshFromNetwork()
+                await notificationStatus.refresh(using: notificationService)
+            }
             .overlay {
                 if viewModel.shows.isEmpty, viewModel.pendingRemoval == nil {
                     emptyState
@@ -261,6 +272,57 @@ struct WatchlistView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(themeColors.surface)
         .accessibilityIdentifier(AccessibilityID.Watchlist.noResults)
+    }
+
+    private func expansionBinding(for section: WatchlistSection) -> Binding<Bool> {
+        Binding(
+            get: { !collapsedSections.contains(section) },
+            set: { isExpanded in
+                if isExpanded {
+                    collapsedSections.remove(section)
+                } else {
+                    collapsedSections.insert(section)
+                }
+            }
+        )
+    }
+}
+
+/// A status section the user can collapse.
+private struct WatchlistCollapsibleSection<Row: View>: View {
+    let title: String
+    let shows: [TrackedShow]
+    @Binding var isExpanded: Bool
+    @ViewBuilder let row: (TrackedShow) -> Row
+
+    var body: some View {
+        Section(isExpanded: $isExpanded) {
+            ForEach(shows) { tracked in
+                row(tracked)
+            }
+        } header: {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isExpanded.toggle()
+                }
+            } label: {
+                HStack(spacing: AppSpacing.tight) {
+                    Text(title)
+                        .font(.headline)
+                        .appPrimaryText()
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(title)
+            .accessibilityHint(isExpanded ? "Collapse section" : "Expand section")
+            .accessibilityAddTraits(.isHeader)
+        }
     }
 }
 

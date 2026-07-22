@@ -319,7 +319,8 @@ struct DiagnosticsView: View {
     private func forceRefreshNow() async {
         guard let refreshService, !isForceRefreshing else { return }
         isForceRefreshing = true
-        let outcome = await refreshService.refreshAll(force: true)
+        // Interactive diagnostics refresh — update silently like Watchlist pull-to-refresh.
+        let outcome = await refreshService.refreshAll(force: true, deliverNotifications: false)
         if let outcome {
             betaRefreshDiagnostics?.recordForegroundRefreshCompleted(
                 at: .now,

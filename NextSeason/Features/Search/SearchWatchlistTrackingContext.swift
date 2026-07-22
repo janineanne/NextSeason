@@ -8,6 +8,7 @@ import Foundation
 /// Dependencies for search-row watchlist add/remove actions.
 struct SearchWatchlistTrackingContext {
     let repository: any WatchlistRepository
+    let tvMaze: any TVMazeService
     let undoRemoval: WatchlistUndoRemoval?
     let notificationService: any NotificationManaging
     let notificationPrompt: WatchlistNotificationPromptState

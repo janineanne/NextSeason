@@ -140,6 +140,7 @@ final class ShowDetailViewModel {
                 anchor: anchor,
                 source: .detail,
                 repository: repository,
+                tvMaze: service,
                 undoRemoval: undoRemoval,
                 analytics: analytics,
                 notifications: notifications,
