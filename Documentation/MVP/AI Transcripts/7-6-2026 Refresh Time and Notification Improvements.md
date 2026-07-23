@@ -75,12 +75,6 @@ Foreground values are in-memory for the current session (not persisted), since t
 
 ok, I think that's good now.  Please take a look at the dignostics documentation and update it as needed.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsDocumentationCopy.swift"}
-```
-
 ## Assistant
 
 Updated the diagnostics documentation to match how the screen actually works now.
@@ -103,12 +97,6 @@ Open **Diagnostics → info (ⓘ)** to review the revised help text.
 ## User
 
 One last thing about the diagnostics page - the notification actions should be disabled if notifications haven't been enabled, right?
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsView.swift"}
-```
 
 ## Assistant
 

@@ -30,21 +30,9 @@ Let me confirm the `ProfileFlowConfiguration.isEnabled` API before wiring the gu
 
 The `-UITesting` launch uses an empty in-memory repository, so the launch-to-Search UI test stays valid. I'll guard against profile-flow runs (which drive navigation deterministically). Now implementing the coordinator method.
 
-### Tool Edit File V2
-
-## Assistant
-
 Now wire it into `ContentView`'s startup task, ahead of the deep-link resolution.
 
-### Tool Edit File V2
-
-## Assistant
-
 Now build to verify it compiles.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Build succeeds. Here's what changed and how it satisfies both requirements.
 

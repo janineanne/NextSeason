@@ -14,7 +14,7 @@ NextSeason/<version>
 Not urgent, but I’d either update the code later or soften the documentation.
 
 2.
-otential date bug in NextSeasonCalculator.
+Potential date bug in NextSeasonCalculator.
 This line may mark a season as ended too early on its actual end date:
 let hasEnded = latest.endDate.map { $0 < now } ?? false
 Because endDate is parsed as midnight UTC, a season ending “today” may count as ended for most of that day. I’d add a test for “season ends today” and probably compare date-only values instead of exact Date.
@@ -32,99 +32,9 @@ Please make these changes, or let me know your reasons if you object.
 
 I'll work through ChatGPT's review items: find the User-Agent doc mismatch, fix the end-date comparison in `NextSeasonCalculator`, and add the missing tests.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"User-Agent|user.?agent|NextSeason/","path":"/Users/janine/Documents/TbF Projects/NextSeason","glob":"*.{md,swift}","caseInsensitive":false,"multiline":false,"toolCallId":"tool_5020e937-ca2d-4bd7-97d0-35990e63c2b","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NextSeasonCalculator.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/TVMazeDate.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/NextSeasonCalculatorTests.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/SummaryFormatterTests.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/SummaryFormatter.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":20,"limit":15}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Architecture.md","offset":138,"limit":10}
-```
-
-## Assistant
-
 I'll add UTC date-only comparison helpers, fix the calculator's end-date logic, soften the User-Agent docs, and add the missing tests.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Next: `SummaryFormatter` displayable-content helper, update `ShowDetailView`, and add the new tests.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":95,"limit":35}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/SummaryFormatter.swift"}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 All three review items are addressed. Here's what changed and why:
 
@@ -158,18 +68,6 @@ Nothing committed yet — say the word if you want these on `main`.
 
 Please make a branch called Phase-4-Review-Items and commit these changes there.
 
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Unspecified
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"Phase-4-Review-Items"}
-```
-
-## Assistant
-
 Done. Created branch **`Phase-4-Review-Items`** and committed as `d8fee6c`:
 
 **Address Phase 4 review items: date-only logic and tests**
@@ -189,44 +87,6 @@ One other thing from ChatGPT:  NextSeasonCalculator treats an undated nextEpisod
 ## Assistant
 
 Let me trace the current logic and what each status actually tells the user.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NextSeasonCalculator.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/NextSeasonStatus+Display.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/NextSeasonStatus.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"nextepisode|next episode|\\.airing","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","caseInsensitive":false,"multiline":false,"toolCallId":"tool_c2b56038-ef00-4f3d-a2b9-9ae4c1468f8","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":140,"limit":50}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":165,"limit":30}
-```
-
-## Assistant
 
 ChatGPT has a fair point, but I wouldn't call it a **bug** — it's a **wording/semantics** choice. Whether to change it depends on what you want "Currently showing Season X" to mean.
 
@@ -291,16 +151,6 @@ Yes
 
 Updating the calculator so an undated `nextEpisode` maps to `.announcedUndated`, then adjusting tests and docs.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Done. Here's the updated rule:
 
 **When `nextepisode.season` points at a new season:**
@@ -323,15 +173,7 @@ These changes are on `Phase-4-Review-Items` but **not committed yet** (they sit 
 
 Yes
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 I'll commit only the review-item code changes and leave your kickoff transcripts and `pbxproj` edits out.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Committed on **`Phase-4-Review-Items`** as `06859bd`:
 
@@ -348,14 +190,6 @@ Your kickoff transcript files and `pbxproj` changes are still uncommitted, as be
 ## User
 
 I've committed my changes and pushed. Please merge the branch into main.
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 `Phase-4-Review-Items` is merged into `main` and pushed.
 

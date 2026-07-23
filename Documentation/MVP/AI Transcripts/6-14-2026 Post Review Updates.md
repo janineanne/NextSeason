@@ -8,53 +8,11 @@ Something we haven't considered is how reliable TVMaze is.  An app like this is 
 
 Good call — data reliability is an existential risk for an app whose entire value is "trust me about when the next season drops." Let me investigate TVMaze's data sourcing, accuracy, freshness, and service availability, then write up findings.
 
-### Tool Web Search
-
-```
-{"searchTerm":"TVMaze data quality crowd-sourced user contributed how is data maintained accuracy","toolCallId":"toolu_vrtx_01QamkGdyw3HDmbzWpc1MeS4"}
-```
-
-### Tool Web Search
-
-```
-{"searchTerm":"TVMaze API uptime reliability status page outages 2026","toolCallId":"toolu_vrtx_01UP1mT28jmpZbdsDyK9R1WR"}
-```
-
-### Tool Web Search
-
-```
-{"searchTerm":"TVMaze vs TMDB vs TheTVDB data accuracy TV show season dates comparison","toolCallId":"toolu_vrtx_01U3osx6R8gZ27KjiuHXkmNc"}
-```
-
-## Assistant
-
 I have solid findings from multiple angles. Let me add a reliability section to `TVMazeResearch.md`. First I'll renumber the existing final section, then insert the new one before it.
-
-### Tool Edit File V2
-
-## Assistant
 
 Let me review the now-redundant items in the old "Open questions / risks" list and tighten them.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":300,"limit":30}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":323,"limit":15}
-```
-
-## Assistant
-
 The timeliness item is now covered in §6.3, so I'll point it there instead of repeating.
-
-### Tool Edit File V2
-
-## Assistant
 
 Added a thorough **§6 "Data reliability & service availability"** to `TVMazeResearch.md` (and renumbered the old "Open questions" to §7, removing the now-duplicated timeliness note). Findings are from web research plus the TVMaze forums/API docs, verified 2026-06-14.
 
@@ -92,29 +50,7 @@ Yes
 
 I'll reflect the reliability mitigations in `Architecture.md` §8 and add a decision-log entry. Let me read the current §8 first.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Architecture.md","offset":258,"limit":34}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Architecture.md","offset":284,"limit":28}
-```
-
-### Tool Edit File V2
-
-## Assistant
-
 Now I'll add a row to the decisions table in §11 and a decision-log entry.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Done. The reliability mitigations are now reflected in all three places:
 

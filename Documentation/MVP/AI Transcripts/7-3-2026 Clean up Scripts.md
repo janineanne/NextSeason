@@ -8,50 +8,6 @@ Scripts/resume-performance-suite.sh has a hardcoded reference to a specific dire
 
 Inspecting the script and how it's used in the project.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/resume-performance-suite.sh"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"resume-performance-suite","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_cabd7c65-7d46-4ccd-a207-c9ba472b569","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"Scripts/**"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/profile-performance-suite.sh"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"APP_PATH|DerivedData|DEVICE_UDID","path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts","caseInsensitive":false,"multiline":false,"toolCallId":"tool_50f6ebae-f458-467d-ba41-c6081b0eda4","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"resume-performance|profile-performance","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","caseInsensitive":false,"multiline":false,"toolCallId":"tool_6ebe5f56-5994-4aa7-b3e9-534fa44d101","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/run-profile-flows-uninstrumented.sh","limit":30}
-```
-
-## Assistant
-
 You're right to flag it — that hardcoded path is a smell, not something you'd want to keep long term.
 
 ## What the script does
@@ -127,41 +83,7 @@ Yes, please apply the refactor
 
 Extracting shared performance-suite helpers and updating both scripts to use dynamic app/device resolution.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/profile-performance-suite.sh","limit":85}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/resume-performance-suite.sh"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/idle-soak-test.sh","limit":50}
-```
-
-## Assistant
-
 Creating a shared lib and updating both performance suite scripts to use it.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Refactor is in place. Here’s what changed:
 
@@ -209,103 +131,7 @@ Can you add a README.md to the Scripts folder and document each script? Mainly w
 
 Reading all scripts in `Scripts` to document them accurately.
 
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"Scripts/**/*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/idle-soak-test.sh"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/profile-flows.sh"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/run-profile-flows-uninstrumented.sh"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/verify-crash-reporting.sh"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/analyze-performance-traces.py","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/analyze-uninstrumented-logs.py","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/render-icon-preview.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/profile-performance-suite.sh","limit":25}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/lib/device-log-capture.sh","limit":50}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"argparse|add_argument|if __name__","path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/analyze-performance-traces.py","caseInsensitive":false,"multiline":false,"toolCallId":"tool_e4cdef0a-1a4c-4901-b7c9-2c203c2ba82","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/analyze-uninstrumented-logs.py","offset":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/lib/device-log-capture.sh","offset":50}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"instruments|soak-logs","path":"/Users/janine/Documents/TbF Projects/NextSeason/.gitignore","caseInsensitive":false,"multiline":false,"toolCallId":"tool_4904b3bd-ef48-4905-a3ed-44b25b69637","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Scripts/analyze-performance-traces.py","offset":500,"limit":80}
-```
-
-## Assistant
-
 Creating `Scripts/README.md` documenting each script.
-
-### Tool Edit File V2
-
-## Assistant
 
 Added `Scripts/README.md` with documentation for every script in the folder.
 

@@ -43,38 +43,6 @@ One more thing about the diagnostics.  The Crash Investigation section is still 
 
 Reviewing how breadcrumbs are stored and surfaced in diagnostics so the recommendation matches the current implementation.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/AppDiagnosticsLogger.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsView.swift","limit":60}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AnalyticsDiagnosticsReport.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"loadPersisted|persistedBreadcrumb|breadcrumbsDefaults","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_de04663c-7019-4812-8c4e-734a31e93b6","offset":0}
-```
-
-## Assistant
-
 The stale data you’re seeing fits how the current design works — and where it doesn’t draw a clear line yet.
 
 ## What’s happening today
@@ -309,85 +277,13 @@ No problem.  Unfortunately, even after following your clearer description, I'm s
 
 Investigating launch/scene ordering and the resume handshake — a cold start after background may promote an incident before `becameActive` runs.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/AppDiagnosticsLogger.swift","limit":150}
-```
-
-## Assistant
-
 Identifying two bugs: incident capture runs in `init()` before `becameActive` can mark a resume, and same-process background→foreground should clear a stale last incident after normal return. Deferring promotion until the scene becomes active and clearing the incident on same-process resume.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/AppDiagnosticsLogger.swift","offset":250}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/AppDiagnosticsLoggerTests.swift"}
-```
-
-## Assistant
 
 Deferring incident capture until the scene becomes active, and clearing last incident on same-process background→foreground resume (normal return to the app).
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/AppDiagnosticsLogger.swift","offset":380}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Fixing call order: run `recordBecameActive` before `finalize` so same-process background resume cancels pending incidents.
 
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Persisting the resume acknowledgment across process boundaries so a background→resume cycle before a relaunch doesn't create a false incident.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Two separate bugs were causing what you saw:
 

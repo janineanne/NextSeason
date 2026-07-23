@@ -12,65 +12,13 @@ Go ahead.
 
 Implementing VoiceOver fixes across the banner, list rows, show detail, undo toast, and search hints.
 
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Updating ShowDetailView to group the header and next-season section for VoiceOver.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Checking ShowDetailView after the partial edit:
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":250}
-```
-
-## Assistant
-
 Fixing the next-season section: `.combine` was blocking the "Try Again" button in the failed state.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":215,"limit":55}
-```
-
-### Tool Edit File V2
-
-## Assistant
-
 Building to verify the project compiles.
-
-### Tool Run Terminal Command V2
-
-### Tool Todo Write
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 VoiceOver improvements are in. Build succeeded. Here’s what changed:
 
@@ -113,79 +61,11 @@ For the most part it's much better, but when I untrack a show, only "removed fro
 
 Investigating the undo toast dismissal timing and why VoiceOver skips the Undo and OK buttons.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"undo|toast|pendingRemoval|5|delay|timeout","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","glob":"**/*.swift","outputMode":"content","caseInsensitive":false,"multiline":false,"toolCallId":"tool_59802e3a-704b-400c-9268-a6b60168f52","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/UndoToast.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistUndoRemoval.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/WatchlistUndoRemovalTests.swift"}
-```
-
-### Tool Unspecified
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"voiceover"}
-```
-
-## Assistant
-
 Fixing two issues: container focus and a full-screen `GeometryReader` are likely hiding the toast buttons from VoiceOver; we'll focus the Undo button and extend the undo window when VoiceOver is active.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/UITestingConfiguration.swift"}
-```
-
-## Assistant
 
 Fixing toast accessibility: the full-screen `GeometryReader` and container focus were blocking Undo/OK. Pinning the toast to the bottom when VoiceOver is on and extending the undo timer.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"UITestingConfiguration.swift","path":"/Users/janine/Documents/TbF Projects/NextSeason","glob":"*.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_81fbc712-2f91-453c-8322-2c2f7ab504e","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Adding a quick unit test for the VoiceOver-aware undo window duration.
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Two separate issues were causing this — both are addressed now.
 
@@ -262,27 +142,7 @@ The "removed from watchlist" label is no longer being read aloud.  I tap the sta
 
 The announcement is likely being cut off when focus jumps to Undo. I'll read the toast code and adjust focus order so the message is read first.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/UndoToast.swift"}
-```
-
-## Assistant
-
 Replacing the announcement (which focus to Undo cancels) with a two-step focus: read the message text first, then move focus to Undo.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 The announcement was being cancelled when focus jumped straight to **Undo** — VoiceOver prioritizes the focused element over a posted announcement, so you only heard "Undo, button."
 

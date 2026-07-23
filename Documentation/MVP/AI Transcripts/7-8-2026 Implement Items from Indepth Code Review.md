@@ -213,20 +213,6 @@ I'll tackle the should-fix items first: unconfigured environment defaults, a sin
 
 Implementing unconfigured environment defaults, a single shared `NotificationService`, a tracking context struct, and cleaning up `MainActor.assumeIsolated`.
 
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsView.swift","offset":298,"limit":20}
-```
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Implemented the second-round review items. Summary:
 
 ### Should-fix
@@ -280,67 +266,7 @@ That is not alarming, but a very picky reviewer might prefer explicit error logg
 
 I'll replace silent `try?` repository calls with explicit analytics logging in those three spots, matching how errors are handled elsewhere in the app.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchWatchlistTracking.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AppNavigationCoordinator.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"trackNonFatalError|AppDiagnosticsLogger","glob":"*.swift","caseInsensitive":false,"headLimit":30,"multiline":false,"toolCallId":"tool_1901370c-0297-43ba-b059-acc3c408b7f","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"watchlistTracking\\.refresh|refreshTrackedShows","glob":"*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_c073a70c-0f6c-4622-ab33-3b0ae20349a","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchWatchlistTrackingContext.swift"}
-```
-
-## Assistant
-
 Replacing silent `try?` with explicit error logging in those three spots, and fixing the same pattern in `handleTrackButton`'s tracked-show lookup.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AppNavigationCoordinator.swift","offset":70}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Done. Silent `try?` repository/network failures now log through analytics with explicit context strings, while `CancellationError` is still ignored (task superseded).
 
