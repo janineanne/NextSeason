@@ -1,6 +1,6 @@
 # AI Transcripts
 
-This folder contains selected AI collaboration transcripts created during the development of NextSeason TV.
+This folder contains selected AI collaboration transcripts created during the development of NextSeason TV.  These transcripts have been lightly edited from the original AI conversations. Tool calls were removed for readability. All design discussions, technical reasoning, architectural decisions, and implementation guidance have been preserved.
 
 These transcripts demonstrate how AI was used throughout the project for:
 
