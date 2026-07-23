@@ -8,171 +8,17 @@ Please review all of the code and look for places where code is duplicated and c
 
 I'll explore the codebase to understand its structure and find duplicated code that could be abstracted, similar to what was done for the notifications flow.
 
-### Tool New agent
-
-## Assistant
-
 Let me look at how the notifications flow was already abstracted (the reference example), and examine the top duplication candidates in detail.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/WatchlistNotificationPromptState.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchWatchlistTracking.swift"}
-```
-
-## Assistant
 
 The notifications prompt was extracted into a shared `WatchlistNotificationPromptState` + `watchlistNotificationPromptAlerts` modifier reused by both flows. Now let me examine the top duplication candidates in detail to find similar opportunities.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/AppAboutView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService+Environment.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Persistence/WatchlistRepository+Environment.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/BetaRefreshDiagnostics+Environment.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AnalyticsService+Environment.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/WatchlistRefreshService+Environment.swift"}
-```
-
-## Assistant
-
 Let me examine the status display, notification content, show row, and mapping files where logic duplication is more likely.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/NextSeasonStatus+Display.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/StatusChangeDetector.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/ShowRow.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/TrackedShow.swift"}
-```
-
-## Assistant
 
 Let me look at the remaining candidates: view models with add/remove logic, the accessibility ID duplication, and safe-area inset modifiers.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistViewModel.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/UITestingConfiguration.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NextSeasonUITestCase.swift"}
-```
-
-## Assistant
-
 Let me look at the safe-area inset modifiers and the views that wire the flows together, plus the `add` implementations across repositories and analytics error handling.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/TVMazeAttributionView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchResultsHintView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/UndoToast.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AnalyticsService.swift"}
-```
-
-## Assistant
-
 Let me check the Diagnostics view for shared sections with About, and how the views compose the modifiers.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"}
-```
-
-## Assistant
 
 I've reviewed the codebase thoroughly. Here's what I found, prioritized by value and how closely each mirrors the notifications-flow extraction you already did (a shared `@Observable` state + a `ViewModifier` reused by both screens).
 
@@ -299,15 +145,7 @@ My recommendation is to start with **#1 and #2** (pure wins, tiny reviewable dif
 
 I'll implement the first three abstractions, each as a small self-contained diff. Let me set up tracking and start.
 
-### Tool Todo Write
-
-## Assistant
-
 **#1 — About toolbar button.** I'll add a `.appAboutToolbarButton()` modifier next to the `openAppAbout` environment key (its natural home), then use it in both views.
-
-### Tool Edit File V2
-
-## Assistant
 
 Now update
 
@@ -319,189 +157,15 @@ Go ahead and do the first three
 
 I'll extract the About toolbar, poster image, and watchlist-add flow into shared pieces. Reading the SwiftUI skill first, then implementing.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/skills/swiftui-pro/SKILL.md","limit":80}
-```
-
-### Tool Todo Write
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"betaThemeSwitcherToolbar|ThemeSwitcherToolbarButton","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"26\nfc_osS6UYm-3LYxF7-bee306c4-aws_ue1_2","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"globPattern":"**/WatchlistUndoRemoval+Environment.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchWatchlistTrackingContext.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/ThemeSwitcherView.swift","offset":150,"limit":50}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"WatchlistNotificationPromptState\\.swift|ShowRow\\.swift|AppAboutView\\.swift","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"30\nfc_osS6W99-3LYxF7-0dd49e36-aws_ue1_1","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swift-concurrency-pro/skills/swift-concurrency-pro/SKILL.md","limit":40}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"PBXFileSystemSynchronized|WatchlistNotificationPrompt","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"32\nfc_osS6Wca-3LYxF7-ee2b7968-aws_ue1_0","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","globPattern":"**/Features/**/*.swift"}
-```
-
-## Assistant
-
 Skills used: `swiftui-pro`, `swift-concurrency-pro`. Creating the three shared pieces and updating call sites.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 One subtle ordering note: local tracked state now updates after the shared add (including the auth check). Verifying the build and checking for related tests.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"addToWatchlist|watchlistAdded|WatchlistAdding","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests","caseInsensitive":false,"multiline":false,"toolCallId":"46\nfc_osS6esW-3LYxF7-1dc629f1-aws_ue1_0","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Todo Write
-
-### Tool Await
-
-```
-{"taskId":"144451","blockUntilMs":120000,"regex":"BUILD SUCCEEDED|BUILD FAILED|error:"}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 There's a naming conflict — checking what's already defining `appAboutToolbarButton`.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"appAboutToolbarButton","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"52\nfc_osS7571-3LYxF7-635b1c96-aws_ue1_0","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/AppAboutView.swift","offset":130}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/AppAboutView.swift","limit":50}
-```
-
-## Assistant
 
 The About toolbar modifier was already present at the top of the file — removing the duplicate I appended.
 
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"aboutToolbarButton|PosterImage|WatchlistAdding","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"57\nfc_osS77Fu-3LYxF7-264cd150-aws_ue1_1","offset":0}
-```
-
-## Assistant
-
 `WatchlistView` still has the duplicated About button — updating that call site too.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift","offset":60,"limit":100}
-```
-
-### Tool Await
-
-```
-{"taskId":"144452","blockUntilMs":120000,"regex":"BUILD SUCCEEDED|BUILD FAILED|error:"}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift","limit":50}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/AppAboutView.swift","limit":50}
-```
-
-## Assistant
 
 All three abstractions are in place and the project builds.
 
@@ -526,59 +190,7 @@ The posters are loading very slowly;  the bottom half of the image appears first
 
 That progressive half-then-half draw usually comes from how the image is decoded/displayed while downloading. I'll inspect `PosterImage` and the surrounding image-loading setup.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/PosterImage.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AsyncImage|posterMedium|ImageCache|progressive","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"68\nfc_osSEFVa-3LYxF7-23d24214-aws_ue1_1","offset":0}
-```
-
-### Tool Switch Mode
-
-```
-{}
-```
-
-### Tool Web Search
-
-```
-{"searchTerm":"SwiftUI AsyncImage progressive JPEG bottom half appears first scaledToFill","toolCallId":"70\nfc_osSEHb8-3LYxF7-ee8739e3-aws_ue1_0"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"poster|AsyncImage|image load","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","glob":"*.md","caseInsensitive":false,"headLimit":30,"multiline":false,"toolCallId":"71\nfc_osSEHb8-3LYxF7-ee8739e3-aws_ue1_1","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Likely cause: `AsyncImage` can paint progressive JPEG scans as they arrive (bottom-then-top), and the frame/clip sits outside the image content. I'll load the full image before display, cache it, and clip inside the frame.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/skills/swiftui-pro/SKILL.md","limit":40}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"import UIKit|UIImage","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","glob":"*.swift","caseInsensitive":false,"headLimit":20,"multiline":false,"toolCallId":"74\nfc_osSENEM-3LYxF7-df081ffc-aws_ue1_1","offset":0}
-```
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 That bottom-then-top reveal was progressive JPEG painting through `AsyncImage` — the image was drawn in scans as bytes arrived.
 
@@ -597,55 +209,9 @@ The poster images on the search page are now coming in intact, but they are stil
 
 I'll compare how the detail poster is composed versus the search rows — something on that screen is still revealing from the bottom.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":100,"limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/PosterImage.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AsyncImage|PosterImage|poster|animation|transition","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail","caseInsensitive":false,"multiline":false,"toolCallId":"79\nfc_osSRXF9-3LYxF7-2997a25e-aws_ue1_2","offset":0}
-```
-
-## Assistant
-
 Search works, so this is likely a detail-only layout/transition (image inserting with a bottom reveal), not progressive download. Checking parent animations and tightening how the loaded image is inserted.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","limit":100}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"animation|transition|contentTransition","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/AppScreenBackground.swift","caseInsensitive":false,"multiline":false,"toolCallId":"81\nfc_osSRZvo-3LYxF7-0c9171ce-aws_ue1_1","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"posterOriginal|posterMedium|image\\?","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models","caseInsensitive":false,"multiline":false,"toolCallId":"82\nfc_osSRZvo-3LYxF7-0c9171ce-aws_ue1_2","offset":0}
-```
-
-## Assistant
-
 Detail is likely animating the image into the `ScrollView` header. I'll stabilize the poster frame, clip the bitmap to it, seed from cache on first paint, and disable insertion animation.
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 That detail-only wipe was a layout/animation issue, not progressive download. In the `ScrollView` header, SwiftUI was animating the bitmap into a `scaledToFill` frame; list rows don’t show that the same way.
 
@@ -685,12 +251,6 @@ Yes
 
 I'll slim `PosterImage` back to `AsyncImage` with proper framing/clipping, and drop the custom download/cache stack.
 
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 `PosterImage` is back to plain `AsyncImage`, with the frame/clip applied on the loaded image so fill doesn’t spill. The custom download/cache path is gone.
 
 **What to test:** Search rows and show detail — posters should still look correct. If the bottom wipe comes back on detail, we can add a minimal fix without rebuilding a full loader.
@@ -702,12 +262,6 @@ Nope, the show detail poster is coming in from the bottom again.
 ## Assistant
 
 That points to an insert animation on detail, not the download path. I'll keep `AsyncImage` and only disable that transition with a stable clipped frame.
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Still using `AsyncImage`, but with:
 - `transaction: Transaction(animation: nil)` so the phase change doesn’t animate
@@ -723,12 +277,6 @@ Nope, same problem.
 
 `AsyncImage` can’t suppress that detail wipe — restoring the lean full-decode loader that fixed it before.
 
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Restored the full-decode approach — `AsyncImage` still wiped on detail even with animations off, so that path isn’t enough here.
 
 Worth the extra complexity in this case: one shared view, and the detail poster behaves correctly. Please confirm detail looks good again.
@@ -743,38 +291,6 @@ Unless you have something else to try, I say put it back the way it was original
 
 Understood — I'll remove `PosterImage`, restore the original inline `AsyncImage` in search and detail, and add comments explaining why they're left duplicated.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/ShowRow.swift","offset":95,"limit":40}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":155,"limit":25}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"PosterImage","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"93\nfc_osSUqyt-3LYxF7-94c1a666-aws_ue1_2","offset":0}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Delete File
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/PosterImage.swift","toolCallId":"96\nfc_osSUrz8-3LYxF7-fc901137-aws_ue1_2"}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Reverted. `PosterImage` is gone; search and detail each use their original inline `AsyncImage` again, with comments noting why that duplication is intentional.
 
 Do a clean build when you verify. The About toolbar and `WatchlistAdding` extractions earlier are unchanged.
@@ -788,44 +304,6 @@ So, the problem isn't really with your fix for the duplicated AsyncImage, it's w
 ## Assistant
 
 That narrows it a lot — I'll compare the "Try an Example" path to a normal Severance search and see how the show (and poster URL) differ.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"exampleSearch|Try an Example|tryExample|Severance|uitest|PreviewTVMaze|example","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","glob":"*.{swift}","caseInsensitive":false,"multiline":false,"toolCallId":"98\nfc_osWQHfU-3LYxF7-68753d15-aws_ue1_0","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/FirstRunCopy.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Previews/Show+Preview.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchViewModel.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift","offset":100,"limit":40}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/TVMazeClient.swift","limit":80}
-```
-
-## Assistant
 
 Good catch — and it’s almost certainly not special “example data.”
 
@@ -893,34 +371,6 @@ Ok, go ahead with that
 
 I'll add a shared full-decode `PosterImage` with an in-memory cache so search warms it and detail reuses it.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/skills/swiftui-pro/SKILL.md","limit":35}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/ShowRow.swift","offset":100,"limit":40}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":158,"limit":30}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Skills used: `swiftui-pro`, `swift-concurrency-pro`.
 
 Shared `PosterImage` is back with:
@@ -941,35 +391,7 @@ Sorry, it's still not working.  I tap try an example, Severance shows up with an
 
 Search already shows a full poster, so this is likely a detail transition/layout issue or a different URL — I'll verify both.
 
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/PosterImage.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":65,"limit":110}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"animation|transition|NavigationStack|matchedGeometry","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities","caseInsensitive":false,"multiline":false,"toolCallId":"114\nfc_osWYLAi-3LYxF7-46c454be-aws_ue1_3","offset":0}
-```
-
-## Assistant
-
 Search already shows a full poster, so the cache is warm — this is almost certainly the navigation push animating a clipped `scaledToFill` image. I'll flatten the poster into a stable bitmap so the transition can’t wipe it.
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Search showing an intact poster already meant the download/cache path was fine. The wipe on detail was almost certainly the **push transition** animating a live `scaledToFill` + clip.
 
@@ -988,31 +410,7 @@ Well, it's not exactly a wipe now... the bottom third comes in all at once, then
 
 Bottom-third-then-rest suggests a two-phase paint (URL change, forced decode, or nav layout)—I'll verify the Severance URLs and harden decoding/display.
 
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Mapping/ShowData+Domain.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift","limit":90}
-```
-
-## Assistant
-
 URLs match, so this isn’t a second fetch — likely ImageIO still painting a progressive JPEG (or SwiftUI re-blitting it) in two passes. Forcing a full bitmap decode and displaying via `UIImageView` should stop that.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 That “bottom third, then the rest” pattern fits a progressive JPEG still decompressing on first paint — even after we’d “fully loaded” it into a `UIImage`.
 
@@ -1031,27 +429,7 @@ Still does the same thing.  It's also taking a lot longer for the rows to appear
 
 The custom loader is costing search performance without fixing the artifact — I'll check for a navigation zoom/hero transition, then strip this back to simple `AsyncImage`.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"navigationTransition|matchedTransition|zoom|NavigationLink","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"123\nfc_osWatKm-3LYxF7-912ee3c5-aws_ue1_0","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift","offset":195,"limit":50}
-```
-
-## Assistant
-
 Force-decoding on the main actor was stalling search. Reverting to a thin shared `AsyncImage` wrapper so rows stay fast; we'll leave the detail band artifact for a separate investigation.
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Reverted the heavy loader. Search was slow because poster force-decode was running on the main actor and blocking the list.
 
@@ -1088,44 +466,6 @@ Ok.  I have restored the stash so your current changes are back again.  Since no
 ## Assistant
 
 I'll put the original inline `AsyncImage` back in search and detail, remove `PosterImage`, and restore the duplication comments.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"PosterImage|private var poster|func poster","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"127\nfc_osWh28d-3LYxF7-80945c31-aws_ue1_0","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/ShowRow.swift","offset":95,"limit":40}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":155,"limit":30}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Delete File
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/PosterImage.swift","toolCallId":"132\nfc_osWh2yD-3LYxF7-f139c41f-aws_ue1_2"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"PosterImage","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"133\nfc_osWh4VJ-3LYxF7-ebcce52e-aws_ue1_0","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Restored. `PosterImage` is gone; search and detail each use the original inline `AsyncImage` again, with comments noting why that duplication stays.
 
@@ -1169,137 +509,7 @@ Thanks, let's do items 4 - 6 now.
 
 I'll tackle the UI-test search helpers, shared accessibility IDs, and the About/Diagnostics App section. Checking the current code and how targets share files.
 
-### Tool Todo Write
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NextSeasonUITestCase.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/UITestingConfiguration.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","limit":200}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/AppAboutView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/DiagnosticsView.swift","limit":180}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"import NextSeason|@testable|UITestAccessibilityID|UITestSearchQuery|AccessibilityID","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests","caseInsensitive":false,"multiline":false,"toolCallId":"141\nfc_osWj67S-3LYxF7-0e638046-aws_ue1_0","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"PBXFileSystemSynchronizedBuildFileException|membershipExceptions|NextSeasonUITests","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"142\nfc_osWj67S-3LYxF7-0e638046-aws_ue1_1","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AppVersionInfo","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"143\nfc_osWj67S-3LYxF7-0e638046-aws_ue1_2","offset":0}
-```
-
-### Tool Unspecified
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"code-cleanup"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","offset":380,"limit":120}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"UITestAccessibilityID|UITestSearchQuery|UITestLaunchArgument","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests","outputMode":"count","caseInsensitive":false,"multiline":false,"toolCallId":"146\nfc_osWj7k7-3LYxF7-449ebc9e-aws_ue1_1","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/BetaBuildConfiguration.swift","limit":80}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"UITestingConfiguration\\.(SearchQuery|launchArgument)|AccessibilityID\\.","path":"/Users/janine/Documents/TbF Projects/NextSeason","glob":"*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"148\nfc_osWjALr-3LYxF7-7b0f5a37-aws_ue1_0","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","offset":230,"limit":40}
-```
-
-## Assistant
-
 Implementing all three: shared constants via a synced `NextSeasonShared` group, parameterized UI-test search helpers, and a shared About/Diagnostics App section.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"UITestingSearchQuery|AccessibilityID|UITestingLaunchArgument","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests","caseInsensitive":false,"headLimit":30,"multiline":false,"toolCallId":"165\nfc_osWjXFu-3LYxF7-86849161-aws_ue1_0","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Todo Write
-
-## Assistant
 
 All three are done.
 
@@ -1328,160 +538,6 @@ testRemoveLastShowViaStarShowsUndoThenEmptyState: XCTAssertTrue failed - Removin
 
 I'll inspect those three failing tests and the search-field helpers we changed — likely a regression from the refactor.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"testWatchlistExposesSearchFieldWhenShowsTracked|testSearchResultsHintDismissesAfterTrack|testRemoveLastShowViaStarShowsUndoThenEmptyState","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests","caseInsensitive":false,"multiline":false,"toolCallId":"168\nfc_osWsaMu-3LYxF7-50db8b9a-aws_ue1_0","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NextSeasonUITestCase.swift","offset":250,"limit":140}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/WatchlistSearchUITests.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift","offset":55,"limit":100}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift","offset":200,"limit":80}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonShared/AccessibilityID.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"UITestingConfiguration|UITestingLaunchArgument|-UITesting","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","glob":"*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"177\nfc_osWsi47-3LYxF7-61c41e62-aws_ue1_2","offset":0}
-```
-
-### Tool Await
-
-```
-{"taskId":"144453","blockUntilMs":300000,"regex":"TEST SUCCEEDED|TEST FAILED|Executed \\d+ test"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/terminals/144453.txt"}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchResultsHintView.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"searchResultsHint|onSearchResultsHintDismissed|searchResultsHintDismissed","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","glob":"*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"183\nfc_osWu3nB-3LYxF7-00172aab-aws_ue1_2","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"FirstRunPreferences|reset|UserDefaults|UITesting","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","glob":"*App*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"185\nfc_osWu7A6-3LYxF7-62e748a6-aws_ue1_0","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/App/AppCompositionRoot.swift","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchWatchlistTracking.swift"}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift","limit":50}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistAdding.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift","offset":85,"limit":50}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift","offset":100,"limit":30}
-```
-
-### Tool Await
-
-```
-{"taskId":"144454","blockUntilMs":180000,"regex":"TEST SUCCEEDED|TEST FAILED|XCTAssert|passed|failed"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/terminals/144454.txt"}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift","limit":50}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Await
-
-```
-{"taskId":"144455","blockUntilMs":180000,"regex":"TEST SUCCEEDED|TEST FAILED|Test Case.*failed"}
-```
-
-## Assistant
-
 I re-ran those three tests here.
 
 **Serially (no parallel clones): all three passed.**  
@@ -1504,12 +560,6 @@ Execute the selected diff-tab commit-and-push action.
 ## Assistant
 
 I'll inspect the branch state, stage only the cleanup-related changes, commit, and push.
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Committed and pushed to `origin/code-cleanup` as `3050cf2`.
 
@@ -1554,14 +604,6 @@ For day-to-day Xcode runs, the shared test plan is the right fix.
 ## User
 
 I don't see a mineu for the autocreated plan.  Where is it?
-
-### Tool Web Search
-
-```
-{"searchTerm":"Xcode convert autocreated test plan to shared test plan menu where 2025 2026","toolCallId":"202\nfc_osX6i79-3LYxF7-17deabae-aws_ue1_0"}
-```
-
-## Assistant
 
 There often isn’t a visible “menu” on the autocreated plan itself. Use one of these instead:
 

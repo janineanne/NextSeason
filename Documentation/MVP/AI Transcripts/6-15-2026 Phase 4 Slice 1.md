@@ -8,53 +8,11 @@ Something we haven't considered is how reliable TVMaze is.  An app like this is 
 
 Good call — data reliability is an existential risk for an app whose entire value is "trust me about when the next season drops." Let me investigate TVMaze's data sourcing, accuracy, freshness, and service availability, then write up findings.
 
-### Tool Web Search
-
-```
-{"searchTerm":"TVMaze data quality crowd-sourced user contributed how is data maintained accuracy","toolCallId":"toolu_vrtx_01QamkGdyw3HDmbzWpc1MeS4"}
-```
-
-### Tool Web Search
-
-```
-{"searchTerm":"TVMaze API uptime reliability status page outages 2026","toolCallId":"toolu_vrtx_01UP1mT28jmpZbdsDyK9R1WR"}
-```
-
-### Tool Web Search
-
-```
-{"searchTerm":"TVMaze vs TMDB vs TheTVDB data accuracy TV show season dates comparison","toolCallId":"toolu_vrtx_01U3osx6R8gZ27KjiuHXkmNc"}
-```
-
-## Assistant
-
 I have solid findings from multiple angles. Let me add a reliability section to `TVMazeResearch.md`. First I'll renumber the existing final section, then insert the new one before it.
-
-### Tool Edit File V2
-
-## Assistant
 
 Let me review the now-redundant items in the old "Open questions / risks" list and tighten them.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":300,"limit":30}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":323,"limit":15}
-```
-
-## Assistant
-
 The timeliness item is now covered in §6.3, so I'll point it there instead of repeating.
-
-### Tool Edit File V2
-
-## Assistant
 
 Added a thorough **§6 "Data reliability & service availability"** to `TVMazeResearch.md` (and renumbered the old "Open questions" to §7, removing the now-duplicated timeliness note). Findings are from web research plus the TVMaze forums/API docs, verified 2026-06-14.
 
@@ -92,29 +50,7 @@ Yes
 
 I'll reflect the reliability mitigations in `Architecture.md` §8 and add a decision-log entry. Let me read the current §8 first.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Architecture.md","offset":258,"limit":34}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Architecture.md","offset":284,"limit":28}
-```
-
-### Tool Edit File V2
-
-## Assistant
-
 Now I'll add a row to the decisions table in §11 and a decision-log entry.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Done. The reliability mitigations are now reflected in all three places:
 
@@ -134,44 +70,12 @@ I'll start Phase 4 (the Guest Search slice). Per our standing agreement, I'll do
 
 Let me set up the branch and gather what I need (project structure + the Swift skills I'm required to read before writing Swift).
 
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/SKILL.md"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swift-concurrency-pro/SKILL.md"}
-```
-
-## Assistant
-
 Setup gathered. Two important things I learned from the project file:
 
 1. **Good news on file management:** the project uses Xcode 26 **file-system-synchronized groups** (`PBXFileSystemSynchronizedRootGroup`), so any `.swift` files I add inside the `NextSeason/` folder are picked up by the target automatically — no fragile `project.pbxproj` editing needed for app code.
 2. **No test target exists yet**, and the build settings use `SWIFT_VERSION = 5.0` (with `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and approachable concurrency on). Both have implications I'll raise below.
 
 Let me create the `Phase4` branch (working tree is clean).
-
-### Tool Run Terminal Command V2
-
-### Tool Unspecified
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"Phase4"}
-```
-
-## Assistant
 
 I'm on the `Phase4` branch now, and I've read the `swiftui-pro` and `swift-concurrency-pro` skills (I'll read `swift-testing-pro` before writing tests). Per our agreement, here's the plan for **Slice 1 (Guest Search)** — I won't write any Swift until you approve.
 
@@ -200,131 +104,33 @@ First, two findings that need a decision, then approval to start:
 - **Test target:** there's currently no test target in the project, and I can't create one safely by hand-editing `project.pbxproj`. The clean path is for you to add a *Unit Testing Bundle* target in Xcode (named `NextSeasonTests`, Swift Testing). The pure `NextSeasonCalculator` + DTO decoding are our highest-value tests.
 - **Swift language mode:** the project is set to `SWIFT_VERSION = 5.0` (with `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and approachable concurrency). `AGENTS.md` says Swift 6.2. The current setting already gives us modern concurrency; I'd suggest leaving it as-is for now and writing Swift-6-clean code, then flipping the language mode later. Changing it is an app-config edit I'd only do with your OK.
 
-### Tool Ask Question
-
-## Assistant
-
 Approved. I'm writing **Step A (Search)** now, leaving the project at Swift 5 mode (+ MainActor default) and writing Swift-6-clean code. You'll add the `NextSeasonTests` target in Xcode later. The synchronized group means these new files build automatically.
 
 Let me track the work and start creating files.
 
-### Tool Todo Write
-
-## Assistant
-
 Creating the DTO models:
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Now the domain models and mapping:
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Now the utilities:
-
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Now the networking layer:
 
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Now the search feature (view model + views):
-
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 I referenced a `Show.preview` fixture — let me create it (DEBUG-only) and then `SearchView`.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Now wire the app entry point to `SearchView` and remove the template `ContentView`:
-
-### Tool Edit File V2
-
-### Tool Delete File
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift","toolCallId":"toolu_vrtx_01HqF2z2wVVDMoN41ZEM7oof"}
-```
-
-### Tool Todo Write
-
-## Assistant
 
 Now let me verify it compiles by building for the simulator.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 `xcodebuild` is pointed at Command Line Tools, not Xcode. I can work around that without `sudo` by setting `DEVELOPER_DIR` for this command. Let me check for Xcode first.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Found Xcode 26.5. Let me build using `DEVELOPER_DIR` (no `sudo` needed). This may need to resolve the toolchain and could take a bit.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 The build failed purely due to sandbox restrictions (can't write to `~/Library/Developer/Xcode/DerivedData`, can't reach `CoreSimulatorService`) — not code errors. Let me re-run outside the sandbox.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 `** BUILD SUCCEEDED **` — Step A compiles cleanly with the Xcode 26.5 toolchain for the iOS Simulator.
-
-### Tool Todo Write
-
-## Assistant
 
 Step A (Search) is done and building. Pausing here for your review as agreed, before Step B (Show Detail + next-season status).
 
@@ -369,27 +175,9 @@ I've already added the test target.  Do you need me to do something so you can s
 
 Let me check what the test target setup looks like now.
 
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Test|PBXFileSystemSynchronizedRootGroup|fileSystemSynchronizedGroups","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","outputMode":"content","caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_016FfNpAaEEKi9jGUgaede6D","offset":0}
-```
-
-## Assistant
-
 No, I'm all set — I can see it. The `NextSeasonTests` target exists and uses a file-system-synchronized group (`path = NextSeasonTests`), so any `.swift` files I add into the `NextSeasonTests/` folder are automatically picked up by the test target. No action needed from you.
 
 Let me peek at the default test file to match the framework/style you got.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/NextSeasonTests.swift"}
-```
-
-## Assistant
 
 It's using **Swift Testing** (`import Testing`), which is exactly what we planned. I can write test files straight into `NextSeasonTests/`.
 
@@ -435,25 +223,9 @@ Go ahead and switch to Swift 6, but don't proceed with Step B yet.
 
 I'll switch the project to Swift 6 language mode and verify the build, but hold off on Step B. Let me find all `SWIFT_VERSION` settings first.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"SWIFT_VERSION","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","outputMode":"content","caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_015RDbL1Sd6DFwngRWSRed2p","offset":0}
-```
-
-## Assistant
-
 All four are target-level (app + test, Debug + Release). I'll switch them all to Swift 6.
 
-### Tool Edit File V2
-
-## Assistant
-
 Now rebuild to confirm the app still compiles cleanly under Swift 6 language mode (strict concurrency now enforced as errors).
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 `** BUILD SUCCEEDED **` under Swift 6 language mode, with no compile errors or warnings (the lone message is an unrelated AppIntents metadata note). Because the code was already written `nonisolated`/`Sendable`-clean, strict concurrency — now enforced as hard errors — passed without any changes needed.
 
@@ -480,14 +252,6 @@ Here's the "better idea" I'd suggest, which gives you both: keep **`ContentView`
 
 Let me restore `ContentView` as the root and point the app at it.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Done — `ContentView` is back as the root view, and the build is clean.
 
 ## What changed
@@ -508,10 +272,6 @@ One thing that occurs to me - what abour reruns?  Can we be sure that the data w
 ## Assistant
 
 Great question — reruns/re-broadcasts are exactly the kind of thing that could quietly corrupt a "next season" signal. Let me verify against live data rather than just assert. A heavily-rerun, long-ended show is the perfect test: The Big Bang Theory (ended 2019, constantly re-aired).
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Confirmed with live data. Despite being in heavy rerun rotation, **The Big Bang Theory** shows:
 - `status: Ended`
@@ -551,43 +311,11 @@ Yes please
 
 I'll add a "Reruns & re-broadcasts" note to `TVMazeResearch.md` §6. Let me place it after §6.2 (numbering rules), since it builds on the original-premiere policy.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/TVMazeResearch.md","offset":238,"limit":30}
-```
-
-### Tool Edit File V2
-
-## Assistant
-
 Now renumber the following three subsections and fix the cross-references.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Now fix the cross-references that pointed at the old section numbers (in the open-questions list and in `Architecture.md`).
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Let me double-check no other stale `§6.x` references remain.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"§6\\.\\d","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","outputMode":"content","caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_01Kc6BJ95jjoAuXTPy7Zx78m","offset":0}
-```
-
-## Assistant
 
 All cross-references are now consistent. The remaining `§6.3` mention is only in a kickoff *transcript* (a historical record of an earlier chat), which I've left untouched.
 
@@ -664,12 +392,6 @@ My recommendation is **option 2**: in Step B, keep the **raw** `summary` HTML on
 
 Let me capture this so it's on record (it also resolves one of our open Phase-4 questions).
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Recorded. To summarize:
 
 - **Decision (PD-009):** show summaries will be rendered with their intended formatting — paragraphs, bold, italics — using a small, unit-tested HTML→`AttributedString` converter that respects Dynamic Type and VoiceOver and matches the app's fonts. The raw `summary` HTML will be kept on the domain model so formatting happens at render time.
@@ -682,15 +404,7 @@ So when we build Step B, I'll add the `SummaryFormatter` (plus tests) and the de
 
 Execute the selected diff-tab commit-and-push action.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Commit created with only the staged file. The rest remain uncommitted as instructed. Now pushing the branch.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Done.
 
@@ -708,17 +422,7 @@ Go ahead and commit and push all changes so far for phase 4, step A.
 
 I'll commit all remaining Phase 4 Step A changes (app code + the related doc updates) and push. Let me review what's there first.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Everything looks like expected Step A work. Staging all, committing, and pushing.
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Done — all Phase 4 Step A changes are committed and pushed.
 
@@ -736,197 +440,38 @@ Go ahead with Step B
 
 Starting Step B. First, as required before writing Swift (and since this step includes tests), let me read the Swift Testing skill.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swift-testing-pro/SKILL.md"}
-```
-
-## Assistant
-
 Read. I'll follow Swift Testing conventions (structs, `#expect`/`#require`, parameterized tests, injected mocks). Now building Step B.
 
 First, the domain additions and model updates (add `NextSeasonStatus`, `NextEpisode`; keep raw summary HTML on `Show`).
 
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Now update `Show` (raw summary HTML + `nextEpisode`) and the mapping:
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Update the preview fixtures for the new fields:
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Now the calculator:
 
-### Tool Todo Write
-
-### Tool Edit File V2
-
-## Assistant
-
 Now the `SummaryFormatter` and a refactor of `String+HTML` to share entity decoding:
-
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Now the detail screen (status display, view model, view) and wiring navigation from search:
 
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Now wire navigation from the search results into the detail view:
-
-### Tool Edit File V2
-
-## Assistant
 
 Let me check how results rows are currently rendered so I can make them navigable:
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Edit File V2
-
-## Assistant
-
 Let me verify `ShowStatus.displayLabel` exists and check the embedded/nextepisode DTO field names used in mapping.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/ShowStatus.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/DTO/EmbeddedData.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/DTO/NextEpisodeData.swift"}
-```
-
-## Assistant
 
 Now let me verify the `TVMazeService` protocol signature and `Season`/`SeasonData` fields for the tests.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/TVMazeService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/Season.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/DTO/SeasonData.swift"}
-```
-
-## Assistant
-
 Now let me check `TVMazeDate` and the search-result mapping so the decoding tests are accurate.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/TVMazeDate.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/DTO/ShowSearchResultData.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Mapping/ShowData+Domain.swift"}
-```
-
-## Assistant
 
 Let me check `ShowData` fields to make sure my test JSON decodes cleanly.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/DTO/ShowData.swift"}
-```
-
-## Assistant
-
 All optional except `id`/`name`. Now writing the tests.
-
-### Tool Todo Write
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Now let me build and run the tests. First locating Xcode and a simulator.
 
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 There's a booted iPhone 17 Pro. Running the test suite against it:
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 All 18 tests passed (including the placeholder). Step B is complete.
-
-### Tool Todo Write
-
-## Assistant
 
 Step B (Show Detail + next-season status) is done. The build succeeds and all tests pass.
 
@@ -963,21 +508,7 @@ Note: I left the auto-generated placeholder `NextSeasonTests.example()` in place
 
 I forgot to have you make a new branch.  Please rename existing branch "Phase4" to "Phase4-StepA" and then make a new branch called "Phase4-StepB" for the uncommitted changes.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 On `Phase4` with the Step B changes uncommitted. I'll rename the branch (working tree changes stay put), then create `Phase4-StepB` from it.
-
-### Tool Run Terminal Command V2
-
-### Tool Unspecified
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"Phase4-StepB"}
-```
-
-## Assistant
 
 Done. Here's the result:
 
@@ -993,10 +524,6 @@ That's a screenshot of the app.  The show "Call the Midwife" is currently in the
 ## Assistant
 
 Let me look at the live TVMaze data for this show to understand why it reports "Returning — no next season announced yet" rather than detecting an airing season.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Good catch — but I dug into the live data and there's an important nuance worth surfacing before I change anything.
 
@@ -1016,39 +543,9 @@ The app *does* already have a proper "currently airing" concept: the `NextSeason
 
 So I'd like your steer on how to proceed (I won't touch app code until you pick):
 
-### Tool Ask Question
-
-## Assistant
-
 The user wants both: reword the airing state to "Currently showing Season X", and soften "Running" → "Ongoing series". Let me check where the status label is used so I change it consistently.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/ShowRow.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"displayLabel","outputMode":"content","caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_0181Wb8xBBfRgZQkqaqFgTSs","offset":0}
-```
-
-## Assistant
-
 Both edits are clean. `displayLabel` is shared by the search row and detail header, so softening it there is consistent. Making the two changes:
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/ShowStatus.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/NextSeasonStatus+Display.swift"]}
-```
-
-## Assistant
 
 Done. Two changes:
 
@@ -1074,10 +571,6 @@ In the same screenshot, you can see that in the summary there is a space before 
 ## Assistant
 
 Let me look at the raw summary HTML from TVMaze to see exactly what's there.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 It's the data — not a layout bug in your view. Here's the raw summary TVMaze returns for this show:
 
@@ -1109,21 +602,9 @@ Yes, and please add one or more tests for this.
 
 Implementing it. First the normalization in `SummaryFormatter`, preserving the paragraph/line breaks we add:
 
-### Tool Edit File V2
-
-## Assistant
-
 Now the tests — including the exact "space + non-breaking space" case from Call the Midwife:
 
-### Tool Edit File V2
-
-## Assistant
-
 Now let me run the test suite to confirm everything passes:
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 All 21 tests pass, including the new whitespace cases.
 
@@ -1158,65 +639,17 @@ The show object from TVMaze includes a `url` field (the canonical show page, e.g
 
 Let me read the current `Show.swift` for exact context.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/Show.swift"}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Now update the preview fixtures:
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Now update the detail view's footer to add the "View on TVMaze" link:
 
-### Tool Edit File V2
-
-## Assistant
-
 Now add `url` to the decoding test and assert the mapping:
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 The calculator test helper constructs `Show` directly, so it needs the new field too. Let me update it.
 
-### Tool Edit File V2
-
-## Assistant
-
 Let me check for any other direct `Show(` constructions I might have missed:
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"\\bShow\\(","outputMode":"files_with_matches","caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_01CBhkKkkHUu4jdMs2mqY9UH","offset":0}
-```
-
-## Assistant
-
 All three covered. Running the test suite to confirm:
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Build and tests pass. Here's what I added for the TVMaze show link:
 
@@ -1250,27 +683,9 @@ Nothing committed yet.
 
 That works, but it doesn't look right.  Let's move the "view on TVMaze" link up so it's part of the About section, and move the "Data provided by TVMaze" down to the bottom of the page, centered.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":17,"limit":40}
-```
-
-## Assistant
-
 Now I'll restructure: fold the link into the About section and make the credit a centered bottom line.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Let me verify it compiles with a quick build:
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Build succeeds. Here's the new layout:
 
@@ -1293,31 +708,9 @@ That looks good.  Please add a preview with sample data to provide a visual exam
 
 Good idea. To make this preview clean and deterministic (no network), I'll let the detail view accept an injected service, add a "missing summary" fixture, and a tiny preview mock service. Let me look at the current preview helpers first.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Previews/Show+Preview.swift"}
-```
-
-## Assistant
-
 I'll add a "missing summary" fixture plus a reusable preview mock service (so previews don't hit the network), then let `ShowDetailView` accept an injected service.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Now update `ShowDetailView` to accept an injected service and add the two named previews:
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Build succeeds. Here's what I added:
 
@@ -1337,10 +730,6 @@ Note on design: I gave the missing-summary fixture a TVMaze URL so you can see t
 ## User
 
 In the case where the summary is missing, can you suppress the About label so the only thing that displays is the link?
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
 
 ## Assistant
 
@@ -1362,35 +751,15 @@ Whenever you're ready, just say the word and I'll commit and push the Step B cha
 
 Go ahead
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Step A is already on `origin/Phase4` and in sync. Now I'll commit the Step B changes and push the new branch. Let me stage and commit first.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Committed. Now let me check for any open PRs (so I don't disrupt anything when sorting out the Step A remote) and push the new branch:
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Step B is pushed and tracking `origin/Phase4-StepB`. `gh` isn't installed, so let me check for an open PR on the old `Phase4` branch via the API before touching it (the repo appears public).
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 The repo is private, so I can't verify PR status unauthenticated — meaning I shouldn't blindly delete the old remote `Phase4` branch (deleting it would close any open PR against it).
 
 I'll do the safe, additive part now: push `Phase4-StepA` to a matching `origin/Phase4-StepA` and set its upstream. Then I'll ask you about the old `Phase4` ref.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 All set on the push side. Current state:
 
@@ -1401,17 +770,7 @@ The one leftover is the **old `origin/Phase4` remote branch**. It still exists a
 
 How would you like to handle the old `origin/Phase4` branch?
 
-### Tool Ask Question
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 The user explicitly chose to delete it, so I'll surface the approval card for this remote deletion.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 All done. Final state:
 
@@ -1432,41 +791,7 @@ Is there anything left to do in Phase 4?
 
 Let me check the project's Phase 4 definition against what we've built.
 
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","globPattern":"**/*.md"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Phase 4","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/ProjectKickoff.md","outputMode":"content","contextAfter":25,"caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_016aoGiGBVj27sBFyWDsFzCd","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Slice 1|Slice 2|Step A|Step B|Step C","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","outputMode":"content","context":3,"caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_01CJwGPDfhcMegVSHjg2AxdV","offset":0}
-```
-
-## Assistant
-
 Let me read the exact Slice 1 scope checklist and the build-order section to compare against what's built.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/ProductSpec.md","offset":57,"limit":35}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"## 10|## 11|Build order|build order","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Architecture.md","outputMode":"content","contextAfter":30,"caseInsensitive":false,"multiline":false,"toolCallId":"toolu_vrtx_01SgfoDwMtHHZ75qzcgxDFfK","offset":0}
-```
-
-## Assistant
 
 Short answer: **the Slice 1 (Guest Search) work that Phase 4 was scoped to deliver is functionally complete.** Step A + Step B together cover the entire documented Slice 1 scope.
 
@@ -1501,19 +826,7 @@ Let's answer that question first.  Adding response caching seems like a good ide
 
 Good question to settle properly. Before I give an opinion, let me check what caching headers TVMaze actually sends — that decides whether we even need to build anything.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Both endpoints return `Cache-Control: public, max-age=3600`. That's the key fact. Let me check how our `TVMazeClient` is configured to see if it's already benefiting from this.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/TVMazeClient.swift"}
-```
-
-## Assistant
 
 Here's the key finding before I opine: TVMaze sends `Cache-Control: public, max-age=3600` on **both** the search and show endpoints. That changes the calculus a lot.
 
@@ -1548,71 +861,17 @@ Yes, and also take care of the Slice 1 loose ends you mentioned above.
 
 I'll handle all of it. Let me set up a plan and read the files I need.
 
-### Tool Todo Write
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchViewModel.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/NextSeasonTests.swift"}
-```
-
-## Assistant
-
 Now implementing. First, the dedicated `URLCache` on `TVMazeClient`:
-
-### Tool Edit File V2
-
-## Assistant
 
 Now the `SearchViewModel` tests and removing the placeholder:
 
-### Tool Edit File V2
-
-### Tool Delete File
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/NextSeasonTests.swift","toolCallId":"toolu_vrtx_01RRdJghxy9wWdxigtVuVAph"}
-```
-
-## Assistant
-
 Now the docs. Let me read the DecisionLog around PD-009 to fix the stale wording and add PD-010.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/DecisionLog.md","offset":110,"limit":50}
-```
-
-### Tool Edit File V2
-
-## Assistant
 
 Now update `Architecture.md` §12:
 
-### Tool Edit File V2
-
-## Assistant
-
 Now let me build and run the full test suite to confirm everything (including the new tests and removed placeholder) is green.
 
-### Tool Todo Write
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 All green. The placeholder is gone and the 4 new `SearchViewModel` tests pass (full suite still TEST SUCCEEDED).
-
-### Tool Todo Write
-
-## Assistant
 
 All done — here's everything that changed (on `Phase4-StepB`):
 
@@ -1647,27 +906,11 @@ Nothing committed yet. Want me to commit these Slice 1 loose-end changes to `Pha
 
 Yes, please commit
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 I see some unrelated changes mixed in (a kickoff transcript `.md` in a half-staged state, and a `project.pbxproj` tweak). Let me inspect the `pbxproj` change to confirm whether it belongs with my work before committing selectively.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 The `pbxproj` change and the `6-15-2026-Phase4-Slice1.md` are **your** additions (a kickoff transcript added to the Xcode project) — unrelated to the Slice 1 loose ends. I'll leave those for you and commit only my changes: the caching, the new tests, the placeholder removal, and the doc updates.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Staged exactly the right set (pbxproj and the transcript are left out). Committing now:
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Committed as `dfa2828` on `Phase4-StepB` (5 files: caching, new tests, placeholder removal, two doc updates).
 
@@ -1699,19 +942,9 @@ A note on strategy: I'll use `--no-ff` so each step becomes an explicit merge co
 
 First, push Step B and perform the two merges locally:
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 The user explicitly asked for these merges into `main`, so I'll surface the approval card.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Step B is pushed. The checkout was blocked by your uncommitted `pbxproj` change. I'll temporarily stash just that file (leaving the untracked transcript in place), do the merges, push `main`, then return to `Phase4-StepB` and restore your stashed change so your transcript work is preserved.
-
-### Tool Run Terminal Command V2
 
 ## Assistant
 
@@ -1742,17 +975,7 @@ Yes please, do it locally
 
 I'll verify `main` locally with a full build and test run.
 
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Tests passed on `main`. Switching you back to `Phase4-StepB` and restoring your stashed `pbxproj` change.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 `main` is green locally.
 

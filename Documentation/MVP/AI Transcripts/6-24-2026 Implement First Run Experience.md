@@ -8,107 +8,7 @@ Please look at the First-Run Experience section of Release Readiness and give me
 
 Searching the repo for the Release Readiness doc and its First-Run Experience section.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"First-Run Experience|Release Readiness","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_a34d517a-a674-433b-ab57-d37553b6835","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"**/*Release*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":200,"limit":80}
-```
-
-### Tool Semantic Search Full
-
-```
-{"query":"First run onboarding welcome screen experience","targetDirectories":[],"explanation":""}
-```
-
-## Assistant
-
 Reviewing what's already shipped and how other Release Readiness sections are structured.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":1,"limit":140}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"ContentUnavailableView|empty|welcome|onboarding|firstRun|first.?run|hasSeen","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","caseInsensitive":true,"multiline":false,"toolCallId":"tool_b2ba96ba-a4f8-4f13-baf7-ae2cbcf3401","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"First-Run|first-run|welcome|onboarding","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","caseInsensitive":false,"multiline":false,"toolCallId":"tool_8b0eb9fe-3837-4c14-978d-1277706499a","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift","limit":260}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift","limit":220}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"notification|permission|UserDefaults|@AppStorage","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_2e8b0e05-98e9-40fe-af29-cc227926fbd","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":139,"limit":90}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"first.?run|welcome|onboarding|FR-","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","glob":"**/*.md","caseInsensitive":false,"headLimit":40,"multiline":false,"toolCallId":"tool_44a757fe-41be-4023-bae2-35171ab370e","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","limit":120}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/AppNavigationCoordinator.swift"}
-```
-
-## Assistant
 
 Here’s an assessment of the **First-Run Experience** section against what the app already does, plus concrete recommendations for both the doc and the product.
 
@@ -267,16 +167,6 @@ Please add the new section to Release Readiness first
 
 Updating the First-Run Experience section in Release Readiness to match the other sections' structure and our recommendations.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":218,"limit":55}
-```
-
-### Tool Edit File V2
-
-## Assistant
-
 Updated `Documentation/MVP/Release Readiness.md` — the **First-Run Experience** section now matches the structure of Watchlist Discoverability and Visual Polish.
 
 **Added:**
@@ -299,35 +189,7 @@ Oops - I need to commit the previous work first.  Please remove your last change
 
 Reverting the First-Run Experience section in Release Readiness and saving the updated content so we can reapply it shortly.
 
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":218,"limit":100}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md"}
-```
-
-## Assistant
-
 Saving the updated section to a draft file, then reverting Release Readiness.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":220,"limit":20}
-```
-
-## Assistant
 
 Done.
 
@@ -345,40 +207,6 @@ Ok, please make a branch and then restore your draft work into Release Readiness
 
 Creating a branch and restoring the First-Run Experience draft into Release Readiness.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/First-Run Experience.section-draft.md"}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"**/*section-draft*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":220,"limit":20}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Edit File V2
-
-### Tool Unspecified
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"feature/first-run-experience-docs"}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Done.
 
 **Branch:** `feature/first-run-experience-docs` (from `main`)
@@ -395,143 +223,7 @@ Move on to the P0 implementation
 
 Implementing P0 first-run work: reading the SwiftUI skill and the Search, Watchlist, and notification copy paths.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/SKILL.md","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchViewModel.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Find Your Next Season|Stay in the Loop|No Tracked Shows|Search for a show","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_f4d0afbf-2a61-4cef-95a7-95cc1bc73c8","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","limit":100}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift","offset":175,"limit":30}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"idlePrompt|Find Your Next Season|exampleSearch","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_b77fa290-642a-493d-b829-1d5530a79be","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/UITestingConfiguration.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/NotificationsDisabledBanner.swift"}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"**/*Search*Test*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NextSeasonUITestCase.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Previews/Show+Preview.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift"}
-```
-
-## Assistant
-
 Implementing P0: shared first-run copy, a Search idle “Try an Example” action, and unified notification messaging across views.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Delete File
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/First-Run Experience.section-draft.md","toolCallId":"tool_ac9c10d5-2554-477c-8c0a-ee0d4af0780"}
-```
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 P0 first-run work is implemented on `feature/first-run-experience-docs`. Build succeeds; simulator tests couldn’t run here (CoreSimulator unavailable in this environment).
 
@@ -569,56 +261,6 @@ Are there any other tests that should be added?
 ## Assistant
 
 Reviewing existing test coverage against the first-run changes to identify meaningful gaps.
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"**/*Tests*"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"FirstRunCopy|tryExample|idlePrompt|notificationPrompt|watchlistEmpty","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_25e78f5e-5930-4ab3-bad5-3168dd9e5b6","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/SearchViewModelTests.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NavigationUITests.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Find a Show|Stay in the Loop|deferAuthorization|FirstRun","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_82480153-cc6a-43c5-80a8-0b50727c3ef","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/NotificationAuthorizationPolicyTests.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"NotificationService|needsAuthorization|deferAuthorization","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests","caseInsensitive":false,"multiline":false,"toolCallId":"tool_553a524a-1aa8-47ef-853d-1a2ca607143","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/AI Transcripts/6-23-2026/Add Additional UI Tests.md","limit":80}
-```
-
-## Assistant
 
 For the P0 first-run work specifically, coverage is **mostly adequate**. One UI test is worth adding; a few others are optional or blocked by how tests are set up today.
 
@@ -688,133 +330,11 @@ Add all the ones you think are worthwhile
 
 Implementing the worthwhile tests: reviewing NotificationService and the UI test setup first.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NavigationUITests.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/SearchAndTrackUITests.swift","limit":55}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonUITests/NextSeasonUITestCase.swift"}
-```
-
-## Assistant
-
 Adding UI test helpers and NotificationService test hooks, then implementing the new tests.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/FirstRunCopy.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swift-testing-pro/SKILL.md","limit":30}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"resetDeferredPromptForTesting","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_0309b3a3-e441-4b06-af26-722dcfdffad","offset":0}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift","limit":60}
-```
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Fixing the failing clear-search UI test — the nav-bar search field likely isn't clearing reliably.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Replacing the flaky nav-bar clear UI test with a unit test that covers the same behavior.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"waitForSearchFieldToClear","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_d9683ae7-87a4-45de-925a-b1006b87b04","offset":0}
-```
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Await
-
-```
-{"taskId":"706566","blockUntilMs":120000}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/terminals/706566.txt","offset":-25}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Added the worthwhile tests. All pass locally.
 
@@ -893,73 +413,7 @@ Sounds good, let's see it.
 
 Implementing a one-time muted footer hint on first search results, dismissed after the user tracks a show or opens detail.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"tvmazeAttributionInset|AppStorage|UserDefaults","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_7ed795c6-1796-444c-a1b5-70258674372","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/FirstRunCopy.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/TVMazeAttributionView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/UITestingConfiguration.swift"}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Resetting the hint on UI-test launch so tests don't interfere with each other.
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
 
 ## User
 
@@ -972,10 +426,6 @@ I've just noticed that the Watchlist page doesn't have a title at the top. Pleas
 ## Assistant
 
 Checking how Search and Watchlist set their navigation titles so we can match Watchlist to Search.
-
-### Tool New agent
-
-## Assistant
 
 Working on the Watchlist title now — I’ll match it to the large “NextSeason” style on Search and report back when it’s done.
 
@@ -1014,16 +464,6 @@ output_path: /Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-
 ## Assistant
 
 Checking whether the Watchlist title fix landed cleanly and if any earlier in-progress work still needs attention.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"navigationBarTitleDisplayMode|appNavigationChrome","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_eedfbc75-f3bd-4b41-94f3-af75b5cd05d","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 The [Watchlist title fix](1388cd7a-cac5-41ea-9c16-e93b9f20bfce) is in and the project builds cleanly — no further code changes needed for that.
 

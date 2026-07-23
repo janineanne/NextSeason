@@ -10,41 +10,7 @@ This must be a very common problem - what is the standard/usual solution?
 
 This is a classic SwiftUI search + debounce focus issue. I'll inspect how search and keyboard dismissal are wired in your project so we can pinpoint what's stealing focus on device.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/SKILL.md","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchViewModel.swift"}
-```
-
-## Assistant
-
 Checking the prior implementation and any related docs for full context.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"collapseSearchKeyboard|dismissSearch|scrollDismissesKeyboard","glob":"**/*.{swift,md}","caseInsensitive":false,"multiline":false,"toolCallId":"tool_53f5695f-892a-4f7f-b463-138ab5b84ae","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"keyboard|searchable|FocusState","glob":"**/*.md","caseInsensitive":false,"headLimit":30,"multiline":false,"toolCallId":"tool_f3a7eb91-f5b0-482c-a313-c4283e3c77d","offset":0}
-```
-
-## Assistant
 
 The behavior you’re seeing isn’t a mysterious device-only SwiftUI bug — it’s coming from the auto-dismiss we added after each debounced search finishes.
 
@@ -127,30 +93,6 @@ Yes
 ## Assistant
 
 Removing auto-dismiss after search completes; keeping dismiss on Search key and scroll.
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"collapseSearchKeyboardIfSearchFinished|collapseSearchKeyboard","caseInsensitive":false,"multiline":false,"toolCallId":"tool_40d6057e-cf83-4f37-8713-92b7e9defa6","offset":0}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"]}
-```
-
-## Assistant
 
 Removed auto-dismiss after search results load. The keyboard now stays up while you type and refine a query.
 

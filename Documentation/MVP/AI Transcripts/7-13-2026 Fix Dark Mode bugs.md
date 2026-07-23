@@ -63,10 +63,6 @@ Now update `drawIcon` to take an appearance instead of the whole spec.
 
 Now rewrite the writer to emit both appearances and an appearance-aware `Contents.json`.
 
-### Tool Edit File V2
-
-## Assistant
-
 Now remove the now-unused `resizedPNG` helper to avoid a dead-code warning.
 
 ## Assistant
@@ -88,10 +84,6 @@ Let me check exactly what differs (likely just a trailing newline).
 ## Assistant
 
 Confirmed — the only difference is a trailing newline. I'll make the script append one so regeneration produces a clean, matching diff.
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 The generator now produces output byte-identical to the committed asset catalog.
 

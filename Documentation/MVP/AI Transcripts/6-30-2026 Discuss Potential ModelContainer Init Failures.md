@@ -8,68 +8,6 @@ We currently call fatalError if ModelContainer creation fails during app startup
 
 I'll locate where `ModelContainer` is created and how failures are handled, then compare that to SwiftData best practices before recommending any change.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"fatalError|ModelContainer","glob":"**/*.{swift}","caseInsensitive":false,"multiline":false,"toolCallId":"tool_124577f9-5020-4e0f-9680-19fdea85c32","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftdata-pro/SKILL.md","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"fatalError|ModelContainer|recovery|migration","path":"/Users/janine/.claude/skills/swiftdata-pro","caseInsensitive":false,"multiline":false,"toolCallId":"tool_7702fa5d-bca8-4f3e-8b87-e2c7aecda60","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason","globPattern":"**/*Persistence*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Persistence/TrackedShowEntity.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"ModelContainer|SwiftData|migration|fatalError","glob":"**/*.{md,swift}","caseInsensitive":false,"multiline":false,"toolCallId":"tool_9067bb08-c401-4a83-96ad-3ac598701bc","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftdata-pro/references/core-rules.md"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AppDiagnosticsLogger","glob":"**/*.swift","caseInsensitive":false,"headLimit":15,"multiline":false,"toolCallId":"tool_46306a72-6bc1-416e-ac27-eba2f4bca11","offset":0}
-```
-
-## Assistant
-
 For NextSeason today, **`fatalError` on `ModelContainer` init failure is a reasonable default** — and it matches what Apple’s SwiftData samples effectively do (often via `try!` in `@main`). Apple doesn’t publish a formal “you must crash” guideline, but the framework assumes a working container at launch; there’s no built-in degraded mode.
 
 Your current setup:
@@ -195,49 +133,7 @@ Go ahead with option 1
 
 I'll add error logging via `AppDiagnosticsLogger` before the existing `fatalError` on `ModelContainer` init failure.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AppDiagnosticsLogger","glob":"**/*.swift","outputMode":"files_with_matches","caseInsensitive":false,"multiline":false,"toolCallId":"tool_623d3dfb-f527-4042-8d8a-5a0d49c1eef","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift","limit":60}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/AppDiagnosticsLogger.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"logger\\(for: \\.persistence\\)|\\.persistence\\)","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_fa34c426-b470-413d-a432-dbe9321cd43","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Persistence/SwiftDataWatchlistRepository.swift","limit":70}
-```
-
-## Assistant
-
 Adding a persistence fault log and persisting breadcrumbs before the existing `fatalError`, so TestFlight crash investigation has context.
-
-### Tool Edit File V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/NextSeasonApp.swift"]}
-```
-
-## Assistant
 
 Done. On `ModelContainer` init failure, the app now logs before it crashes:
 

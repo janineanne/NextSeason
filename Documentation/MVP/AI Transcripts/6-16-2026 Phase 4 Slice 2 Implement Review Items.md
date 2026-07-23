@@ -22,211 +22,11 @@ requestAuthorizationIfNeeded() treats .provisional and .ephemeral as allowed, bu
 
 I'll review the feedback against the current code and start with the high-priority background refresh window, then the notification and detail-view items.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"WatchlistRefreshService|updatedShows|refreshAll","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_fa7a1ccc-a7e0-4a91-b55e-d9d1c6aedd4","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"requestAuthorizationIfNeeded|deliver\\(","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_3e50e88d-d0e2-43c1-b58f-a7f07a2b7a1","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"ShowDetailView|\\.task","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_4cfefc4d-cfb4-4a43-afac-ac5ab4071d2","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/WatchlistRefreshService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"TVMazeUpdatePeriod","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_4f66870c-f6a0-4be5-b258-6b52d480da2","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/TVMazeService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/WatchlistRefreshServiceTests.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"lastCheckedAt|TrackedShow","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_bfa6cf8a-ebf8-476a-bb44-6b3863e8aa9","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"globPattern":"**/*Notification*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/TrackedShow.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/SKILL.md","limit":80}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/TVMazeClient.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-## Assistant
-
 Implementing fixes: adaptive update window from `lastCheckedAt`, load-once detail view, notification pre-prompt, and aligned `deliver()` authorization.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/StatusChangeDetector.swift","limit":30}
-```
-
-### Tool Glob File Search
-
-```
-{"globPattern":"**/*Notification*Tests*"}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
 
 Updating `requestAuthorizationIfNeeded` to reuse the shared helper and adding tests.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"WatchlistRefreshServiceTests","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_f06e7684-6991-426a-8071-b5acf90493b","offset":0}
-```
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/WatchlistRefreshService.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/TVMazeService.swift"]}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"TVMazeUpdatePeriodTests|StatusChangeDetectorTests","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_5ce6c538-2b9d-44d8-91f9-4141770f1dc","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"StatusChangeDetectorTests","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_0b3808af-70b5-4565-92f8-998e399c2bf","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"globPattern":"**/*.xcodeproj/**"}
-```
-
-### Tool Glob File Search
-
-```
-{"globPattern":"**/Package.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"NextSeasonTests|Synchronized","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_dfed995d-3fe5-4897-adc6-602bcdc7670","offset":0}
-```
-
-## Assistant
-
 Fixing the detail view: `.task(id:)` still runs on every appearance, so we'll skip reload when the view model already matches the show.
-
-### Tool Edit File V2
-
-## Assistant
 
 All four review items are addressed. Summary of changes:
 
@@ -259,41 +59,7 @@ When a user tracks a show and notification permission is still `.notDetermined`,
 
 There is a build error in ShowDetailViewModel - please fix
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift"}
-```
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift"]}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Likely cause: comparing to `.notDetermined` without importing UserNotifications. Adding a helper on `NotificationService` to keep that dependency out of the view model.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift"}
-```
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailViewModel.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/NotificationService.swift"]}
-```
-
-## Assistant
 
 The build error was from comparing to `.notDetermined` in `ShowDetailViewModel` without importing `UserNotifications` — that enum case isn’t visible with only `Foundation` imported.
 
@@ -309,83 +75,9 @@ func needsAuthorizationPrompt() async -> Bool
 
 We removed the system image next to the show status from the watchlist view, but it's still there on the detail view.  Please remove it from there too.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"displayLabel|systemImage|status","glob":"**/Watchlist*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_da71364b-b278-4e8d-9608-86aba101184","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"displayLabel|systemImage|status","glob":"**/ShowDetail*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_11354046-0486-4a15-971d-493c25ddbc8","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistRow.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":83,"limit":80}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"systemImage","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_4e48be93-c260-46b6-abc9-5b398ace136","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/NextSeasonStatus+Display.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"status\\.systemImage|systemImage","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_c7c9e38f-6cb7-4e36-ae21-44e3713f3a3","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Removing the next-season status icon in the detail view to match the watchlist's plain text headline.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":103,"limit":30}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"\\.systemImage","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_d19a5cc8-b281-445b-99be-b64d380f667","offset":0}
-```
-
-## Assistant
-
 Removing the unused `systemImage` property now that nothing references it.
-
-### Tool Edit File V2
-
-## Assistant
 
 Removed the SF Symbol from the **Next Season** section on the detail view so it matches the watchlist: plain `Text(status.headline)` instead of a `Label` with an icon.
 
@@ -401,39 +93,9 @@ Please commit and merge to main.
 
 Checking git state, then committing and merging to main.
 
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/agent-tools/7dad06be-4f08-4c9f-87cc-e130947a48f0.txt","limit":200}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Staging all changes, committing, then merging into main.
 
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Retrying with your approval — committing all branch work, then merging to main.
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Committed and merged to `main`. Summary:
 
@@ -452,12 +114,6 @@ Includes the adaptive TVMaze update window, notification pre-prompt, detail view
 
 Execute the selected diff-tab push action.
 
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
-
 Pushed `main` to `origin/main` (`0440311..f7d1598`). Both local commits are now on the remote:
 
 1. `2560733` — Add local watchlist with notifications and background refresh
@@ -470,74 +126,6 @@ Have you considered VoiceOver?  Do you expect it to work correctly?
 ## Assistant
 
 Reviewing VoiceOver-related accessibility across the app's views and interactions.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"accessibility|VoiceOver|accessibilityLabel|accessibilityHint|accessibilityHidden|accessibilityElement","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_0e02fbed-a207-41a2-9dc7-69fbdf821a4","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.claude/skills/swiftui-pro/references/accessibility.md"}
-```
-
-### Tool Glob File Search
-
-```
-{"globPattern":"**/Features/**/*.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/ShowRow.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistRow.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/ContentView.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"displayLabel","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_a7f3932a-6427-4d03-bae5-a98cc41bb47","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Models/Domain/ShowStatus.swift"}
-```
-
-## Assistant
 
 Yes, I’ve considered it — but only lightly. For an MVP the basics are in place; I would **not** expect a fully polished VoiceOver experience without a dedicated pass and device testing.
 
@@ -639,53 +227,9 @@ Yes, please create a branch and implement.
 
 Creating a branch and implementing the VoiceOver improvements we identified.
 
-### Tool Run Terminal Command V2
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":28,"limit":50}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistRow.swift"}
-```
-
-## Assistant
-
 Implementing VoiceOver fixes: labeled loading states, explicit watchlist row labels, and a clearer Track button.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Fixing the unlabeled loading state in `WatchlistView`.
-
-### Tool Edit File V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistRow.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Watchlist/WatchlistView.swift"]}
-```
-
-### Tool Unspecified
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason","branchName":"cursor/voiceover-accessibility"}
-```
-
-## Assistant
 
 Branch `cursor/voiceover-accessibility` is ready with these VoiceOver improvements:
 
@@ -714,31 +258,7 @@ Want me to commit this or open a PR?
 
 There are build errors in ShowDetailView;  please fix
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"}
-```
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"]}
-```
-
-## Assistant
-
 Fixing a missing closing brace in `trackButtonHint`.
-
-### Tool Edit File V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift"]}
-```
-
-## Assistant
 
 The build error was a missing closing brace on `trackButtonHint()` — the function body wasn’t closed before `header(viewModel:)` started. That’s fixed now; rebuild and it should compile.
 
@@ -749,20 +269,6 @@ I just noticed that when I tap in the search box the navigation stack title slid
 ## Assistant
 
 Checking how search is wired into the navigation stack.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Search/SearchView.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"navigationTitle|searchable|navigationBarTitleDisplayMode","glob":"**/*.swift","caseInsensitive":false,"multiline":false,"toolCallId":"tool_3e595524-4b0d-439b-a25c-13546940afd","offset":0}
-```
-
-## Assistant
 
 That's typical SwiftUI / iOS behavior — nothing in the app is explicitly hiding the title.
 

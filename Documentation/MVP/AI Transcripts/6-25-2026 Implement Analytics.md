@@ -20,39 +20,7 @@ How about if you add some bold text that says "Tap here for Actor Name Analytic"
 
 Adding a deterministic per-show bold tap target inserted into each summary so actor-name analytics are easy to test.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/SummaryFormatter.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/ShowDetail/ShowDetailView.swift","offset":235,"limit":30}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeasonTests/SummaryFormatterTests.swift","offset":1,"limit":30}
-```
-
-## Assistant
-
 Inserting a per-show bold analytics tap target into summaries via `SummaryFormatter`, placed deterministically from each show's ID.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Done. Each show’s **About** section now includes a bold, tappable line:
 
@@ -71,14 +39,6 @@ You should see `actor_name_tapped show_id=44933` in Console.app. Remove this bet
 ## User
 
 That works. Please add a note in the Portfolio Readiness section of Release Readiness.md to remove that after beta.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md","offset":500}
-```
-
-### Tool Edit File V2
 
 ## Assistant
 
@@ -143,44 +103,6 @@ If you want, I can outline a minimal remote provider behind `AnalyticsTracking` 
 ## User
 
 Not necessary now, but please add this to the analytics section of Post-MVP Roadmap.md.
-
-### Tool Read File V2
-
-```
-{}
-```
-
-### Tool Glob File Search
-
-```
-{"globPattern":"**/Roadmap.md"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Product Analytics","path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation","caseInsensitive":false,"multiline":false,"toolCallId":"tool_b407b4cf-7546-4040-a310-7fafda46621","offset":0}
-```
-
-### Tool Glob File Search
-
-```
-{"targetDirectory":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Post-MVP","globPattern":"**/*"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Post-MVP/Post-MVP Roadmap.md","offset":190}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/Post-MVP/Post-MVP Roadmap.md","offset":1,"limit":35}
-```
-
-### Tool Edit File V2
 
 ## Assistant
 

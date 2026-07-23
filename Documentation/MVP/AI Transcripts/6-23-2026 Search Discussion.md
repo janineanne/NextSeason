@@ -4,45 +4,9 @@
 
 Please read the search improvements documented in "Release Readiness.md" and tell me if there is anything there that TVMaze's search doesn't already do.
 
-### Tool Glob File Search
-
-```
-{"globPattern":"**/Release Readiness.md"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/Documentation/MVP/Release Readiness.md"}
-```
-
-## Assistant
-
 I've read the search improvements. Let me check how the app currently uses TVMaze search and verify TVMaze's documented search behavior.
 
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"search/shows|singlesearch|tvmaze|TVMaze","outputMode":"content","context":2,"caseInsensitive":true,"multiline":false,"toolCallId":"toolu_vrtx_01XNrMiXEst3tVRegBguGuQh","offset":0}
-```
-
-### Tool Web Search
-
-```
-{"searchTerm":"TVMaze API search shows fuzzy search algorithm documentation 2026","toolCallId":"toolu_vrtx_01HxyMK7iBSUVFdoM8ewkB7G"}
-```
-
-## Assistant
-
 Let me look at the current search client implementation to see exactly how the app queries TVMaze.
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"search","glob":"**/TVMazeClient.swift","outputMode":"content","context":6,"caseInsensitive":true,"multiline":false,"toolCallId":"toolu_vrtx_01VN8Hp8PmVJMng3rFzvc5rz","offset":0}
-```
-
-## Assistant
 
 I've read the search improvements in `Release Readiness.md` and cross-checked them against how the app currently queries TVMaze and what TVMaze's search engine actually does.
 
@@ -103,15 +67,7 @@ Yes
 
 Your "Yes" covers an either/or question, so I want to confirm scope before changing anything.
 
-### Tool Ask Question
-
-## Assistant
-
 I'll make a small, focused edit to the "Search Quality Improvements" section of `Release Readiness.md`, annotating each potential improvement with whether TVMaze already handles it and adding a brief note so the remaining real work is clear. I won't touch other sections.
-
-### Tool Edit File V2
-
-## Assistant
 
 Done. I updated only the **Search Quality Improvements** section of `Documentation/MVP/Release Readiness.md`.
 
@@ -132,10 +88,6 @@ Yes, please add coverage summary instead
 
 I'll restore the original flat bullet list of potential improvements and replace my inline annotations with a separate coverage summary appended after the list.
 
-### Tool Edit File V2
-
-## Assistant
-
 Done. The original flat **Potential Improvements** bullet list is restored unchanged, and I replaced the inline annotations with a dedicated **TVMaze Coverage Summary** appended right after it. It groups the items into: already handled by TVMaze, mostly covered/low value (articles), and the real app-side opportunities (abbreviation aliasing + app-purpose ordering), with the beta-validation reminder.
 
 What to check: open `Release Readiness.md` and confirm the summary placement and wording read well. Other sections are untouched.
@@ -149,16 +101,6 @@ I have noticed a problem with our search behavior.  When I search for something 
 ## Assistant
 
 Let me verify how TVMaze's search endpoint actually behaves (pagination/result cap) before answering. I'll check the code path and the live API.
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Services/TVMazeClient.swift","offset":40,"limit":60}
-```
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 No — it's not a pagination bug in our code, because TVMaze's `/search/shows` endpoint isn't paginated at all.
 

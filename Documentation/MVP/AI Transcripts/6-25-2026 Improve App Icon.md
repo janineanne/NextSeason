@@ -122,35 +122,7 @@ I'm getting the message on Done now.
 
 Done triggers apply + dismiss + icon sync in the same transition. Deferring both the palette apply and icon sync until after the sheet fully dismisses.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/ThemeSwitcherView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/Theme/AppThemeIconService.swift","limit":75}
-```
-
-## Assistant
-
 Done still calls `applyPalette` during dismiss. Moving the apply and icon sync to after the sheet fully closes.
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Run Terminal Command V2
-
-## Assistant
 
 Good — that narrows it down. Done was still doing too much during the sheet dismiss (apply palette + icon sync in the same transaction).
 
@@ -174,75 +146,9 @@ It happens a beat later
 
 The delayed warning points to `setAlternateIconName`. Deferring icon sync until the app becomes inactive (e.g. Home) or after a short timer, so it doesn't run right after the palette apply.
 
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/Theme/AppThemeIconService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/ThemeSwitcherView.swift","offset":158}
-```
-
-## Assistant
-
 The delayed warning aligns with `setAlternateIconName`. Scheduling icon sync until the app becomes inactive (e.g. Home), not right after applying the palette.
 
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-## Assistant
-
 Sheet dismiss may briefly hit `.inactive`, causing the delayed sync. Flushing only on `.background` (fully leaving the app):
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Edit File V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Tap Done","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_eafdad76-cfd1-45f8-8064-7bbc0d404fe","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Await
-
-```
-{"taskId":"153374","blockUntilMs":120000,"regex":"(BUILD SUCCEEDED|BUILD FAILED|error:)"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/.cursor/projects/Users-janine-Documents-TbF-Projects-NextSeason/terminals/153374.txt","offset":-30}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/Theme/AppThemeIconService.swift"}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"schedulePaletteIconSync|applyPalette|onDismiss","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_93116962-e5fb-4a27-95a0-db8949528d3","offset":0}
-```
-
-## Assistant
 
 That timing confirms the warning is tied to `setAlternateIconName`, not the palette apply itself — it was firing on the brief `.inactive` transition during sheet dismiss, which is why it showed up a beat after Done.
 
@@ -267,81 +173,7 @@ You can back out all the changes for this issue. I googled for the error and fou
 
 Reverting the concurrency-warning workarounds while keeping the theme icon feature. Checking what's changed and restoring simpler behavior.
 
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"schedulePaletteIconSync|flushScheduled|RunLoop\\.main|draftVariant|applyPendingPalette","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_afd08113-a195-4247-ad12-b4dfb18b2b1","offset":0}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/ThemeSwitcherView.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/Theme/AppThemeIconService.swift"}
-```
-
-### Tool Read File V2
-
-```
-{"path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/Theme/AppThemeController.swift"}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AppThemeIconService|appThemeIcon|onChange.*variant","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_7696d5d5-2606-4d64-a241-c37f3246354","offset":0}
-```
-
-### Tool Run Terminal Command V2
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AppThemeIconService","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_08d6782d-f94f-4e98-8c7b-90bcda59f20","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"AppThemeController","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_853034b7-de2a-4a64-8fa3-19447e60e03","offset":0}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"Theme","path":"/Users/janine/Documents/TbF Projects/NextSeason/NextSeason.xcodeproj/project.pbxproj","caseInsensitive":false,"multiline":false,"toolCallId":"tool_c3bc5b31-3e83-46bc-92ce-a37941547df","offset":0}
-```
-
-## Assistant
-
 Restoring the theme switcher and controller to their direct-apply behavior, and simplifying the icon service by removing deferral/queue workarounds.
-
-### Tool Run Terminal Command V2
-
-### Tool Edit File V2
-
-### Tool Read Lints
-
-```
-{"paths":["/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/Theme/AppThemeIconService.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Features/Debug/ThemeSwitcherView.swift","/Users/janine/Documents/TbF Projects/NextSeason/NextSeason/Utilities/Theme/AppThemeController.swift"]}
-```
-
-### Tool Ripgrep Raw Search
-
-```
-{"pattern":"unsafeForcedSync|RunLoop\\.main|schedulePalette|flushScheduled|applyPalette|draftVariant","path":"/Users/janine/Documents/TbF Projects/NextSeason","caseInsensitive":false,"multiline":false,"toolCallId":"tool_7fe22f32-1187-447c-91ab-6072f35dde5","offset":0}
-```
-
-## Assistant
 
 That makes sense — if it shows up on a plain background without touching the theme switcher, it’s not our code.
 
@@ -369,14 +201,6 @@ Sorry, forgot the link:  https://developer.apple.com/forums/thread/802423
 ## Assistant
 
 Checking that forum thread for context.
-
-### Tool Web Fetch
-
-```
-{"url":"https://developer.apple.com/forums/thread/802423","toolCallId":"tool_d0279c5f-05f1-4998-9862-859a5737a6d"}
-```
-
-## Assistant
 
 Thanks for the link — that thread lines up with what you found.
 
