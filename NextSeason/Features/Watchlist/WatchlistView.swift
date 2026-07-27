@@ -107,7 +107,6 @@ struct WatchlistView: View {
                 Task { await viewModel?.handlePendingRemovalIDChange(from: oldId, to: newId) }
             }
         }
-        .appNavigationChrome()
     }
 
     /// Creates the view model on first need, then reloads list + notification status.

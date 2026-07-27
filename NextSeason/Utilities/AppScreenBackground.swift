@@ -11,11 +11,6 @@ extension View {
         modifier(AppScreenBackgroundModifier())
     }
 
-    /// Matches navigation bars to the app screen background.
-    func appNavigationChrome() -> some View {
-        modifier(AppNavigationChromeModifier())
-    }
-
     /// Plain list on the app background instead of system white/black.
     func appPlainListStyle() -> some View {
         listStyle(.plain)
@@ -57,16 +52,6 @@ private struct AppScreenBackgroundModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content.background(colors.background.ignoresSafeArea())
-    }
-}
-
-private struct AppNavigationChromeModifier: ViewModifier {
-    @Environment(\.appThemeColors) private var colors
-
-    func body(content: Content) -> some View {
-        content
-            .toolbarBackground(colors.background, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
     }
 }
 

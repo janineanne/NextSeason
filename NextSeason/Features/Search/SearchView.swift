@@ -105,7 +105,6 @@ struct SearchView: View {
                 )
         }
         .scrollDismissesKeyboard(.immediately)
-        .appNavigationChrome()
     }
 
     private func refreshTrackedShows() async {
