@@ -13,6 +13,13 @@ struct UndoToast: View {
     @AccessibilityFocusState.Binding var toastFocus: UndoToastFocus?
 
     var body: some View {
+        toastContents
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .modifier(UndoToastChromeModifier())
+    }
+
+    private var toastContents: some View {
         HStack(spacing: 12) {
             Text(message)
                 .font(.subheadline)
@@ -29,9 +36,19 @@ struct UndoToast: View {
                 .accessibilityIdentifier(AccessibilityID.Watchlist.confirmButton)
                 .accessibilityHint("Confirms removal from your watchlist")
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+/// Floating chrome for the undo toast: Liquid Glass on iOS 26+, material below.
+private struct UndoToastChromeModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+        } else {
+            content
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        }
     }
 }
 
