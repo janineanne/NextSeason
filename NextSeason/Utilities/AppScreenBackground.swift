@@ -22,14 +22,15 @@ extension View {
         modifier(AppSurfaceCardModifier(cornerRadius: cornerRadius))
     }
 
-    /// Titles, show names, and section headers.
+    /// Show names, section headings, and other primary content labels.
+    /// Uses the system primary style so content adapts to glass, contrast, and accessibility.
     func appPrimaryText() -> some View {
-        modifier(AppPrimaryTextModifier())
+        foregroundStyle(.primary)
     }
 
-    /// Metadata lines: genres, timestamps, supporting descriptions.
+    /// Status lines, metadata, and supporting descriptions.
     func appSecondaryText() -> some View {
-        modifier(AppSecondaryTextModifier())
+        foregroundStyle(.secondary)
     }
 }
 
@@ -48,22 +49,6 @@ private struct AppSurfaceCardModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content.background(colors.surface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-    }
-}
-
-private struct AppPrimaryTextModifier: ViewModifier {
-    @Environment(\.appThemeColors) private var colors
-
-    func body(content: Content) -> some View {
-        content.foregroundStyle(colors.accent)
-    }
-}
-
-private struct AppSecondaryTextModifier: ViewModifier {
-    @Environment(\.appThemeColors) private var colors
-
-    func body(content: Content) -> some View {
-        content.foregroundStyle(colors.mutedText)
     }
 }
 
