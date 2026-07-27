@@ -118,6 +118,10 @@ private struct AppRootView: View {
                 Task {
                     AppDiagnosticsLogger.logTaskStart("foreground_watchlist_refresh")
                     await refreshService.refreshAllIfNeeded()
+                    // Refresh (or a background task while we were away) updates
+                    // SwiftData; the watchlist UI keeps an in-memory snapshot and
+                    // must reload so section/status match what just notified.
+                    navigationCoordinator.notifyWatchlistDataChanged()
                     AppDiagnosticsLogger.logTaskComplete("foreground_watchlist_refresh")
                 }
             }
