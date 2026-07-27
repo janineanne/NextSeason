@@ -102,6 +102,7 @@
 		E167DDF53012B34E007F7098 /* 7-23-2026 Transcript Comparison and Edits.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-23-2026 Transcript Comparison and Edits.md"; sourceTree = "<group>"; };
 		E167E0323017F0C9007F7098 /* 7-27-2026 HIG and Liquid Glass Audit.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-27-2026 HIG and Liquid Glass Audit.md"; sourceTree = "<group>"; };
 		E167E0333017F0D7007F7098 /* 7-27-2026 UI Audit Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-27-2026 UI Audit Implementation.md"; sourceTree = "<group>"; };
+		E167E27030180120007F7098 /* 7-27-2026 Fix Watchlist Reload Bug.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-27-2026 Fix Watchlist Reload Bug.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -427,6 +428,7 @@
 				E167DDF53012B34E007F7098 /* 7-23-2026 Transcript Comparison and Edits.md */,
 				E167E0323017F0C9007F7098 /* 7-27-2026 HIG and Liquid Glass Audit.md */,
 				E167E0333017F0D7007F7098 /* 7-27-2026 UI Audit Implementation.md */,
+				E167E27030180120007F7098 /* 7-27-2026 Fix Watchlist Reload Bug.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
@@ -740,7 +742,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = JTVUXCB28U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -776,7 +778,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = JTVUXCB28U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
