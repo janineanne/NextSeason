@@ -90,7 +90,6 @@ struct ShowDetailView: View {
         .appAboutToolbarButton()
         // Theme switcher parked; see ThemeSwitcherView.swift status comment.
         // .betaThemeSwitcherToolbar()
-        .appNavigationChrome()
         .watchlistNotificationPromptAlerts(
             prompt: viewModel.notificationPrompt,
             notificationService: viewModel.notificationService
