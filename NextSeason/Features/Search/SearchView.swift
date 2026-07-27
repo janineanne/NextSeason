@@ -172,7 +172,6 @@ struct SearchView: View {
                 ForEach(0..<3, id: \.self) { _ in
                     ShowRowSkeleton()
                 }
-                .appListRowSurface()
             }
             .appPlainListStyle()
             .scrollDismissesKeyboard(.immediately)
@@ -206,7 +205,6 @@ struct SearchView: View {
                             }
                         }
                     }
-                    .appListRowSurface()
                 }
                 SearchResultsLimitFooterView(query: viewModel.query)
                     .listRowInsets(

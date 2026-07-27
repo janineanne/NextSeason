@@ -17,23 +17,9 @@ extension View {
             .scrollContentBackground(.hidden)
     }
 
-    /// Inset card row on the app surface (replaces stark system list row backgrounds).
-    func appListRowSurface() -> some View {
-        modifier(AppListRowSurfaceModifier())
-    }
-
-    /// Rounded surface for insets and cards outside lists.
+    /// Rounded surface for distinct callouts and detail sections (not list rows).
     func appSurfaceCard(cornerRadius: CGFloat = 12) -> some View {
         modifier(AppSurfaceCardModifier(cornerRadius: cornerRadius))
-    }
-
-    /// Surface card used inside lists (clear row chrome, inset card content).
-    func appInsetSurfaceCard() -> some View {
-        padding(AppSpacing.row)
-            .appSurfaceCard()
-            .listRowInsets(EdgeInsets(top: 8, leading: AppSpacing.screen, bottom: 8, trailing: AppSpacing.screen))
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
     }
 
     /// Titles, show names, and section headers.
@@ -52,20 +38,6 @@ private struct AppScreenBackgroundModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content.background(colors.background.ignoresSafeArea())
-    }
-}
-
-private struct AppListRowSurfaceModifier: ViewModifier {
-    @Environment(\.appThemeColors) private var colors
-
-    func body(content: Content) -> some View {
-        content
-            .listRowInsets(EdgeInsets(top: 4, leading: AppSpacing.screen, bottom: 4, trailing: AppSpacing.screen))
-            .listRowSeparator(.hidden)
-            .listRowBackground(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(colors.surface)
-            )
     }
 }
 

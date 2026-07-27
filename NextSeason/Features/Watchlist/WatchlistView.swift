@@ -197,7 +197,6 @@ struct WatchlistView: View {
                                 }
                             }
                         }
-                        .appListRowSurface()
                     }
                 }
             }
