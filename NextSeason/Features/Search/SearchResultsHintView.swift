@@ -24,7 +24,7 @@ struct SearchResultsHintView: View {
 }
 
 extension View {
-    /// Pins first-run search guidance above the TVMaze attribution strip.
+    /// Pins first-run search guidance above the tab bar while results are shown.
     func searchResultsHintInset(isVisible: Bool) -> some View {
         safeAreaInset(edge: .bottom, spacing: 0) {
             if isVisible {
