@@ -206,11 +206,11 @@ struct ShowDetailView: View {
                     HStack(alignment: .top, spacing: AppSpacing.tight) {
                         Image(systemName: status.statusSymbolName)
                             .font(.subheadline)
-                            .foregroundStyle(status.emphasisColor(in: themeColors))
+                            .foregroundStyle(status.emphasisStyle(in: themeColors))
                             .accessibilityHidden(true)
                         Text(status.headline)
                             .font(.body)
-                            .appPrimaryText()
+                            .appSecondaryText()
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
