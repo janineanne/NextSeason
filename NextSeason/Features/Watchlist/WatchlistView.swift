@@ -11,7 +11,6 @@ struct WatchlistView: View {
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.analytics) private var analytics
-    @Environment(\.appThemeColors) private var themeColors
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
@@ -251,7 +250,6 @@ struct WatchlistView: View {
             .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(themeColors.surface)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.Watchlist.emptyState)
         .onAppear {
@@ -268,7 +266,6 @@ struct WatchlistView: View {
                 .appSecondaryText()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(themeColors.surface)
         .accessibilityIdentifier(AccessibilityID.Watchlist.noResults)
     }
 
