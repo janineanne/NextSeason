@@ -198,13 +198,16 @@ struct WatchlistView: View {
                         }
                     }
                 }
+                Section {
+                } footer: {
+                    TVMazeAttributionView()
+                }
             }
             .animation(
                 .easeInOut(duration: 0.35),
                 value: viewModel.filteredShows.map { "\($0.id):\($0.nextSeason.headline)" }
             )
             .appPlainListStyle()
-            .tvmazeAttributionInset()
             .searchable(
                 text: $viewModel.searchText,
                 placement: .navigationBarDrawer(displayMode: .always),

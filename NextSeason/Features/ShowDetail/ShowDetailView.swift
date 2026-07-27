@@ -79,12 +79,13 @@ struct ShowDetailView: View {
                 header(viewModel: viewModel)
                 nextSeasonSection(viewModel: viewModel)
                 aboutSection(viewModel: viewModel)
+                TVMazeAttributionView()
+                    .frame(maxWidth: .infinity)
             }
             .padding(AppSpacing.screen)
         }
         .appScreenBackground()
         .scrollContentBackground(.hidden)
-        .tvmazeAttributionInset()
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
         .appAboutToolbarButton()

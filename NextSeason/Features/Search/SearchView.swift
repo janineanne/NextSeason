@@ -169,8 +169,12 @@ struct SearchView: View {
             .accessibilityIdentifier(AccessibilityID.Search.idlePrompt)
         case .loading:
             List {
-                ForEach(0..<3, id: \.self) { _ in
-                    ShowRowSkeleton()
+                Section {
+                    ForEach(0..<3, id: \.self) { _ in
+                        ShowRowSkeleton()
+                    }
+                } footer: {
+                    TVMazeAttributionView()
                 }
             }
             .appPlainListStyle()
@@ -179,44 +183,47 @@ struct SearchView: View {
                 isScrollDismissingKeyboard: $isScrollDismissingKeyboard,
                 dismissSearch: dismissSearch
             )
-            .tvmazeAttributionInset()
         case .results(let shows):
             List {
-                ForEach(shows) { show in
-                    HStack(spacing: AppSpacing.tight) {
-                        NavigationLink(value: show) {
-                            ShowRowLabel(show: show)
-                        }
-                        .buttonStyle(.plain)
-                        .showDetailLinkAccessibility()
-                        .accessibilityIdentifier("\(AccessibilityID.Search.result).\(show.id)")
-                        ShowRowTrackButton(
-                            showID: show.id,
-                            showName: show.name,
-                            isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
-                            isUpdating: watchlistTracking.updatingShowIDs.contains(show.id)
-                        ) { anchor in
-                            Task {
-                                await watchlistTracking.handleTrackButton(
-                                    for: show,
-                                    anchor: anchor,
-                                    context: watchlistTrackingContext
-                                )
+                Section {
+                    ForEach(shows) { show in
+                        HStack(spacing: AppSpacing.tight) {
+                            NavigationLink(value: show) {
+                                ShowRowLabel(show: show)
+                            }
+                            .buttonStyle(.plain)
+                            .showDetailLinkAccessibility()
+                            .accessibilityIdentifier("\(AccessibilityID.Search.result).\(show.id)")
+                            ShowRowTrackButton(
+                                showID: show.id,
+                                showName: show.name,
+                                isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
+                                isUpdating: watchlistTracking.updatingShowIDs.contains(show.id)
+                            ) { anchor in
+                                Task {
+                                    await watchlistTracking.handleTrackButton(
+                                        for: show,
+                                        anchor: anchor,
+                                        context: watchlistTrackingContext
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                SearchResultsLimitFooterView(query: viewModel.query)
-                    .listRowInsets(
-                        EdgeInsets(
-                            top: AppSpacing.tight,
-                            leading: AppSpacing.screen,
-                            bottom: AppSpacing.section,
-                            trailing: AppSpacing.screen
+                    SearchResultsLimitFooterView(query: viewModel.query)
+                        .listRowInsets(
+                            EdgeInsets(
+                                top: AppSpacing.tight,
+                                leading: AppSpacing.screen,
+                                bottom: AppSpacing.section,
+                                trailing: AppSpacing.screen
+                            )
                         )
-                    )
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                } footer: {
+                    TVMazeAttributionView()
+                }
             }
             .appPlainListStyle()
             .scrollDismissesKeyboard(.immediately)
@@ -225,7 +232,6 @@ struct SearchView: View {
                 dismissSearch: dismissSearch
             )
             .searchResultsHintInset(isVisible: !searchResultsHintDismissed)
-            .tvmazeAttributionInset()
         case .empty:
             // TVMaze's public search returns at most 10 results with no pagination,
             // so an empty result set does not mean the show is missing. Guide the
