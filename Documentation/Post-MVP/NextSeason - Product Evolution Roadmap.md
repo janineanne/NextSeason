@@ -25,9 +25,6 @@ This document captures enhancements planned after the initial App Store release.
 
 - Support swipe-to-delete in the Watchlist, in addition to tapping the star.
 - User-selectable sorting.
-- Filtering by show status.
-- Hide ended shows.
-- Optional grouping by status.
 
 Watchlist search should use simple title matching rather than
 discovery-oriented fuzzy search.
@@ -83,6 +80,13 @@ Implementation principles:
 
 # Platform Features
 
+## Cross-Device Sync
+
+-   Cloud sync.
+-   Cross-device watchlists.
+-   Backup and restore.
+-   Device migration.
+
 ## Apple Platform Expansion
 
 Potential platforms:
@@ -94,13 +98,6 @@ After Cloud Sync is implemented:
 - Apple TV companion app
 
 Vision Pro is not currently planned.
-
-## Cross-Device Sync
-
--   Cloud sync.
--   Cross-device watchlists.
--   Backup and restore.
--   Device migration.
 
 ## Monitoring & Notifications
 

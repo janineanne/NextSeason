@@ -99,6 +99,7 @@
 		E167D73A301170C6007F7098 /* 7-13-2026 Watchlist vs Search Design.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-13-2026 Watchlist vs Search Design.md"; sourceTree = "<group>"; };
 		E167D73B30117162007F7098 /* 7-20-2026 MVP vs App Store Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-20-2026 MVP vs App Store Roadmap.md"; sourceTree = "<group>"; };
 		E167D73F3011732D007F7098 /* 7-21-2026 MVP Completion Checklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-21-2026 MVP Completion Checklist.md"; sourceTree = "<group>"; };
+		E167DDF53012B34E007F7098 /* 7-23-2026 Transcript Comparison and Edits.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-23-2026 Transcript Comparison and Edits.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -421,6 +422,7 @@
 				E167D2C13011533D007F7098 /* 7-22-2026 Watchlist Improvement Discussion.md */,
 				E167D2C330115406007F7098 /* 7-22-2026 Watchlist Improvement Implementation.md */,
 				E167D2C230115379007F7098 /* 7-22-2026 Watchlist Bug Fixes.md */,
+				E167DDF53012B34E007F7098 /* 7-23-2026 Transcript Comparison and Edits.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
