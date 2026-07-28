@@ -77,6 +77,7 @@ private struct AppRootView: View {
 
     var body: some View {
         ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
+            .appControlTint()
             // Theme switcher parked; see ThemeSwitcherView.swift status comment.
             // Previously: beta theme switcher lived in each tab's nav bar via `.betaThemeSwitcherToolbar()`.
             .watchlistUndoToast(

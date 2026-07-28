@@ -10,8 +10,6 @@ struct ContentView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
     @Environment(\.analytics) private var analytics
-    @Environment(\.appThemeColors) private var themeColors
-
     @Bindable var coordinator: AppNavigationCoordinator
 
     private let tvMaze: any TVMazeService
@@ -59,7 +57,6 @@ struct ContentView: View {
                 }
                 .tag(AppNavigationCoordinator.Tab.watchlist)
         }
-        .tint(themeColors.controlTint)
         .appScreenBackground()
         .background {
             TabBarReselectHandler(tabIndex: AppNavigationCoordinator.Tab.search.tabBarIndex) {
