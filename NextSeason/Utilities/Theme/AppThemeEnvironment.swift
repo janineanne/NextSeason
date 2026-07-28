@@ -33,9 +33,22 @@ extension View {
         modifier(AppThemeColorsModifier(controller: controller))
     }
 
+    /// Applies the active palette tint to buttons, links, and other controls.
+    func appControlTint() -> some View {
+        modifier(AppControlTintModifier())
+    }
+
     /// Applies a palette for SwiftUI previews without a theme controller.
     func appThemePreview(_ variant: AppPaletteVariant = .tealUtility) -> some View {
         modifier(AppThemePreviewModifier(variant: variant))
+    }
+}
+
+private struct AppControlTintModifier: ViewModifier {
+    @Environment(\.appThemeColors) private var colors
+
+    func body(content: Content) -> some View {
+        content.tint(colors.controlTint)
     }
 }
 
