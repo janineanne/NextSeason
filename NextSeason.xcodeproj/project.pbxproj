@@ -158,22 +158,9 @@
 		E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E1THEME01PARKED000076FCDD /* Exceptions for "NextSeason" folder in "NextSeason" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Features/Debug/ThemeSwitcherView.swift,
-			);
-			target = E13811CC2FDB795C009C141B /* NextSeason */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E13811CF2FDB795C009C141B /* NextSeason */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				E1THEME01PARKED000076FCDD /* Exceptions for "NextSeason" folder in "NextSeason" target */,
-			);
 			path = NextSeason;
 			sourceTree = "<group>";
 		};

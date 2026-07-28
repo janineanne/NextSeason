@@ -88,8 +88,6 @@ struct ShowDetailView: View {
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
         .appAboutToolbarButton()
-        // Theme switcher parked; see ThemeSwitcherView.swift status comment.
-        // .betaThemeSwitcherToolbar()
         .watchlistNotificationPromptAlerts(
             prompt: viewModel.notificationPrompt,
             notificationService: viewModel.notificationService
