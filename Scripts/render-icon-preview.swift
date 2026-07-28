@@ -22,39 +22,13 @@ private let themeIcons: [ThemeIconSpec] = [
         assetName: "AppIcon",
         light: IconAppearance(
             fileName: "AppIcon.png",
-            background: (0.902, 0.886, 0.933),
-            foreground: (0.365, 0.306, 0.443)
-        ),
-        dark: IconAppearance(
-            fileName: "AppIcon-Dark.png",
-            background: (0.149, 0.129, 0.196),
-            foreground: (0.659, 0.596, 0.769)
-        )
-    ),
-    ThemeIconSpec(
-        assetName: "AppIcon-TealUtility",
-        light: IconAppearance(
-            fileName: "AppIcon-TealUtility.png",
             background: (0.941, 0.949, 0.945),
             foreground: (0.051, 0.420, 0.388)
         ),
         dark: IconAppearance(
-            fileName: "AppIcon-TealUtility-Dark.png",
+            fileName: "AppIcon-Dark.png",
             background: (0.102, 0.114, 0.110),
             foreground: (0.431, 0.792, 0.737)
-        )
-    ),
-    ThemeIconSpec(
-        assetName: "AppIcon-WarmSlate",
-        light: IconAppearance(
-            fileName: "AppIcon-WarmSlate.png",
-            background: (0.969, 0.961, 0.949),
-            foreground: (0.200, 0.255, 0.333)
-        ),
-        dark: IconAppearance(
-            fileName: "AppIcon-WarmSlate-Dark.png",
-            background: (0.110, 0.098, 0.090),
-            foreground: (0.796, 0.835, 0.882)
         )
     ),
 ]

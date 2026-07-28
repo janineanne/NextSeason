@@ -24,7 +24,6 @@ struct DiagnosticsView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.watchlistRefreshService) private var refreshService
     @Environment(\.betaRefreshDiagnostics) private var betaRefreshDiagnostics
-    @Environment(AppThemeController.self) private var themeController
     @Environment(\.dismiss) private var dismiss
 
     @State private var notificationStatus = NotificationStatusModel()
@@ -46,7 +45,6 @@ struct DiagnosticsView: View {
             List {
                 BetaAppInfoSection(
                     channelDisplayName: betaBuildAvailability.channelDisplayName,
-                    themeDisplayName: themeController.variant.displayName,
                     notificationsEnabledLabel: notificationStatus.diagnosticsEnabledLabel
                 )
 
@@ -124,7 +122,6 @@ struct DiagnosticsView: View {
                         "Notification reminders scheduled",
                         value: String(counters.notificationRemindersScheduled)
                     )
-                    LabeledContent("Theme selections", value: String(counters.themeSelections))
                 }
 
                 Section {
@@ -162,9 +159,6 @@ struct DiagnosticsView: View {
             }
             .task {
                 await refreshReport()
-            }
-            .onChange(of: themeController.variant) {
-                refreshReportText()
             }
             .refreshNotificationStatus(notificationStatus)
         }
@@ -392,7 +386,6 @@ struct DiagnosticsView: View {
     private func refreshReportText() {
         reportText = analytics.diagnosticsReport(
             notificationsEnabled: notificationStatus.canDeliverVisibleAlerts,
-            currentTheme: themeController.variant.displayName,
             betaRefreshDiagnostics: betaRefreshDiagnostics
         )
     }
@@ -406,5 +399,6 @@ struct DiagnosticsView: View {
         .environment(\.watchlistRepository, InMemoryWatchlistRepository())
         .environment(\.betaRefreshDiagnostics, BetaRefreshDiagnostics())
         .environment(AppThemeController.preview)
+        .appThemePreview()
 }
 #endif

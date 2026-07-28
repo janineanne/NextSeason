@@ -19,7 +19,6 @@ struct AnalyticsCounters: Codable, Equatable, Sendable {
     var notificationPermissionRequests = 0
     var notificationPermissionGrants = 0
     var notificationRemindersScheduled = 0
-    var themeSelections = 0
 }
 
 extension AnalyticsCounters {
@@ -49,8 +48,6 @@ extension AnalyticsCounters {
             }
         case .notificationReminderScheduled:
             notificationRemindersScheduled += 1
-        case .themeSelected:
-            themeSelections += 1
         case .searchResultOpened, .watchlistViewed, .watchlistItemOpened,
              .notificationTapped, .appOpenedFromNotification, .emptyWatchlistShown,
              .nonFatalError:

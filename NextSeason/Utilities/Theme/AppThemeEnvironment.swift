@@ -6,7 +6,7 @@
 import SwiftUI
 
 private struct AppThemeColorsKey: EnvironmentKey {
-    static let defaultValue = AppThemeColors.colors(for: .tealUtility, colorScheme: .light)
+    static let defaultValue = AppThemeColors.colors(for: .light)
 }
 
 extension EnvironmentValues {
@@ -38,9 +38,9 @@ extension View {
         modifier(AppControlTintModifier())
     }
 
-    /// Applies a palette for SwiftUI previews without a theme controller.
-    func appThemePreview(_ variant: AppPaletteVariant = .tealUtility) -> some View {
-        modifier(AppThemePreviewModifier(variant: variant))
+    /// Applies the app palette for SwiftUI previews without a theme controller.
+    func appThemePreview() -> some View {
+        modifier(AppThemePreviewModifier())
     }
 }
 
@@ -55,10 +55,8 @@ private struct AppControlTintModifier: ViewModifier {
 private struct AppThemePreviewModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
 
-    let variant: AppPaletteVariant
-
     func body(content: Content) -> some View {
         content
-            .environment(\.appThemeColors, AppThemeColors.colors(for: variant, colorScheme: colorScheme))
+            .environment(\.appThemeColors, AppThemeColors.colors(for: colorScheme))
     }
 }

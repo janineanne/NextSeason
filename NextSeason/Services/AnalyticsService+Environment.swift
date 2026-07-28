@@ -28,7 +28,6 @@ private final class UnconfiguredAnalyticsService: AnalyticsTracking {
 
     func diagnosticsReport(
         notificationsEnabled: Bool,
-        currentTheme: String,
         betaRefreshDiagnostics: BetaRefreshDiagnostics?
     ) -> String {
         fail()

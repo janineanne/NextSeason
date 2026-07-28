@@ -20,7 +20,6 @@ struct AnalyticsCountersTests {
         counters.record(.watchlistAdded(source: .search, showID: 1))
         counters.record(.notificationPermission(result: .granted))
         counters.record(.notificationReminderScheduled)
-        counters.record(.themeSelected(variant: .lavender))
 
         #expect(counters.appLaunches == 1)
         #expect(counters.searchesPerformed == 1)
@@ -31,7 +30,6 @@ struct AnalyticsCountersTests {
         #expect(counters.notificationPermissionRequests == 1)
         #expect(counters.notificationPermissionGrants == 1)
         #expect(counters.notificationRemindersScheduled == 1)
-        #expect(counters.themeSelections == 1)
     }
 
     @Test("Failed searches do not count as successful")
@@ -71,14 +69,12 @@ struct AnalyticsDiagnosticsReportTests {
 
         let report = AnalyticsDiagnosticsReport.formatted(
             counters: counters,
-            notificationsEnabled: true,
-            currentTheme: "Lavender"
+            notificationsEnabled: true
         )
 
         #expect(report.contains("NextSeason Diagnostics"))
         #expect(report.contains("App launches: 19"))
         #expect(report.contains("Searches: 52"))
         #expect(report.contains("Notifications enabled: true"))
-        #expect(report.contains("Current theme: Lavender"))
     }
 }

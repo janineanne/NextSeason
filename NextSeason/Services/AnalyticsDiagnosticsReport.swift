@@ -24,7 +24,6 @@ enum AnalyticsDiagnosticsReport {
     static func formatted(
         counters: AnalyticsCounters,
         notificationsEnabled: Bool,
-        currentTheme: String,
         recentBreadcrumbs: [String] = AppDiagnosticsLogger.recentBreadcrumbs(),
         persistedBreadcrumbs: [String] = AppDiagnosticsLogger.persistedBreadcrumbsForExport(),
         launchDiagnostics: AppLaunchDiagnostics = AppDiagnosticsLogger.launchDiagnostics(),
@@ -96,9 +95,7 @@ enum AnalyticsDiagnosticsReport {
         Notification permission requests: \(counters.notificationPermissionRequests)
         Notification permission grants: \(counters.notificationPermissionGrants)
         Notification reminders scheduled: \(counters.notificationRemindersScheduled)
-        Theme selections: \(counters.themeSelections)
         Notifications enabled: \(notificationsEnabled)
-        Current theme: \(currentTheme)
 
         Recent breadcrumbs (this session):
         \(breadcrumbLines)
