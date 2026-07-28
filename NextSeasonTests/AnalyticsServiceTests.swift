@@ -40,15 +40,12 @@ struct AnalyticsServiceTests {
     func diagnosticsReportUsesCounters() {
         let analytics = RecordingAnalyticsService()
         analytics.track(.appLaunched)
-        analytics.track(.themeSelected(variant: .tealUtility))
 
         let report = analytics.diagnosticsReport(
-            notificationsEnabled: false,
-            currentTheme: AppPaletteVariant.tealUtility.displayName
+            notificationsEnabled: false
         )
 
         #expect(report.contains("App launches: 1"))
-        #expect(report.contains("Theme selections: 1"))
         #expect(report.contains("Notifications enabled: false"))
     }
 

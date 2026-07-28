@@ -24,7 +24,6 @@ enum AnalyticsEvent: Equatable, Sendable {
     case appOpenedFromNotification(showID: Int)
     case emptyWatchlistShown
     case emptySearchResultsShown
-    case themeSelected(variant: AppPaletteVariant)
     case nonFatalError(category: AnalyticsErrorCategory, context: String)
 }
 
@@ -68,7 +67,6 @@ protocol AnalyticsTracking: AnyObject {
     func countersSnapshot() -> AnalyticsCounters
     func diagnosticsReport(
         notificationsEnabled: Bool,
-        currentTheme: String,
         betaRefreshDiagnostics: BetaRefreshDiagnostics?
     ) -> String
 }
@@ -84,13 +82,11 @@ extension AnalyticsTracking {
 
     func diagnosticsReport(
         notificationsEnabled: Bool,
-        currentTheme: String,
         betaRefreshDiagnostics: BetaRefreshDiagnostics? = nil
     ) -> String {
         AnalyticsDiagnosticsReport.formatted(
             counters: countersSnapshot(),
             notificationsEnabled: notificationsEnabled,
-            currentTheme: currentTheme,
             betaRefreshDiagnostics: betaRefreshDiagnostics
         )
     }
@@ -114,7 +110,6 @@ extension AnalyticsEvent {
         case .appOpenedFromNotification: "app_opened_from_notification"
         case .emptyWatchlistShown: "empty_watchlist_shown"
         case .emptySearchResultsShown: "empty_search_results_shown"
-        case .themeSelected: "theme_selected"
         case .nonFatalError: "non_fatal_error"
         }
     }
@@ -138,8 +133,6 @@ extension AnalyticsEvent {
             ["source": source.rawValue, "show_id": String(showID)]
         case let .notificationPermission(result):
             ["result": result.rawValue]
-        case let .themeSelected(variant):
-            ["variant": variant.rawValue]
         case let .nonFatalError(category, context):
             ["category": category.rawValue, "context": context]
         case .appLaunched, .exampleSearchUsed, .notificationReminderScheduled,

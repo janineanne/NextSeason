@@ -21,8 +21,6 @@ enum DiagnosticsDocumentationCopy {
     static let appSection = """
         **Version** and **Build channel** identify the build you are running.
 
-        **Current theme** shows the active app icon and color theme.
-
         **Notifications enabled** reflects whether the app can deliver alerts on this device \
         (system permission granted).
         """

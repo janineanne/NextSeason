@@ -44,7 +44,6 @@ struct NextSeasonApp: App {
             )
             .environment(themeController)
             .appThemeColors(from: themeController)
-            .appThemeIcon(from: themeController)
             .environment(\.watchlistRepository, composition.watchlistRepository)
             .environment(\.watchlistRefreshService, composition.refreshService)
             .environment(\.watchlistUndoRemoval, composition.watchlistUndoRemoval)

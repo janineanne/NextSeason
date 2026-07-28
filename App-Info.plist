@@ -8,19 +8,6 @@
 	</array>
 	<key>CFBundleIcons</key>
 	<dict>
-		<key>CFBundleAlternateIcons</key>
-		<dict>
-			<key>AppIcon-TealUtility</key>
-			<dict>
-				<key>CFBundleIconName</key>
-				<string>AppIcon-TealUtility</string>
-			</dict>
-			<key>AppIcon-WarmSlate</key>
-			<dict>
-				<key>CFBundleIconName</key>
-				<string>AppIcon-WarmSlate</string>
-			</dict>
-		</dict>
 		<key>CFBundlePrimaryIcon</key>
 		<dict>
 			<key>CFBundleIconName</key>
