@@ -15,6 +15,8 @@ struct AppThemeColors: Equatable, Sendable {
     let controlTint: Color
     let mutedText: Color
     let trackedStar: Color
+    /// Empty watchlist star — neutral grey, independent of palette accent.
+    let untrackedStar: Color
     let warning: Color
 
     static func colors(for variant: AppPaletteVariant, colorScheme: ColorScheme) -> AppThemeColors {
@@ -38,6 +40,9 @@ struct AppThemeColors: Equatable, Sendable {
 }
 
 private extension AppThemeColors {
+    static let untrackedStarLight = Color(white: 0.24)
+    static let untrackedStarDark = Color(white: 0.83)
+
     static let lavenderLight = AppThemeColors(
         background: Color(red: 0.902, green: 0.886, blue: 0.933),
         surface: Color(red: 0.973, green: 0.969, blue: 0.988),
@@ -45,6 +50,7 @@ private extension AppThemeColors {
         controlTint: Color(red: 0.365, green: 0.306, blue: 0.443),
         mutedText: Color(red: 0.431, green: 0.416, blue: 0.482),
         trackedStar: Color(red: 0.918, green: 0.639, blue: 0.090),
+        untrackedStar: untrackedStarLight,
         warning: Color(red: 0.851, green: 0.451, blue: 0.000)
     )
 
@@ -55,6 +61,7 @@ private extension AppThemeColors {
         controlTint: Color(red: 0.659, green: 0.596, blue: 0.769),
         mutedText: Color(red: 0.792, green: 0.776, blue: 0.816),
         trackedStar: Color(red: 1.000, green: 0.839, blue: 0.337),
+        untrackedStar: untrackedStarDark,
         warning: Color(red: 1.000, green: 0.584, blue: 0.235)
     )
 
@@ -65,6 +72,7 @@ private extension AppThemeColors {
         controlTint: Color(red: 0.051, green: 0.420, blue: 0.388),
         mutedText: Color(red: 0.361, green: 0.400, blue: 0.439),
         trackedStar: Color(red: 0.918, green: 0.639, blue: 0.090),
+        untrackedStar: untrackedStarLight,
         warning: Color(red: 0.851, green: 0.451, blue: 0.000)
     )
 
@@ -75,6 +83,7 @@ private extension AppThemeColors {
         controlTint: Color(red: 0.431, green: 0.792, blue: 0.737),
         mutedText: Color(red: 0.659, green: 0.690, blue: 0.722),
         trackedStar: Color(red: 1.000, green: 0.839, blue: 0.337),
+        untrackedStar: untrackedStarDark,
         warning: Color(red: 1.000, green: 0.584, blue: 0.235)
     )
 
@@ -85,6 +94,7 @@ private extension AppThemeColors {
         controlTint: Color(red: 0.200, green: 0.255, blue: 0.333),
         mutedText: Color(red: 0.392, green: 0.455, blue: 0.545),
         trackedStar: Color(red: 0.918, green: 0.639, blue: 0.090),
+        untrackedStar: untrackedStarLight,
         warning: Color(red: 0.851, green: 0.451, blue: 0.000)
     )
 
@@ -97,6 +107,7 @@ private extension AppThemeColors {
         controlTint: Color(red: 0.796, green: 0.835, blue: 0.882),
         mutedText: Color(red: 0.659, green: 0.635, blue: 0.620),
         trackedStar: Color(red: 1.000, green: 0.839, blue: 0.337),
+        untrackedStar: untrackedStarDark,
         warning: Color(red: 1.000, green: 0.584, blue: 0.235)
     )
 }
