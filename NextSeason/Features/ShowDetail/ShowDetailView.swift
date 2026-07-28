@@ -9,7 +9,6 @@ import SwiftUI
 /// formatted summary.
 struct ShowDetailView: View {
     @Environment(\.watchlistUndoRemoval) private var undoRemoval
-    @Environment(\.appThemeColors) private var themeColors
 
     @State private var viewModel: ShowDetailViewModel
 
@@ -207,7 +206,7 @@ struct ShowDetailView: View {
                     HStack(alignment: .top, spacing: AppSpacing.tight) {
                         Image(systemName: status.statusSymbolName)
                             .font(.subheadline)
-                            .foregroundStyle(status.emphasisStyle(in: themeColors))
+                            .foregroundStyle(status.emphasisStyle())
                             .accessibilityHidden(true)
                         Text(status.headline)
                             .font(.body)
@@ -222,7 +221,7 @@ struct ShowDetailView: View {
                             .appSecondaryText()
                     } icon: {
                         Image(systemName: "exclamationmark.triangle")
-                            .foregroundStyle(themeColors.warning)
+                            .foregroundStyle(AppColor.warning)
                     }
                     Button("Try Again") {
                         Task { await viewModel.load(undoRemoval: undoRemoval) }

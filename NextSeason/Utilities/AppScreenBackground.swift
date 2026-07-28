@@ -6,7 +6,7 @@
 import SwiftUI
 
 extension View {
-    /// Screen fill from the active app palette.
+    /// Screen fill from the app color asset.
     func appScreenBackground() -> some View {
         modifier(AppScreenBackgroundModifier())
     }
@@ -35,20 +35,16 @@ extension View {
 }
 
 private struct AppScreenBackgroundModifier: ViewModifier {
-    @Environment(\.appThemeColors) private var colors
-
     func body(content: Content) -> some View {
-        content.background(colors.background.ignoresSafeArea())
+        content.background(AppColor.background.ignoresSafeArea())
     }
 }
 
 private struct AppSurfaceCardModifier: ViewModifier {
-    @Environment(\.appThemeColors) private var colors
-
     let cornerRadius: CGFloat
 
     func body(content: Content) -> some View {
-        content.background(colors.surface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        content.background(AppColor.surface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
@@ -63,6 +59,5 @@ private struct AppSurfaceCardModifier: ViewModifier {
     .appSurfaceCard()
     .padding()
     .appScreenBackground()
-    .appThemePreview()
 }
 #endif

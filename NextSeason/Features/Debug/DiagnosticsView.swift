@@ -398,7 +398,5 @@ struct DiagnosticsView: View {
         .environment(\.notificationService, NotificationService(analytics: RecordingAnalyticsService()))
         .environment(\.watchlistRepository, InMemoryWatchlistRepository())
         .environment(\.betaRefreshDiagnostics, BetaRefreshDiagnostics())
-        .environment(AppThemeController.preview)
-        .appThemePreview()
 }
 #endif

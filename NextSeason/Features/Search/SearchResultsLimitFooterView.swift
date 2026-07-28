@@ -41,6 +41,5 @@ struct SearchResultsLimitFooterView: View {
     SearchResultsLimitFooterView(query: "Star Trek")
         .padding()
         .appScreenBackground()
-        .appThemePreview()
 }
 #endif
