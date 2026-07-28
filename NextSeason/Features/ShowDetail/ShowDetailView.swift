@@ -113,7 +113,7 @@ struct ShowDetailView: View {
             VStack(alignment: .leading, spacing: AppSpacing.tight) {
                 Text(viewModel.displayShow.name)
                     .font(.title2.bold())
-                    .appPrimaryText()
+                    .appAccentText()
                 Text(viewModel.displayShow.status.displayLabel)
                     .font(.subheadline)
                     .appSecondaryText()

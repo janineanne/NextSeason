@@ -148,8 +148,13 @@ struct SearchView: View {
         switch viewModel.state {
         case .idle:
             ContentUnavailableView {
-                Label("Find Your Next Season", systemImage: "magnifyingglass")
-                    .appPrimaryText()
+                Label {
+                    Text("Find Your Next Season")
+                        .appAccentText()
+                } icon: {
+                    Image(systemName: "magnifyingglass")
+                        .appPrimaryText()
+                }
             } description: {
                 Text(FirstRunCopy.searchIdleDescription)
                     .appSecondaryText()
