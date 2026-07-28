@@ -58,7 +58,7 @@ struct ShowRowLabel: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(name)
                     .font(.headline)
-                    .appPrimaryText()
+                    .appAccentText()
                 Text(subtitle)
                     .font(.subheadline)
                     .appSecondaryText()

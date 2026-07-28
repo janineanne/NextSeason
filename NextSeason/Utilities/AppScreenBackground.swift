@@ -22,10 +22,14 @@ extension View {
         modifier(AppSurfaceCardModifier(cornerRadius: cornerRadius))
     }
 
-    /// Show names, section headings, and other primary content labels.
-    /// Uses the system primary style so content adapts to glass, contrast, and accessibility.
+    /// Headings and labels that use the system primary style for glass and accessibility.
     func appPrimaryText() -> some View {
         foregroundStyle(.primary)
+    }
+
+    /// Show names and other branded emphasis text.
+    func appAccentText() -> some View {
+        foregroundStyle(AppColor.accent)
     }
 
     /// Status lines, metadata, and supporting descriptions.
