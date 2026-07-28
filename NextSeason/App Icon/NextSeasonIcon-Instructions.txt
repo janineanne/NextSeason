@@ -1,0 +1,119 @@
+NextSeason App Icon Instructions
+
+Design summary
+
+The icon represents the two core concepts of NextSeason:
+
+-   Television — the app monitors TV shows.
+-   Calendar — the app notifies the user when there is something worth
+    knowing about an upcoming or returning season.
+
+The final artwork intentionally avoids using SF Symbols. Instead it uses
+original, simple vector geometry.
+
+Design characteristics:
+
+-   Monochrome teal artwork on a light background.
+-   Modern widescreen television with a subtle Y-axis perspective,
+    making it appear turned slightly toward the calendar instead of
+    lying flat.
+-   Empty TV screen to keep the icon clean and recognizable at small
+    sizes.
+-   Single angled TV foot.
+-   Calendar overlaps the TV and is rotated slightly clockwise to add
+    visual energy.
+-   Simple calendar grid with six date squares.
+-   All visible pieces are separate vector objects to improve editing
+    and compatibility with Icon Composer.
+
+------------------------------------------------------------------------
+
+Using the SVG
+
+1. Open in Icon Composer
+
+Open NextSeasonIcon-CleanLayers.svg in Icon Composer.
+
+Verify that:
+
+-   the artwork is centered
+-   the TV perspective looks correct
+-   the calendar overlap looks correct
+-   the icon reads well in Light, Dark and Tinted previews
+
+Minor visual adjustments can be made directly in Icon Composer if
+desired.
+
+2. Save as an Icon Composer document
+
+Choose:
+
+File → Save
+
+Save the project as:
+
+AppIcon.icon
+
+The .icon file becomes the editable master for the application.
+
+The SVG remains your source artwork and can always be re-imported if
+needed.
+
+3. Add the .icon file to Xcode
+
+Drag AppIcon.icon into the Xcode project.
+
+Enable:
+
+-   Copy items if needed
+-   Add to the NextSeason target
+
+4. Configure the target
+
+Open:
+
+Project → NextSeason target → General
+
+Under App Icons and Launch Screen, set App Icon to:
+
+AppIcon
+
+5. Build
+
+Build and run the application.
+
+Xcode automatically generates the required icon sizes and appearance
+variants from the .icon file.
+
+Do not manually resize the SVG into multiple PNG files for the app
+bundle.
+
+6. Verify
+
+Check the icon in:
+
+-   Home Screen
+-   Spotlight / App Library
+-   Settings
+-   Light appearance
+-   Dark appearance
+-   Tinted appearance
+
+7. Keep the SVG
+
+Retain both files:
+
+-   NextSeasonIcon-CleanLayers.svg (source artwork)
+-   AppIcon.icon (Icon Composer project)
+
+The SVG is ideal for future edits because it preserves clean vector
+geometry.
+
+Notes
+
+-   The blue overlay seen inside Icon Composer while hovering is an
+    editor visualization, not part of the icon.
+-   The blue highlight does not appear in exported icons or in the
+    running application.
+-   If future edits are needed, modify the SVG (or the .icon file after
+    import) rather than editing raster images.

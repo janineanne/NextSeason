@@ -158,9 +158,23 @@
 		E1UI00012FE400000076FCDD /* NextSeasonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NextSeasonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E167E91230196A87007F7098 /* Exceptions for "NextSeason" folder in "NextSeason" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"App Icon/NextSeasonIcon-CleanLayers.svg",
+				"App Icon/NextSeasonIcon-Instructions.txt",
+			);
+			target = E13811CC2FDB795C009C141B /* NextSeason */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E13811CF2FDB795C009C141B /* NextSeason */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E167E91230196A87007F7098 /* Exceptions for "NextSeason" folder in "NextSeason" target */,
+			);
 			path = NextSeason;
 			sourceTree = "<group>";
 		};
