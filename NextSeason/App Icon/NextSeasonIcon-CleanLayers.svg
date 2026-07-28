@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>NextSeason TV App Icon</title>
+  <desc>
+    A subtly perspective-angled television overlapped by a slightly tilted calendar.
+    All visible parts are separate vector objects for cleaner behavior in Icon Composer.
+  </desc>
+
+  <!-- Background -->
+  <rect id="background"
+        x="0" y="0" width="1024" height="1024"
+        fill="#F0F2F1"/>
+
+  <!-- Entire composition: moved slightly left from the previous version -->
+  <g id="composition" transform="translate(5 0)">
+
+    <!-- TV outer body: slightly stronger Y-axis perspective -->
+    <path id="tv-body"
+          d="
+            M 194 222
+            Q 148 222 142 269
+            L 142 532
+            Q 148 578 194 578
+            L 727 552
+            Q 766 550 766 511
+            L 766 289
+            Q 766 250 727 247
+            Z"
+          fill="#0D6B63"/>
+
+    <!-- TV screen: a separate foreground shape, not a compound-path cutout -->
+    <path id="tv-screen"
+          d="
+            M 208 265
+            Q 183 265 180 292
+            L 180 508
+            Q 183 535 209 535
+            L 703 513
+            Q 724 512 724 490
+            L 724 309
+            Q 724 287 703 285
+            Z"
+          fill="#F0F2F1"/>
+
+    <!-- TV foot: separate object -->
+    <path id="tv-foot"
+          d="M 247 577 L 321 573 L 279 646 L 211 646 Z"
+          fill="#0D6B63"/>
+
+    <!-- Calendar group -->
+    <g id="calendar" transform="rotate(4 654 610)">
+
+      <!-- Calendar outer body -->
+      <rect id="calendar-body"
+            x="455" y="410" width="400" height="405"
+            rx="72" ry="72"
+            fill="#0D6B63"/>
+
+      <!-- Calendar page -->
+      <rect id="calendar-page"
+            x="490" y="535" width="330" height="245"
+            rx="42" ry="42"
+            fill="#F0F2F1"/>
+
+      <!-- Binding tabs, each its own object -->
+      <rect id="calendar-tab-left"
+            x="555" y="365" width="48" height="132"
+            rx="24" ry="24"
+            fill="#0D6B63"
+            stroke="#F0F2F1"
+            stroke-width="18"/>
+
+      <rect id="calendar-tab-right"
+            x="708" y="365" width="48" height="132"
+            rx="24" ry="24"
+            fill="#0D6B63"
+            stroke="#F0F2F1"
+            stroke-width="18"/>
+
+      <!-- Date blocks, each its own object -->
+      <rect id="date-1" x="555" y="600" width="52" height="52" rx="11" fill="#0D6B63"/>
+      <rect id="date-2" x="629" y="600" width="52" height="52" rx="11" fill="#0D6B63"/>
+      <rect id="date-3" x="703" y="600" width="52" height="52" rx="11" fill="#0D6B63"/>
+      <rect id="date-4" x="555" y="682" width="52" height="52" rx="11" fill="#0D6B63"/>
+      <rect id="date-5" x="629" y="682" width="52" height="52" rx="11" fill="#0D6B63"/>
+      <rect id="date-6" x="703" y="682" width="52" height="52" rx="11" fill="#0D6B63"/>
+    </g>
+  </g>
+</svg>
