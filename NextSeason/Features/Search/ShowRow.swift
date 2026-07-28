@@ -156,7 +156,7 @@ struct ShowRowTrackButton: View {
             .frame(width: 44, height: 44)
         }
         .buttonStyle(.borderless)
-        .tint(isTracked ? themeColors.trackedStar : themeColors.accent)
+        .tint(isTracked ? themeColors.trackedStar : themeColors.untrackedStar)
         .disabled(isUpdating)
         .accessibilityLabel(trackAccessibilityLabel)
         .accessibilityIdentifier("\(trackButtonIdentifier).\(showID)")
