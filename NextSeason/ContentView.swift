@@ -117,6 +117,5 @@ struct ContentView: View {
             repository: repository,
             analytics: RecordingAnalyticsService()
         ))
-        .appThemePreview()
 }
 #endif

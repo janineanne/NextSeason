@@ -10,7 +10,6 @@ import SwiftUI
 struct NextSeasonApp: App {
     private let composition: AppCompositionRoot
     @State private var navigationCoordinator = AppNavigationCoordinator()
-    @State private var themeController = AppThemeController()
 
     init() {
         let coordinator = AppNavigationCoordinator()
@@ -42,8 +41,6 @@ struct NextSeasonApp: App {
                 refreshService: composition.refreshService,
                 tvMaze: composition.tvMaze
             )
-            .environment(themeController)
-            .appThemeColors(from: themeController)
             .environment(\.watchlistRepository, composition.watchlistRepository)
             .environment(\.watchlistRefreshService, composition.refreshService)
             .environment(\.watchlistUndoRemoval, composition.watchlistUndoRemoval)
@@ -76,7 +73,7 @@ private struct AppRootView: View {
 
     var body: some View {
         ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
-            .appControlTint()
+            .appAccentTint()
             // Theme switcher parked; see ThemeSwitcherView.swift status comment.
             // Previously: beta theme switcher lived in each tab's nav bar via `.betaThemeSwitcherToolbar()`.
             .watchlistUndoToast(

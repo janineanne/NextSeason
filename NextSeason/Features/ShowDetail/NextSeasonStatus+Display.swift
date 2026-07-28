@@ -44,10 +44,10 @@ extension NextSeasonStatus {
 
     /// Tint for the status icon on show detail. Accent is reserved for
     /// scheduled/airing emphasis; quieter statuses use system hierarchy.
-    func emphasisStyle(in colors: AppThemeColors) -> AnyShapeStyle {
+    func emphasisStyle() -> AnyShapeStyle {
         switch self {
         case .scheduled, .airing:
-            AnyShapeStyle(colors.accent)
+            AnyShapeStyle(AppColor.accent)
         case .announcedUndated, .returningNoSeasonYet, .unknown:
             AnyShapeStyle(.secondary)
         case .ended:

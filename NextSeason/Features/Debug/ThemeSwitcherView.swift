@@ -3,9 +3,7 @@
 //  NextSeason
 //
 // STATUS: Obsolete — excluded from the NextSeason build target.
-// Multi-palette support (lavender, warm slate, etc.) was removed; the app uses a
-// single teal palette via AppThemeColors. This file is kept for reference only and
-// must be rewritten before it can be re-added to the target.
+// Colors now live in Assets.xcassets and are accessed via AppColor.
 //
 
 import SwiftUI
