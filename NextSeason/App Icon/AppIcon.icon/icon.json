@@ -6,8 +6,9 @@
     {
       "layers" : [
         {
-          "image-name" : "NextSeasonIcon-CleanLayers.svg",
-          "name" : "NextSeasonIcon-CleanLayers"
+          "glass" : false,
+          "image-name" : "NextSeasonIcon-CoolGrayGradient.svg",
+          "name" : "NextSeasonIcon-CoolGrayGradient"
         }
       ],
       "shadow" : {

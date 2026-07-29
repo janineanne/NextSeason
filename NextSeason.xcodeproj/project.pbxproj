@@ -103,6 +103,7 @@
 		E167E0323017F0C9007F7098 /* 7-27-2026 HIG and Liquid Glass Audit.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-27-2026 HIG and Liquid Glass Audit.md"; sourceTree = "<group>"; };
 		E167E0333017F0D7007F7098 /* 7-27-2026 UI Audit Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-27-2026 UI Audit Implementation.md"; sourceTree = "<group>"; };
 		E167E27030180120007F7098 /* 7-27-2026 Fix Watchlist Reload Bug.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-27-2026 Fix Watchlist Reload Bug.md"; sourceTree = "<group>"; };
+		E167ED91301A8BB1007F7098 /* 7-29-2026 App Icon Discussion.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-29-2026 App Icon Discussion.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -162,8 +163,10 @@
 		E167E91230196A87007F7098 /* Exceptions for "NextSeason" folder in "NextSeason" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"App Icon/NextSeasonIcon-CleanLayers.svg",
-				"App Icon/NextSeasonIcon-Instructions.txt",
+				"App Icon/Design History/NextSeasonIcon-CoolGrayGradient-WhiteInteriors.svg",
+				"App Icon/Design History/NextSeasonIcon-CoolGrayGradient.svg",
+				"App Icon/Design History/NextSeasonIcon-Instructions.txt",
+				"App Icon/Design History/README-AppIconArtwork.md",
 			);
 			target = E13811CC2FDB795C009C141B /* NextSeason */;
 		};
