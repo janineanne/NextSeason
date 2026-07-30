@@ -1,172 +1,141 @@
-# NextSeason -- App Store Readiness Roadmap
+# NextSeason -- Product Evolution Roadmap
 
-## Related Documentation
-
-The current implementation architecture is documented in the Mermaid diagrams under `Documentation/Diagrams/`. Those diagrams describe the existing codebase and are updated as implementation changes. This roadmap intentionally focuses on planned work rather than current architecture.
-
-The diagrams most relevant to this roadmap are:
-
-- 01 – App Architecture
-- 03 – Refresh & Notifications
-- 04 – Data & Persistence
-- 05 – Search Flow
-- 08 – Background Refresh Scheduling
-
-
+This document captures enhancements planned after the initial App Store release. Features are grouped by area rather than priority, and will be implemented based on user feedback, technical dependencies, and product direction.
 
 ## Purpose
 
-This document captures the work that should be completed before the first App Store release. Content has been preserved from the original roadmap and reorganized by release timing rather than topic.
-
-# Engineering & Reliability
-
-## SwiftData Migration Strategy
-
--   Add and test a SwiftData migration plan before changing persistent
-    models.
--   Verify upgrades preserve user data.
--   Include migration testing in release validation.
--   Keep representative stores from older versions for testing.
-
-## Persistence Recovery
-
-Replace the startup `fatalError` with a user-facing recovery flow before
-App Store release.
-
--   Log diagnostics before recovery.
--   Allow resetting the local store.
--   Explain consequences before resetting.
--   Allow exporting diagnostics before reset.
-
-## Crash Loop Prevention
-
--   Detect repeated launch failures.
--   Offer a **Reset Local Data** option.
--   Preserve diagnostics for troubleshooting.
+This document captures enhancements planned after the initial App Store release. Content has been preserved from the original roadmap and reorganized by release timing rather than topic.
 
 # Core Product Improvements
 
-## Search
+## Search Improvements
 
-TVMaze already provides fuzzy matching, AKA support, partial-title
-matching, punctuation tolerance, and relevance ordering.
+- Support common abbreviations and acronyms if users demonstrate a need.
+- Continue refining search quality based on analytics and user feedback.
 
-### Recommended Analytics
+## Watchlist Management
 
--   `search_performed`
--   Query length
--   Result count
--   Whether a show was selected
+- Support swipe-to-delete in the Watchlist, in addition to tapping the star.
+- User-selectable sorting.
 
-### Necessary Improvements
+Continue to favor fast, predictable title matching over discovery-oriented fuzzy search.
 
--   Eliminate the current 10-result limitation (must be done before first App Store release).
+## Notification Enhancements
 
-Continue using TVMaze's relevance ordering where appropriate, while allowing another provider to supply broader search results if it improves discoverability.
+-   Global notification preferences.
+-   Per-show preferences.
+-   Quiet hours.
+-   Notification history.
+-   Additional notification categories.
 
-## Search Provider Independence
+## Streaming Availability
 
-Reduce dependence on a single metadata provider while improving search coverage.
+Implement only if users demonstrate meaningful demand.
 
--   Use one or more search-focused providers.
--   Continue using the most appropriate metadata provider for season tracking.
--   Map provider IDs when a show is selected.
--   Design the search layer so providers can be added or replaced with minimal user impact.
+If sufficient demand exists:
 
-# App Store Submission Checklist
+-   Integrate with a dedicated streaming provider.
+-   Display current regional availability.
+-   Deep-link to supported services.
 
-The application is feature-complete at this point. The remaining work is focused on preparing it for public release and successfully navigating the App Store review process.
+Do not use TVMaze's crowdsourced provider data.
 
-Note that unlike most of the roadmap documents, these tasks are in mostly sequential order.
+### Dependent Future Features
 
-## Legal and Business
+-   Record subscribed services.
+-   Highlight available shows.
+-   Filter/group by availability.
+-   Tailor notifications.
 
-* Receive D-U-N-S Number for Trial by Fyre, LLC.
-* Convert Apple Developer account to an Organization account.
-* Verify company information in App Store Connect.
-* Review and complete all tax and banking information.
-* Confirm support email address.
-* Confirm support website.
-* Verify Privacy Policy is published and accessible.
-* Decide whether to use a support knowledge base or GitHub Issues for user support.
 
-## App Store Assets
+## AI-Assisted Show Insights
 
-* Design a final production-quality app icon.
-    * The current icon is sufficient for development but should be replaced before release.
-* Capture App Store screenshots for all supported device sizes.
-* Prepare App Preview video (optional).
-* Write the App Store description.
-* Write promotional text.
-* Choose keywords.
-* Select App Store categories.
-* Prepare copyright information.
+Evaluate Apple’s on-device Foundation Models as the primary implementation for concise, privacy-preserving viewing insights.
 
-## Privacy and Compliance
+Potential capabilities:
 
-* Complete the Privacy Nutrition Label.
-* Verify App Privacy answers remain accurate.
-* Confirm encryption questionnaire answers.
-* Review accessibility support.
-* Verify required legal acknowledgements and licenses.
+- Generate a brief "Why you might like this" summary.
+- Highlight the types of viewers the show is best suited for.
+- Describe tone and pacing in a few concise bullet points.
+- Produce consistent, spoiler-free summaries that fit naturally within the existing UI.
 
-## Final Quality Pass
+Implementation principles:
 
-* Complete a full regression test.
-* Test on current iOS release.
-* Test on the latest beta version of iOS (if available).
-* Verify upgrade from previous TestFlight builds.
-* Verify clean installation.
-* Verify notification permissions flow.
-* Verify background refresh behavior.
-* Verify behavior with notifications disabled.
-* Verify behavior with Background App Refresh disabled.
-* Verify Dark, Light, and Midnight themes.
-* Verify Dynamic Type.
-* Verify VoiceOver.
-* Verify localization assumptions (even if English-only).
-* Verify app behavior while offline.
-* Run Instruments one final time for memory leaks and performance.
+- Use Apple's on-device Foundation Models when available.
+- Cache generated insights so each show is processed only once.
+- Gracefully fall back to the standard TVMaze description on unsupported devices or OS versions.
+- Clearly identify this as a feature available only on supported versions of iOS, ensuring the app continues to provide a complete experience on older devices.
+- Keep AI optional, unobtrusive, and focused on helping users decide whether to add a show to their Watchlist.
+- Preserve user privacy by performing generation on-device whenever possible.
 
-## TestFlight
+## Continuous Improvement
 
-* Create Release Candidate build.
-* Invite final external testers.
-* Address remaining beta feedback.
-* Remove or hide developer-only diagnostics as appropriate.
-* Increment version and build numbers for release.
+- Refine the user experience based on App Store reviews and user feedback.
+- Continue improving accessibility.
+- Improve performance and battery efficiency.
+- Reduce maintenance burden through ongoing codebase simplification.
 
-## App Store Connect
+# Platform Features
 
-* Create production app version.
-* Upload Release Candidate build.
-* Complete release notes (“What’s New”).
-* Upload screenshots.
-* Upload app icon.
-* Complete pricing information.
-* Select availability by country.
-* Configure age rating.
-* Configure App Review information.
-* Provide demo account (if ever required).
-* Submit for review.
+## Cross-Device Sync
 
-## Launch
+-   Cloud sync.
+-   Cross-device watchlists.
+-   Backup and restore.
+-   Device migration.
 
-* Decide between automatic release and manual release after approval.
-* Publish announcement on LinkedIn.
-* Publish announcement on GitHub.
-* Publish announcement on the project website.
-* Monitor App Review status.
-* Respond promptly to reviewer questions.
-* Monitor crash reports after launch.
-* Monitor user reviews and support emails.
-* Prioritize post-launch fixes before beginning major new features.
+## Apple Platform Expansion
 
-⸻
+Potential platforms:
 
-There are a couple of things I’d add based on what I know about NextSeason specifically:
+Planned after Cloud Sync is implemented:
 
-* Replace the temporary SF Symbols app icon before submission. We talked about this after realizing App Review might reject an icon composed directly from SF Symbols.
-* Remove or gate the diagnostics UI (or at least verify you’re comfortable with what remains visible to end users).
-* Verify all GitHub links and documentation point to the public repository and no internal-only notes remain.
-* Archive the MVP documentation (roadmaps, transcripts, architecture docs, etc.) as the “v1.0” snapshot before you begin post-launch work. That gives you a clean historical record of the project as it existed when it first shipped.
+- iPad
+- Mac
+- Apple TV companion app
+
+Vision Pro is not currently planned.
+
+## Monitoring & Notifications
+
+- Move season monitoring to a backend service.
+- Deliver reliable push notifications even when the app is not running.
+- Reduce dependence on background app refresh.
+- Keep notification delivery consistent across all of a user’s devices.
+- Minimize battery impact by performing monitoring on the server whenever possible.
+
+## Identity & Accounts
+
+Introduce user accounts only if they become necessary to support Cloud Sync or backend monitoring.
+
+# Product Analytics
+
+Transition Diagnostics into a production support feature while retaining diagnostic report generation. Continue using lightweight, privacy-preserving analytics to guide future product decisions.
+
+# Business Options
+
+-   One-time purchase.
+-   Premium upgrade.
+-   Subscription.
+-   Affiliate revenue.
+-   **Initial release**: One-time paid purchase. Future pricing models (including free, freemium, subscriptions, or optional purchases) will be evaluated based on user feedback, adoption, and operating costs.
+
+# Product Principles
+
+-   Remain focused on season tracking.
+-   Avoid unnecessary complexity.
+-   Favor privacy.
+-   Work well without requiring an account.
+-   Integrate naturally with Apple's platforms.
+-   Earn user trust through reliability.
+-   Do one thing exceptionally well before expanding scope.
+
+# Explicit Non-Goals
+
+-   Social networking.
+-   User reviews.
+-   Episode tracking.
+-   Discussion forums.
+-   General TV discovery.
+-   Recommendation engines.
+-   Comprehensive media database features.

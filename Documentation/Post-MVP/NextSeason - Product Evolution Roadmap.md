@@ -1,12 +1,6 @@
 # NextSeason -- Product Evolution Roadmap
 
-## Related Documentation
-
-The current implementation architecture is documented in the Mermaid diagrams under `Documentation/Diagrams/`. Those diagrams describe the existing codebase and are updated as implementation changes. This roadmap intentionally focuses on planned work rather than current architecture.
-
-As major post-launch features such as cloud sync, backend notifications, and multi-provider search are implemented, new architecture diagrams should be added alongside the existing implementation diagrams.
-
-
+This document captures enhancements planned after the initial App Store release. Features are grouped by area rather than priority, and will be implemented based on user feedback, technical dependencies, and product direction.
 
 ## Purpose
 
@@ -14,9 +8,7 @@ This document captures enhancements planned after the initial App Store release.
 
 # Core Product Improvements
 
-## Search
-
-### Potential Improvements
+## Search Improvements
 
 - Support common abbreviations and acronyms if users demonstrate a need.
 - Continue refining search quality based on analytics and user feedback.
@@ -26,8 +18,7 @@ This document captures enhancements planned after the initial App Store release.
 - Support swipe-to-delete in the Watchlist, in addition to tapping the star.
 - User-selectable sorting.
 
-Watchlist search should use simple title matching rather than
-discovery-oriented fuzzy search.
+Continue to favor fast, predictable title matching over discovery-oriented fuzzy search.
 
 ## Notification Enhancements
 
@@ -59,7 +50,7 @@ Do not use TVMaze's crowdsourced provider data.
 
 ## AI-Assisted Show Insights
 
-Explore Apple's on-device Foundation Models to provide concise, privacy-preserving viewing insights on the Show Details screen.
+Evaluate Apple’s on-device Foundation Models as the primary implementation for concise, privacy-preserving viewing insights.
 
 Potential capabilities:
 
@@ -77,6 +68,12 @@ Implementation principles:
 - Keep AI optional, unobtrusive, and focused on helping users decide whether to add a show to their Watchlist.
 - Preserve user privacy by performing generation on-device whenever possible.
 
+## Continuous Improvement
+
+- Refine the user experience based on App Store reviews and user feedback.
+- Continue improving accessibility.
+- Improve performance and battery efficiency.
+- Reduce maintenance burden through ongoing codebase simplification.
 
 # Platform Features
 
@@ -91,7 +88,7 @@ Implementation principles:
 
 Potential platforms:
 
-After Cloud Sync is implemented:
+Planned after Cloud Sync is implemented:
 
 - iPad
 - Mac
@@ -105,6 +102,7 @@ Vision Pro is not currently planned.
 - Deliver reliable push notifications even when the app is not running.
 - Reduce dependence on background app refresh.
 - Keep notification delivery consistent across all of a user’s devices.
+- Minimize battery impact by performing monitoring on the server whenever possible.
 
 ## Identity & Accounts
 
@@ -120,7 +118,7 @@ Transition Diagnostics into a production support feature while retaining diagnos
 -   Premium upgrade.
 -   Subscription.
 -   Affiliate revenue.
--   Validate monetization only after the core product demonstrates user retention.
+-   Delay monetization decisions until the core product demonstrates sustained user engagement and retention.
 
 # Product Principles
 

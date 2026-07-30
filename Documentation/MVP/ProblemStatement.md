@@ -47,18 +47,6 @@ The solution should require little ongoing maintenance.
 
 ---
 
-## Accounts and Login
-
-The MVP will not include user accounts or login.
-
-User watchlists will be stored locally on the device.
-
-This keeps the first version simple and avoids adding authentication, backend user management, account recovery, privacy policy complexity, and cloud synchronization before the core product value has been validated.
-
-Login may be added in a later phase if the product expands to support cloud sync, multi-device use, or server-side notification delivery.
-
----
-
 ## Why This Matters
 
 Television content is increasingly fragmented across streaming platforms.

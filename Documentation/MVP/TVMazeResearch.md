@@ -4,8 +4,7 @@ Phase 3 research input for NextSeason. Documents the relevant parts of the
 TVMaze public API and — most importantly — how to **derive next-season
 information**, which the API does not expose as a single field.
 
-Source: <https://www.tvmaze.com/api>. All findings below were verified against
-live responses on 2026-06-14.
+Source: <https://www.tvmaze.com/api>. These findings were verified against live API responses on 2026-06-14 and subsequently validated during implementation of the MVP.
 
 ---
 
@@ -22,7 +21,7 @@ live responses on 2026-06-14.
 
 | Constraint     | Detail                                                                                  | Impact on NextSeason                                                                 |
 | -------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Rate limit     | "At least 20 calls / 10s per IP." HTTP `429` when exceeded.                              | Handle `429` with a short back-off + retry. Throttle background polling.             |
+| Rate limit     | "At least 20 calls / 10s per IP." HTTP `429` when exceeded.                              | Handle `429` with a short back-off + retry. Throttle background polling. Dynamic update windows and change gating keep API usage well below published rate limits.             |
 | Edge caching   | All output cached 60 min by their load balancers.                                        | Don't expect sub-hour freshness. 12h polling is well within tolerance.               |
 | User-Agent     | Strongly recommended to set a unique UA.                                                 | Set `User-Agent: NextSeason/<version>` on every request (contact info may be added later). |
 | Connections    | Don't leave >1 idle connection open.                                                     | Use a single shared `URLSession`; let it manage connection reuse.                   |
@@ -32,14 +31,22 @@ live responses on 2026-06-14.
 
 ## 2. Endpoints we will use
 
-### Slice 1 (Guest Search)
+### Search
 
 | Purpose            | Endpoint                                              | Notes                                                              |
 | ------------------ | ---------------------------------------------------- | ----------------------------------------------------------------- |
-| Search shows       | `GET /search/shows?q=:query`                         | Returns `[{ score, show }]`, best matches first. Fuzziness 2.      |
+| Search shows       | `GET /search/shows?q=:query`                         | Returns `[{ score, show }]`, best matches first. Fuzziness 2. Fuzzy matching works well. Relevance ordering is generally good. Returns approximately 10 matches with no pagination or mechanism to retrieve additional results.     |
 | Show + seasons     | `GET /shows/:id?embed[]=seasons&embed[]=nextepisode` | Single call gives everything needed for next-season derivation.   |
 
-### Slice 2 (Save & Notify)
+### Search endpoint limitations
+
+During MVP development, it became clear that GET /search/shows is limited to approximately 10 results, with no support for pagination or requesting additional matches.
+
+For common or ambiguous searches, relevant shows may therefore be omitted entirely, even when they exist in the TVMaze database.
+
+This limitation is acceptable for the MVP but is not considered sufficient for a production App Store release. Eliminating this limitation (either through an additional data source or an alternative search strategy) is tracked in the Product Evolution Roadmap.
+
+### Watchlist Refresh & Notifications
 
 | Purpose              | Endpoint                          | Notes                                                                       |
 | -------------------- | --------------------------------- | -------------------------------------------------------------------------- |
@@ -193,30 +200,28 @@ Edge cases to handle in code (and to cover with tests):
 
 ---
 
-## 5. Change detection for notifications (future phase)
+## 5. Change detection for notifications
 
-Goal: notify a user when a saved show's next-season status **meaningfully
-changes**.
+Goal: detect meaningful changes to tracked shows and deliver local notifications while minimizing unnecessary network requests.
 
 Approach:
 
 1. On save, compute and store a `NextSeasonStatus` snapshot per show.
 2. Background poll (~every 12h):
-   a. Call `GET /updates/shows?since=day` once. It returns `{ showId: epoch }`.
-   b. For each saved show whose stored `updated` epoch is older than the value in
-      the map (or absent from a `since=week` fallback), re-fetch
-      `GET /shows/:id?embed[]=seasons`.
+   a. Call GET /updates/shows?since=<period> using the smallest update period (day, week, or month) that safely covers the elapsed time since the oldest tracked show was last checked. It returns `{ showId: epoch }`.
+   b. For each tracked show whose stored source update timestamp is older than the value returned by the updates endpoint, fetch the latest show details using GET /shows/:id?embed[]=seasons.
    c. Recompute `NextSeasonStatus` and diff against the stored snapshot.
 3. Emit a local notification on a meaningful delta:
    - `announcedUndated` → `scheduled` (premiere date announced)
    - `scheduled` date changed
    - any status → `airing` (new season out)
    - any status → `ended`
-4. Persist a notification signature to guarantee we never notify twice for the
-   same transition (FR-013, FR-018).
+4. Persist notification signatures and pending-change state to prevent duplicate notifications and reduce false positives from transient API updates.
 
 This minimizes API calls (one `/updates` call gates all per-show fetches) and
 respects the rate limit.
+
+**Implementation notes:** The completed MVP further reduces unnecessary API traffic by dynamically selecting the appropriate TVMaze update window (day, week, or month) and by confirming certain status transitions across refresh cycles before notifying the user.
 
 ---
 
@@ -304,7 +309,7 @@ Because data is editable, fields can **change or be corrected after the fact**:
 - A show can be deleted or merged (rare), so a saved show's `/shows/:id` could
   later return `404`.
 
-Mitigations (feed into Slice 2 design, see `Architecture.md`):
+Mitigations (feed into notification design, see `MVPArchitecture.md`):
 
 - **Debounce notifications:** prefer notifying on changes that *persist across two
   consecutive polls*, or that are backed by a concrete `premiereDate`/`airstamp`,
@@ -334,8 +339,7 @@ catalog. We mitigate it with honest UI (timestamps, attribution), debounced
 notifications, and graceful failure handling — rather than by assuming the data is
 perfect.
 
-**Contingency:** the architecture already isolates the network layer behind a
-`TVMazeService` protocol (`Architecture.md` §4). If freshness proves insufficient
+**Contingency:** tThe networking layer is isolated behind the `TVMazeService` protocol (`MVPArchitecture.md` §4). If freshness proves insufficient
 in practice, a second provider (TheTVDB — TV-first, very stable; or TMDB — broad,
 but episode ordering can shift) could be added or swapped behind that protocol
 without touching the UI. No need to build multi-source now; just preserved as an
@@ -349,8 +353,6 @@ option.
   assessment and mitigations. Monitor real-world latency during testing.
 - **Background execution limits:** iOS `BGAppRefreshTask` scheduling is
   best-effort, not guaranteed every 12h. Notifications may be delayed until the
-  system grants runtime. Documented in `Architecture.md`.
+  system grants runtime. Documented in `MVPArchitecture.md`.
 - **Status enum drift:** treat `status` as open-ended; never crash on a new value.
-- **HTML in `summary`:** decide between stripping tags vs. rendering
-  (`AttributedString`) — UI concern, deferred to implementation.
 ```
