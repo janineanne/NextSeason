@@ -1,5 +1,7 @@
 # TV Show Tracker App - Project Kickoff
-Written by ChatGPT to summarize a lengthy chat, 6-13-26
+Written by ChatGPT to summarize the initial project planning discussion (June 13, 2026).
+
+This document is a historical snapshot of the project's original goals, assumptions, and development strategy. As the project evolved, some implementation details changed. Current project guidance is documented in the repository's living documentation.
 
 ## Purpose
 
@@ -251,6 +253,8 @@ Potential rules:
 
 # Documentation Strategy
 
+> **Note:** This section reflects the original documentation plan from the project kickoff. The documentation organization evolved significantly during development as additional design documents, roadmaps, AI transcripts, and implementation guides were added.
+
 Repository structure:
 
 Docs/
@@ -273,6 +277,8 @@ Important AI conversations should be summarized into documents rather than relyi
 ---
 
 # AI Development Log
+
+> **Note:** This section reflects the original documentation plan from the project kickoff. The documentation organization evolved significantly during development as additional design documents, roadmaps, AI transcripts, and implementation guides were added.
 
 For significant work sessions record:
 

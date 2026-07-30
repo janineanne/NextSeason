@@ -1,14 +1,17 @@
-# Analytics Recommendations
+# MVP Analytics
+
+> **Status:** This document describes the analytics architecture implemented for the completed MVP. The MVP intentionally uses local, privacy-first analytics with no third-party SDKs or backend services. The final section describes how this architecture can evolve after the initial App Store release.
+
 
 ## Goals
 
-The analytics system should:
+The MVP analytics system:
 
--   Remain completely free.
--   Avoid third-party SDKs.
--   Respect user privacy.
--   Provide actionable feedback during TestFlight.
--   Demonstrate thoughtful architecture for portfolio reviewers.
+-   Remains completely free.
+-   Avoids third-party SDKs.
+-   Respects user privacy.
+-   Provides actionable feedback during TestFlight.
+-   Demonstrates a scalable analytics architecture.
 
 ## Guiding Philosophy
 
@@ -21,7 +24,6 @@ Examples:
 -   Do users find shows that interest them?
 -   Do they build a watchlist?
 -   Are notifications being enabled?
--   Which theme do beta testers actually prefer?
 
 Everything else is unnecessary noise.
 
@@ -29,7 +31,7 @@ Everything else is unnecessary noise.
 
 # Layer 1 — Structured Analytics Events
 
-Ad-hoc logging is replaced by a strongly typed event model in
+The MVP implements a strongly typed event model in
 `AnalyticsService.swift`.
 
 ```swift
@@ -85,7 +87,6 @@ Stored counters:
 -   Notification permission requests
 -   Notification permission grants
 -   Notification reminders scheduled
--   Theme selections
 
 Only aggregate counts are stored.
 
@@ -128,16 +129,13 @@ Watchlist removals: 6
 Notification permission requests: 2
 Notification permission grants: 1
 Notification reminders scheduled: 4
-Theme selections: 3
-Notifications enabled: true
-Current theme: Lavender (Current)
 ```
 
 Implementation: `DiagnosticsView.swift`, `AnalyticsDiagnosticsReport.swift`.
 
 ------------------------------------------------------------------------
 
-# Recommended Events
+# Implemented Events
 
 ## Search
 
@@ -182,16 +180,6 @@ scheduled reminders today.
 
 ------------------------------------------------------------------------
 
-## Appearance
-
-Since theme feedback is an explicit beta goal, record:
-
--   Theme selected (palette variant; alternate app icon follows the variant)
-
-This allows measuring actual user preferences.
-
-------------------------------------------------------------------------
-
 # Events Not Worth Tracking
 
 Avoid recording:
@@ -221,10 +209,22 @@ via Copy or Share on the diagnostics screen.
 
 ------------------------------------------------------------------------
 
-# Future Expansion
+# Future Evolution
 
-If analytics requirements eventually exceed the local approach, the
-`AnalyticsTracking` protocol should make it straightforward to swap in a
-remote backend without changing the rest of the application.
+The MVP intentionally avoids remote analytics services. This keeps operating
+costs at zero, minimizes privacy concerns, and is sufficient for TestFlight
+validation and portfolio demonstration.
 
-No changes are recommended until there is a demonstrated need.
+After the initial App Store release, the existing analytics abstraction can be
+extended without affecting the rest of the application. Potential enhancements
+include:
+
+- Optional anonymous aggregate telemetry.
+- Crash reporting.
+- Feature adoption metrics.
+- Search quality metrics (including search-result limitations).
+- Background refresh success/failure rates.
+- Notification delivery and engagement metrics.
+
+Because analytics are already isolated behind an abstraction, these capabilities
+can be added incrementally without requiring widespread architectural changes.

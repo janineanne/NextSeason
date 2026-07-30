@@ -31,12 +31,13 @@ Requirements:
 - Add show
 - Remove show
 - View tracked shows
+- Search within the watchlist
 
 ---
 
 ## Season Status
 
-Users can see season information.
+Users can view the current status of tracked shows.
 
 Requirements:
 
@@ -57,11 +58,13 @@ Requirements:
 
 - Local notification delivery
 - Notification content identifies the show
-- User can open the app from the notification
+- User can open the show within the app from the notification
 
 ---
 
 ## Background Updates
+
+> **Note:** Background updates rely on iOS background execution opportunities. Notifications are most reliable after the app has been launched periodically. A future server-based notification system is planned to provide consistent, device-independent delivery.
 
 The app periodically refreshes show information.
 
@@ -84,16 +87,13 @@ The MVP will NOT include:
 - Social features
 - Friends or sharing
 - Streaming service availability
-- User accounts
+- User accounts and login
 - Cloud synchronization
 - Cross-platform support
 - Android application
 - Web application
 - Premium subscriptions
 - Advertising
-- User accounts
-- Login
-- Cloud synchronization
 - Multi-device sync
 
 ---
@@ -105,7 +105,7 @@ The MVP is successful if users can:
 1. Add shows to a watchlist.
 2. Leave the application.
 3. Receive notifications when a new season becomes available.
-4. Continue using the application without ongoing manual effort.
+4. Continue receiving useful updates with minimal ongoing interaction.
 
 ---
 
@@ -116,6 +116,6 @@ The MVP is complete when:
 - Search works reliably
 - Watchlist management works reliably
 - Season data updates correctly
-- Notifications are delivered correctly
+- Notifications are delivered correctly within the constraints of iOS background execution
 - The app can be demonstrated as a portfolio-quality project
 - The project demonstrates effective AI-assisted development practices

@@ -1,6 +1,6 @@
-> **Note:** This document primarily captures the original MVP architectural design. As the project evolved, implementation details diverged in several areas (navigation coordination, watchlist tracking workflow, notification state management, diagnostics, etc.). Treat this as a design-history document rather than a precise description of the current implementation.
+> **Historical Document:** This document primarily captures the original MVP architectural design. As the project evolved, implementation details diverged in several areas (navigation coordination, watchlist tracking workflow, notification state management, diagnostics, etc.). Treat this as a design-history document rather than a precise description of the current implementation. See [`MVPArchitecture.md`](MVPArchitecture.md), for the authoritative description of the current application architecture.
 
-# Architecture
+# Initial Architecture
 
 Phase 3 architecture blueprint for NextSeason. Defines the data model, persistence,
 networking, notification, and testing strategies adopted for the MVP.
@@ -10,7 +10,7 @@ networking, notification, and testing strategies adopted for the MVP.
 a diagram-first view of the running MVP, see
 [`Diagrams/01-app-architecture.md`](Diagrams/01-app-architecture.md).
 
-Companion docs: [`ProductSpec.md`](ProductSpec.md),
+Companion docs: [`ImplementationPlan.md`](ImplementationPlan.md),
 [`TVMazeResearch.md`](TVMazeResearch.md).
 
 ---
@@ -33,45 +33,6 @@ The architecture was sized for **Slice 1 (Guest Search)** first, then extended t
 ---
 
 ## 2. Layering
-
-```mermaid
-flowchart TD
-    subgraph UI [SwiftUI Views]
-        SearchView
-        ShowDetailView
-        WatchlistView
-    end
-    subgraph VM [ViewModels · @Observable]
-        SearchViewModel
-        ShowDetailViewModel
-        WatchlistViewModel
-    end
-    subgraph SVC [Services]
-        TVMazeClient
-        NextSeasonCalculator
-        NotificationService
-        RefreshScheduler
-        WatchlistRefreshService
-    end
-    subgraph DATA [Data]
-        DTOs[Codable DTOs]
-        Domain[Domain models]
-        Repo[WatchlistRepository]
-        Store[(SwiftData)]
-    end
-
-    UI --> VM --> SVC
-    TVMazeClient --> DTOs --> Domain
-    NextSeasonCalculator --> Domain
-    VM --> Domain
-    VM --> Repo
-    Repo --> Domain
-    Repo --> Store
-    RefreshScheduler --> TVMazeClient
-    RefreshScheduler --> WatchlistRefreshService
-    WatchlistRefreshService --> Repo
-    WatchlistRefreshService --> NotificationService
-```
 
 **Three model tiers, kept deliberately separate:**
 

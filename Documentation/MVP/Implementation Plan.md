@@ -1,4 +1,6 @@
-# Product Spec
+# Implementation Plan
+
+> **Historical Document:** This document describes the original implementation plan used to build the MVP in two development slices. The MVP has since been completed. See MVPDefinition.md for the completed feature set and MVPArchitecture.md for the implemented architecture.
 
 Single source of truth for what NextSeason is and what its first slice delivers.
 This consolidates the Phase 1/2 product documents; it does not replace them. For
@@ -86,16 +88,6 @@ To prevent scope creep in every phase, NextSeason is:
 
 ## 6. Slice 2 — Save & Notify (context, not Slice 1 work)
 
-```mermaid
-flowchart LR
-    search[Search show] --> detail[Show detail]
-    detail --> save[Save to watchlist]
-    save --> poll[Poll TVMaze ~12h]
-    poll --> compare[Compare next-season status]
-    compare -->|changed| notify[Local notification]
-    compare -->|unchanged| poll
-```
-
 A "status change" is any meaningful delta in next-season fields: date announced,
 date changed, new season airing, or show ended. Field-level detail lives in
 [`TVMazeResearch.md`](TVMazeResearch.md) §4–5; the architecture path is in
@@ -103,9 +95,6 @@ date changed, new season airing, or show ended. Field-level detail lives in
 
 Slice 2 uses **on-device storage only** — no user accounts or sign-in. See
 PD-001 in [`DecisionLog.md`](DecisionLog.md).
-
-**Future enhancement (post-MVP):** Sign in with Apple and cloud-synced
-watchlists, when cross-device sync justifies the added complexity.
 
 ## 7. Data source
 
