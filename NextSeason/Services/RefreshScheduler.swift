@@ -7,7 +7,7 @@ import BackgroundTasks
 import Foundation
 import os
 
-/// Schedules best-effort background watchlist refresh (~12h production, 10m soak-test cadence).
+/// Schedules best-effort background watchlist refresh (~12h production cadence).
 enum RefreshScheduler {
     static let taskIdentifier = "com.TrialByFyre.NextSeason.watchlist-refresh"
 
@@ -79,12 +79,7 @@ enum RefreshScheduler {
         do {
             try BGTaskScheduler.shared.submit(request)
             AppDiagnosticsLogger.logger(for: .tasks)
-                .notice(
-                    """
-                    background_task_scheduled earliest=\(interval, privacy: .public)s \
-                    accelerated=\(BackgroundRefreshConfiguration.isAccelerated, privacy: .public)
-                    """
-                )
+                .notice("background_task_scheduled earliest=\(interval, privacy: .public)s")
             AppDiagnosticsLogger.breadcrumb("background_task_scheduled")
         } catch {
             AppDiagnosticsLogger.logger(for: .tasks)
