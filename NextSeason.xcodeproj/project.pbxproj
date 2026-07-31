@@ -107,6 +107,7 @@
 		E167ED92301A8BDC007F7098 /* 7-29-2026 Refactor theming and colors.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-29-2026 Refactor theming and colors.md"; sourceTree = "<group>"; };
 		E167F0EA301AB58A007F7098 /* MVPArchitecture.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPArchitecture.md; sourceTree = "<group>"; };
 		E167F0EB301AC74B007F7098 /* MVPAnalytics.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPAnalytics.md; sourceTree = "<group>"; };
+		E167F330301D2F41007F7098 /* 7-29-2026 Documentation Review and Cleanup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-29-2026 Documentation Review and Cleanup.md"; sourceTree = "<group>"; };
 		E17E04942FDE291A00708D7A /* MVPDefinition.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MVPDefinition.md; sourceTree = "<group>"; };
 		E17E04952FDE291A00708D7A /* ProblemStatement.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProblemStatement.md; sourceTree = "<group>"; };
 		E197008E2FF72BFF00D34A28 /* 7-2-2026 Diagnostics Work with Cursor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-2-2026 Diagnostics Work with Cursor.md"; sourceTree = "<group>"; };
@@ -430,6 +431,7 @@
 				E167E27030180120007F7098 /* 7-27-2026 Fix Watchlist Reload Bug.md */,
 				E167ED91301A8BB1007F7098 /* 7-29-2026 App Icon Discussion.md */,
 				E167ED92301A8BDC007F7098 /* 7-29-2026 Refactor theming and colors.md */,
+				E167F330301D2F41007F7098 /* 7-29-2026 Documentation Review and Cleanup.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
