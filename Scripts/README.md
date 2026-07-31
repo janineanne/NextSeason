@@ -2,7 +2,7 @@
 
 Shell and Python helpers for on-device profiling, crash diagnostics, and asset generation. Most scripts require a connected iPhone and a **Release** build of the app.
 
-Output directories (`.instruments/`, `.soak-logs/`) are gitignored.
+Output directories (`.instruments/`) are gitignored.
 
 ## Prerequisites
 
@@ -159,36 +159,6 @@ Normally invoked automatically by `run-profile-flows-uninstrumented.sh`.
 ---
 
 ## Diagnostics
-
-### `idle-soak-test.sh`
-
-Assists long idle crash and memory reproduction on a connected device. Captures unified logs for NextSeason diagnostic categories while you run manual soak scenarios.
-
-**What it does:**
-
-- Prints a soak checklist and scenario instructions
-- Captures device logs (streams when supported; otherwise polls via `log collect --last`)
-- On Ctrl+C, saves a log archive to `.soak-logs/`
-
-**Manual soak scenarios** (run each as a separate session):
-
-- **A.** Search tab idle — 6+ hours on Search
-- **B.** Wishlist tab idle — populated watchlist, 6+ hours on Watchlist
-- **C.** Background cycle — foreground 30 min → background 30 min, repeat
-- **D.** Background refresh — leave app backgrounded across a BGAppRefreshTask window
-
-**Usage:**
-
-```bash
-./Scripts/idle-soak-test.sh
-DEVICE_UDID=... SOAK_HOURS=6 ./Scripts/idle-soak-test.sh
-POLL_INTERVAL_SECONDS=30 POLL_WINDOW=2m ./Scripts/idle-soak-test.sh
-USE_SUDO=1 ./Scripts/idle-soak-test.sh
-```
-
-**Output:** `.soak-logs/idle-soak-<timestamp>.log` and `.logarchive` on exit
-
----
 
 ### `verify-crash-reporting.sh`
 

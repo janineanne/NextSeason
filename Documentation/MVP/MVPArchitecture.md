@@ -403,7 +403,6 @@ The repository includes scripts and profile flows for:
 
 - Instruments-driven user-flow profiling,
 - uninstrumented performance logging,
-- idle soak testing,
 - crash-report verification,
 - trace analysis and resumption.
 

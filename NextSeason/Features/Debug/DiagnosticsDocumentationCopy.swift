@@ -34,8 +34,7 @@ enum DiagnosticsDocumentationCopy {
         update this timestamp.
 
         **Next refresh window** is the earliest time the next background refresh is \
-        scheduled. Production builds use a 12-hour cadence; accelerated soak-test builds \
-        may use 10 minutes (see launch flags in developer docs).
+        scheduled. Production builds use a 12-hour cadence.
 
         **Last background fetch result** summarizes that background run—for example, \
         how many shows were checked, whether TVMaze reported changes, or if an error occurred.

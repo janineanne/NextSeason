@@ -276,10 +276,7 @@ struct DiagnosticsView: View {
         guard let nextDate = betaRefreshDiagnostics?.nextScheduledRefreshAt else {
             return "Not scheduled yet"
         }
-        let intervalLabel = BackgroundRefreshConfiguration.isAccelerated
-            ? "10 min (accelerated soak test)"
-            : "12 h (production cadence)"
-        return "\(formattedDate(nextDate)) — \(intervalLabel)"
+        return "\(formattedDate(nextDate)) — 12 h (production cadence)"
     }
 
     private func formattedDate(_ date: Date?) -> String {

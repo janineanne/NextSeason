@@ -68,17 +68,6 @@ struct AppCompositionRoot {
     }
 
     private func configureBackgroundRefresh() {
-        if BackgroundRefreshConfiguration.forceAcceleratedForSoakTest
-            || ProcessInfo.processInfo.arguments.contains(BackgroundRefreshConfiguration.launchFlag)
-        {
-            BackgroundRefreshConfiguration.persistAcceleratedModeIfRequested()
-            if BackgroundRefreshConfiguration.isAccelerated {
-                AppDiagnosticsLogger.breadcrumb("background_refresh_accelerated_10m")
-            }
-        } else {
-            BackgroundRefreshConfiguration.clearPersistedAcceleratedMode()
-        }
-
         RefreshScheduler.registerBackgroundTask()
         let refreshServiceForBackground = refreshService
         AppDiagnosticsLogger.breadcrumb("refresh_scheduler_configure")

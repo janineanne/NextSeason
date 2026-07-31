@@ -12,9 +12,6 @@ DerivedData/
 .instruments/
 *.trace
 
-# Idle soak log capture (Scripts/idle-soak-test.sh)
-.soak-logs/
-
 ## User settings
 xcuserdata/
 
