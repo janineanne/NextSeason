@@ -207,9 +207,14 @@ struct WatchlistView: View {
                         }
                     }
                 }
-                Section {
-                } footer: {
-                    TVMazeAttributionView()
+                // Omit attribution when the empty/no-results overlay is up — a List
+                // footer behind ContentUnavailableView clips, overlaps the star, and
+                // leaves a misaligned white strip (same pattern as Search idle/empty).
+                if !viewModel.filteredShows.isEmpty {
+                    Section {
+                    } footer: {
+                        TVMazeAttributionView()
+                    }
                 }
             }
             .animation(
