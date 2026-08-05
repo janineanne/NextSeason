@@ -44,6 +44,10 @@
 		E13811CD2FDB795C009C141B /* NextSeason.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextSeason.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E13811E42FDCAFE0009C141B /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		E167043A30230010007F7098 /* 8-4-2026 Human Code Review - Questions and Cleanup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-4-2026 Human Code Review - Questions and Cleanup.md"; sourceTree = "<group>"; };
+		E167068D3023BA77007F7098 /* 8-4-2026 Add diagnostics cleanup to pre-App Store Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-4-2026 Add diagnostics cleanup to pre-App Store Roadmap.md"; sourceTree = "<group>"; };
+		E167068E3023BA77007F7098 /* 8-4-2026 Add fatalError to pre-App Store Roadmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-4-2026 Add fatalError to pre-App Store Roadmap.md"; sourceTree = "<group>"; };
+		E167068F3023BA77007F7098 /* 8-4-2026 Discuss Analytics Counters.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-4-2026 Discuss Analytics Counters.md"; sourceTree = "<group>"; };
+		E16706903023BA77007F7098 /* 8-4-2026 Remove unused files.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-4-2026 Remove unused files.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -436,6 +440,10 @@
 				E167F330301D2F41007F7098 /* 7-29-2026 Documentation Review and Cleanup.md */,
 				E167FE83301D42A3007F7098 /* 7-31-2026 Remove soak test code.md */,
 				E167043A30230010007F7098 /* 8-4-2026 Human Code Review - Questions and Cleanup.md */,
+				E167068F3023BA77007F7098 /* 8-4-2026 Discuss Analytics Counters.md */,
+				E16706903023BA77007F7098 /* 8-4-2026 Remove unused files.md */,
+				E167068D3023BA77007F7098 /* 8-4-2026 Add diagnostics cleanup to pre-App Store Roadmap.md */,
+				E167068E3023BA77007F7098 /* 8-4-2026 Add fatalError to pre-App Store Roadmap.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
