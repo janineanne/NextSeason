@@ -48,20 +48,21 @@ private struct AppSurfaceCardModifier: ViewModifier {
     let cornerRadius: CGFloat
 
     func body(content: Content) -> some View {
-        content.background(AppColor.surface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        content.background(
+            AppColor.surface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
 #if DEBUG
-#Preview("Surface card") {
-    VStack(spacing: 16) {
-        Text("Next Season")
-            .font(.headline)
-        Text("Season 2 premieres Jan 1, 2027")
+    #Preview("Surface card") {
+        VStack(spacing: 16) {
+            Text("Next Season")
+                .font(.headline)
+            Text("Season 2 premieres Jan 1, 2027")
+        }
+        .padding()
+        .appSurfaceCard()
+        .padding()
+        .appScreenBackground()
     }
-    .padding()
-    .appSurfaceCard()
-    .padding()
-    .appScreenBackground()
-}
 #endif

@@ -59,10 +59,12 @@ final class WatchlistRefreshService {
     /// Scene-active / foreground entry point: runs `refreshAll` only when
     /// `RefreshPolicy` says enough time has passed since the last foreground run.
     func refreshAllIfNeeded() async {
-        guard RefreshPolicy.shouldPerformForegroundRefresh(
-            lastRefreshAt: lastForegroundRefreshAt,
-            at: clock()
-        ) else {
+        guard
+            RefreshPolicy.shouldPerformForegroundRefresh(
+                lastRefreshAt: lastForegroundRefreshAt,
+                at: clock()
+            )
+        else {
             AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_skipped policy")
             return
         }
@@ -89,7 +91,9 @@ final class WatchlistRefreshService {
         recordDiagnostics: Bool = false
     ) async -> WatchlistRefreshOutcome? {
         AppDiagnosticsLogger.logger(for: .cache)
-            .notice("watchlist_refresh_start force=\(force, privacy: .public) notify=\(deliverNotifications, privacy: .public)")
+            .notice(
+                "watchlist_refresh_start force=\(force, privacy: .public) notify=\(deliverNotifications, privacy: .public)"
+            )
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_start")
         var fetchResult = "Completed"
         // Last per-show notification decision string wins for the outcome summary.
@@ -118,7 +122,8 @@ final class WatchlistRefreshService {
         }
 
         guard !trackedShows.isEmpty else {
-            AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_complete empty_watchlist")
+            AppDiagnosticsLogger.logger(for: .cache).notice(
+                "watchlist_refresh_complete empty_watchlist")
             AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
             let outcome = WatchlistRefreshOutcome(
                 fetchResult: "Skipped: empty watchlist",
@@ -159,7 +164,8 @@ final class WatchlistRefreshService {
 
         for var tracked in trackedShows {
             if !force {
-                let serverChanged = updates[tracked.id].map { $0 > tracked.sourceUpdatedAt } ?? false
+                let serverChanged =
+                    updates[tracked.id].map { $0 > tracked.sourceUpdatedAt } ?? false
                 // `nextSeason` also depends on the calendar (airing → returning when a
                 // season ends, scheduled → airing on premiere). Search-track used to
                 // persist `.returningNoSeasonYet` without season data; re-check that
@@ -183,7 +189,8 @@ final class WatchlistRefreshService {
 
                 // Pure status + notify decision; persistence and delivery follow.
                 let newStatus = NextSeasonCalculator.status(for: show, at: clock())
-                let evaluation = StatusChangeDetector.evaluate(tracked: tracked, newStatus: newStatus, at: clock())
+                let evaluation = StatusChangeDetector.evaluate(
+                    tracked: tracked, newStatus: newStatus, at: clock())
 
                 try await repository.updateAfterRefresh(evaluation.tracked)
                 refreshedShowCount += 1

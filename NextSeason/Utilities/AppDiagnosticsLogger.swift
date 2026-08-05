@@ -29,12 +29,18 @@ enum AppDiagnosticsLogger: Sendable {
         Bundle.main.bundleIdentifier ?? "com.TrialByFyre.NextSeason"
     private nonisolated static let breadcrumbsDefaultsKey = "AppDiagnosticsLogger.breadcrumbs"
     private nonisolated static let sessionActiveDefaultsKey = "AppDiagnosticsLogger.sessionActive"
-    private nonisolated static let currentLaunchStartedAtDefaultsKey = "AppDiagnosticsLogger.currentLaunchStartedAt"
-    private nonisolated static let lastGracefulExitAtDefaultsKey = "AppDiagnosticsLogger.lastGracefulExitAt"
-    private nonisolated static let previousUnexpectedDefaultsKey = "AppDiagnosticsLogger.previousUnexpected"
-    private nonisolated static let previousUnexpectedLaunchStartedAtDefaultsKey = "AppDiagnosticsLogger.previousUnexpectedLaunchStartedAt"
-    private nonisolated static let unexpectedTerminationDetectedAtDefaultsKey = "AppDiagnosticsLogger.unexpectedTerminationDetectedAt"
-    private nonisolated static let previousUnexpectedBreadcrumbsDefaultsKey = "AppDiagnosticsLogger.previousUnexpectedBreadcrumbs"
+    private nonisolated static let currentLaunchStartedAtDefaultsKey =
+        "AppDiagnosticsLogger.currentLaunchStartedAt"
+    private nonisolated static let lastGracefulExitAtDefaultsKey =
+        "AppDiagnosticsLogger.lastGracefulExitAt"
+    private nonisolated static let previousUnexpectedDefaultsKey =
+        "AppDiagnosticsLogger.previousUnexpected"
+    private nonisolated static let previousUnexpectedLaunchStartedAtDefaultsKey =
+        "AppDiagnosticsLogger.previousUnexpectedLaunchStartedAt"
+    private nonisolated static let unexpectedTerminationDetectedAtDefaultsKey =
+        "AppDiagnosticsLogger.unexpectedTerminationDetectedAt"
+    private nonisolated static let previousUnexpectedBreadcrumbsDefaultsKey =
+        "AppDiagnosticsLogger.previousUnexpectedBreadcrumbs"
     private nonisolated static let maxBreadcrumbs = 50
     private nonisolated static let breadcrumbStore = BreadcrumbStore()
 
@@ -58,16 +64,20 @@ enum AppDiagnosticsLogger: Sendable {
         let defaults = UserDefaults.standard
         let now = Date.now
         let hadActiveSession = defaults.bool(forKey: sessionActiveDefaultsKey)
-        let priorLaunchStartedAt = defaults.object(forKey: currentLaunchStartedAtDefaultsKey) as? Date
+        let priorLaunchStartedAt =
+            defaults.object(forKey: currentLaunchStartedAtDefaultsKey) as? Date
         let priorBreadcrumbs = loadPersistedBreadcrumbs()
 
         defaults.set(now, forKey: currentLaunchStartedAtDefaultsKey)
         defaults.set(true, forKey: sessionActiveDefaultsKey)
 
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+        let version =
+            Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+            ?? "1.0"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
         let launchLogger = logger(for: .lifecycle)
-        launchLogger.notice("app_launch version=\(version, privacy: .public) build=\(build, privacy: .public)")
+        launchLogger.notice(
+            "app_launch version=\(version, privacy: .public) build=\(build, privacy: .public)")
 
         // Still-active session flag means the last run never reached
         // `recordEnterBackground` — treat as a possible abrupt termination.
@@ -75,9 +85,12 @@ enum AppDiagnosticsLogger: Sendable {
             defaults.set(true, forKey: previousUnexpectedDefaultsKey)
             defaults.set(now, forKey: unexpectedTerminationDetectedAtDefaultsKey)
             if let priorLaunchStartedAt {
-                defaults.set(priorLaunchStartedAt, forKey: previousUnexpectedLaunchStartedAtDefaultsKey)
+                defaults.set(
+                    priorLaunchStartedAt, forKey: previousUnexpectedLaunchStartedAtDefaultsKey)
             }
-            defaults.set(Array(priorBreadcrumbs.suffix(10)), forKey: previousUnexpectedBreadcrumbsDefaultsKey)
+            defaults.set(
+                Array(priorBreadcrumbs.suffix(10)), forKey: previousUnexpectedBreadcrumbsDefaultsKey
+            )
 
             let summary = priorBreadcrumbs.suffix(10).joined(separator: " | ")
             launchLogger.fault(
@@ -107,12 +120,16 @@ enum AppDiagnosticsLogger: Sendable {
     nonisolated static func launchDiagnostics() -> AppLaunchDiagnostics {
         let defaults = UserDefaults.standard
         return AppLaunchDiagnostics(
-            currentLaunchStartedAt: defaults.object(forKey: currentLaunchStartedAtDefaultsKey) as? Date,
+            currentLaunchStartedAt: defaults.object(forKey: currentLaunchStartedAtDefaultsKey)
+                as? Date,
             lastGracefulExitAt: defaults.object(forKey: lastGracefulExitAtDefaultsKey) as? Date,
             previousLaunchEndedUnexpectedly: defaults.bool(forKey: previousUnexpectedDefaultsKey),
-            previousLaunchStartedAt: defaults.object(forKey: previousUnexpectedLaunchStartedAtDefaultsKey) as? Date,
-            unexpectedTerminationDetectedAt: defaults.object(forKey: unexpectedTerminationDetectedAtDefaultsKey) as? Date,
-            priorBreadcrumbs: defaults.stringArray(forKey: previousUnexpectedBreadcrumbsDefaultsKey) ?? []
+            previousLaunchStartedAt: defaults.object(
+                forKey: previousUnexpectedLaunchStartedAtDefaultsKey) as? Date,
+            unexpectedTerminationDetectedAt: defaults.object(
+                forKey: unexpectedTerminationDetectedAtDefaultsKey) as? Date,
+            priorBreadcrumbs: defaults.stringArray(forKey: previousUnexpectedBreadcrumbsDefaultsKey)
+                ?? []
         )
     }
 
@@ -163,7 +180,9 @@ enum AppDiagnosticsLogger: Sendable {
     }
 
     /// Parseable wall-clock for `-ProfileFlow` runs without Instruments attached.
-    nonisolated static func logProfileFlowTiming(flow: String, durationMs: Int, phase: String? = nil) {
+    nonisolated static func logProfileFlowTiming(
+        flow: String, durationMs: Int, phase: String? = nil
+    ) {
         if let phase {
             logger(for: .tasks).notice(
                 "profile_flow_timing flow=\(flow, privacy: .public) phase=\(phase, privacy: .public) duration_ms=\(durationMs)"
@@ -201,7 +220,8 @@ enum AppDiagnosticsLogger: Sendable {
     }
 
     nonisolated private static func persistBreadcrumbs() {
-        UserDefaults.standard.set(breadcrumbStore.snapshot(limit: maxBreadcrumbs), forKey: breadcrumbsDefaultsKey)
+        UserDefaults.standard.set(
+            breadcrumbStore.snapshot(limit: maxBreadcrumbs), forKey: breadcrumbsDefaultsKey)
     }
 
     nonisolated private static func loadPersistedBreadcrumbs() -> [String] {

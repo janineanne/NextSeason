@@ -5,6 +5,7 @@
 
 import Foundation
 import Testing
+
 @testable import NextSeason
 
 @MainActor
@@ -26,8 +27,8 @@ struct BetaRefreshDiagnosticsTests {
         #expect(reloaded.lastBackgroundRefreshAt == refreshDate)
         #expect(reloaded.lastBackgroundFetchResult == "Refreshed 2 show(s)")
         #expect(
-            reloaded.lastBackgroundNotificationDecision ==
-                "No notification for Severance (no meaningful change)"
+            reloaded.lastBackgroundNotificationDecision
+                == "No notification for Severance (no meaningful change)"
         )
     }
 }

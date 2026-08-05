@@ -58,12 +58,12 @@ struct AppCompositionRoot {
     func configureNonUITestRuntime() {
         AppDiagnosticsLogger.recordAppLaunch()
         MetricKitDiagnosticsSubscriber.installIfNeeded()
-		
-		// The coordinator that handles notification taps is attached from the view
-		// layer (see ContentView). NotificationRouting is set up here and is able to
-		// handle taps before ContentView is able to set the coordinator. Installing
-		// the delegate here lets a launch-from-notification tap buffer until the
-		// coordinator attaches.
+
+        // The coordinator that handles notification taps is attached from the view
+        // layer (see ContentView). NotificationRouting is set up here and is able to
+        // handle taps before ContentView is able to set the coordinator. Installing
+        // the delegate here lets a launch-from-notification tap buffer until the
+        // coordinator attaches.
         NotificationRouting.setAnalytics(analyticsService)
         NotificationRouting.installDelegate()
 
@@ -71,7 +71,7 @@ struct AppCompositionRoot {
         analyticsService.track(.appLaunched)
     }
 
-	// registers the ~12h background watchlist refresh task (aka background refresh)
+    // registers the ~12h background watchlist refresh task (aka background refresh)
     private func configureBackgroundRefresh() {
         RefreshScheduler.registerBackgroundTask()
         let refreshServiceForBackground = refreshService

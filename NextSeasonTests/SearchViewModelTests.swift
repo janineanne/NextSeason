@@ -3,8 +3,9 @@
 //  NextSeasonTests
 //
 
-import Testing
 import Foundation
+import Testing
+
 @testable import NextSeason
 
 @MainActor
@@ -33,7 +34,10 @@ struct SearchViewModelTests {
     @Test("An empty/whitespace query resets to idle without calling the service")
     func emptyQueryStaysIdle() async {
         let viewModel = SearchViewModel(
-            service: MockService { _ in Issue.record("service should not be called"); return [] },
+            service: MockService { _ in
+                Issue.record("service should not be called")
+                return []
+            },
             analytics: RecordingAnalyticsService(),
             debounce: .zero
         )

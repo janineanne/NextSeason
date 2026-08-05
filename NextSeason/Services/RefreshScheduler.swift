@@ -106,7 +106,9 @@ enum RefreshScheduler {
             AppDiagnosticsLogger.breadcrumb("background_task_scheduled")
         } catch {
             AppDiagnosticsLogger.logger(for: .tasks)
-                .error("background_task_schedule_failed error=\(String(describing: error), privacy: .public)")
+                .error(
+                    "background_task_schedule_failed error=\(String(describing: error), privacy: .public)"
+                )
         }
     }
 }

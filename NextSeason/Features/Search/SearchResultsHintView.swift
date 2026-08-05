@@ -33,8 +33,8 @@ extension View {
 }
 
 #if DEBUG
-#Preview {
-    SearchResultsHintView()
-        .appScreenBackground()
-}
+    #Preview {
+        SearchResultsHintView()
+            .appScreenBackground()
+    }
 #endif

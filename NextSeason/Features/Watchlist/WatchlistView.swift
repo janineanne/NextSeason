@@ -184,7 +184,8 @@ struct WatchlistView: View {
                             }
                             .buttonStyle(.plain)
                             .showDetailLinkAccessibility()
-                            .accessibilityIdentifier("\(AccessibilityID.Watchlist.row).\(tracked.id)")
+                            .accessibilityIdentifier(
+                                "\(AccessibilityID.Watchlist.row).\(tracked.id)")
 
                             ShowRowTrackButton(
                                 showID: tracked.id,
@@ -273,8 +274,10 @@ struct WatchlistView: View {
             Label("No Matches", systemImage: "magnifyingglass")
                 .appPrimaryText()
         } description: {
-            Text("No tracked shows match “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”.")
-                .appSecondaryText()
+            Text(
+                "No tracked shows match “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”."
+            )
+            .appSecondaryText()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityIdentifier(AccessibilityID.Watchlist.noResults)
@@ -333,17 +336,19 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
 }
 
 #if DEBUG
-#Preview {
-    @Previewable @State var path = NavigationPath()
-    let repository = InMemoryWatchlistRepository()
-    let analytics = RecordingAnalyticsService()
-    WatchlistView(navigationPath: $path, tvMaze: PreviewTVMazeService(stub: .preview))
-        .environment(\.watchlistRepository, repository)
-        .environment(\.analytics, analytics)
-        .environment(\.notificationService, NotificationService(analytics: analytics))
-        .environment(\.watchlistPendingRemoval, WatchlistPendingRemoval(
-            repository: repository,
-            analytics: analytics
-        ))
-}
+    #Preview {
+        @Previewable @State var path = NavigationPath()
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        WatchlistView(navigationPath: $path, tvMaze: PreviewTVMazeService(stub: .preview))
+            .environment(\.watchlistRepository, repository)
+            .environment(\.analytics, analytics)
+            .environment(\.notificationService, NotificationService(analytics: analytics))
+            .environment(
+                \.watchlistPendingRemoval,
+                WatchlistPendingRemoval(
+                    repository: repository,
+                    analytics: analytics
+                ))
+    }
 #endif

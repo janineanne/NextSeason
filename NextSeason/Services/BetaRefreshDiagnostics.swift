@@ -33,7 +33,8 @@ final class BetaRefreshDiagnostics {
 
     init() {
         guard BetaBuildConfiguration.isAvailable, !UITestingConfiguration.isEnabled else { return }
-        lastBackgroundRefreshAt = Self.loadPersistedDate(forKey: Self.lastBackgroundRefreshAtDefaultsKey)
+        lastBackgroundRefreshAt = Self.loadPersistedDate(
+            forKey: Self.lastBackgroundRefreshAtDefaultsKey)
         lastBackgroundFetchResult = Self.loadPersistedString(
             forKey: Self.lastBackgroundFetchResultDefaultsKey,
             defaultValue: lastBackgroundFetchResult

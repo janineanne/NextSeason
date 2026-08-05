@@ -3,8 +3,9 @@
 //  NextSeasonTests
 //
 
-import Testing
 import Foundation
+import Testing
+
 @testable import NextSeason
 
 struct NextSeasonCalculatorTests {
@@ -49,9 +50,10 @@ struct NextSeasonCalculatorTests {
     func scheduled() throws {
         let show = makeShow(seasons: [
             season(1, premiere: "2024-01-01", end: "2024-03-01"),
-            season(2, premiere: "2026-09-01")
+            season(2, premiere: "2026-09-01"),
         ])
-        let expected = NextSeasonStatus.scheduled(season: 2, premiere: try #require(TVMazeDate.dateOnly("2026-09-01")))
+        let expected = NextSeasonStatus.scheduled(
+            season: 2, premiere: try #require(TVMazeDate.dateOnly("2026-09-01")))
         #expect(NextSeasonCalculator.status(for: show, at: now) == expected)
     }
 
@@ -60,7 +62,7 @@ struct NextSeasonCalculatorTests {
         let show = makeShow(seasons: [
             season(1, premiere: "2022-02-18", end: "2022-04-08"),
             season(2, premiere: "2025-01-17", end: "2025-03-21"),
-            season(3, premiere: nil)
+            season(3, premiere: nil),
         ])
         #expect(NextSeasonCalculator.status(for: show, at: now) == .announcedUndated(season: 3))
     }
@@ -69,7 +71,7 @@ struct NextSeasonCalculatorTests {
     func airing() {
         let show = makeShow(seasons: [
             season(1, premiere: "2025-01-01", end: "2025-03-01"),
-            season(2, premiere: "2026-06-01", end: nil)
+            season(2, premiere: "2026-06-01", end: nil),
         ])
         #expect(NextSeasonCalculator.status(for: show, at: now) == .airing(season: 2))
     }
@@ -78,17 +80,19 @@ struct NextSeasonCalculatorTests {
     func returningNoSeasonYet() {
         let show = makeShow(seasons: [
             season(1, premiere: "2024-01-01", end: "2024-03-01"),
-            season(2, premiere: "2025-01-01", end: "2025-03-01")
+            season(2, premiere: "2025-01-01", end: "2025-03-01"),
         ])
         #expect(NextSeasonCalculator.status(for: show, at: now) == .returningNoSeasonYet)
     }
 
     @Test("An ended show with only past seasons is rerun-safe and reports ended")
     func endedShow() {
-        let show = makeShow(status: .ended, seasons: [
-            season(1, premiere: "2007-09-24", end: "2008-05-19"),
-            season(12, premiere: "2018-09-24", end: "2019-05-16")
-        ])
+        let show = makeShow(
+            status: .ended,
+            seasons: [
+                season(1, premiere: "2007-09-24", end: "2008-05-19"),
+                season(12, premiere: "2018-09-24", end: "2019-05-16"),
+            ])
         #expect(NextSeasonCalculator.status(for: show, at: now) == .ended)
     }
 
@@ -100,10 +104,13 @@ struct NextSeasonCalculatorTests {
 
     @Test("A brand-new show with only a future first season is scheduled")
     func brandNewFirstSeason() throws {
-        let show = makeShow(status: .toBeDetermined, seasons: [
-            season(1, premiere: "2026-12-01")
-        ])
-        let expected = NextSeasonStatus.scheduled(season: 1, premiere: try #require(TVMazeDate.dateOnly("2026-12-01")))
+        let show = makeShow(
+            status: .toBeDetermined,
+            seasons: [
+                season(1, premiere: "2026-12-01")
+            ])
+        let expected = NextSeasonStatus.scheduled(
+            season: 1, premiere: try #require(TVMazeDate.dateOnly("2026-12-01")))
         #expect(NextSeasonCalculator.status(for: show, at: now) == expected)
     }
 
@@ -112,7 +119,7 @@ struct NextSeasonCalculatorTests {
         let show = makeShow(seasons: [
             season(0, premiere: "2026-06-01"),
             season(1, premiere: "2024-01-01", end: "2024-03-01"),
-            season(2, premiere: nil)
+            season(2, premiere: nil),
         ])
         #expect(NextSeasonCalculator.status(for: show, at: now) == .announcedUndated(season: 2))
     }
@@ -121,7 +128,7 @@ struct NextSeasonCalculatorTests {
     func annualSeasonAiring() {
         let show = makeShow(seasons: [
             season(2025, premiere: "2025-01-01", end: "2025-12-15"),
-            season(2026, premiere: "2026-01-05", end: nil)
+            season(2026, premiere: "2026-01-05", end: nil),
         ])
         #expect(NextSeasonCalculator.status(for: show, at: now) == .airing(season: 2026))
     }
@@ -132,7 +139,8 @@ struct NextSeasonCalculatorTests {
             seasons: [season(1, premiere: "2025-01-01", end: "2025-03-01")],
             nextEpisode: NextEpisode(season: 2, airdate: TVMazeDate.dateOnly("2026-08-01"))
         )
-        let expected = NextSeasonStatus.scheduled(season: 2, premiere: try #require(TVMazeDate.dateOnly("2026-08-01")))
+        let expected = NextSeasonStatus.scheduled(
+            season: 2, premiere: try #require(TVMazeDate.dateOnly("2026-08-01")))
         #expect(NextSeasonCalculator.status(for: show, at: now) == expected)
     }
 
@@ -142,7 +150,7 @@ struct NextSeasonCalculatorTests {
         let nowSameDay = endToday.addingTimeInterval(12 * 3600)
         let show = makeShow(seasons: [
             season(1, premiere: "2025-01-01", end: "2025-03-01"),
-            season(2, premiere: "2026-06-01", end: "2026-06-14")
+            season(2, premiere: "2026-06-01", end: "2026-06-14"),
         ])
         #expect(NextSeasonCalculator.status(for: show, at: nowSameDay) == .airing(season: 2))
     }
@@ -152,7 +160,7 @@ struct NextSeasonCalculatorTests {
         let show = makeShow(seasons: [
             season(1, premiere: "2025-01-01", end: "2025-03-01"),
             season(2, premiere: "2026-06-01", end: nil),
-            season(3, premiere: nil)
+            season(3, premiere: nil),
         ])
         #expect(NextSeasonCalculator.status(for: show, at: now) == .airing(season: 2))
     }
@@ -171,7 +179,7 @@ struct NextSeasonCalculatorTests {
         let show = makeShow(
             seasons: [
                 season(1, premiere: "2025-01-01", end: "2025-03-01"),
-                season(2, premiere: nil)
+                season(2, premiere: nil),
             ],
             nextEpisode: NextEpisode(season: 2, airdate: nil)
         )

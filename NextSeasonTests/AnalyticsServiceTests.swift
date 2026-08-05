@@ -5,6 +5,7 @@
 
 import Foundation
 import Testing
+
 @testable import NextSeason
 
 @MainActor
@@ -17,7 +18,9 @@ struct AnalyticsServiceTests {
 
         #expect(analytics.events.count == 2)
         #expect(analytics.events[0] == .watchlistViewed)
-        #expect(analytics.events[1] == .searchPerformed(queryLength: 9, resultCount: 3, durationMs: 120))
+        #expect(
+            analytics.events[1] == .searchPerformed(queryLength: 9, resultCount: 3, durationMs: 120)
+        )
     }
 
     @Test("Analytics service increments persisted counters")
@@ -58,8 +61,11 @@ struct AnalyticsServiceTests {
 
     @Test("TVMaze errors map to analytics categories")
     func errorCategoryMapping() {
-        #expect(AnalyticsErrorCategory.category(for: TVMazeError.decoding(TestError())) == .decoding)
-        #expect(AnalyticsErrorCategory.category(for: TVMazeError.network(URLError(.notConnectedToInternet))) == .network)
+        #expect(
+            AnalyticsErrorCategory.category(for: TVMazeError.decoding(TestError())) == .decoding)
+        #expect(
+            AnalyticsErrorCategory.category(
+                for: TVMazeError.network(URLError(.notConnectedToInternet))) == .network)
         #expect(AnalyticsErrorCategory.category(for: TVMazeError.notFound) == .api)
     }
 

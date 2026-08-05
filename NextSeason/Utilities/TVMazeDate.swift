@@ -43,9 +43,10 @@ nonisolated enum TVMazeDate {
         guard let string, string.count >= 10 else { return nil }
         let parts = string.prefix(10).split(separator: "-")
         guard parts.count == 3,
-              let year = Int(parts[0]),
-              let month = Int(parts[1]),
-              let day = Int(parts[2]) else {
+            let year = Int(parts[0]),
+            let month = Int(parts[1]),
+            let day = Int(parts[2])
+        else {
             return nil
         }
         var components = DateComponents()

@@ -54,7 +54,7 @@ final class NotificationService: NotificationManaging {
     private let userDefaults: UserDefaults
     private let analytics: any AnalyticsTracking
     #if DEBUG
-    private let authorizationStatusForTesting: UNAuthorizationStatus?
+        private let authorizationStatusForTesting: UNAuthorizationStatus?
     #endif
 
     init(
@@ -66,34 +66,34 @@ final class NotificationService: NotificationManaging {
         self.userDefaults = userDefaults
         self.analytics = analytics
         #if DEBUG
-        self.authorizationStatusForTesting = nil
+            self.authorizationStatusForTesting = nil
         #endif
     }
 
     #if DEBUG
-    /// Test seam: fixed authorization status so unit tests never present the
-    /// system permission dialog (which would block the test process).
-    init(
-        userDefaults: UserDefaults,
-        authorizationStatusForTesting: UNAuthorizationStatus,
-        analytics: any AnalyticsTracking
-    ) {
-        self.center = .current()
-        self.userDefaults = userDefaults
-        self.authorizationStatusForTesting = authorizationStatusForTesting
-        self.analytics = analytics
-    }
+        /// Test seam: fixed authorization status so unit tests never present the
+        /// system permission dialog (which would block the test process).
+        init(
+            userDefaults: UserDefaults,
+            authorizationStatusForTesting: UNAuthorizationStatus,
+            analytics: any AnalyticsTracking
+        ) {
+            self.center = .current()
+            self.userDefaults = userDefaults
+            self.authorizationStatusForTesting = authorizationStatusForTesting
+            self.analytics = analytics
+        }
 
-    func resetDeferredPromptForTesting() {
-        userDefaults.removeObject(forKey: Self.deferredPromptKey)
-    }
+        func resetDeferredPromptForTesting() {
+            userDefaults.removeObject(forKey: Self.deferredPromptKey)
+        }
     #endif
 
     func authorizationStatus() async -> UNAuthorizationStatus {
         #if DEBUG
-        if let authorizationStatusForTesting {
-            return authorizationStatusForTesting
-        }
+            if let authorizationStatusForTesting {
+                return authorizationStatusForTesting
+            }
         #endif
         return await center.notificationSettings().authorizationStatus
     }
@@ -124,9 +124,10 @@ final class NotificationService: NotificationManaging {
     func canDeliverVisibleAlerts() async -> Bool {
         guard !UITestingConfiguration.isEnabled else { return false }
         #if DEBUG
-        if let authorizationStatusForTesting {
-            return NotificationAuthorizationPolicy.canDeliverAlerts(authorizationStatusForTesting)
-        }
+            if let authorizationStatusForTesting {
+                return NotificationAuthorizationPolicy.canDeliverAlerts(
+                    authorizationStatusForTesting)
+            }
         #endif
         let settings = await center.notificationSettings()
         return NotificationAuthorizationPolicy.canDeliverAlerts(from: settings)
@@ -137,7 +138,8 @@ final class NotificationService: NotificationManaging {
         // The general app settings page does not expose the notifications toggle
         // after the user taps "Don't Allow". iOS 16+ provides a dedicated deep link.
         if let url = URL(string: UIApplication.openNotificationSettingsURLString),
-           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.canOpenURL(url)
+        {
             UIApplication.shared.open(url)
             return
         }
@@ -180,14 +182,16 @@ final class NotificationService: NotificationManaging {
             return false
         case .notDetermined:
             #if DEBUG
-            // When tests inject authorization status, never present the system
-            // permission dialog — it blocks the unit-test process until dismissed.
-            if authorizationStatusForTesting != nil {
-                return false
-            }
+                // When tests inject authorization status, never present the system
+                // permission dialog — it blocks the unit-test process until dismissed.
+                if authorizationStatusForTesting != nil {
+                    return false
+                }
             #endif
             do {
-                let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                let granted = try await center.requestAuthorization(options: [
+                    .alert, .sound, .badge,
+                ])
                 analytics.track(
                     .notificationPermission(result: granted ? .granted : .denied)
                 )
@@ -246,7 +250,8 @@ final class NotificationService: NotificationManaging {
         notification.sound = .default
         notification.userInfo = ["showID": content.showID]
 
-        let identifier = requestIdentifier
+        let identifier =
+            requestIdentifier
             ?? "show-\(content.showID)-\(StatusChangeDetector.signature(for: content.status))"
         let request = UNNotificationRequest(
             identifier: identifier,
@@ -260,7 +265,7 @@ final class NotificationService: NotificationManaging {
         } catch {
             analytics.trackNonFatalError(error, context: "notification_schedule")
             #if DEBUG
-            assertionFailure("Failed to schedule notification: \(error)")
+                assertionFailure("Failed to schedule notification: \(error)")
             #endif
         }
     }

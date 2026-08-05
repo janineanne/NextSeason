@@ -138,7 +138,9 @@ extension NextSeasonUITesting where Self: XCTestCase {
         }
     }
 
-    func waitForButton(_ identifier: String, labelContaining text: String, timeout: TimeInterval) -> Bool {
+    func waitForButton(_ identifier: String, labelContaining text: String, timeout: TimeInterval)
+        -> Bool
+    {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             let button = app.descendants(matching: .any)[identifier]
@@ -221,13 +223,15 @@ extension NextSeasonUITesting where Self: XCTestCase {
     }
 
     func searchTrackButton(showID: Int = UITestPreviewShow.id) -> XCUIElement {
-        let byID = app.descendants(matching: .any)["\(AccessibilityID.Search.trackButton).\(showID)"]
+        let byID = app.descendants(matching: .any)[
+            "\(AccessibilityID.Search.trackButton).\(showID)"]
         if byID.exists { return byID }
         return app.buttons["Track \(UITestPreviewShow.name)"]
     }
 
     func watchlistTrackButton(showID: Int = UITestPreviewShow.id) -> XCUIElement {
-        let byID = app.descendants(matching: .any)["\(AccessibilityID.Watchlist.trackButton).\(showID)"]
+        let byID = app.descendants(matching: .any)[
+            "\(AccessibilityID.Watchlist.trackButton).\(showID)"]
         if byID.exists { return byID }
         let stop = app.buttons["Stop tracking \(UITestPreviewShow.name)"]
         if stop.exists { return stop }
@@ -257,7 +261,9 @@ extension NextSeasonUITesting where Self: XCTestCase {
     /// XCUITest can drop synthesized key events when typing races the focus
     /// handoff to a `.searchable` field, so callers must confirm focus first.
     @discardableResult
-    func focusSearchField(_ field: XCUIElement, timeout: TimeInterval = UITestTimeout.standard) -> Bool {
+    func focusSearchField(_ field: XCUIElement, timeout: TimeInterval = UITestTimeout.standard)
+        -> Bool
+    {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             field.tap()
@@ -284,7 +290,8 @@ extension NextSeasonUITesting where Self: XCTestCase {
             searchField,
             placeholder: searchFieldPlaceholder,
             query: query,
-            missingFieldMessage: "Search tab should expose the “Search TV shows” field before typing."
+            missingFieldMessage:
+                "Search tab should expose the “Search TV shows” field before typing."
         )
     }
 
@@ -293,7 +300,8 @@ extension NextSeasonUITesting where Self: XCTestCase {
             watchlistSearchField,
             placeholder: watchlistSearchFieldPlaceholder,
             query: query,
-            missingFieldMessage: "Watchlist should expose the “Search Watchlist” field before typing."
+            missingFieldMessage:
+                "Watchlist should expose the “Search Watchlist” field before typing."
         )
     }
 
@@ -360,7 +368,7 @@ extension NextSeasonUITesting where Self: XCTestCase {
         let clearCandidates = [
             field.buttons["Clear text"],
             app.buttons["Clear text"],
-            app.navigationBars.buttons["Clear text"]
+            app.navigationBars.buttons["Clear text"],
         ]
         for clearButton in clearCandidates where clearButton.waitForExistence(timeout: 1) {
             clearButton.tap()

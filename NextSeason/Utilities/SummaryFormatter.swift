@@ -59,7 +59,7 @@ nonisolated enum SummaryFormatter {
             ("</p>", "\n\n"),
             ("<br>", "\n"),
             ("<br/>", "\n"),
-            ("<br />", "\n")
+            ("<br />", "\n"),
         ]
         for (tag, replacement) in blockReplacements {
             text = text.replacingOccurrences(of: tag, with: replacement, options: .caseInsensitive)
@@ -74,10 +74,11 @@ nonisolated enum SummaryFormatter {
             (" </b>", "** "),
             (" </strong>", "** "),
             (" </i>", "* "),
-            (" </em>", "* ")
+            (" </em>", "* "),
         ]
         for (pattern, replacement) in spacedClosingTags {
-            text = text.replacingOccurrences(of: pattern, with: replacement, options: .caseInsensitive)
+            text = text.replacingOccurrences(
+                of: pattern, with: replacement, options: .caseInsensitive)
         }
 
         // Opening tags may include attributes; closing tags may include whitespace.
@@ -85,7 +86,7 @@ nonisolated enum SummaryFormatter {
             ("<(?:b|strong)(?:\\s[^>]*)?>", "**"),
             ("</(?:b|strong)\\s*>", "**"),
             ("<(?:i|em)(?:\\s[^>]*)?>", "*"),
-            ("</(?:i|em)\\s*>", "*")
+            ("</(?:i|em)\\s*>", "*"),
         ]
         for (pattern, replacement) in inlinePatterns {
             text = text.replacingOccurrences(

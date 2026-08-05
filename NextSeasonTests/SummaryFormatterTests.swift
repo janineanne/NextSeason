@@ -3,8 +3,9 @@
 //  NextSeasonTests
 //
 
-import Testing
 import Foundation
+import Testing
+
 @testable import NextSeason
 
 struct SummaryFormatterTests {
@@ -85,7 +86,8 @@ struct SummaryFormatterTests {
 
     @Test("A stray space + non-breaking space is collapsed (Call the Midwife)")
     func collapsesSpaceAndNonBreakingSpace() {
-        let result = SummaryFormatter.attributedString(from: "<p>Following. \u{00A0}Based on memoirs.</p>")
+        let result = SummaryFormatter.attributedString(
+            from: "<p>Following. \u{00A0}Based on memoirs.</p>")
         #expect(String(result.characters) == "Following. Based on memoirs.")
     }
 

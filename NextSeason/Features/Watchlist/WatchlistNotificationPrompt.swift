@@ -52,7 +52,9 @@ struct WatchlistNotificationPromptAlerts: ViewModifier {
             } message: {
                 Text(FirstRunCopy.notificationPromptMessage)
             }
-            .alert("Notifications Not Enabled", isPresented: $prompt.shouldShowNotificationsDeniedAlert) {
+            .alert(
+                "Notifications Not Enabled", isPresented: $prompt.shouldShowNotificationsDeniedAlert
+            ) {
                 Button("Not Now", role: .cancel) {}
                 Button("Open Settings") {
                     Task { await notificationService.enableNotificationsFromSettingsEntryPoint() }

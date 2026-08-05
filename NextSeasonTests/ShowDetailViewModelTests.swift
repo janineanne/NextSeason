@@ -7,6 +7,7 @@ import CoreGraphics
 import Foundation
 import Testing
 import UserNotifications
+
 @testable import NextSeason
 
 @MainActor
@@ -128,7 +129,8 @@ struct ShowDetailViewModelTests {
     func removalIgnoredReconcilesTrackedState() async {
         let repository = InMemoryWatchlistRepository()
         let analytics = RecordingAnalyticsService()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: analytics)
         let viewModel = ShowDetailViewModel(
             show: sampleShow,
             service: StubTVMazeService(),
@@ -152,7 +154,8 @@ struct ShowDetailViewModelTests {
     func removalLookupFailureReportsAndRefreshes() async {
         let repository = FailingTrackedShowLookupRepository()
         let analytics = RecordingAnalyticsService()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: analytics)
         let viewModel = ShowDetailViewModel(
             show: sampleShow,
             service: StubTVMazeService(),
@@ -184,7 +187,8 @@ struct ShowDetailViewModelTests {
     func removalLookupFailurePreservesStarWhenStillPersisted() async {
         let repository = FailingLookupStillPersistedRepository(showID: sampleShow.id)
         let analytics = RecordingAnalyticsService()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: analytics)
         let viewModel = ShowDetailViewModel(
             show: sampleShow,
             service: StubTVMazeService(),

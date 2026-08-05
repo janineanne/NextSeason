@@ -97,7 +97,8 @@ final class DiagnosticsSimulatedUpdateRunner {
         let tracked = repository.show(id: dataProvider.showID)
         let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
         let notificationDecision = outcome?.notificationDecision ?? "Refresh did not complete"
-        let summary = "Step \(phase.stepNumber) (\(phase.shortLabel)): \(statusSummary). \(notificationDecision)"
+        let summary =
+            "Step \(phase.stepNumber) (\(phase.shortLabel)): \(statusSummary). \(notificationDecision)"
 
         diagnostics.recordSimulatedScenarioSummary(summary)
         dataProvider.advanceAfterRun()
@@ -118,7 +119,7 @@ final class DiagnosticsSimulatedUpdateRunner {
     /// the app and verify a banner). Resets the scenario when finished.
     @discardableResult
     func runDelayedNewSeasonNotification(
-        delayRange: ClosedRange<TimeInterval> = 5 ... 10
+        delayRange: ClosedRange<TimeInterval> = 5...10
     ) async -> String {
         let betaValidationAvailable = await MainActor.run {
             BetaBuildConfiguration.isAvailable
@@ -169,7 +170,8 @@ final class DiagnosticsSimulatedUpdateRunner {
             id: dataProvider.showID,
             name: dataProvider.showName,
             posterMediumURL: nil,
-            summaryHTML: "<p>Beta diagnostics / simulated show. This is fake data for TestFlight validation only.</p>",
+            summaryHTML:
+                "<p>Beta diagnostics / simulated show. This is fake data for TestFlight validation only.</p>",
             tvMazeURL: nil,
             status: .running,
             nextSeason: .returningNoSeasonYet,
@@ -227,15 +229,15 @@ private final class SimulatedWatchlistRepository: WatchlistRepository {
     }
 }
 
-private extension DiagnosticsSimulatedDataProvider.Phase {
-    var stepNumber: String {
+extension DiagnosticsSimulatedDataProvider.Phase {
+    fileprivate var stepNumber: String {
         switch self {
         case .baseline: "1"
         case .updated: "2"
         }
     }
 
-    var shortLabel: String {
+    fileprivate var shortLabel: String {
         switch self {
         case .baseline: "baseline fake data"
         case .updated: "updated fake data"
@@ -243,8 +245,8 @@ private extension DiagnosticsSimulatedDataProvider.Phase {
     }
 }
 
-private extension NextSeasonStatus {
-    var headlineSummary: String {
+extension NextSeasonStatus {
+    fileprivate var headlineSummary: String {
         switch self {
         case .airing(let season):
             "Season \(season) airing"

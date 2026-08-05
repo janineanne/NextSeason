@@ -25,8 +25,8 @@ struct NextSeasonApp: App {
                 root.configureNonUITestRuntime()
             } else {
                 #if DEBUG
-                FirstRunPreferences.resetSearchResultsHintForTesting()
-                FirstRunPreferences.resetFirstSearchCompletedForTesting()
+                    FirstRunPreferences.resetSearchResultsHintForTesting()
+                    FirstRunPreferences.resetFirstSearchCompletedForTesting()
                 #endif
             }
         } catch {
@@ -82,62 +82,62 @@ private struct AppRootView: View {
             coordinator: navigationCoordinator,
             tvMaze: tvMazeService(testing: UITestingConfiguration.isEnabled)
         )
-            .appAccentTint()
-            .watchlistUndoToast(
-                isPresented: removalCoordinator.pendingRemoval != nil,
-                anchor: removalCoordinator.toastAnchor,
-                undoAction: { _ = removalCoordinator.undoRemoval() },
-                confirmAction: {
-                    Task {
-                        await removalCoordinator.commitPendingRemovalIfNeeded()
-                    }
-                }
-            )
-            .alert(
-                "Couldn't Update Watchlist",
-                isPresented: Binding(
-                    get: { removalCoordinator.removalErrorMessage != nil },
-                    set: { if !$0 { removalCoordinator.clearRemovalError() } }
-                )
-            ) {
-                Button("OK", role: .cancel) {
-                    removalCoordinator.clearRemovalError()
-                }
-            } message: {
-                Text(removalCoordinator.removalErrorMessage ?? "")
-            }
-            .onChange(of: scenePhase) { previousPhase, phase in
-                guard !UITestingConfiguration.isEnabled else { return }
-                AppDiagnosticsLogger.logScenePhase(
-                    from: String(describing: previousPhase),
-                    to: String(describing: phase)
-                )
-
-                if phase == .background {
-                    AppDiagnosticsLogger.recordEnterBackground()
-                }
-
-                guard phase == .active, previousPhase != .active else { return }
-                AppDiagnosticsLogger.breadcrumb("foreground_refresh_scheduled")
+        .appAccentTint()
+        .watchlistUndoToast(
+            isPresented: removalCoordinator.pendingRemoval != nil,
+            anchor: removalCoordinator.toastAnchor,
+            undoAction: { _ = removalCoordinator.undoRemoval() },
+            confirmAction: {
                 Task {
-                    AppDiagnosticsLogger.logTaskStart("foreground_watchlist_refresh")
-                    await refreshService.refreshAllIfNeeded()
-                    // Refresh (or a background task while we were away) updates
-                    // SwiftData; the watchlist UI keeps an in-memory snapshot and
-                    // must reload so section/status match what just notified.
-                    navigationCoordinator.notifyWatchlistDataChanged()
-                    AppDiagnosticsLogger.logTaskComplete("foreground_watchlist_refresh")
+                    await removalCoordinator.commitPendingRemovalIfNeeded()
                 }
             }
+        )
+        .alert(
+            "Couldn't Update Watchlist",
+            isPresented: Binding(
+                get: { removalCoordinator.removalErrorMessage != nil },
+                set: { if !$0 { removalCoordinator.clearRemovalError() } }
+            )
+        ) {
+            Button("OK", role: .cancel) {
+                removalCoordinator.clearRemovalError()
+            }
+        } message: {
+            Text(removalCoordinator.removalErrorMessage ?? "")
+        }
+        .onChange(of: scenePhase) { previousPhase, phase in
+            guard !UITestingConfiguration.isEnabled else { return }
+            AppDiagnosticsLogger.logScenePhase(
+                from: String(describing: previousPhase),
+                to: String(describing: phase)
+            )
+
+            if phase == .background {
+                AppDiagnosticsLogger.recordEnterBackground()
+            }
+
+            guard phase == .active, previousPhase != .active else { return }
+            AppDiagnosticsLogger.breadcrumb("foreground_refresh_scheduled")
+            Task {
+                AppDiagnosticsLogger.logTaskStart("foreground_watchlist_refresh")
+                await refreshService.refreshAllIfNeeded()
+                // Refresh (or a background task while we were away) updates
+                // SwiftData; the watchlist UI keeps an in-memory snapshot and
+                // must reload so section/status match what just notified.
+                navigationCoordinator.notifyWatchlistDataChanged()
+                AppDiagnosticsLogger.logTaskComplete("foreground_watchlist_refresh")
+            }
+        }
     }
 
     /// UI tests get `PreviewTVMazeService` so search / detail never hit the network;
     /// production always uses the injected live client.
     private func tvMazeService(testing: Bool) -> any TVMazeService {
         #if DEBUG
-        if testing {
-            return PreviewTVMazeService(stub: .preview)
-        }
+            if testing {
+                return PreviewTVMazeService(stub: .preview)
+            }
         #endif
         return tvMaze
     }

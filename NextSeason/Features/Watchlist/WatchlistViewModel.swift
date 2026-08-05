@@ -63,7 +63,7 @@ final class WatchlistViewModel {
 
     private static func comingSoonSort(_ lhs: TrackedShow, _ rhs: TrackedShow) -> Bool {
         switch (lhs.nextSeason, rhs.nextSeason) {
-        case let (.scheduled(_, leftDate), .scheduled(_, rightDate)):
+        case (.scheduled(_, let leftDate), .scheduled(_, let rightDate)):
             if leftDate != rightDate { return leftDate < rightDate }
             return alphabeticalSort(lhs, rhs)
         default:
