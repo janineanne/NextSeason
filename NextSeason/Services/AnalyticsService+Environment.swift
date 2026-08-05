@@ -10,6 +10,7 @@ private struct AnalyticsServiceKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
+    /// App-wide analytics; must be injected at the root (fatal if missing).
     @MainActor var analytics: any AnalyticsTracking {
         get { self[AnalyticsServiceKey.self] }
         set { self[AnalyticsServiceKey.self] = newValue }

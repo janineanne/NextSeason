@@ -17,14 +17,19 @@ nonisolated protocol TVMazeService: Sendable {
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date]
 }
 
+/// Query window for `GET /updates/shows` (`?since=day|week|month`).
 nonisolated enum TVMazeUpdatePeriod: String, Sendable {
     case day, week, month
 
     /// Smallest TVMaze update window that still covers every change since
     /// `oldestCheck`. Background refresh is best-effort and may be delayed, so
-    /// the window must grow with the polling gap.
-    static func covering(since oldestCheck: Date, now: Date = .now) -> TVMazeUpdatePeriod {
-        let elapsed = now.timeIntervalSince(oldestCheck)
+    /// the window must grow with the polling gap — otherwise a show that changed
+    /// just outside a too-small window would be silently skipped.
+    ///
+    /// Thresholds: ≤1 day → `.day`, ≤1 week → `.week`, otherwise `.month`
+    /// (TVMaze's coarsest supported `since` value).
+    static func covering(since oldestCheck: Date, at: Date = .now) -> TVMazeUpdatePeriod {
+        let elapsed = at.timeIntervalSince(oldestCheck)
         let oneDay: TimeInterval = 86_400
         let oneWeek: TimeInterval = 604_800
 
@@ -35,6 +40,7 @@ nonisolated enum TVMazeUpdatePeriod: String, Sendable {
 }
 
 extension TVMazeService {
+    /// Convenience: fetch show detail using the normal cache policy.
     func show(id: Int) async throws -> Show {
         try await show(id: id, bypassCache: false)
     }

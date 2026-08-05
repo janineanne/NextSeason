@@ -53,23 +53,23 @@ enum WatchlistTracking {
         source: WatchlistActionSource,
         repository: any WatchlistRepository,
         tvMaze: any TVMazeService,
-        undoRemoval: WatchlistUndoRemoval?,
+        removalCoordinator: WatchlistPendingRemoval?,
         analytics: any AnalyticsTracking,
         notifications: any NotificationManaging,
         prompt: WatchlistNotificationPromptState,
         onRemovalCommitted: @escaping () -> Void = {}
     ) async throws -> ToggleOutcome {
-        if undoRemoval?.pendingRemoval?.id == show.id {
-            _ = undoRemoval?.undoRemoval()
+        if removalCoordinator?.pendingRemoval?.id == show.id {
+            _ = removalCoordinator?.undoRemoval()
             return .undidPendingRemoval
         }
 
         if isTracked {
-            guard let undoRemoval else { return .ignored }
+            guard let removalCoordinator else { return .ignored }
             guard let tracked = try await repository.trackedShow(showID: show.id) else {
                 return .ignored
             }
-            undoRemoval.requestRemoval(
+            removalCoordinator.requestRemoval(
                 tracked,
                 anchor: anchor,
                 source: source,

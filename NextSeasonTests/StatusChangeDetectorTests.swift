@@ -37,7 +37,7 @@ struct StatusChangeDetectorTests {
         let evaluation = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .scheduled(season: 2, premiere: premiere),
-            now: now
+            at: now
         )
 
         #expect(evaluation.notification != nil)
@@ -51,7 +51,7 @@ struct StatusChangeDetectorTests {
         let first = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .announcedUndated(season: 2),
-            now: now
+            at: now
         )
 
         #expect(first.notification == nil)
@@ -60,7 +60,7 @@ struct StatusChangeDetectorTests {
         let second = StatusChangeDetector.evaluate(
             tracked: first.tracked,
             newStatus: .announcedUndated(season: 2),
-            now: now
+            at: now
         )
 
         #expect(second.notification != nil)
@@ -75,7 +75,7 @@ struct StatusChangeDetectorTests {
         let evaluation = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .scheduled(season: 2, premiere: premiere),
-            now: now
+            at: now
         )
 
         #expect(evaluation.notification == nil)
@@ -87,7 +87,7 @@ struct StatusChangeDetectorTests {
         let evaluation = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .scheduled(season: 2, premiere: laterPremiere),
-            now: now
+            at: now
         )
 
         #expect(evaluation.notification != nil)
@@ -100,7 +100,7 @@ struct StatusChangeDetectorTests {
         let evaluation = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .airing(season: 2),
-            now: now
+            at: now
         )
 
         #expect(evaluation.notification != nil)
@@ -113,7 +113,7 @@ struct StatusChangeDetectorTests {
         let first = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .ended,
-            now: now
+            at: now
         )
 
         #expect(first.notification == nil)
@@ -122,7 +122,7 @@ struct StatusChangeDetectorTests {
         let second = StatusChangeDetector.evaluate(
             tracked: first.tracked,
             newStatus: .ended,
-            now: now
+            at: now
         )
 
         #expect(second.notification != nil)
@@ -135,14 +135,14 @@ struct StatusChangeDetectorTests {
         let first = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .announcedUndated(season: 2),
-            now: now
+            at: now
         )
         #expect(first.tracked.pendingChangeSignature != nil)
 
         let reverted = StatusChangeDetector.evaluate(
             tracked: first.tracked,
             newStatus: .returningNoSeasonYet,
-            now: now
+            at: now
         )
 
         #expect(reverted.notification == nil)
@@ -155,7 +155,7 @@ struct StatusChangeDetectorTests {
         let evaluation = StatusChangeDetector.evaluate(
             tracked: show,
             newStatus: .returningNoSeasonYet,
-            now: now
+            at: now
         )
 
         #expect(evaluation.notification == nil)

@@ -5,11 +5,14 @@
 
 import SwiftUI
 
+// Optional UI presentation callback (nil = unavailable), not a required injected
+// service — kept here beside About rather than in a `+Environment` file.
 private struct OpenAppAboutKey: EnvironmentKey {
     static let defaultValue: (() -> Void)? = nil
 }
 
 extension EnvironmentValues {
+    /// Presents the About sheet when set by the app root (beta / DEBUG).
     var openAppAbout: (() -> Void)? {
         get { self[OpenAppAboutKey.self] }
         set { self[OpenAppAboutKey.self] = newValue }

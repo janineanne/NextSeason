@@ -7,6 +7,9 @@ import Foundation
 import SwiftUI
 
 /// Launch-argument helpers for XCUITest runs (`-UITesting`).
+///
+/// When enabled, composition root uses an in-memory watchlist and notification
+/// helpers short-circuit system permission sheets.
 enum UITestingConfiguration {
     static let launchArgument = UITestingLaunchArgument.uiTesting
 

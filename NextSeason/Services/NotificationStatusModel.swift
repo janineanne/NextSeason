@@ -5,12 +5,14 @@
 
 import Foundation
 
-/// Owns UI-facing notification permission state so views refresh via intents
-/// instead of loading presentation values inline.
+/// Observable holder for UI-facing notification permission state shared by About,
+/// Watchlist, and Diagnostics. Views call `refresh(using:)` (or
+/// `refreshNotificationStatus`) instead of loading presentation values inline.
 @Observable
 @MainActor
 final class NotificationStatusModel {
     private(set) var presentation = NotificationStatusPresentation.unknown
+    /// Bumps on each refresh so a slower in-flight load cannot overwrite a newer one.
     private var refreshGeneration = 0
 
     var canDeliverVisibleAlerts: Bool { presentation.canDeliverVisibleAlerts }

@@ -6,7 +6,9 @@
 import SwiftUI
 import UserNotifications
 
-/// Shared UI-facing notification permission state for About, Watchlist, and Diagnostics.
+/// Shared UI-facing snapshot of notification permission for About, Watchlist,
+/// and Diagnostics (labels, icons, banner CTA). Loaded asynchronously from
+/// `NotificationManaging` so views stay free of permission API details.
 nonisolated struct NotificationStatusPresentation: Equatable, Sendable {
     /// True when the system can show alert banners for this app.
     var canDeliverVisibleAlerts: Bool
@@ -55,7 +57,8 @@ nonisolated struct NotificationStatusPresentation: Equatable, Sendable {
 }
 
 extension View {
-    /// Refreshes notification presentation when the scene becomes active.
+    /// Refreshes notification presentation when the scene becomes active
+    /// (e.g. returning from Settings after toggling permission).
     func refreshNotificationStatus(_ model: NotificationStatusModel) -> some View {
         modifier(NotificationStatusRefreshModifier(model: model))
     }

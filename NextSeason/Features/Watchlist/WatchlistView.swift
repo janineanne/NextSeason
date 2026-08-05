@@ -5,11 +5,21 @@
 
 import SwiftUI
 
+/// Local watchlist: status-grouped tracked shows, in-list search, pull-to-refresh,
+/// undoable removal, and notification deep-link push into Show Detail.
+///
+/// Lifecycle:
+/// - `.task(id: watchlistReloadToken)` creates the view model and reloads when the
+///   tab is selected (token bump from `ContentView` / the navigation coordinator).
+/// - `.onAppear` applies a buffered deep link and, after the first load, refreshes
+///   on later tab returns without double-fetching the initial presentation.
+/// - Pending-removal ID changes keep the list's track-button / toast state in sync
+///   with `WatchlistPendingRemoval` shared across tabs.
 struct WatchlistView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.watchlistRefreshService) private var refreshService
     @Environment(\.notificationService) private var notificationService
-    @Environment(\.watchlistUndoRemoval) private var undoRemoval
+    @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.analytics) private var analytics
 
     @Binding var navigationPath: NavigationPath
@@ -100,7 +110,7 @@ struct WatchlistView: View {
                 onApplyPendingDetail()
             }
             .refreshNotificationStatus(notificationStatus)
-            .onChange(of: undoRemoval?.pendingRemoval?.id) { oldId, newId in
+            .onChange(of: removalCoordinator?.pendingRemoval?.id) { oldId, newId in
                 Task { await viewModel?.handlePendingRemovalIDChange(from: oldId, to: newId) }
             }
         }
@@ -108,12 +118,12 @@ struct WatchlistView: View {
 
     /// Creates the view model on first need, then reloads list + notification status.
     private func prepareAndReload() async {
-        guard let undoRemoval else { return }
+        guard let removalCoordinator else { return }
         if viewModel == nil {
             viewModel = WatchlistViewModel(
                 repository: repository,
                 refreshService: refreshService,
-                undoRemoval: undoRemoval,
+                removalCoordinator: removalCoordinator,
                 analytics: analytics
             )
         }
@@ -326,11 +336,14 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
 #Preview {
     @Previewable @State var path = NavigationPath()
     let repository = InMemoryWatchlistRepository()
-    WatchlistView(navigationPath: $path, tvMaze: TVMazeClient())
+    let analytics = RecordingAnalyticsService()
+    WatchlistView(navigationPath: $path, tvMaze: PreviewTVMazeService(stub: .preview))
         .environment(\.watchlistRepository, repository)
-        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(
+        .environment(\.analytics, analytics)
+        .environment(\.notificationService, NotificationService(analytics: analytics))
+        .environment(\.watchlistPendingRemoval, WatchlistPendingRemoval(
             repository: repository,
-            analytics: RecordingAnalyticsService()
+            analytics: analytics
         ))
 }
 #endif

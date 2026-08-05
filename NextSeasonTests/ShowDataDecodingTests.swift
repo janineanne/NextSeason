@@ -87,6 +87,6 @@ struct ShowDataDecodingTests {
 
         let now = try #require(TVMazeDate.dateOnly("2026-06-14"))
         let expected = NextSeasonStatus.scheduled(season: 3, premiere: try #require(TVMazeDate.dateOnly("2026-09-01")))
-        #expect(NextSeasonCalculator.status(for: show, now: now) == expected)
+        #expect(NextSeasonCalculator.status(for: show, at: now) == expected)
     }
 }

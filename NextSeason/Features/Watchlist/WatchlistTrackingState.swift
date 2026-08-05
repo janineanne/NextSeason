@@ -1,5 +1,5 @@
 //
-//  WatchlistEffectiveTracking.swift
+//  WatchlistTrackingState.swift
 //  NextSeason
 //
 
@@ -8,7 +8,7 @@ import Foundation
 /// Resolves UI-facing "tracked" state from persistence plus any pending
 /// undoable removal. Search, detail, and other surfaces should use this so
 /// "currently tracked" does not depend on which screen recomputed it.
-enum WatchlistEffectiveTracking {
+enum WatchlistTrackingState {
     /// True when the show is persisted and not currently pending undoable removal.
     static func isTracked(
         showID: Int,
@@ -34,13 +34,13 @@ enum WatchlistEffectiveTracking {
     static func isTracked(
         showID: Int,
         repository: any WatchlistRepository,
-        undoRemoval: WatchlistUndoRemoval?
+        removalCoordinator: WatchlistPendingRemoval?
     ) async throws -> Bool {
         let isPersisted = try await repository.contains(showID: showID)
         return isTracked(
             showID: showID,
             isPersisted: isPersisted,
-            pendingRemovalID: undoRemoval?.pendingRemoval?.id
+            pendingRemovalID: removalCoordinator?.pendingRemoval?.id
         )
     }
 
@@ -48,12 +48,12 @@ enum WatchlistEffectiveTracking {
     @MainActor
     static func trackedIDs(
         repository: any WatchlistRepository,
-        undoRemoval: WatchlistUndoRemoval?
+        removalCoordinator: WatchlistPendingRemoval?
     ) async throws -> Set<Int> {
         let persisted = try await repository.trackedShowIDs()
         return trackedIDs(
             persistedIDs: persisted,
-            pendingRemovalID: undoRemoval?.pendingRemoval?.id
+            pendingRemovalID: removalCoordinator?.pendingRemoval?.id
         )
     }
 }

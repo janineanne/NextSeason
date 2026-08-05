@@ -12,7 +12,7 @@ struct RefreshPolicyTests {
 
     @Test("Foreground refresh runs when there is no prior refresh")
     func runsWithoutPriorRefresh() {
-        #expect(RefreshPolicy.shouldPerformForegroundRefresh(lastRefreshAt: nil, now: now))
+        #expect(RefreshPolicy.shouldPerformForegroundRefresh(lastRefreshAt: nil, at: now))
     }
 
     @Test("Foreground refresh is skipped inside the minimum interval")
@@ -21,7 +21,7 @@ struct RefreshPolicyTests {
         #expect(
             RefreshPolicy.shouldPerformForegroundRefresh(
                 lastRefreshAt: lastRefresh,
-                now: now
+                at: now
             ) == false
         )
     }
@@ -32,7 +32,7 @@ struct RefreshPolicyTests {
         #expect(
             RefreshPolicy.shouldPerformForegroundRefresh(
                 lastRefreshAt: lastRefresh,
-                now: now
+                at: now
             )
         )
     }

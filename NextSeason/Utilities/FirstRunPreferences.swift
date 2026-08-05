@@ -5,11 +5,12 @@
 
 import Foundation
 
-/// Persists one-time first-run affordances across launches.
+/// Persists one-time first-run affordances across launches (UserDefaults).
 enum FirstRunPreferences {
     static let searchResultsHintDismissedKey = "searchResultsHintDismissed"
     static let hasCompletedFirstSearchKey = "hasCompletedFirstSearch"
 
+    /// Whether the post-search "tap the star" coaching hint was dismissed.
     static var hasDismissedSearchResultsHint: Bool {
         get { UserDefaults.standard.bool(forKey: searchResultsHintDismissedKey) }
         set { UserDefaults.standard.set(newValue, forKey: searchResultsHintDismissedKey) }

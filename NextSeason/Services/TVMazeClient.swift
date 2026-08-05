@@ -38,6 +38,7 @@ actor TVMazeClient: TVMazeService {
         return URLSession(configuration: configuration)
     }
 
+    /// `GET /search/shows?q=` — empty / whitespace query short-circuits to `[]`.
     func searchShows(matching query: String) async throws -> [Show] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
@@ -58,6 +59,8 @@ actor TVMazeClient: TVMazeService {
         return shows
     }
 
+    /// `GET /shows/:id` with embedded seasons + next episode for status calculation.
+    /// Pass `bypassCache: true` for refresh paths that must not reuse a stale hour-old body.
     func show(id: Int, bypassCache: Bool = false) async throws -> Show {
         AppDiagnosticsLogger.logger(for: .network)
             .notice("show_detail_start show_id=\(id, privacy: .public) bypass_cache=\(bypassCache, privacy: .public)")
@@ -78,6 +81,8 @@ actor TVMazeClient: TVMazeService {
         return show
     }
 
+    /// `GET /updates/shows?since=` — JSON object of show-ID strings → Unix epochs.
+    /// Always bypasses cache so background refresh sees the latest change map.
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
         AppDiagnosticsLogger.logger(for: .network)
             .notice("updates_start period=\(period.rawValue, privacy: .public)")
@@ -96,12 +101,14 @@ actor TVMazeClient: TVMazeService {
         return result
     }
 
+    /// Builds the request with TVMaze’s preferred User-Agent and optional cache bypass.
     private func get<T: Decodable>(_ components: URLComponents?, bypassCache: Bool = false) async throws -> T {
         guard let url = components?.url else { throw TVMazeError.invalidURL }
         if bypassCache {
             AppDiagnosticsLogger.logger(for: .cache).notice("request_bypass_cache path=\(url.path, privacy: .public)")
         }
         var request = URLRequest(url: url)
+        // TVMaze asks clients to identify themselves; helps them contact us on issues.
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         if bypassCache {
             request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -109,6 +116,7 @@ actor TVMazeClient: TVMazeService {
         return try await perform(request, attempt: 0)
     }
 
+    /// Single request with one retry on HTTP 429 after a short backoff.
     private func perform<T: Decodable>(_ request: URLRequest, attempt: Int) async throws -> T {
         let data: Data
         let response: URLResponse

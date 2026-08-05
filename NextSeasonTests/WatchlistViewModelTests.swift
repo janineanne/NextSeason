@@ -36,10 +36,10 @@ struct WatchlistViewModelTests {
 
     private func loadedViewModel(with shows: [Show]) async throws -> WatchlistViewModel {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         for show in shows {
@@ -69,10 +69,10 @@ struct WatchlistViewModelTests {
     @Test("Reload loads tracked shows from persistence")
     func reloadLoadsTrackedShows() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(sampleShow)
@@ -87,10 +87,10 @@ struct WatchlistViewModelTests {
     @Test("A pending removal keeps the show visible in the loaded list")
     func pendingRemovalKeepsRowVisible() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(sampleShow)
@@ -107,10 +107,10 @@ struct WatchlistViewModelTests {
     @Test("Committing a pending removal reloads an empty watchlist")
     func commitPendingRemovalReloadsList() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(sampleShow)
@@ -128,10 +128,10 @@ struct WatchlistViewModelTests {
     @Test("Animated removal drops the row from the loaded list")
     func removeShowAnimatedDropsRow() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(sampleShow)
@@ -147,10 +147,10 @@ struct WatchlistViewModelTests {
     @Test("Pending-removal clear animates row away only after persistence removes it")
     func pendingRemovalClearAnimatesCommittedRemoval() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(sampleShow)
@@ -158,7 +158,7 @@ struct WatchlistViewModelTests {
         let tracked = try #require((try await repository.all()).first)
 
         viewModel.requestRemoval(tracked, anchor: .zero)
-        await undoRemoval.commitPendingRemovalIfNeeded()
+        await removalCoordinator.commitPendingRemovalIfNeeded()
         await viewModel.handlePendingRemovalIDChange(from: tracked.id, to: nil)
 
         #expect(viewModel.shows.isEmpty)
@@ -167,10 +167,10 @@ struct WatchlistViewModelTests {
     @Test("Pending-removal clear leaves the row when undo restored it")
     func pendingRemovalClearKeepsRowAfterUndo() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(sampleShow)
@@ -188,10 +188,10 @@ struct WatchlistViewModelTests {
     @Test("Replacing a pending removal drops the first show from the displayed list")
     func replacingPendingRemovalDropsFirstShowFromDisplayedList() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         let firstShow = makeShow(id: 44933, name: "Severance")
@@ -223,10 +223,10 @@ struct WatchlistViewModelTests {
     @Test("Undo clears the pending removal flag")
     func undoPendingRemovalClearsPendingState() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(sampleShow)
@@ -378,10 +378,10 @@ struct WatchlistViewModelTests {
     @Test("Filtered section groups honor the search query")
     func filteredSectionGroupsHonorSearchQuery() async throws {
         let repository = InMemoryWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         try await repository.add(makeShow(id: 1, name: "Severance"))
@@ -405,10 +405,10 @@ struct WatchlistViewModelTests {
     @Test("A slower older reload cannot overwrite a newer reload result")
     func slowerOlderReloadDoesNotOverwriteNewerResult() async throws {
         let repository = ReentrantWatchlistRepository()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: RecordingAnalyticsService()
         )
         repository.viewModel = viewModel

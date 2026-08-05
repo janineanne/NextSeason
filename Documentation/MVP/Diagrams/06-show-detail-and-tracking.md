@@ -12,7 +12,7 @@ flowchart TD
     CTA -->|No| Add[Add to Watchlist]
     CTA -->|Yes| Remove[Remove from Watchlist]
     Add --> RepoAdd[repository.add(show)]
-    Remove --> Undo[WatchlistUndoRemoval]
+    Remove --> Undo[WatchlistPendingRemoval]
     Undo --> Pending[Pending removal toast]
     Pending -->|Undo| Restore[Cancel removal]
     Pending -->|Confirm / timeout| RepoRemove[repository.remove(id)]

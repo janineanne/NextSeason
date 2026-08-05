@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// Marketing / build strings shown at the top of shareable diagnostics reports.
 enum AppVersionInfo {
     static var marketingVersion: String {
         (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "1.0"
@@ -19,6 +20,20 @@ enum AppVersionInfo {
     }
 }
 
+/// Builds the plain-text diagnostics export shown on the Diagnostics screen and
+/// via Share / Copy. Fields are oriented toward TestFlight triage:
+///
+/// - **Usage counters:** cumulative local tallies (see `AnalyticsCounters`).
+/// - **Recent breadcrumbs:** in-memory trail for the current process (what the user
+///   did just before filing a report).
+/// - **Persisted breadcrumbs:** last session's trail (survives relaunch when the
+///   prior process wrote them before exit).
+/// - **Launch diagnostics:** whether the previous run looked like an unexpected
+///   termination, when the current / prior launches started, last graceful
+///   background, and breadcrumbs captured from that unexpected launch — enough
+///   to correlate a crash-like exit with the last known app steps.
+/// - **Beta validation:** last foreground/background refresh outcomes and
+///   simulated-scenario summaries when beta tooling is available.
 enum AnalyticsDiagnosticsReport {
     @MainActor
     static func formatted(
@@ -34,6 +49,7 @@ enum AnalyticsDiagnosticsReport {
             : recentBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
         let priorLines = persistedBreadcrumbs.isEmpty
             ? "  (none persisted)"
+            // Cap export size; full ring stays available in-app if needed.
             : persistedBreadcrumbs.suffix(10).map { "  \($0)" }.joined(separator: "\n")
         let previousLaunchStatus = launchDiagnostics.previousLaunchEndedUnexpectedly
             ? "Ended unexpectedly"

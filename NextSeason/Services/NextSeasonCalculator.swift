@@ -8,21 +8,25 @@ import Foundation
 /// Derives a `NextSeasonStatus` from a show's status, seasons, and next episode.
 ///
 /// TVMaze has no single "next season" field, so this is the one place that rule
-/// lives. It is a pure function (inject `now`) so it is fully unit-testable and is
-/// shared by the detail screen and (later) background change-detection.
+/// lives. Pure and date-injectable (`at:`) so unit tests can pin the calendar;
+/// shared by show detail, watchlist save, and `WatchlistRefreshService`.
 ///
 /// Rerun-safe by construction: it keys only off original season premiere dates and
 /// the next *unaired* episode, none of which a re-broadcast changes
 /// (see `Documentation/TVMazeResearch.md` §6.3).
 nonisolated enum NextSeasonCalculator {
-    static func status(for show: Show, now: Date = .now) -> NextSeasonStatus {
+    /// Priority order: dated upcoming season → next-episode hint → currently
+    /// airing latest season → undated upcoming row → overall show status.
+    ///
+    /// - Parameter at: Reference "today" for premiere / end comparisons (UTC days).
+    static func status(for show: Show, at: Date = .now) -> NextSeasonStatus {
         // Ignore specials / season 0 for "next season" purposes.
         let seasons = show.seasons
             .filter { $0.number >= 1 }
             .sorted { $0.number < $1.number }
 
         let aired = seasons.filter { season in
-            if let date = season.premiereDate { return TVMazeDate.isOnOrBefore(date, now) }
+            if let date = season.premiereDate { return TVMazeDate.isOnOrBefore(date, at) }
             return false
         }
         let latestAired = aired.last
@@ -34,7 +38,7 @@ nonisolated enum NextSeasonCalculator {
         // 1. A not-yet-aired season with a known future premiere date.
         let datedUpcoming = upcoming
             .compactMap { season -> (number: Int, date: Date)? in
-                guard let date = season.premiereDate, TVMazeDate.isAfter(date, now) else { return nil }
+                guard let date = season.premiereDate, TVMazeDate.isAfter(date, at) else { return nil }
                 return (season.number, date)
             }
             .sorted { $0.date < $1.date }
@@ -48,7 +52,7 @@ nonisolated enum NextSeasonCalculator {
            let season = episode.season,
            season > latestAiredNumber {
             if let date = episode.airdate {
-                if TVMazeDate.isAfter(date, now) {
+                if TVMazeDate.isAfter(date, at) {
                     return .scheduled(season: season, premiere: date)
                 }
                 // A concrete airdate on or before today means the new season is underway.
@@ -60,7 +64,7 @@ nonisolated enum NextSeasonCalculator {
 
         // 3. The most recent season is currently airing (premiered, not yet ended).
         if show.status != .ended, let latest = latestAired {
-            let hasEnded = latest.endDate.map { TVMazeDate.isBefore($0, now) } ?? false
+            let hasEnded = latest.endDate.map { TVMazeDate.isBefore($0, at) } ?? false
             if !hasEnded {
                 return .airing(season: latest.number)
             }

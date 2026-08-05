@@ -5,8 +5,12 @@
 
 import Foundation
 
-/// Runs a two-step simulated season update through the real watchlist refresh
-/// service, without touching the user's normal watchlist repository or TVMaze.
+/// Runs a two-step simulated season update through the real `WatchlistRefreshService`,
+/// without touching the user's normal watchlist repository or live TVMaze.
+///
+/// Uses an in-memory `SimulatedWatchlistRepository` and `DiagnosticsSimulatedDataProvider`
+/// so beta / TestFlight validation can exercise status recompute + notification
+/// decisions end-to-end with fake show data.
 @MainActor
 final class DiagnosticsSimulatedUpdateRunner {
     private let dataProvider: DiagnosticsSimulatedDataProvider
@@ -15,7 +19,7 @@ final class DiagnosticsSimulatedUpdateRunner {
     private let analytics: any AnalyticsTracking
     private let refreshService: WatchlistRefreshService
     private let diagnostics: BetaRefreshDiagnostics
-    private let now: @Sendable () -> Date
+    private let clock: @Sendable () -> Date
     private var isSeeded = false
     private var pipelineTemplate: TrackedShow?
 
@@ -25,13 +29,14 @@ final class DiagnosticsSimulatedUpdateRunner {
         notifications: any NotificationManaging,
         diagnostics: BetaRefreshDiagnostics,
         analytics: any AnalyticsTracking,
-        now: @escaping @Sendable () -> Date = { .now }
+        clock: @escaping @Sendable () -> Date = { .now }
     ) {
         if let pipelineTemplate {
+            // Prefer a real watchlist show's identity so notification copy looks familiar.
             self.dataProvider = DiagnosticsSimulatedDataProvider(
                 showID: pipelineTemplate.id,
                 showName: pipelineTemplate.name,
-                now: now
+                clock: clock
             )
             self.pipelineTemplate = pipelineTemplate
         } else {
@@ -42,14 +47,14 @@ final class DiagnosticsSimulatedUpdateRunner {
         self.notificationService = notifications
         self.analytics = analytics
         self.diagnostics = diagnostics
-        self.now = now
+        self.clock = clock
         self.refreshService = WatchlistRefreshService(
             tvMaze: self.dataProvider,
             repository: repository,
             notifications: notifications,
             analytics: analytics,
             diagnostics: diagnostics,
-            now: now
+            clock: clock
         )
     }
 
@@ -63,6 +68,15 @@ final class DiagnosticsSimulatedUpdateRunner {
         isSeeded = false
     }
 
+    /// Advances the two-step simulated pipeline once and returns a human-readable summary.
+    ///
+    /// 1. First call (if not seeded): seeds undated / baseline tracked state, then
+    ///    force-refreshes against the provider's current phase (usually baseline).
+    /// 2. Provider advances to `.updated` after the run.
+    /// 3. Second call: force-refreshes against dated season data so
+    ///    `StatusChangeDetector` can choose a notification; then resets the scenario.
+    ///
+    /// Unavailable when `BetaBuildConfiguration.isAvailable` is false.
     @discardableResult
     func runNextStep() async -> String {
         let betaValidationAvailable = await MainActor.run {
@@ -73,7 +87,7 @@ final class DiagnosticsSimulatedUpdateRunner {
         }
 
         if !isSeeded {
-            repository.seed(makeInitialTracked(at: now()))
+            repository.seed(makeInitialTracked(at: clock()))
             isSeeded = true
         }
 
@@ -88,6 +102,7 @@ final class DiagnosticsSimulatedUpdateRunner {
         diagnostics.recordSimulatedScenarioSummary(summary)
         dataProvider.advanceAfterRun()
 
+        // Completed the "updated" step — clear so the next tap starts from seed again.
         if phase == .updated {
             resetScenario()
         }
@@ -97,6 +112,10 @@ final class DiagnosticsSimulatedUpdateRunner {
 
     /// Seeds fake data with a dated new season, runs the real refresh + notification
     /// decision path, and schedules delivery after a short delay for background testing.
+    ///
+    /// Unlike `runNextStep`, this jumps straight to the updated phase and wraps
+    /// notification delivery so the alert fires ~5–10s later (easier to background
+    /// the app and verify a banner). Resets the scenario when finished.
     @discardableResult
     func runDelayedNewSeasonNotification(
         delayRange: ClosedRange<TimeInterval> = 5 ... 10
@@ -109,7 +128,7 @@ final class DiagnosticsSimulatedUpdateRunner {
         }
 
         resetScenario()
-        repository.seed(makeInitialTracked(at: now()))
+        repository.seed(makeInitialTracked(at: clock()))
         dataProvider.forcePhase(.updated)
         isSeeded = true
 
@@ -124,7 +143,7 @@ final class DiagnosticsSimulatedUpdateRunner {
             notifications: delayedNotifications,
             analytics: analytics,
             diagnostics: diagnostics,
-            now: now
+            clock: clock
         )
 
         let outcome = await pipelineRefresh.refreshAll(force: true)
@@ -161,6 +180,7 @@ final class DiagnosticsSimulatedUpdateRunner {
     }
 }
 
+/// In-memory watchlist used only by simulated refresh runs (never SwiftData).
 @MainActor
 private final class SimulatedWatchlistRepository: WatchlistRepository {
     private var shows: [Int: TrackedShow] = [:]

@@ -7,6 +7,10 @@ import Foundation
 import os
 import SwiftData
 
+/// Production `WatchlistRepository` backed by SwiftData / `TrackedShowEntity`.
+///
+/// `@MainActor` because `ModelContext` is main-actor bound. Callers (view models,
+/// refresh) already hop to the main actor before awaiting these methods.
 @MainActor
 final class SwiftDataWatchlistRepository: WatchlistRepository {
     private let context: ModelContext
@@ -15,6 +19,7 @@ final class SwiftDataWatchlistRepository: WatchlistRepository {
         self.context = context
     }
 
+    /// Newest saves first (`dateAdded` descending).
     func all() async throws -> [TrackedShow] {
         AppDiagnosticsLogger.logger(for: .persistence).notice("watchlist_read_all start")
         AppDiagnosticsLogger.breadcrumb("watchlist_read_all")
@@ -45,6 +50,7 @@ final class SwiftDataWatchlistRepository: WatchlistRepository {
         return try context.fetchCount(descriptor) > 0
     }
 
+    /// Idempotent: a second add of the same show ID is a no-op.
     func add(_ show: Show) async throws {
         AppDiagnosticsLogger.logger(for: .persistence)
             .notice("watchlist_write_add show_id=\(show.id, privacy: .public)")
@@ -55,6 +61,7 @@ final class SwiftDataWatchlistRepository: WatchlistRepository {
         try context.save()
     }
 
+    /// No-op if the show is not on the watchlist.
     func remove(showID: Int) async throws {
         AppDiagnosticsLogger.logger(for: .persistence)
             .notice("watchlist_write_remove show_id=\(showID, privacy: .public)")
@@ -64,6 +71,8 @@ final class SwiftDataWatchlistRepository: WatchlistRepository {
         try context.save()
     }
 
+    /// Applies refresh fields onto an existing row. No-op if the show was removed
+    /// between fetch and write (e.g. user untracked during a background refresh).
     func updateAfterRefresh(_ tracked: TrackedShow) async throws {
         AppDiagnosticsLogger.logger(for: .persistence)
             .notice("watchlist_write_refresh show_id=\(tracked.id, privacy: .public)")

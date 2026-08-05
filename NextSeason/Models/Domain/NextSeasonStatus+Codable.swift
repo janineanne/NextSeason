@@ -5,11 +5,17 @@
 
 import Foundation
 
+/// Codable storage for `NextSeasonStatus` on `TrackedShowEntity`.
+///
+/// Uses a keyed `kind` discriminator (not enum case order) so adding cases later
+/// does not break decoding of previously persisted values. Associated values
+/// (`season`, `premiere`) are optional keys present only when that kind needs them.
 nonisolated extension NextSeasonStatus: Codable {
     private enum CodingKeys: String, CodingKey {
         case kind, season, premiere
     }
 
+    /// Stable string tags written to disk; rename only with a migration plan.
     private enum Kind: String, Codable {
         case airing, scheduled, announcedUndated, returningNoSeasonYet, ended, unknown
     }
@@ -59,6 +65,9 @@ nonisolated extension NextSeasonStatus: Codable {
 }
 
 extension ShowStatus {
+    /// TVMaze's exact status string for SwiftData (`statusRaw`). Distinct from
+    /// `displayLabel`, which is user-facing copy. `.unknown` round-trips the
+    /// original API value unchanged.
     nonisolated var persistenceRawValue: String {
         switch self {
         case .running: "Running"

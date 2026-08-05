@@ -6,6 +6,8 @@
 import SwiftData
 import SwiftUI
 
+/// App entry: builds `AppCompositionRoot`, injects services into the environment,
+/// and hosts `AppRootView` for scene-phase refresh and watchlist undo.
 @main
 struct NextSeasonApp: App {
     private let composition: AppCompositionRoot
@@ -37,13 +39,13 @@ struct NextSeasonApp: App {
         WindowGroup {
             AppRootView(
                 navigationCoordinator: navigationCoordinator,
-                undoRemoval: composition.watchlistUndoRemoval,
+                removalCoordinator: composition.watchlistPendingRemoval,
                 refreshService: composition.refreshService,
                 tvMaze: composition.tvMaze
             )
             .environment(\.watchlistRepository, composition.watchlistRepository)
             .environment(\.watchlistRefreshService, composition.refreshService)
-            .environment(\.watchlistUndoRemoval, composition.watchlistUndoRemoval)
+            .environment(\.watchlistPendingRemoval, composition.watchlistPendingRemoval)
             .environment(\.notificationService, composition.notificationService)
             .environment(\.analytics, composition.analyticsService)
             .environment(\.betaRefreshDiagnostics, composition.betaRefreshDiagnostics)
@@ -62,40 +64,47 @@ struct NextSeasonApp: App {
     }
 }
 
-/// Hosts scene-phase refresh so foreground returns pick up watchlist changes.
+/// Root content host: scene-phase watchlist refresh, undo toast for deferred
+/// watchlist removals, and UITest TVMaze stubbing.
+///
+/// Undo lives here (not inside Watchlist) so the toast remains visible across
+/// tab switches while a removal is still pending confirmation.
 private struct AppRootView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @Bindable var navigationCoordinator: AppNavigationCoordinator
-    @Bindable var undoRemoval: WatchlistUndoRemoval
+    @Bindable var removalCoordinator: WatchlistPendingRemoval
     let refreshService: WatchlistRefreshService
     let tvMaze: any TVMazeService
 
     var body: some View {
-        ContentView(coordinator: navigationCoordinator, tvMaze: uiTestingTVMazeService)
+        ContentView(
+            coordinator: navigationCoordinator,
+            tvMaze: tvMazeService(testing: UITestingConfiguration.isEnabled)
+        )
             .appAccentTint()
             .watchlistUndoToast(
-                isPresented: undoRemoval.pendingRemoval != nil,
-                anchor: undoRemoval.toastAnchor,
-                undoAction: { _ = undoRemoval.undoRemoval() },
+                isPresented: removalCoordinator.pendingRemoval != nil,
+                anchor: removalCoordinator.toastAnchor,
+                undoAction: { _ = removalCoordinator.undoRemoval() },
                 confirmAction: {
                     Task {
-                        await undoRemoval.commitPendingRemovalIfNeeded()
+                        await removalCoordinator.commitPendingRemovalIfNeeded()
                     }
                 }
             )
             .alert(
                 "Couldn't Update Watchlist",
                 isPresented: Binding(
-                    get: { undoRemoval.removalErrorMessage != nil },
-                    set: { if !$0 { undoRemoval.clearRemovalError() } }
+                    get: { removalCoordinator.removalErrorMessage != nil },
+                    set: { if !$0 { removalCoordinator.clearRemovalError() } }
                 )
             ) {
                 Button("OK", role: .cancel) {
-                    undoRemoval.clearRemovalError()
+                    removalCoordinator.clearRemovalError()
                 }
             } message: {
-                Text(undoRemoval.removalErrorMessage ?? "")
+                Text(removalCoordinator.removalErrorMessage ?? "")
             }
             .onChange(of: scenePhase) { previousPhase, phase in
                 guard !UITestingConfiguration.isEnabled else { return }
@@ -122,9 +131,11 @@ private struct AppRootView: View {
             }
     }
 
-    private var uiTestingTVMazeService: any TVMazeService {
+    /// UI tests get `PreviewTVMazeService` so search / detail never hit the network;
+    /// production always uses the injected live client.
+    private func tvMazeService(testing: Bool) -> any TVMazeService {
         #if DEBUG
-        if UITestingConfiguration.isEnabled {
+        if testing {
             return PreviewTVMazeService(stub: .preview)
         }
         #endif

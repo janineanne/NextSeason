@@ -13,15 +13,26 @@ import Foundation
 /// `inlineOnlyPreservingWhitespace`, which keeps our line breaks intact. Plain
 /// text is used as a fallback if parsing ever fails.
 nonisolated enum SummaryFormatter {
+    /// Converts summary HTML once: `nil` when there is no displayable text after
+    /// stripping tags and normalizing whitespace.
+    static func attributedSummary(from html: String?) -> AttributedString? {
+        guard let html else { return nil }
+        let text = plainText(fromHTML: html)
+        guard !text.isEmpty else { return nil }
+        return attributedString(fromPlainText: text)
+    }
+
     /// Whether the HTML contains any text worth showing after tag stripping and
-    /// whitespace normalization.
+    /// whitespace normalization. Prefer `attributedSummary(from:)` when you also
+    /// need the rendered text (avoids converting twice).
     static func hasDisplayableContent(_ html: String?) -> Bool {
         guard let html else { return false }
         return !plainText(fromHTML: html).isEmpty
     }
 
+    /// Always returns an `AttributedString` (empty when there is nothing to show).
     static func attributedString(from html: String) -> AttributedString {
-        attributedString(fromPlainText: plainText(fromHTML: html))
+        attributedSummary(from: html) ?? AttributedString()
     }
 
     private static func attributedString(fromPlainText text: String) -> AttributedString {
@@ -34,6 +45,13 @@ nonisolated enum SummaryFormatter {
         return AttributedString(text)
     }
 
+    /// Turns TVMaze’s light HTML into Markdown-ish plain text for
+    /// `AttributedString` parsing (or emptiness checks).
+    ///
+    /// Pipeline: paragraph/break tags → line breaks; fix trailing spaces inside
+    /// bold/italic closers so Markdown markers parse; map `<b>`/`<i>` (and
+    /// synonyms) to `**`/`*`; strip any remaining tags; decode basic entities;
+    /// collapse messy whitespace while keeping paragraph blank lines.
     private static func plainText(fromHTML html: String) -> String {
         var text = html
 

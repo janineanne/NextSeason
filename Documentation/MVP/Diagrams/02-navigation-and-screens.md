@@ -22,7 +22,7 @@ flowchart TD
 
     WatchlistRoot --> RemoveShow[Remove from Watchlist]
     RemoveShow --> UndoToast[Undo toast]
-    UndoToast -->|Undo| RestoreShow[WatchlistUndoRemoval.undoRemoval]
+    UndoToast -->|Undo| RestoreShow[WatchlistPendingRemoval.undoRemoval]
     UndoToast -->|Confirm/timeout| CommitRemoval[commitPendingRemovalIfNeeded]
 
     Tabs --> BetaModifier[BetaDiagnosticsPresentationModifier]

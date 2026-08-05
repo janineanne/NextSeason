@@ -8,6 +8,15 @@ import os
 import SwiftUI
 
 /// Drives a single user flow for Instruments when launched with `-ProfileFlow`.
+///
+/// Sets coordinator state (tab, search query, navigation path) and waits on
+/// tokens that Search/Show Detail bump when UI work settles
+/// (`profileFlowSearchSettledToken`, `profileFlowDetailLoadedToken`). Emits
+/// `OSSignposter` intervals for Instruments and records durations via
+/// `AppDiagnosticsLogger` / `ProfileFlowTimingStore`.
+///
+/// Setup-only flows (e.g. seed) exit early; others sleep briefly after the flow
+/// so xctrace can capture trailing work.
 @MainActor
 struct ProfileFlowRunner {
     private static var signposter: OSSignposter { ProfileFlowConfiguration.Signpost.signposter }
@@ -123,6 +132,7 @@ struct ProfileFlowRunner {
         }
     }
 
+    /// Sets the search query; SearchView’s `.task(id:)` performs the network work.
     private func runSearch() async {
         let phaseStart = Date.now
         let interval = Self.signposter.beginInterval("search.query")
@@ -145,6 +155,7 @@ struct ProfileFlowRunner {
         Self.signposter.endInterval("search.empty", interval)
     }
 
+    /// Populates the watchlist from fixed queries (setup before other flows).
     private func runSeedWatchlist() async {
         let interval = Self.signposter.beginInterval("watchlist.seed")
         for query in ProfileFlowConfiguration.SeedData.watchlistSearchQueries {
@@ -161,6 +172,7 @@ struct ProfileFlowRunner {
         Self.signposter.endInterval("watchlist.seed", interval)
     }
 
+    /// Push show detail, wait for load, then pop — captures retention after dismiss.
     private func runShowDetails() async {
         guard let show = await resolveExampleShow() else { return }
 
@@ -259,6 +271,7 @@ struct ProfileFlowRunner {
         }
     }
 
+    /// Polls until SearchView bumps `profileFlowSearchSettledToken`, or times out.
     private func waitForSearchResults(since startToken: Int? = nil) async {
         let baseline = startToken ?? coordinator.profileFlowSearchSettledToken
         let deadline = Date.now.addingTimeInterval(15)
@@ -270,6 +283,7 @@ struct ProfileFlowRunner {
         }
     }
 
+    /// Polls until ShowDetailView bumps `profileFlowDetailLoadedToken`, or times out.
     private func waitForDetailLoaded(since startToken: Int) async {
         let deadline = Date.now.addingTimeInterval(12)
         while Date.now < deadline {
@@ -280,6 +294,7 @@ struct ProfileFlowRunner {
         }
     }
 
+    /// Repeated search → detail → back to stress navigation / retention.
     private func runStressSearchDetailsBack() async {
         guard let show = await resolveExampleShow() else { return }
 

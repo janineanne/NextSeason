@@ -34,7 +34,7 @@ The architecture favors explicit dependencies and small, testable components wit
 - `NotificationService`
 - `AnalyticsService`
 - `BetaRefreshDiagnostics`
-- `WatchlistUndoRemoval`
+- `WatchlistPendingRemoval`
 
 For normal execution, the composition root creates a SwiftData-backed repository. UI tests instead receive an in-memory repository and an in-memory `ModelContainer`.
 
@@ -101,7 +101,7 @@ Pull-to-refresh performs a forced network refresh but suppresses local notificat
 
 ### Undoable Removal
 
-`WatchlistUndoRemoval` coordinates deferred deletion. A removal first enters a pending state and displays an undo affordance. The repository deletion is committed when the undo window expires, the user confirms, another removal replaces it, or the user leaves the Watchlist tab.
+`WatchlistPendingRemoval` coordinates deferred deletion. A removal first enters a pending state and displays an undo affordance. The repository deletion is committed when the undo window expires, the user confirms, another removal replaces it, or the user leaves the Watchlist tab.
 
 This coordination is intentionally separate from `WatchlistViewModel` because pending removal state and the global toast outlive individual row interactions.
 

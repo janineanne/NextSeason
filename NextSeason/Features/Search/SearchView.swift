@@ -5,11 +5,24 @@
 
 import SwiftUI
 
-/// Guest search: type a title, see matching shows and their status.
+/// Guest search: type a title, browse matching shows, and track from the results list.
+///
+/// Lifecycle / refresh matrix:
+/// - `.task(id: query)` drives `SearchViewModel.search()` (debounce + cancel on edit).
+/// - `.task` and `.task(id: navigationPath.count)` refresh tracked IDs when the
+///   screen appears or when returning from show detail.
+/// - `.task(id: pendingRemoval?.id)` keeps row track-button state in sync while an
+///   undoable removal is pending.
+///
+/// First-run AppStorage (independent flags):
+/// - `hasCompletedFirstSearch` — retires the idle "Try an Example" button once the
+///   user reaches `.results` or `.empty`.
+/// - `searchResultsHintDismissed` — hides the results-list inset hint after the
+///   user opens a show (or after an add-to-watchlist dismisses it).
 struct SearchView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.notificationService) private var notificationService
-    @Environment(\.watchlistUndoRemoval) private var undoRemoval
+    @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.dismissSearch) private var dismissSearch
 
     @Binding var navigationPath: NavigationPath
@@ -23,8 +36,10 @@ struct SearchView: View {
     @State private var watchlistTracking = SearchWatchlistTracking()
     @State private var notificationPrompt = WatchlistNotificationPromptState()
     @State private var isScrollDismissingKeyboard = false
+    /// Persists dismissal of the results-list first-run inset (not the idle example CTA).
     @AppStorage(FirstRunPreferences.searchResultsHintDismissedKey)
     private var searchResultsHintDismissed = false
+    /// Persists completion of the idle "Try an Example" affordance.
     @AppStorage(FirstRunPreferences.hasCompletedFirstSearchKey)
     private var hasCompletedFirstSearch = false
 
@@ -94,7 +109,7 @@ struct SearchView: View {
                     }
                     await refreshTrackedShows()
                 }
-                .task(id: undoRemoval?.pendingRemoval?.id) {
+                .task(id: removalCoordinator?.pendingRemoval?.id) {
                     await refreshTrackedShows()
                 }
                 .watchlistNotificationPromptAlerts(
@@ -108,16 +123,16 @@ struct SearchView: View {
     private func refreshTrackedShows() async {
         await watchlistTracking.refresh(
             repository: repository,
-            excludingPendingRemovalFrom: undoRemoval,
+            excludingPendingRemovalFrom: removalCoordinator,
             analytics: analytics
         )
     }
 
-    private var watchlistTrackingContext: SearchWatchlistTrackingContext {
-        SearchWatchlistTrackingContext(
+    private var watchlistTrackingContext: SearchWatchlistTracking.Context {
+        SearchWatchlistTracking.Context(
             repository: repository,
             tvMaze: tvMaze,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             notificationService: notificationService,
             notificationPrompt: notificationPrompt,
             analytics: analytics,
@@ -299,7 +314,7 @@ private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
         analytics: RecordingAnalyticsService()
     )
     .environment(\.watchlistRepository, repository)
-    .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(
+    .environment(\.watchlistPendingRemoval, WatchlistPendingRemoval(
         repository: repository,
         analytics: RecordingAnalyticsService()
     ))

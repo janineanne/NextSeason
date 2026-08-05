@@ -6,9 +6,15 @@
 import SwiftUI
 
 /// Show detail: artwork, metadata, the derived next-season status, and a
-/// formatted summary.
+/// formatted summary, plus track / untrack.
+///
+/// Lifecycle: `.task(id:)` loads seasons and cancels any in-flight undo toast from
+/// search/watchlist so it does not cover detail. `.onAppear` and pending-removal
+/// changes reconcile tracked state (e.g. after removal on the Watchlist tab).
+/// Removals started on this screen keep their toast — see
+/// `cancelPendingRemovalForDetailPresentation`.
 struct ShowDetailView: View {
-    @Environment(\.watchlistUndoRemoval) private var undoRemoval
+    @Environment(\.watchlistPendingRemoval) private var removalCoordinator
 
     @State private var viewModel: ShowDetailViewModel
 
@@ -47,17 +53,17 @@ struct ShowDetailView: View {
                 // Opening detail abandons any in-flight undo toast from search/watchlist
                 // so the banner does not cover detail content.
                 cancelPendingRemovalForDetailPresentation()
-                await viewModel.load(undoRemoval: undoRemoval)
+                await viewModel.load(removalCoordinator: removalCoordinator)
             }
             .onAppear {
                 analytics.track(.showDetailViewed(showID: viewModel.initialShow.id))
                 cancelPendingRemovalForDetailPresentation()
                 // Reconcile tracked state on reappear (e.g. returning to this screen
                 // after the show was removed on the Watchlist tab).
-                Task { await viewModel.refreshTrackedState(undoRemoval: undoRemoval) }
+                Task { await viewModel.refreshTrackedState(removalCoordinator: removalCoordinator) }
             }
-            .onChange(of: undoRemoval?.pendingRemoval?.id) { _, _ in
-                Task { await viewModel.refreshTrackedState(undoRemoval: undoRemoval) }
+            .onChange(of: removalCoordinator?.pendingRemoval?.id) { _, _ in
+                Task { await viewModel.refreshTrackedState(removalCoordinator: removalCoordinator) }
             }
             .onChange(of: viewModel.loadState) { _, loadState in
                 guard ProfileFlowConfiguration.isEnabled, loadState == .loaded else { return }
@@ -68,8 +74,8 @@ struct ShowDetailView: View {
     /// Dismisses a pending undoable removal when Show Detail is presented.
     /// Removals started from this screen keep their toast (onAppear already ran).
     private func cancelPendingRemovalForDetailPresentation() {
-        guard undoRemoval?.pendingRemoval != nil else { return }
-        _ = undoRemoval?.undoRemoval()
+        guard removalCoordinator?.pendingRemoval != nil else { return }
+        _ = removalCoordinator?.undoRemoval()
     }
 
     private func detailContent(viewModel: ShowDetailViewModel) -> some View {
@@ -160,7 +166,7 @@ struct ShowDetailView: View {
     private func handleTrackButtonTap(viewModel: ShowDetailViewModel, anchor: CGRect) async {
         await viewModel.handleTrackButton(
             anchor: anchor,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             onWatchlistChanged: onWatchlistChanged
         )
     }
@@ -222,7 +228,7 @@ struct ShowDetailView: View {
                             .foregroundStyle(AppColor.warning)
                     }
                     Button("Try Again") {
-                        Task { await viewModel.load(undoRemoval: undoRemoval) }
+                        Task { await viewModel.load(removalCoordinator: removalCoordinator) }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -256,15 +262,14 @@ struct ShowDetailView: View {
 
     @ViewBuilder
     private func aboutSection(viewModel: ShowDetailViewModel) -> some View {
-        let html = viewModel.displayShow.summaryHTML
-        let hasSummary = SummaryFormatter.hasDisplayableContent(html)
-        if hasSummary || viewModel.displayShow.tvMazeURL != nil {
+        let summary = SummaryFormatter.attributedSummary(from: viewModel.displayShow.summaryHTML)
+        if summary != nil || viewModel.displayShow.tvMazeURL != nil {
             VStack(alignment: .leading, spacing: AppSpacing.tight) {
-                if let html, hasSummary {
+                if let summary {
                     Text("About")
                         .font(.headline)
                         .appPrimaryText()
-                    Text(SummaryFormatter.attributedString(from: html))
+                    Text(summary)
                         .font(.body)
                         .appSecondaryText()
                 }

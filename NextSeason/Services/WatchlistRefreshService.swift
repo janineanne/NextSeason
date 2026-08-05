@@ -6,15 +6,27 @@
 import Foundation
 import os
 
+/// Human-readable summary of one refresh pass (diagnostics / beta tooling).
 struct WatchlistRefreshOutcome: Sendable, Equatable {
     let fetchResult: String
     let notificationDecision: String
 }
 
-/// Polls TVMaze for watchlist changes and emits notifications when appropriate.
+/// Polls TVMaze for watchlist changes, updates persisted next-season status, and
+/// delivers local notifications when `StatusChangeDetector` says a change is
+/// worth alerting (PD-008 debounce / dedupe).
 ///
-/// Remains `@MainActor` because `WatchlistRepository` is MainActor-bound for SwiftData;
-/// network work still runs off the actor while awaiting `TVMazeService`.
+/// Pipeline for each refresh:
+/// 1. Load tracked shows from the repository.
+/// 2. Unless `force`, ask TVMaze which show IDs changed since the oldest check
+///    (`/updates/shows`), then skip shows that neither changed on the server nor
+///    need a calendar/status recheck.
+/// 3. For each show that needs work: fetch full detail, recompute
+///    `NextSeasonStatus`, run `StatusChangeDetector.evaluate`, persist, and
+///    optionally deliver a notification.
+///
+/// Remains `@MainActor` because `WatchlistRepository` is MainActor-bound for
+/// SwiftData; network work still runs off the actor while awaiting `TVMazeService`.
 @MainActor
 final class WatchlistRefreshService {
     private let tvMaze: any TVMazeService
@@ -22,7 +34,10 @@ final class WatchlistRefreshService {
     private let notifications: any NotificationDelivering
     private let analytics: any AnalyticsTracking
     private let diagnostics: BetaRefreshDiagnostics?
-    private let now: @Sendable () -> Date
+    /// Injectable time source so tests (and diagnostics) can pin the calendar used
+    /// for status / policy decisions; production uses `{ .now }`.
+    private let clock: @Sendable () -> Date
+    /// Last time `refreshAllIfNeeded` actually ran a refresh (foreground throttle).
     private var lastForegroundRefreshAt: Date?
 
     init(
@@ -31,21 +46,22 @@ final class WatchlistRefreshService {
         notifications: any NotificationDelivering,
         analytics: any AnalyticsTracking,
         diagnostics: BetaRefreshDiagnostics? = nil,
-        now: @escaping @Sendable () -> Date = { .now }
+        clock: @escaping @Sendable () -> Date = { .now }
     ) {
         self.tvMaze = tvMaze
         self.repository = repository
         self.notifications = notifications
         self.analytics = analytics
         self.diagnostics = diagnostics
-        self.now = now
+        self.clock = clock
     }
 
-    /// Foreground-only refresh that skips network work if a refresh ran recently.
+    /// Scene-active / foreground entry point: runs `refreshAll` only when
+    /// `RefreshPolicy` says enough time has passed since the last foreground run.
     func refreshAllIfNeeded() async {
         guard RefreshPolicy.shouldPerformForegroundRefresh(
             lastRefreshAt: lastForegroundRefreshAt,
-            now: now()
+            at: clock()
         ) else {
             AppDiagnosticsLogger.logger(for: .cache).notice("watchlist_refresh_skipped policy")
             return
@@ -53,15 +69,19 @@ final class WatchlistRefreshService {
 
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_foreground")
         await refreshAll(force: false)
-        lastForegroundRefreshAt = now()
+        lastForegroundRefreshAt = clock()
     }
 
+    /// Full watchlist refresh used by background tasks, pull-to-refresh, and
+    /// `refreshAllIfNeeded`.
+    ///
     /// - Parameter force: When true, re-fetches every tracked show instead of
     ///   consulting TVMaze's updates map.
     /// - Parameter deliverNotifications: When false, status is still updated and
     ///   dedupe signatures recorded, but no local notification is scheduled.
     ///   Use for interactive pull-to-refresh where the user can see the list.
     /// - Parameter recordDiagnostics: When true, writes a beta diagnostics sample.
+    /// - Returns: A summary of what happened, or `nil` if the run was cancelled.
     @discardableResult
     func refreshAll(
         force: Bool = false,
@@ -72,6 +92,7 @@ final class WatchlistRefreshService {
             .notice("watchlist_refresh_start force=\(force, privacy: .public) notify=\(deliverNotifications, privacy: .public)")
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_start")
         var fetchResult = "Completed"
+        // Last per-show notification decision string wins for the outcome summary.
         var lastNotificationDecision = "No notification (no meaningful change)"
         var refreshedShowCount = 0
         var skippedShowCount = 0
@@ -111,12 +132,15 @@ final class WatchlistRefreshService {
             return outcome
         }
 
+        // Map of showID → TVMaze "updated" timestamp. Empty when forcing a full pass.
         let updates: [Int: Date]
         if force {
             updates = [:]
         } else {
-            let oldestCheck = trackedShows.map(\.lastCheckedAt).min() ?? now()
-            let period = TVMazeUpdatePeriod.covering(since: oldestCheck, now: now())
+            // Grow the updates window with the largest polling gap so a delayed
+            // background run still sees every change since we last checked.
+            let oldestCheck = trackedShows.map(\.lastCheckedAt).min() ?? clock()
+            let period = TVMazeUpdatePeriod.covering(since: oldestCheck, at: clock())
             do {
                 updates = try await tvMaze.updatedShows(since: period)
             } catch {
@@ -157,8 +181,9 @@ final class WatchlistRefreshService {
                 tracked.status = show.status
                 tracked.sourceUpdatedAt = show.updatedAt
 
-                let newStatus = NextSeasonCalculator.status(for: show, now: now())
-                let evaluation = StatusChangeDetector.evaluate(tracked: tracked, newStatus: newStatus, now: now())
+                // Pure status + notify decision; persistence and delivery follow.
+                let newStatus = NextSeasonCalculator.status(for: show, at: clock())
+                let evaluation = StatusChangeDetector.evaluate(tracked: tracked, newStatus: newStatus, at: clock())
 
                 try await repository.updateAfterRefresh(evaluation.tracked)
                 refreshedShowCount += 1
@@ -174,12 +199,14 @@ final class WatchlistRefreshService {
                 AppDiagnosticsLogger.logTaskCancel("watchlist_refresh_show")
                 return nil
             } catch TVMazeError.notFound {
+                // Show removed from TVMaze: keep the row but flag it stale.
                 tracked.isStale = true
-                tracked.lastCheckedAt = now()
+                tracked.lastCheckedAt = clock()
                 try? await repository.updateAfterRefresh(tracked)
                 refreshedShowCount += 1
                 lastNotificationDecision = "Marked stale: \(tracked.name) not found on TVMaze"
             } catch {
+                // Per-show failure: leave this row alone and continue the rest.
                 analytics.trackNonFatalError(error, context: "watchlist_refresh_show")
                 continue
             }
@@ -218,12 +245,13 @@ final class WatchlistRefreshService {
     ) {
         guard recordDiagnostics else { return }
         diagnostics?.recordBackgroundRefreshCompleted(
-            at: now(),
+            at: clock(),
             fetchResult: fetchResult,
             notificationDecision: notificationDecision
         )
     }
 
+    /// Turns an evaluation into the short string shown in diagnostics outcomes.
     private static func describeNotificationDecision(
         for showName: String,
         evaluation: StatusChangeDetector.Evaluation,

@@ -87,7 +87,7 @@ struct WatchlistRefreshServiceTests {
             repository: repository,
             tvMaze: tvMaze,
             notifications: notifications,
-            now: { fixedNow }
+            clock: { fixedNow }
         )
     }
 
@@ -95,14 +95,14 @@ struct WatchlistRefreshServiceTests {
         repository: InMemoryWatchlistRepository,
         tvMaze: MockTVMazeService,
         notifications: RecordingNotificationService,
-        now: @escaping @Sendable () -> Date
+        clock: @escaping @Sendable () -> Date
     ) -> WatchlistRefreshService {
         WatchlistRefreshService(
             tvMaze: tvMaze,
             repository: repository,
             notifications: notifications,
             analytics: RecordingAnalyticsService(),
-            now: now
+            clock: clock
         )
     }
 
@@ -205,7 +205,7 @@ struct WatchlistRefreshServiceTests {
             repository: repository,
             tvMaze: tvMaze,
             notifications: notifications,
-            now: { airingNow }
+            clock: { airingNow }
         )
 
         // Simulate a search-track snapshot: Running, but nextSeason was computed
@@ -279,7 +279,7 @@ struct WatchlistRefreshServiceTests {
             repository: repository,
             tvMaze: tvMaze,
             notifications: notifications,
-            now: { airingNow }
+            clock: { airingNow }
         )
 
         let searchStub = Show(
@@ -431,7 +431,7 @@ struct WatchlistRefreshServiceTests {
             repository: repository,
             tvMaze: tvMaze,
             notifications: notifications,
-            now: { nowBox.date }
+            clock: { nowBox.date }
         )
 
         try await repository.add(show())

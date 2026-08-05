@@ -57,6 +57,8 @@ final class AppNavigationCoordinator {
     private var pendingWatchlistDetailAnimated = false
 
     /// Whether the queued navigation (`pendingShowID`) originated from an in-app tap.
+    /// Applied when resolving to Search immediately and copied into
+    /// `pendingWatchlistDetailAnimated` when the Watchlist push is deferred.
     private var pendingNavigationAnimated = false
 
     /// Guards the one-time cold-launch tab decision so foreground returns keep the
@@ -135,16 +137,27 @@ final class AppNavigationCoordinator {
         }
     }
 
+    /// Turns a queued notification deep link (`pendingShowID`) into tab + detail
+    /// navigation. Called from `ContentView` after attach and whenever a new
+    /// `pendingShowID` arrives while the app is already running.
+    ///
+    /// Prefer Watchlist when the show is still tracked (deferred push so the
+    /// tab's `NavigationStack` is mounted). Otherwise fall back to Search and
+    /// push immediately, honoring `pendingNavigationAnimated` for launch vs
+    /// in-app taps.
     func resolvePendingNavigation(
         repository: any WatchlistRepository,
         tvMaze: any TVMazeService,
         analytics: any AnalyticsTracking
     ) async {
         guard let showID = pendingShowID else { return }
+        // Consume the queue up front so a concurrent resolve cannot process twice.
         pendingShowID = nil
 
         do {
             if let tracked = try await repository.trackedShow(showID: showID) {
+                // Defer the path append until WatchlistView appears — pushing in
+                // the same update as the tab switch can drop the navigation.
                 selectedTab = .watchlist
                 pendingWatchlistDetail = tracked
                 pendingWatchlistDetailAnimated = pendingNavigationAnimated
@@ -154,13 +167,25 @@ final class AppNavigationCoordinator {
         } catch is CancellationError {
             return
         } catch {
+            // Lookup failed; try the Search/TVMaze path below rather than giving up.
             analytics.trackNonFatalError(error, context: "notification_navigation_watchlist_lookup")
         }
 
+        // Not on the watchlist (or watchlist lookup failed): open via Search.
         do {
             let show = try await tvMaze.show(id: showID)
             selectedTab = .search
-            searchPath.append(show)
+            if pendingNavigationAnimated {
+                searchPath.append(show)
+            } else {
+                // Launch / foreground tap: land on detail without a slide-in.
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    searchPath = NavigationPath()
+                    searchPath.append(show)
+                }
+            }
             analytics.track(.appOpenedFromNotification(showID: showID))
         } catch is CancellationError {
             return

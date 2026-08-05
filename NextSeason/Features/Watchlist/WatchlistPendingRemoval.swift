@@ -1,5 +1,5 @@
 //
-//  WatchlistUndoRemoval.swift
+//  WatchlistPendingRemoval.swift
 //  NextSeason
 //
 
@@ -9,7 +9,7 @@ import Foundation
 /// watchlist list, show detail, and search flows.
 @Observable
 @MainActor
-final class WatchlistUndoRemoval {
+final class WatchlistPendingRemoval {
     private(set) var pendingRemoval: TrackedShow?
     private(set) var toastAnchor: CGRect?
     /// Set when deferred persistence fails after the undo window ends.
@@ -53,6 +53,8 @@ final class WatchlistUndoRemoval {
         AppDiagnosticsLogger.logTaskCancel("undo_removal_timer")
         removalErrorMessage = nil
 
+        // Only one undo window at a time: commit the previous show immediately
+        // so its removal is not lost when the user untracks another.
         if let pending = pendingRemoval, pending.id != tracked.id {
             let previous = pending
             let previousSource = pendingRemovalSource ?? .watchlist
@@ -84,6 +86,8 @@ final class WatchlistUndoRemoval {
         return tracked
     }
 
+    /// Forces any in-flight undoable removal to persist now (e.g. before refresh
+    /// or leaving a screen where the toast would otherwise outlive the context).
     func commitPendingRemovalIfNeeded(onCommitted: (() -> Void)? = nil) async {
         await commitPendingRemoval(cancelTimer: true, onCommitted: onCommitted)
     }

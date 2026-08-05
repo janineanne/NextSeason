@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// Confirmation toast shown after removing a show from the watchlist.
+/// Confirmation toast shown after removing a show from the watchlist (Undo / OK).
 struct UndoToast: View {
     let message: String
     let undoAction: () -> Void
@@ -77,6 +77,8 @@ extension View {
     }
 }
 
+/// Presents the undo toast either bottom-centered (VoiceOver) or position-anchored
+/// near the track button that started the removal (sighted layout).
 private struct WatchlistUndoToastModifier: ViewModifier {
     let isPresented: Bool
     let anchor: CGRect?
@@ -90,6 +92,8 @@ private struct WatchlistUndoToastModifier: ViewModifier {
         content
             .overlay {
                 if isPresented {
+                    // VoiceOver: fixed bottom placement is more reliable than
+                    // GeometryReader + `.position` near a disappearing row.
                     if isVoiceOverRunning {
                         voiceOverToast
                     } else {
@@ -163,6 +167,11 @@ private struct WatchlistUndoToastModifier: ViewModifier {
     }
 }
 
+/// Centers the toast under (or above) `anchor` in the overlay's local coordinates.
+///
+/// Converts the button's global frame into the `GeometryReader`'s space, prefers
+/// placement below the button when there is room, otherwise flips above, and
+/// clamps X so a ~320pt-wide toast stays inset from the edges.
 private func toastPosition(
     in proxy: GeometryProxy,
     containerFrame: CGRect,
@@ -176,17 +185,20 @@ private func toastPosition(
         return CGPoint(x: proxy.size.width / 2, y: proxy.size.height - toastHeightEstimate)
     }
 
+    // Global → local: subtract the overlay container's global origin.
     let localMidX = anchor.midX - containerFrame.minX
     let belowY = anchor.maxY + spacing + toastHeightEstimate / 2 - containerFrame.minY
     let aboveY = anchor.minY - spacing - toastHeightEstimate / 2 - containerFrame.minY
 
     let y: CGFloat
+    // Prefer below the button; flip above when the toast would clip the bottom.
     if belowY + toastHeightEstimate / 2 <= proxy.size.height - 8 {
         y = belowY
     } else {
         y = max(toastHeightEstimate / 2 + 8, aboveY)
     }
 
+    // Keep the toast's horizontal center within [176, width-176] for a 320pt max width.
     let clampedX = min(
         max(localMidX, 16 + 160),
         proxy.size.width - 16 - 160

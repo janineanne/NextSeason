@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Reserved show identity for beta-only simulated update scenarios.
+/// Reserved show identity helpers for beta-only simulated update scenarios.
 /// Never written to the real watchlist repository.
 nonisolated enum DiagnosticsSimulatedData {
     static let showID = 777_777
@@ -21,7 +21,8 @@ nonisolated enum DiagnosticsSimulatedData {
         )
     }
 
-    /// Seeds the simulated pipeline with a watchlist show reset to an undated state.
+    /// Seeds the simulated pipeline with a watchlist show reset to an undated state
+    /// so the next "updated" fetch can produce a meaningful status change.
     static func pipelineSeed(from tracked: TrackedShow, at date: Date) -> TrackedShow {
         TrackedShow(
             id: tracked.id,
@@ -38,9 +39,14 @@ nonisolated enum DiagnosticsSimulatedData {
     }
 }
 
-/// Fake TVMaze data for beta validation. Returns baseline season data on the first
-/// fetch, then a newer dated season on the second fetch.
+/// Fake `TVMazeService` for beta validation: a two-phase machine that returns
+/// baseline (undated next season) data first, then updated (dated) season data.
+///
+/// Phase mutations are guarded by `NSLock` because refresh may call into this
+/// provider off the main actor while the diagnostics runner advances phase on
+/// the main actor (`@unchecked Sendable` + lock, not actor isolation).
 final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable {
+    /// Which fake payload `show(id:)` should return until the runner advances.
     enum Phase: Sendable {
         case baseline
         case updated
@@ -51,16 +57,16 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
 
     private let lock = NSLock()
     private nonisolated(unsafe) var phase: Phase = .baseline
-    private let now: @Sendable () -> Date
+    private let clock: @Sendable () -> Date
 
     init(
         showID: Int = DiagnosticsSimulatedData.showID,
         showName: String = DiagnosticsSimulatedData.showName,
-        now: @escaping @Sendable () -> Date = { .now }
+        clock: @escaping @Sendable () -> Date = { .now }
     ) {
         self.showID = showID
         self.showName = showName
-        self.now = now
+        self.clock = clock
     }
 
     var currentPhase: Phase {
@@ -90,6 +96,7 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
         lock.unlock()
     }
 
+    /// Flips baseline ↔ updated after each simulated refresh step.
     func advanceAfterRun() {
         lock.lock()
         phase = phase == .baseline ? .updated : .baseline
@@ -105,12 +112,14 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
         return makeShow(for: currentPhase)
     }
 
+    /// Always marks the simulated show as changed so refresh policy never skips it
+    /// when `force` is false — simulations must re-fetch every run.
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
-        [showID: now()]
+        [showID: clock()]
     }
 
     private func makeShow(for phase: Phase) -> Show {
-        let referenceDate = now()
+        let referenceDate = clock()
         let airedSeasons = [
             Season(
                 id: 1,
