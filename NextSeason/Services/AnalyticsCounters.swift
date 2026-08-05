@@ -6,7 +6,8 @@
 import Foundation
 
 /// Aggregate usage counts persisted locally for beta diagnostics. No search text,
-/// show titles, or other user content is stored.
+/// show titles, or other user content is stored — only tallies of `AnalyticsEvent`s
+/// that `record(_:)` chooses to increment (many catalog events are intentionally ignored).
 struct AnalyticsCounters: Codable, Equatable, Sendable {
     var appLaunches = 0
     var searchesPerformed = 0
@@ -22,6 +23,14 @@ struct AnalyticsCounters: Codable, Equatable, Sendable {
 }
 
 extension AnalyticsCounters {
+    /// Increments the counters that back the Diagnostics "Usage" section.
+    ///
+    /// Mapped events: `appLaunched`, `searchPerformed` (+ `successfulSearches` when
+    /// `resultCount > 0`), `emptySearchResultsShown` → `noResultSearches`,
+    /// `exampleSearchUsed`, `showDetailViewed`, watchlist add/remove, notification
+    /// permission (+ grants), `notificationReminderScheduled`.
+    /// Navigation / error events (`searchResultOpened`, taps, `nonFatalError`, etc.)
+    /// are tracked for logging but do not bump these aggregates.
     mutating func record(_ event: AnalyticsEvent) {
         switch event {
         case .appLaunched:
@@ -56,7 +65,10 @@ extension AnalyticsCounters {
     }
 }
 
+/// Loads and saves `AnalyticsCounters` under UserDefaults key `analyticsCounters`.
+/// Survives launches so Diagnostics / shareable reports show cumulative beta usage.
 final class AnalyticsCountersStore {
+    /// UserDefaults key for the JSON-encoded `AnalyticsCounters` blob.
     private static let storageKey = "analyticsCounters"
 
     private(set) var counters: AnalyticsCounters

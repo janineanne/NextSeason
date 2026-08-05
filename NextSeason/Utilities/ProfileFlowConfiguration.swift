@@ -22,12 +22,17 @@ enum ProfileFlowConfiguration {
     enum Flow: String, CaseIterable {
         /// Populates the watchlist on device before a `launch-with-data` profile (setup only).
         case seedWatchlist
+        /// Search for a known show (happy path).
         case search
         /// Search query that should return no TVMaze matches (empty-state path).
         case searchEmpty
+        /// Open show detail from search results.
         case showDetails
+        /// Navigate to the watchlist tab.
         case viewWishlist
+        /// Add a show from search / detail.
         case addToWishlist
+        /// Remove a tracked show from the watchlist.
         case removeFromWishlist
         /// Search → detail → back, repeated (stress).
         case stressSearchDetailsBack
@@ -38,6 +43,7 @@ enum ProfileFlowConfiguration {
         /// Cold launch with populated watchlist; script runs multiple times.
         case launchWithData
 
+        /// Setup flows run once to prepare data; they are not timed as the profile under test.
         var isSetupOnly: Bool { self == .seedWatchlist }
 
         var isStress: Bool {
@@ -67,6 +73,7 @@ enum ProfileFlowConfiguration {
         static let emptyResults = "zzzzxnoresultsnexseasonprofile999"
     }
 
+    /// Active profiling flow from `PROFILE_FLOW` env (preferred) or `-ProfileFlow <name>`.
     static var activeFlow: Flow? {
         if let env = ProcessInfo.processInfo.environment["PROFILE_FLOW"],
            let flow = Flow(rawValue: env)

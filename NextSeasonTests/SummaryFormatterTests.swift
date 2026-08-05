@@ -103,14 +103,16 @@ struct SummaryFormatterTests {
 
     @Test("Empty HTML yields no displayable content")
     func emptyHTML() {
+        #expect(SummaryFormatter.attributedSummary(from: "") == nil)
+        #expect(SummaryFormatter.attributedSummary(from: nil as String?) == nil)
         #expect(SummaryFormatter.hasDisplayableContent("") == false)
-        #expect(String(SummaryFormatter.attributedString(from: "").characters).isEmpty)
     }
 
     @Test("Whitespace-only HTML yields no displayable content")
     func whitespaceOnlyHTML() {
+        #expect(SummaryFormatter.attributedSummary(from: "<p>   </p>") == nil)
+        #expect(SummaryFormatter.attributedSummary(from: "  \n\t  ") == nil)
         #expect(SummaryFormatter.hasDisplayableContent("<p>   </p>") == false)
         #expect(SummaryFormatter.hasDisplayableContent("  \n\t  ") == false)
-        #expect(String(SummaryFormatter.attributedString(from: "<p>   </p>").characters).isEmpty)
     }
 }

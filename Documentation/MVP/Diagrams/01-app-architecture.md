@@ -39,7 +39,7 @@ flowchart TB
     TVMazeClient --> TVMazeAPI[TVMaze API]
 
     Root --> ThemeSwitcher[ThemeSwitcherButton]
-    Root --> UndoToast[WatchlistUndoRemoval Toast]
+    Root --> UndoToast[WatchlistPendingRemoval Toast]
     UndoToast --> Repo
 
     App --> RefreshScheduler[RefreshScheduler]

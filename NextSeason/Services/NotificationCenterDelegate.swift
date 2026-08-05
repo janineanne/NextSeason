@@ -17,18 +17,19 @@ enum NotificationRouting {
 
     static func setCoordinator(_ coordinator: AppNavigationCoordinator) {
         self.coordinator = coordinator
-        flushBufferedNavigation()
+        deliverBufferedNavigation()
     }
 
     static func setAnalytics(_ analytics: any AnalyticsTracking) {
         self.analytics = analytics
     }
 
-    static func install(center: UNUserNotificationCenter = .current()) {
+    static func installDelegate(center: UNUserNotificationCenter = .current()) {
         center.delegate = NotificationCenterDelegate.shared
-        flushBufferedNavigation()
     }
 
+	/// If the coordinator has been set, queue the show from the notification tap.  If it has not, buffer
+	/// (save) it for processing later.
     /// - Parameter animated: `true` when the app was already foreground-active at the
     ///   time of the tap (in-app navigation), `false` for a launch/foreground tap.
     static func routeToShow(showID: Int, animated: Bool) {
@@ -41,7 +42,8 @@ enum NotificationRouting {
         }
     }
 
-    private static func flushBufferedNavigation() {
+	/// Queue the buffered (saved) show information from the notification tap
+    private static func deliverBufferedNavigation() {
         guard let showID = bufferedShowID, let coordinator else { return }
         bufferedShowID = nil
         coordinator.queueShowNavigation(showID: showID, animated: bufferedAnimated)
@@ -63,6 +65,8 @@ enum NotificationRouting {
     #endif
 }
 
+/// `UNUserNotificationCenter` delegate that presents banners while foregrounded
+/// and routes taps through `NotificationRouting`.
 final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationCenterDelegate()
 

@@ -5,6 +5,16 @@
 
 import Foundation
 
+/// Debounced TVMaze title search for `SearchView`.
+///
+/// Intended to be driven by `.task(id: query)`: each keystroke cancels the prior
+/// task, and `search()` sleeps for `debounce` before hitting the network — so
+/// rapid typing only fetches the final query.
+///
+/// `displayedQuery` is the trimmed query that produced the current `.results` or
+/// `.empty` outcome. When `.task` re-runs with the same text (e.g. returning from
+/// show detail), `search()` skips the loading flash and keeps that outcome.
+/// Failures clear `displayedQuery` so a retry is not short-circuited.
 @Observable
 @MainActor
 final class SearchViewModel {
@@ -22,7 +32,8 @@ final class SearchViewModel {
     private let service: any TVMazeService
     private let analytics: any AnalyticsTracking
     private let debounce: Duration
-    /// Query that produced the current `.results` or `.empty` state.
+    /// Trimmed query that produced the current `.results` or `.empty` state; `nil`
+    /// while idle, loading, or after a failed search.
     private var displayedQuery: String?
 
     init(

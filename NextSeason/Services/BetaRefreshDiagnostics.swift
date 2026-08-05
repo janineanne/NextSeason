@@ -5,8 +5,12 @@
 
 import Foundation
 
-/// Refresh and notification diagnostics for beta validation.
-/// Background refresh outcomes persist across launches via UserDefaults.
+/// In-memory (and partially persisted) samples of refresh / notification outcomes
+/// for beta validation UI and shareable diagnostics reports.
+///
+/// Background refresh timestamps and decision strings persist across launches via
+/// UserDefaults so Testers can open Diagnostics after a BGAppRefresh and still see
+/// what happened. Foreground samples and simulation summaries stay session-scoped.
 /// All mutating APIs no-op when `BetaBuildConfiguration.isAvailable` is false.
 @MainActor
 @Observable
@@ -98,6 +102,7 @@ final class BetaRefreshDiagnostics {
         fetchResult: String,
         notificationDecision: String
     ) {
+        // UI tests share the host app's defaults; skip so runs stay isolated.
         guard !UITestingConfiguration.isEnabled else { return }
         let defaults = UserDefaults.standard
         defaults.set(date, forKey: lastBackgroundRefreshAtDefaultsKey)

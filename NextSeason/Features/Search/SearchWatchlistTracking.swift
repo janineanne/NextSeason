@@ -5,22 +5,47 @@
 
 import Foundation
 
-/// Tracks which search results are on the watchlist and handles row-level add/remove.
+/// Search-tab star state: which result IDs are effectively tracked, and row taps.
+///
+/// Uses `WatchlistTrackingState` so a show pending undo-removal appears
+/// untracked (filled star off) even though it is still in the repository.
+/// Add/remove goes through shared `WatchlistTracking.toggle` (same path as
+/// Show Detail). Local `trackedShowIDs` updates immediately so the star feels
+/// responsive without waiting for a full refresh.
 @Observable
 @MainActor
 final class SearchWatchlistTracking {
+    /// Bundled dependencies for search-row watchlist add/remove actions.
+    ///
+    /// Built by `SearchView` and passed into track handling so row buttons can
+    /// persist changes, drive the notification prompt, and dismiss the first-run
+    /// results hint without threading each dependency through the list separately.
+    struct Context {
+        let repository: any WatchlistRepository
+        let tvMaze: any TVMazeService
+        let removalCoordinator: WatchlistPendingRemoval?
+        let notificationService: any NotificationManaging
+        let notificationPrompt: WatchlistNotificationPromptState
+        let analytics: any AnalyticsTracking
+        let onWatchlistChanged: () -> Void
+        let onSearchResultsHintDismissed: () -> Void
+    }
+
+    /// IDs shown as tracked on search rows (excludes pending removals).
     private(set) var trackedShowIDs: Set<Int> = []
+    /// IDs with an in-flight add (prevents double-tap while fetching full show data).
     private(set) var updatingShowIDs: Set<Int> = []
 
+    /// Reloads star state from persistence, excluding any pending removal.
     func refresh(
         repository: any WatchlistRepository,
-        excludingPendingRemovalFrom undoRemoval: WatchlistUndoRemoval?,
+        excludingPendingRemovalFrom removalCoordinator: WatchlistPendingRemoval?,
         analytics: any AnalyticsTracking
     ) async {
         do {
-            trackedShowIDs = try await WatchlistEffectiveTracking.trackedIDs(
+            trackedShowIDs = try await WatchlistTrackingState.trackedIDs(
                 repository: repository,
-                undoRemoval: undoRemoval
+                removalCoordinator: removalCoordinator
             )
         } catch is CancellationError {
             return
@@ -29,15 +54,16 @@ final class SearchWatchlistTracking {
         }
     }
 
+    /// Handles a search-row track / untrack tap.
     func handleTrackButton(
         for show: Show,
         anchor: CGRect,
-        context: SearchWatchlistTrackingContext
+        context: Context
     ) async {
         guard !updatingShowIDs.contains(show.id) else { return }
 
         let isTracked = trackedShowIDs.contains(show.id)
-        let isPendingRemoval = context.undoRemoval?.pendingRemoval?.id == show.id
+        let isPendingRemoval = context.removalCoordinator?.pendingRemoval?.id == show.id
         // Only the add path needs an in-flight lock; untrack/undo update local
         // star state immediately. Capture before await so defer still clears.
         let shouldLockForAdd = !isTracked && !isPendingRemoval
@@ -59,7 +85,7 @@ final class SearchWatchlistTracking {
                 source: .search,
                 repository: context.repository,
                 tvMaze: context.tvMaze,
-                undoRemoval: context.undoRemoval,
+                removalCoordinator: context.removalCoordinator,
                 analytics: context.analytics,
                 notifications: context.notificationService,
                 prompt: context.notificationPrompt,
@@ -70,7 +96,7 @@ final class SearchWatchlistTracking {
                 // Repo/UI mismatch (e.g. show already gone) — reconcile stars.
                 await refresh(
                     repository: context.repository,
-                    excludingPendingRemovalFrom: context.undoRemoval,
+                    excludingPendingRemovalFrom: context.removalCoordinator,
                     analytics: context.analytics
                 )
             default:
@@ -83,18 +109,20 @@ final class SearchWatchlistTracking {
                 ? "search_watchlist_tracking_lookup"
                 : "watchlist_add_search"
             context.analytics.trackNonFatalError(error, context: errorContext)
+            // Reconcile with persistence after a failed toggle.
             await refresh(
                 repository: context.repository,
-                excludingPendingRemovalFrom: context.undoRemoval,
+                excludingPendingRemovalFrom: context.removalCoordinator,
                 analytics: context.analytics
             )
         }
     }
 
+    /// Applies a successful toggle to the local star set (and related UI hooks).
     private func apply(
         _ outcome: WatchlistTracking.ToggleOutcome,
         for showID: Int,
-        context: SearchWatchlistTrackingContext
+        context: Context
     ) {
         switch outcome {
         case .undidPendingRemoval:

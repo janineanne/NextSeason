@@ -6,13 +6,14 @@
 import SwiftData
 import SwiftUI
 
-/// Builds long-lived app services and persistence so `NextSeasonApp` stays readable.
+/// Extracted from `NextSeasonApp` to handle the building of long-lived app services and persistence so
+/// `NextSeasonApp` stays readable.
 @MainActor
 struct AppCompositionRoot {
     let modelContainer: ModelContainer
     let watchlistRepository: any WatchlistRepository
     let refreshService: WatchlistRefreshService
-    let watchlistUndoRemoval: WatchlistUndoRemoval
+    let watchlistPendingRemoval: WatchlistPendingRemoval
     let analyticsService: AnalyticsService
     let notificationService: NotificationService
     let betaRefreshDiagnostics: BetaRefreshDiagnostics
@@ -26,6 +27,8 @@ struct AppCompositionRoot {
 
         let repository: any WatchlistRepository
         if UITestingConfiguration.isEnabled {
+            // XCUITest: in-memory store + repository so runs stay isolated and don't
+            // touch the developer's on-device watchlist.
             let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
             modelContainer = try ModelContainer(
                 for: TrackedShowEntity.self,
@@ -46,7 +49,7 @@ struct AppCompositionRoot {
             analytics: analyticsService,
             diagnostics: betaRefreshDiagnostics
         )
-        watchlistUndoRemoval = WatchlistUndoRemoval(
+        watchlistPendingRemoval = WatchlistPendingRemoval(
             repository: repository,
             analytics: analyticsService
         )
@@ -55,18 +58,20 @@ struct AppCompositionRoot {
     func configureNonUITestRuntime() {
         AppDiagnosticsLogger.recordAppLaunch()
         MetricKitDiagnosticsSubscriber.installIfNeeded()
-
-        // The tap coordinator is attached from the view layer (see ContentView) so
-        // routing always targets the exact AppNavigationCoordinator instance SwiftUI
-        // observes. Installing the delegate here lets a launch-from-notification tap
-        // buffer until the coordinator attaches.
+		
+		// The coordinator that handles notification taps is attached from the view
+		// layer (see ContentView). NotificationRouting is set up here and is able to
+		// handle taps before ContentView is able to set the coordinator. Installing
+		// the delegate here lets a launch-from-notification tap buffer until the
+		// coordinator attaches.
         NotificationRouting.setAnalytics(analyticsService)
-        NotificationRouting.install()
+        NotificationRouting.installDelegate()
 
         configureBackgroundRefresh()
         analyticsService.track(.appLaunched)
     }
 
+	// registers the ~12h background watchlist refresh task (aka background refresh)
     private func configureBackgroundRefresh() {
         RefreshScheduler.registerBackgroundTask()
         let refreshServiceForBackground = refreshService

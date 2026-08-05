@@ -5,6 +5,8 @@
 
 import Foundation
 
+/// Loads full show details from TVMaze and drives track/untrack through shared
+/// watchlist helpers so the star matches search and the watchlist list.
 @Observable
 @MainActor
 final class ShowDetailViewModel {
@@ -64,10 +66,10 @@ final class ShowDetailViewModel {
     /// Loads full show details (seasons + next episode) and tracked status.
     /// Tracked status is fetched in parallel with the network request so the
     /// toolbar reflects search-row changes without waiting on TVMaze.
-    func load(undoRemoval: WatchlistUndoRemoval?) async {
+    func load(removalCoordinator: WatchlistPendingRemoval?) async {
         loadState = .loading
         AppDiagnosticsLogger.breadcrumb("show_detail_load:\(initialShow.id)")
-        async let trackedRefresh: Void = refreshTrackedState(undoRemoval: undoRemoval)
+        async let trackedRefresh: Void = refreshTrackedState(removalCoordinator: removalCoordinator)
 
         do {
             fullShow = try await service.show(id: initialShow.id)
@@ -91,13 +93,13 @@ final class ShowDetailViewModel {
     /// removal) so the Track control matches search and other surfaces when this
     /// screen reappears. Skipped mid-toggle to avoid clobbering an in-flight
     /// optimistic update.
-    func refreshTrackedState(undoRemoval: WatchlistUndoRemoval?) async {
+    func refreshTrackedState(removalCoordinator: WatchlistPendingRemoval?) async {
         guard !isUpdatingWatchlist else { return }
         do {
-            isTracked = try await WatchlistEffectiveTracking.isTracked(
+            isTracked = try await WatchlistTrackingState.isTracked(
                 showID: initialShow.id,
                 repository: repository,
-                undoRemoval: undoRemoval
+                removalCoordinator: removalCoordinator
             )
         } catch is CancellationError {
             return
@@ -113,14 +115,16 @@ final class ShowDetailViewModel {
     /// Shared track/untrack orchestration; local star state updates from the outcome.
     func handleTrackButton(
         anchor: CGRect,
-        undoRemoval: WatchlistUndoRemoval?,
+        removalCoordinator: WatchlistPendingRemoval?,
         onWatchlistChanged: @escaping () -> Void
     ) async {
         guard !isUpdatingWatchlist else { return }
 
         let show = fullShow ?? initialShow
         let wasTracked = isTracked
-        let isPendingRemoval = undoRemoval?.pendingRemoval?.id == show.id
+        let isPendingRemoval = removalCoordinator?.pendingRemoval?.id == show.id
+        // Lock only during add. Undoable removal stays tappable so the user can
+        // undo while the toast window is open.
         let shouldLockForAdd = !wasTracked && !isPendingRemoval
         watchlistActionErrorMessage = nil
 
@@ -141,7 +145,7 @@ final class ShowDetailViewModel {
                 source: .detail,
                 repository: repository,
                 tvMaze: service,
-                undoRemoval: undoRemoval,
+                removalCoordinator: removalCoordinator,
                 analytics: analytics,
                 notifications: notifications,
                 prompt: notificationPrompt,
@@ -149,7 +153,7 @@ final class ShowDetailViewModel {
             )
             switch outcome {
             case .undidPendingRemoval:
-                await refreshTrackedState(undoRemoval: undoRemoval)
+                await refreshTrackedState(removalCoordinator: removalCoordinator)
             case .removalRequested:
                 isTracked = false
             case .added:
@@ -157,7 +161,7 @@ final class ShowDetailViewModel {
                 onWatchlistChanged()
             case .ignored:
                 // Repo/UI mismatch (e.g. show already gone) — reconcile the star.
-                await refreshTrackedState(undoRemoval: undoRemoval)
+                await refreshTrackedState(removalCoordinator: removalCoordinator)
             }
         } catch is CancellationError {
             return
@@ -175,7 +179,7 @@ final class ShowDetailViewModel {
                 isTracked = wasTracked
             } else {
                 // Removal/lookup failure: re-read persistence now that we are not locked.
-                await refreshTrackedState(undoRemoval: undoRemoval)
+                await refreshTrackedState(removalCoordinator: removalCoordinator)
             }
         }
     }

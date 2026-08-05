@@ -6,6 +6,9 @@
 import Foundation
 
 /// A show the user is monitoring for next-season changes. Stored on-device only.
+///
+/// Refresh, notification debounce, and SwiftData persistence all share this
+/// shape; signatures and timestamps below drive PD-008 change detection.
 nonisolated struct TrackedShow: Identifiable, Sendable, Hashable {
     let id: Int
     var name: String
@@ -14,8 +17,13 @@ nonisolated struct TrackedShow: Identifiable, Sendable, Hashable {
     var tvMazeURL: URL?
     var status: ShowStatus
     var nextSeason: NextSeasonStatus
+    /// TVMaze's `updated` timestamp for this show; used to skip re-fetch when
+    /// `/updates/shows` reports no newer change.
     var sourceUpdatedAt: Date
+    /// Last time we successfully refreshed this row (policy / diagnostics).
     var lastCheckedAt: Date
+    /// Signature of the last status we already notified about; suppresses repeat
+    /// alerts for the same change (`StatusChangeDetector`).
     var lastNotifiedSignature: String?
     /// When a non-date-backed change is first seen, holds its signature until a
     /// second poll confirms it (PD-008 debounce).
@@ -55,7 +63,7 @@ nonisolated struct TrackedShow: Identifiable, Sendable, Hashable {
     }
 
     /// Builds a tracked row from a fully-loaded show at save time.
-    init(from show: Show, now: Date = .now) {
+    init(from show: Show, at: Date = .now) {
         self.init(
             id: show.id,
             name: show.name,
@@ -63,10 +71,10 @@ nonisolated struct TrackedShow: Identifiable, Sendable, Hashable {
             summaryHTML: show.summaryHTML,
             tvMazeURL: show.tvMazeURL,
             status: show.status,
-            nextSeason: NextSeasonCalculator.status(for: show, now: now),
+            nextSeason: NextSeasonCalculator.status(for: show, at: at),
             sourceUpdatedAt: show.updatedAt,
-            lastCheckedAt: now,
-            dateAdded: now
+            lastCheckedAt: at,
+            dateAdded: at
         )
     }
 }

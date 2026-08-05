@@ -30,6 +30,7 @@ enum WatchlistSection: Int, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    /// Maps a stored next-season status onto the watchlist section that lists it.
     static func section(for status: NextSeasonStatus) -> WatchlistSection {
         switch status {
         case .airing:

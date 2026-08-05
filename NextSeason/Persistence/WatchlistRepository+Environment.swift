@@ -10,6 +10,7 @@ private struct WatchlistRepositoryKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
+    /// Local watchlist persistence; must be injected at the root (fatal if missing).
     @MainActor var watchlistRepository: any WatchlistRepository {
         get { self[WatchlistRepositoryKey.self] }
         set { self[WatchlistRepositoryKey.self] = newValue }

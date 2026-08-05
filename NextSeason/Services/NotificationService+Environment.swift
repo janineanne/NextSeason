@@ -11,6 +11,7 @@ private struct NotificationServiceKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
+    /// Notification authorization and delivery; must be injected at the root.
     @MainActor var notificationService: any NotificationManaging {
         get { self[NotificationServiceKey.self] }
         set { self[NotificationServiceKey.self] = newValue }

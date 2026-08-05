@@ -6,6 +6,8 @@
 import Foundation
 import SwiftUI
 
+/// Loads, filters, and sections the local watchlist, and keeps list animations
+/// in sync with undoable removals via `WatchlistPendingRemoval`.
 @Observable
 @MainActor
 final class WatchlistViewModel {
@@ -77,7 +79,7 @@ final class WatchlistViewModel {
 
     private let repository: any WatchlistRepository
     private let refreshService: WatchlistRefreshService?
-    private let removalCoordinator: WatchlistUndoRemoval
+    private let removalCoordinator: WatchlistPendingRemoval
     private let analytics: any AnalyticsTracking
 
     private var reloadGeneration = 0
@@ -85,12 +87,12 @@ final class WatchlistViewModel {
     init(
         repository: any WatchlistRepository,
         refreshService: WatchlistRefreshService? = nil,
-        undoRemoval: WatchlistUndoRemoval,
+        removalCoordinator: WatchlistPendingRemoval,
         analytics: any AnalyticsTracking
     ) {
         self.repository = repository
         self.refreshService = refreshService
-        self.removalCoordinator = undoRemoval
+        self.removalCoordinator = removalCoordinator
         self.analytics = analytics
     }
 
@@ -116,6 +118,7 @@ final class WatchlistViewModel {
         }
     }
 
+    /// Commits any pending removal, force-refreshes tracked shows, then reloads.
     func refreshFromNetwork() async {
         await removalCoordinator.commitPendingRemovalIfNeeded()
         // Pull-to-refresh is interactive — update rows silently; don't alert.
@@ -146,6 +149,8 @@ final class WatchlistViewModel {
         removalCoordinator.undoRemoval()
     }
 
+    /// Commits a pending removal and animates the row away when persistence
+    /// confirms it; otherwise reloads so the list matches the repository.
     func commitPendingRemovalIfNeeded(onCommitted: (() -> Void)? = nil) async {
         let removedID = removalCoordinator.pendingRemoval?.id
         await removalCoordinator.commitPendingRemovalIfNeeded(onCommitted: onCommitted)

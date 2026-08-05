@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// Lightweight HTML cleanup for TVMaze text fields (summaries and similar).
 extension String {
     /// Decodes the small set of HTML entities that appear in TVMaze text.
     nonisolated var decodingBasicHTMLEntities: String {

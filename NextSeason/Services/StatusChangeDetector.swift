@@ -62,15 +62,22 @@ nonisolated enum StatusChangeDetector {
         }
     }
 
-    static func evaluate(tracked: TrackedShow, newStatus: NextSeasonStatus, now: Date = .now) -> Evaluation {
+    /// Updates local next-season state and decides whether to notify (PD-008).
+    ///
+    /// Always returns a tracked show with `lastCheckedAt` and `nextSeason` applied.
+    /// A notification is included only when the delta is meaningful, not a duplicate
+    /// of `lastNotifiedSignature`, and either date-backed (notify immediately) or
+    /// confirmed across two consecutive polls (debounce soft changes).
+    static func evaluate(tracked: TrackedShow, newStatus: NextSeasonStatus, at: Date = .now) -> Evaluation {
         let previousStatus = tracked.nextSeason
         var updated = tracked
-        updated.lastCheckedAt = now
+        updated.lastCheckedAt = at
         updated.nextSeason = newStatus
 
         let changeSignature = signature(for: newStatus)
 
-        // Second poll: the snapshot already matches, but a pending change is confirming.
+        // Debounce confirmed: a prior poll stashed this soft change as pending, and
+        // this poll sees the same signature again — notify and clear pending.
         if tracked.pendingChangeSignature == changeSignature,
            changeSignature != tracked.lastNotifiedSignature {
             updated.lastNotifiedSignature = changeSignature
@@ -81,16 +88,19 @@ nonisolated enum StatusChangeDetector {
             )
         }
 
+        // Not a meaningful delta (or no change) — keep the UI current, no alert.
         guard isMeaningfulChange(from: previousStatus, to: newStatus) else {
             updated.pendingChangeSignature = nil
             return Evaluation(tracked: updated, notification: nil)
         }
 
+        // Already notified for this exact next-season state — do not re-alert.
         if changeSignature == tracked.lastNotifiedSignature {
             updated.pendingChangeSignature = nil
             return Evaluation(tracked: updated, notification: nil)
         }
 
+        // Date-backed (scheduled / airing): concrete enough to notify on first sight.
         if isDateBacked(newStatus) {
             updated.lastNotifiedSignature = changeSignature
             updated.pendingChangeSignature = nil
@@ -100,6 +110,7 @@ nonisolated enum StatusChangeDetector {
             )
         }
 
+        // Soft meaningful change: wait for a second consecutive poll before notifying.
         updated.pendingChangeSignature = changeSignature
         return Evaluation(tracked: updated, notification: nil)
     }

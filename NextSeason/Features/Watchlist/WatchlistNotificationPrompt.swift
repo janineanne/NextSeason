@@ -1,17 +1,23 @@
 //
-//  WatchlistNotificationPromptState.swift
+//  WatchlistNotificationPrompt.swift
 //  NextSeason
 //
 
 import SwiftUI
 
-/// Alert state for the post-track notification authorization flow.
+/// Alert flags for the post-track notification authorization flow (shared by
+/// Search and Show Detail via `watchlistNotificationPromptAlerts`).
+///
+/// After the user adds a show, callers set `shouldPromptForNotifications` when
+/// `NotificationService` says a prompt is still appropriate; "Not Now" defers
+/// via UserDefaults, and a denial surfaces the Settings reminder alert.
 @Observable
 @MainActor
 final class WatchlistNotificationPromptState {
     var shouldPromptForNotifications = false
     var shouldShowNotificationsDeniedAlert = false
 
+    /// Honors "Not Now" by recording deferral in `NotificationService`.
     func deferPrompt(using notificationService: any NotificationManaging) {
         notificationService.deferAuthorizationPrompt()
     }
@@ -20,6 +26,7 @@ final class WatchlistNotificationPromptState {
         shouldShowNotificationsDeniedAlert = true
     }
 
+    /// Requests system authorization; if still denied, shows the Settings reminder.
     func confirmPrompt(using notificationService: any NotificationManaging) async {
         await notificationService.requestAuthorizationIfNeeded()
         if await notificationService.isDenied() {

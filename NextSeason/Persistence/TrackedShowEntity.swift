@@ -6,8 +6,18 @@
 import Foundation
 import SwiftData
 
+/// SwiftData persistence model for a watchlist row.
+///
+/// Mirrors `TrackedShow` but stores types SwiftData handles natively:
+/// - `statusRaw` — TVMaze status string (`ShowStatus.persistenceRawValue`)
+/// - `nextSeasonSnapshot` — JSON-encoded `NextSeasonStatus` (associated values
+///   don’t map cleanly to SwiftData attributes)
+///
+/// Notification debounce fields (`lastNotifiedSignature`, `pendingChangeSignature`)
+/// persist across launches so PD-008 soft-change confirmation survives process death.
 @Model
 final class TrackedShowEntity {
+    /// TVMaze show ID; unique so a show can appear at most once on the watchlist.
     @Attribute(.unique) var tvMazeID: Int
     var name: String
     var posterMediumURL: URL?
@@ -38,6 +48,8 @@ final class TrackedShowEntity {
         self.dateAdded = tracked.dateAdded
     }
 
+    /// Updates mutable fields after a refresh. Does not change `tvMazeID` or
+    /// `dateAdded` (identity and “when the user saved this show”).
     func apply(_ tracked: TrackedShow) throws {
         name = tracked.name
         posterMediumURL = tracked.posterMediumURL

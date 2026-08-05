@@ -47,7 +47,6 @@ Do not use TVMaze's crowdsourced provider data.
 -   Filter/group by availability.
 -   Tailor notifications.
 
-
 ## AI-Assisted Show Insights
 
 Evaluate Apple’s on-device Foundation Models as the primary implementation for concise, privacy-preserving viewing insights.
@@ -107,6 +106,12 @@ Vision Pro is not currently planned.
 ## Identity & Accounts
 
 Introduce user accounts only if they become necessary to support Cloud Sync or backend monitoring.
+
+# Reliability and Error Handling
+
+## Audit and eliminate production-reachable fatalError calls
+
+Review every use of fatalError, preconditionFailure, and similar deliberate crash mechanisms. Replace any that could be reached because of malformed data, persistence problems, API responses, migration failures, or other runtime conditions with recoverable error handling, safe fallback behavior, and appropriate logging. Retain deliberate crashes only for genuinely impossible programmer errors, and document why each remaining use is safe.
 
 # Product Analytics
 

@@ -128,7 +128,7 @@ struct ShowDetailViewModelTests {
     func removalIgnoredReconcilesTrackedState() async {
         let repository = InMemoryWatchlistRepository()
         let analytics = RecordingAnalyticsService()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
         let viewModel = ShowDetailViewModel(
             show: sampleShow,
             service: StubTVMazeService(),
@@ -140,7 +140,7 @@ struct ShowDetailViewModelTests {
 
         await viewModel.handleTrackButton(
             anchor: .zero,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             onWatchlistChanged: {}
         )
 
@@ -152,7 +152,7 @@ struct ShowDetailViewModelTests {
     func removalLookupFailureReportsAndRefreshes() async {
         let repository = FailingTrackedShowLookupRepository()
         let analytics = RecordingAnalyticsService()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
         let viewModel = ShowDetailViewModel(
             show: sampleShow,
             service: StubTVMazeService(),
@@ -164,7 +164,7 @@ struct ShowDetailViewModelTests {
 
         await viewModel.handleTrackButton(
             anchor: .zero,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             onWatchlistChanged: {}
         )
 
@@ -184,7 +184,7 @@ struct ShowDetailViewModelTests {
     func removalLookupFailurePreservesStarWhenStillPersisted() async {
         let repository = FailingLookupStillPersistedRepository(showID: sampleShow.id)
         let analytics = RecordingAnalyticsService()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
         let viewModel = ShowDetailViewModel(
             show: sampleShow,
             service: StubTVMazeService(),
@@ -196,7 +196,7 @@ struct ShowDetailViewModelTests {
 
         await viewModel.handleTrackButton(
             anchor: .zero,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             onWatchlistChanged: {}
         )
 
@@ -225,12 +225,12 @@ struct ShowDetailViewModelTests {
             initialIsTracked: false
         )
 
-        await viewModel.load(undoRemoval: nil)
+        await viewModel.load(removalCoordinator: nil)
         #expect(viewModel.loadState == .loaded)
 
         await viewModel.handleTrackButton(
             anchor: .zero,
-            undoRemoval: nil,
+            removalCoordinator: nil,
             onWatchlistChanged: {}
         )
 

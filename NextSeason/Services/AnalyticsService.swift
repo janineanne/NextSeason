@@ -6,8 +6,11 @@
 import Foundation
 import os
 
-/// Anonymous product events for beta prioritization. Do not log search text,
-/// show titles, or other identifying content.
+/// Catalog of anonymous product events for beta prioritization and local diagnostics.
+///
+/// Privacy: parameters stay structural only (`show_id`, lengths, counts, result enums).
+/// Never attach search text, show titles, or other user-identifying content — the same
+/// rule applies to Console logs and to `AnalyticsCounters` persistence.
 enum AnalyticsEvent: Equatable, Sendable {
     case appLaunched
     case searchPerformed(queryLength: Int, resultCount: Int, durationMs: Int)
@@ -27,6 +30,7 @@ enum AnalyticsEvent: Equatable, Sendable {
     case nonFatalError(category: AnalyticsErrorCategory, context: String)
 }
 
+/// Where a watchlist add/remove originated (search row, detail, or watchlist itself).
 enum WatchlistActionSource: String, Sendable {
     case search
     case detail
@@ -38,6 +42,8 @@ enum NotificationPermissionResult: String, Sendable {
     case denied
 }
 
+/// Coarse buckets for non-fatal errors so beta triage can group failures without
+/// shipping full error text into analytics parameters.
 enum AnalyticsErrorCategory: String, Sendable {
     case api
     case decoding
@@ -45,6 +51,8 @@ enum AnalyticsErrorCategory: String, Sendable {
     case notification
     case persistence
 
+    /// Maps known `TVMazeError` cases to decoding/network; everything else (including
+    /// non-TVMaze errors) defaults to `.api` so unknown failures still get a category.
     static func category(for error: Error) -> AnalyticsErrorCategory {
         if let tvMazeError = error as? TVMazeError {
             switch tvMazeError {
@@ -61,6 +69,8 @@ enum AnalyticsErrorCategory: String, Sendable {
 }
 
 /// Abstraction so analytics providers can be swapped without touching call sites.
+/// Production uses `AnalyticsService` (os.Logger + persisted counters); DEBUG unit
+/// tests use `RecordingAnalyticsService` (in-memory only, no Console / UserDefaults).
 @MainActor
 protocol AnalyticsTracking: AnyObject {
     func track(_ event: AnalyticsEvent)
@@ -72,6 +82,8 @@ protocol AnalyticsTracking: AnyObject {
 }
 
 extension AnalyticsTracking {
+    /// Convenience that derives `AnalyticsErrorCategory` via `category(for:)` and
+    /// records a `nonFatalError` with a short call-site `context` string.
     func trackNonFatalError(_ error: Error, context: String) {
         track(.nonFatalError(category: AnalyticsErrorCategory.category(for: error), context: context))
     }
@@ -142,8 +154,10 @@ extension AnalyticsEvent {
     }
 }
 
-/// Default beta implementation: logs structured events locally via `os.Logger`.
-/// Replace or compose with a remote provider when ready.
+/// Default beta implementation: increments local counters and logs structured events
+/// via `os.Logger`. Disabled under UI tests (`isEnabled` defaults false) so test runs
+/// do not pollute Console or UserDefaults. Replace or compose with a remote provider
+/// when ready — call sites only depend on `AnalyticsTracking`.
 @MainActor
 final class AnalyticsService: AnalyticsTracking {
     private let logger: Logger
@@ -183,7 +197,8 @@ final class AnalyticsService: AnalyticsTracking {
 }
 
 #if DEBUG
-/// Records events in memory for unit tests.
+/// In-memory analytics for unit tests: captures events for assertions without
+/// writing to Console or UserDefaults (unlike production `AnalyticsService`).
 @MainActor
 final class RecordingAnalyticsService: AnalyticsTracking {
     private(set) var events: [AnalyticsEvent] = []

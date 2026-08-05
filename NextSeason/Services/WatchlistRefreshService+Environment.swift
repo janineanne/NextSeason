@@ -10,6 +10,7 @@ private struct WatchlistRefreshServiceKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
+    /// Background / pull-to-refresh pipeline for tracked shows; optional in previews.
     @MainActor var watchlistRefreshService: WatchlistRefreshService? {
         get { self[WatchlistRefreshServiceKey.self] }
         set { self[WatchlistRefreshServiceKey.self] = newValue }

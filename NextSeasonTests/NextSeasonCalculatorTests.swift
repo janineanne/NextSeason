@@ -52,7 +52,7 @@ struct NextSeasonCalculatorTests {
             season(2, premiere: "2026-09-01")
         ])
         let expected = NextSeasonStatus.scheduled(season: 2, premiere: try #require(TVMazeDate.dateOnly("2026-09-01")))
-        #expect(NextSeasonCalculator.status(for: show, now: now) == expected)
+        #expect(NextSeasonCalculator.status(for: show, at: now) == expected)
     }
 
     @Test("An undated upcoming season is reported as announced (Severance S3)")
@@ -62,7 +62,7 @@ struct NextSeasonCalculatorTests {
             season(2, premiere: "2025-01-17", end: "2025-03-21"),
             season(3, premiere: nil)
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .announcedUndated(season: 3))
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .announcedUndated(season: 3))
     }
 
     @Test("The latest season still on air is reported as airing")
@@ -71,7 +71,7 @@ struct NextSeasonCalculatorTests {
             season(1, premiere: "2025-01-01", end: "2025-03-01"),
             season(2, premiere: "2026-06-01", end: nil)
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .airing(season: 2))
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .airing(season: 2))
     }
 
     @Test("A running show between seasons returns returningNoSeasonYet")
@@ -80,7 +80,7 @@ struct NextSeasonCalculatorTests {
             season(1, premiere: "2024-01-01", end: "2024-03-01"),
             season(2, premiere: "2025-01-01", end: "2025-03-01")
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .returningNoSeasonYet)
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .returningNoSeasonYet)
     }
 
     @Test("An ended show with only past seasons is rerun-safe and reports ended")
@@ -89,13 +89,13 @@ struct NextSeasonCalculatorTests {
             season(1, premiere: "2007-09-24", end: "2008-05-19"),
             season(12, premiere: "2018-09-24", end: "2019-05-16")
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .ended)
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .ended)
     }
 
     @Test("No seasons and unknown status returns unknown")
     func unknownStatus() {
         let show = makeShow(status: .unknown("Unknown"), seasons: [])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .unknown)
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .unknown)
     }
 
     @Test("A brand-new show with only a future first season is scheduled")
@@ -104,7 +104,7 @@ struct NextSeasonCalculatorTests {
             season(1, premiere: "2026-12-01")
         ])
         let expected = NextSeasonStatus.scheduled(season: 1, premiere: try #require(TVMazeDate.dateOnly("2026-12-01")))
-        #expect(NextSeasonCalculator.status(for: show, now: now) == expected)
+        #expect(NextSeasonCalculator.status(for: show, at: now) == expected)
     }
 
     @Test("Specials (season 0) are ignored when deriving status")
@@ -114,7 +114,7 @@ struct NextSeasonCalculatorTests {
             season(1, premiere: "2024-01-01", end: "2024-03-01"),
             season(2, premiere: nil)
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .announcedUndated(season: 2))
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .announcedUndated(season: 2))
     }
 
     @Test("An annual/daily show in its current yearly season reports airing")
@@ -123,7 +123,7 @@ struct NextSeasonCalculatorTests {
             season(2025, premiere: "2025-01-01", end: "2025-12-15"),
             season(2026, premiere: "2026-01-05", end: nil)
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .airing(season: 2026))
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .airing(season: 2026))
     }
 
     @Test("A next episode in an undated new season resolves to scheduled")
@@ -133,7 +133,7 @@ struct NextSeasonCalculatorTests {
             nextEpisode: NextEpisode(season: 2, airdate: TVMazeDate.dateOnly("2026-08-01"))
         )
         let expected = NextSeasonStatus.scheduled(season: 2, premiere: try #require(TVMazeDate.dateOnly("2026-08-01")))
-        #expect(NextSeasonCalculator.status(for: show, now: now) == expected)
+        #expect(NextSeasonCalculator.status(for: show, at: now) == expected)
     }
 
     @Test("A season whose end date is today is still reported as airing")
@@ -144,7 +144,7 @@ struct NextSeasonCalculatorTests {
             season(1, premiere: "2025-01-01", end: "2025-03-01"),
             season(2, premiere: "2026-06-01", end: "2026-06-14")
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: nowSameDay) == .airing(season: 2))
+        #expect(NextSeasonCalculator.status(for: show, at: nowSameDay) == .airing(season: 2))
     }
 
     @Test("An undated future season does not override a currently airing season")
@@ -154,7 +154,7 @@ struct NextSeasonCalculatorTests {
             season(2, premiere: "2026-06-01", end: nil),
             season(3, premiere: nil)
         ])
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .airing(season: 2))
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .airing(season: 2))
     }
 
     @Test("A next episode with no airdate in a new season is announced, not airing")
@@ -163,7 +163,7 @@ struct NextSeasonCalculatorTests {
             seasons: [season(1, premiere: "2025-01-01", end: "2025-03-01")],
             nextEpisode: NextEpisode(season: 2, airdate: nil)
         )
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .announcedUndated(season: 2))
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .announcedUndated(season: 2))
     }
 
     @Test("An undated next episode with a matching undated season row is announced")
@@ -175,6 +175,6 @@ struct NextSeasonCalculatorTests {
             ],
             nextEpisode: NextEpisode(season: 2, airdate: nil)
         )
-        #expect(NextSeasonCalculator.status(for: show, now: now) == .announcedUndated(season: 2))
+        #expect(NextSeasonCalculator.status(for: show, at: now) == .announcedUndated(season: 2))
     }
 }

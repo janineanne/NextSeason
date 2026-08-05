@@ -5,10 +5,12 @@
 
 import SwiftUI
 
-/// The app's root view: Search and Watchlist tabs (Slice 2).
+/// Root tab shell: Search and Watchlist, wired to `AppNavigationCoordinator` for
+/// tab selection, navigation paths, watchlist reload tokens, notification deep
+/// links, and (when enabled) the profile-driven search flow.
 struct ContentView: View {
     @Environment(\.watchlistRepository) private var repository
-    @Environment(\.watchlistUndoRemoval) private var undoRemoval
+    @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.analytics) private var analytics
     @Bindable var coordinator: AppNavigationCoordinator
 
@@ -73,7 +75,7 @@ struct ContentView: View {
             if oldTab == .watchlist, tab != .watchlist {
                 Task {
                     AppDiagnosticsLogger.logTaskStart("watchlist_commit_on_leave_tab")
-                    await undoRemoval?.commitPendingRemovalIfNeeded()
+                    await removalCoordinator?.commitPendingRemovalIfNeeded()
                     AppDiagnosticsLogger.logTaskComplete("watchlist_commit_on_leave_tab")
                 }
             }
@@ -113,7 +115,7 @@ struct ContentView: View {
     let repository = InMemoryWatchlistRepository()
     ContentView(coordinator: AppNavigationCoordinator(), tvMaze: TVMazeClient())
         .environment(\.watchlistRepository, repository)
-        .environment(\.watchlistUndoRemoval, WatchlistUndoRemoval(
+        .environment(\.watchlistPendingRemoval, WatchlistPendingRemoval(
             repository: repository,
             analytics: RecordingAnalyticsService()
         ))

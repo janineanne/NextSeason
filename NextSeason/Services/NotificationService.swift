@@ -7,13 +7,14 @@ import Foundation
 import UIKit
 import UserNotifications
 
-/// Abstraction for delivering season-change alerts (testable without UserNotifications).
+/// Narrow delivery surface used by refresh / diagnostics so they can be tested
+/// without the full permission API.
 @MainActor
 protocol NotificationDelivering: AnyObject {
     func deliver(_ content: SeasonNotificationContent) async
 }
 
-/// Permission prompts, settings, and delivery used by SwiftUI and view models.
+/// Full permission + settings + delivery surface for SwiftUI and view models.
 @MainActor
 protocol NotificationManaging: NotificationDelivering {
     func authorizationStatus() async -> UNAuthorizationStatus
@@ -34,7 +35,19 @@ protocol NotificationManaging: NotificationDelivering {
     ) async
 }
 
-/// Wraps local notification permission and delivery (FR-011, FR-012).
+/// Local notification permission and delivery for season-change alerts (FR-011, FR-012).
+///
+/// Responsibilities:
+/// - **Permission UX:** decide when to show the in-app prompt, honor "Not Now"
+///   deferral (UserDefaults), call the system authorization dialog, and deep-link
+///   into Settings when the user has already decided.
+/// - **Delivery:** turn `SeasonNotificationContent` into a `UNNotificationRequest`
+///   with `showID` in `userInfo` so `NotificationRouting` can deep-link on tap.
+///   Request identifiers incorporate the status signature so duplicate states
+///   replace rather than stack.
+///
+/// UI tests short-circuit permission helpers to avoid system sheets. Debug builds
+/// can inject a fake authorization status for unit tests.
 @MainActor
 final class NotificationService: NotificationManaging {
     private let center: UNUserNotificationCenter
@@ -58,6 +71,8 @@ final class NotificationService: NotificationManaging {
     }
 
     #if DEBUG
+    /// Test seam: fixed authorization status so unit tests never present the
+    /// system permission dialog (which would block the test process).
     init(
         userDefaults: UserDefaults,
         authorizationStatusForTesting: UNAuthorizationStatus,
@@ -83,9 +98,11 @@ final class NotificationService: NotificationManaging {
         return await center.notificationSettings().authorizationStatus
     }
 
+    /// UserDefaults flag set when the user taps "Not Now" on the in-app prompt.
+    /// Blocks further automatic prompts until cleared (e.g. Settings entry point).
     private static let deferredPromptKey = "notificationPromptDeferred"
 
-    /// True when the user has never been asked and has not deferred the in-app prompt.
+    /// True when the system has never asked and the user has not deferred the in-app prompt.
     func needsAuthorizationPrompt() async -> Bool {
         guard !UITestingConfiguration.isEnabled else { return false }
         guard !userDefaults.bool(forKey: Self.deferredPromptKey) else { return false }
@@ -115,6 +132,7 @@ final class NotificationService: NotificationManaging {
         return NotificationAuthorizationPolicy.canDeliverAlerts(from: settings)
     }
 
+    /// Opens the system Notifications settings page for this app when possible.
     func openNotificationSettings() {
         // The general app settings page does not expose the notifications toggle
         // after the user taps "Don't Allow". iOS 16+ provides a dedicated deep link.
@@ -128,7 +146,10 @@ final class NotificationService: NotificationManaging {
     }
 
     /// Entry point for Watchlist banner, About, and post-deny alerts.
-    /// If permission was never requested (including after "Not Now"), shows the system dialog.
+    ///
+    /// - Still `.notDetermined` (including after "Not Now"): clear deferral and
+    ///   show the system permission dialog.
+    /// - Any other status: open Settings so the user can change the toggle.
     func enableNotificationsFromSettingsEntryPoint() async {
         guard !UITestingConfiguration.isEnabled else { return }
         let status = await authorizationStatus()
@@ -144,8 +165,11 @@ final class NotificationService: NotificationManaging {
         }
     }
 
-    /// Requests permission once; returns whether alerts are allowed.
-    /// No-ops when the user previously dismissed the in-app prompt with "Not Now".
+    /// Requests system permission when still undecided; returns whether alerts are allowed.
+    ///
+    /// No-ops when the user previously dismissed the in-app prompt with "Not Now"
+    /// (see `deferAuthorizationPrompt`). If already authorized, returns `true`
+    /// without prompting again. If denied, returns `false` (Settings is the only path).
     @discardableResult
     func requestAuthorizationIfNeeded() async -> Bool {
         guard !userDefaults.bool(forKey: Self.deferredPromptKey) else { return false }
@@ -178,6 +202,7 @@ final class NotificationService: NotificationManaging {
         }
     }
 
+    /// Schedules an immediate local notification (nil trigger → deliver ASAP).
     func deliver(_ content: SeasonNotificationContent) async {
         await scheduleNotification(content, requestIdentifier: nil, trigger: nil)
     }
@@ -200,6 +225,11 @@ final class NotificationService: NotificationManaging {
         await scheduleNotification(content, requestIdentifier: requestIdentifier, trigger: trigger)
     }
 
+    /// Builds and adds a `UNNotificationRequest` when alerts are allowed.
+    ///
+    /// - `userInfo["showID"]` is what `NotificationRouting` reads on tap.
+    /// - Default identifier embeds show ID + status signature so re-scheduling
+    ///   the same next-season state replaces the prior pending request.
     private func scheduleNotification(
         _ content: SeasonNotificationContent,
         requestIdentifier: String?,

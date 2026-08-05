@@ -18,6 +18,7 @@ nonisolated enum TVMazeDate {
         return calendar
     }
 
+    /// UTC calendar-day boundary for TVMaze date-only comparisons.
     static func startOfDayUTC(_ date: Date) -> Date {
         utcCalendar.startOfDay(for: date)
     }
@@ -37,6 +38,7 @@ nonisolated enum TVMazeDate {
         startOfDayUTC(date) > startOfDayUTC(other)
     }
 
+    /// Parses a TVMaze `"yyyy-MM-dd"` (or longer ISO) string as a UTC calendar date.
     static func dateOnly(_ string: String?) -> Date? {
         guard let string, string.count >= 10 else { return nil }
         let parts = string.prefix(10).split(separator: "-")

@@ -6,6 +6,10 @@
 import Foundation
 import os
 
+/// Snapshot of launch and abrupt-termination signals for diagnostics export.
+///
+/// `previousLaunchEndedUnexpectedly` is true when the prior session never called
+/// `recordEnterBackground` (still marked active at next `recordAppLaunch`).
 struct AppLaunchDiagnostics: Sendable, Hashable {
     let currentLaunchStartedAt: Date?
     let lastGracefulExitAt: Date?
@@ -65,6 +69,8 @@ enum AppDiagnosticsLogger: Sendable {
         let launchLogger = logger(for: .lifecycle)
         launchLogger.notice("app_launch version=\(version, privacy: .public) build=\(build, privacy: .public)")
 
+        // Still-active session flag means the last run never reached
+        // `recordEnterBackground` — treat as a possible abrupt termination.
         if hadActiveSession {
             defaults.set(true, forKey: previousUnexpectedDefaultsKey)
             defaults.set(now, forKey: unexpectedTerminationDetectedAtDefaultsKey)
@@ -97,6 +103,7 @@ enum AppDiagnosticsLogger: Sendable {
         breadcrumb("enter_background")
     }
 
+    /// Reads persisted launch markers set by `recordAppLaunch` / `recordEnterBackground`.
     nonisolated static func launchDiagnostics() -> AppLaunchDiagnostics {
         let defaults = UserDefaults.standard
         return AppLaunchDiagnostics(

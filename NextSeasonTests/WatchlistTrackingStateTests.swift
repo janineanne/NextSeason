@@ -1,5 +1,5 @@
 //
-//  WatchlistEffectiveTrackingTests.swift
+//  WatchlistTrackingStateTests.swift
 //  NextSeasonTests
 //
 
@@ -9,32 +9,32 @@ import Testing
 @testable import NextSeason
 
 @MainActor
-struct WatchlistEffectiveTrackingTests {
+struct WatchlistTrackingStateTests {
     @Test("A persisted show is tracked unless it is pending removal")
     func isTrackedExcludesPendingRemoval() {
         #expect(
-            WatchlistEffectiveTracking.isTracked(
+            WatchlistTrackingState.isTracked(
                 showID: 1,
                 isPersisted: true,
                 pendingRemovalID: nil
             )
         )
         #expect(
-            WatchlistEffectiveTracking.isTracked(
+            WatchlistTrackingState.isTracked(
                 showID: 1,
                 isPersisted: true,
                 pendingRemovalID: 1
             ) == false
         )
         #expect(
-            WatchlistEffectiveTracking.isTracked(
+            WatchlistTrackingState.isTracked(
                 showID: 1,
                 isPersisted: true,
                 pendingRemovalID: 2
             )
         )
         #expect(
-            WatchlistEffectiveTracking.isTracked(
+            WatchlistTrackingState.isTracked(
                 showID: 1,
                 isPersisted: false,
                 pendingRemovalID: nil
@@ -47,19 +47,19 @@ struct WatchlistEffectiveTrackingTests {
         let persisted: Set<Int> = [1, 2, 3]
 
         #expect(
-            WatchlistEffectiveTracking.trackedIDs(
+            WatchlistTrackingState.trackedIDs(
                 persistedIDs: persisted,
                 pendingRemovalID: nil
             ) == persisted
         )
         #expect(
-            WatchlistEffectiveTracking.trackedIDs(
+            WatchlistTrackingState.trackedIDs(
                 persistedIDs: persisted,
                 pendingRemovalID: 2
             ) == [1, 3]
         )
         #expect(
-            WatchlistEffectiveTracking.trackedIDs(
+            WatchlistTrackingState.trackedIDs(
                 persistedIDs: persisted,
                 pendingRemovalID: 99
             ) == persisted
@@ -88,40 +88,40 @@ struct WatchlistEffectiveTrackingTests {
         )
         try await repository.add(show)
 
-        let undoRemoval = WatchlistUndoRemoval(
+        let removalCoordinator = WatchlistPendingRemoval(
             repository: repository,
             analytics: RecordingAnalyticsService()
         )
         let tracked = try #require(await repository.trackedShow(showID: show.id))
-        undoRemoval.requestRemoval(tracked, anchor: .zero, source: .search)
+        removalCoordinator.requestRemoval(tracked, anchor: .zero, source: .search)
 
         #expect(
-            try await WatchlistEffectiveTracking.isTracked(
+            try await WatchlistTrackingState.isTracked(
                 showID: show.id,
                 repository: repository,
-                undoRemoval: undoRemoval
+                removalCoordinator: removalCoordinator
             ) == false
         )
         #expect(
-            try await WatchlistEffectiveTracking.trackedIDs(
+            try await WatchlistTrackingState.trackedIDs(
                 repository: repository,
-                undoRemoval: undoRemoval
+                removalCoordinator: removalCoordinator
             ).isEmpty
         )
 
-        _ = undoRemoval.undoRemoval()
+        _ = removalCoordinator.undoRemoval()
 
         #expect(
-            try await WatchlistEffectiveTracking.isTracked(
+            try await WatchlistTrackingState.isTracked(
                 showID: show.id,
                 repository: repository,
-                undoRemoval: undoRemoval
+                removalCoordinator: removalCoordinator
             )
         )
         #expect(
-            try await WatchlistEffectiveTracking.trackedIDs(
+            try await WatchlistTrackingState.trackedIDs(
                 repository: repository,
-                undoRemoval: undoRemoval
+                removalCoordinator: removalCoordinator
             ) == [show.id]
         )
     }

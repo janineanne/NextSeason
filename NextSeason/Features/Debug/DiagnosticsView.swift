@@ -5,18 +5,24 @@
 
 import SwiftUI
 
+// Optional UI presentation callback (nil = unavailable), not a required injected
+// service — kept here beside Diagnostics rather than in a `+Environment` file.
 private struct OpenDiagnosticsKey: EnvironmentKey {
     static let defaultValue: (() -> Void)? = nil
 }
 
 extension EnvironmentValues {
+    /// Presents the Diagnostics screen when set by the app root (beta / DEBUG).
     var openDiagnostics: (() -> Void)? {
         get { self[OpenDiagnosticsKey.self] }
         set { self[OpenDiagnosticsKey.self] = newValue }
     }
 }
 
-/// Beta diagnostics screen with local usage counters and explicit share controls.
+/// Beta / TestFlight diagnostics screen: usage counters, launch triage, and
+/// explicit actions that exercise refresh + notification pipelines without
+/// relying on live TVMaze season changes. Share / Copy export the same text
+/// built by `AnalyticsDiagnosticsReport`.
 @MainActor
 struct DiagnosticsView: View {
     @Environment(\.analytics) private var analytics
@@ -52,6 +58,7 @@ struct DiagnosticsView: View {
                     betaValidationSection
                 }
 
+                // Unexpected-termination flags + breadcrumbs for crash-like triage.
                 Section {
                     let launchDiagnostics = AppDiagnosticsLogger.launchDiagnostics()
                     LabeledContent("Previous launch") {
@@ -100,6 +107,7 @@ struct DiagnosticsView: View {
                     Text("Launch investigation")
                 }
 
+                // Local tallies from `AnalyticsCounters` (not remote analytics).
                 Section("Usage") {
                     let counters = analytics.countersSnapshot()
                     LabeledContent("App launches", value: String(counters.appLaunches))
@@ -164,8 +172,10 @@ struct DiagnosticsView: View {
         }
     }
 
+    /// Last refresh / simulation outcomes plus buttons that force those paths.
     @ViewBuilder
     private var betaValidationSection: some View {
+        // Persisted / in-memory samples from `BetaRefreshDiagnostics`.
         Section {
             LabeledContent("Last background refresh") {
                 Text(formattedDate(betaRefreshDiagnostics?.lastBackgroundRefreshAt))
@@ -210,6 +220,8 @@ struct DiagnosticsView: View {
             Text("Beta validation")
         }
 
+        // Force refresh (silent), delayed banner from a real watchlist show,
+        // delayed full refresh→notify pipeline, and two-step status simulation.
         Section {
             Button {
                 Task { await forceRefreshNow() }
@@ -307,6 +319,7 @@ struct DiagnosticsView: View {
         refreshReportText()
     }
 
+    /// Exercises production watchlist refresh with `force: true`, without scheduling alerts.
     private func forceRefreshNow() async {
         guard let refreshService, !isForceRefreshing else { return }
         isForceRefreshing = true
@@ -322,6 +335,8 @@ struct DiagnosticsView: View {
         isForceRefreshing = false
     }
 
+    /// Schedules a delayed local notification from the first real watchlist show
+    /// (delivery path only — does not run refresh / status detection).
     private func sendTestNotification() async {
         guard !isSendingTestNotification else { return }
         isSendingTestNotification = true
@@ -349,6 +364,7 @@ struct DiagnosticsView: View {
         isSendingTestNotification = false
     }
 
+    /// Full simulated refresh → notification decision with delayed delivery (~5–10s).
     private func scheduleDelayedPipelineNotification() async {
         guard !isSchedulingDelayedPipelineNotification else { return }
         isSchedulingDelayedPipelineNotification = true
@@ -362,6 +378,7 @@ struct DiagnosticsView: View {
         isSchedulingDelayedPipelineNotification = false
     }
 
+    /// One step of the two-phase baseline→updated simulated status-change scenario.
     private func runSimulatedUpdateScenario() async {
         guard !isRunningSimulation else { return }
         isRunningSimulation = true

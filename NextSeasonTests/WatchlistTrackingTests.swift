@@ -81,7 +81,7 @@ struct WatchlistTrackingTests {
             source: .search,
             repository: repository,
             tvMaze: tvMaze,
-            undoRemoval: nil,
+            removalCoordinator: nil,
             analytics: analytics,
             notifications: makeNotificationService(analytics: analytics),
             prompt: WatchlistNotificationPromptState()
@@ -97,7 +97,7 @@ struct WatchlistTrackingTests {
     func secondTapUndoesPendingRemoval() async throws {
         let repository = InMemoryWatchlistRepository()
         let analytics = RecordingAnalyticsService()
-        let undoRemoval = WatchlistUndoRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
         let notifications = makeNotificationService(analytics: analytics)
         let prompt = WatchlistNotificationPromptState()
         let tvMaze = MockTVMazeService()
@@ -110,13 +110,13 @@ struct WatchlistTrackingTests {
             source: .detail,
             repository: repository,
             tvMaze: tvMaze,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: analytics,
             notifications: notifications,
             prompt: prompt
         )
         #expect(first == .removalRequested)
-        #expect(undoRemoval.pendingRemoval?.id == sampleShow.id)
+        #expect(removalCoordinator.pendingRemoval?.id == sampleShow.id)
         #expect(try await repository.contains(showID: sampleShow.id))
 
         let second = try await WatchlistTracking.toggle(
@@ -126,14 +126,14 @@ struct WatchlistTrackingTests {
             source: .detail,
             repository: repository,
             tvMaze: tvMaze,
-            undoRemoval: undoRemoval,
+            removalCoordinator: removalCoordinator,
             analytics: analytics,
             notifications: notifications,
             prompt: prompt
         )
 
         #expect(second == .undidPendingRemoval)
-        #expect(undoRemoval.pendingRemoval == nil)
+        #expect(removalCoordinator.pendingRemoval == nil)
         #expect(try await repository.contains(showID: sampleShow.id))
         #expect(tvMaze.fetchedShowIDs.isEmpty)
     }
@@ -172,8 +172,8 @@ struct WatchlistTrackingTests {
 
         // Search stubs have no seasons; without a detail fetch they would store
         // `.returningNoSeasonYet` even while a season is still airing.
-        #expect(NextSeasonCalculator.status(for: sampleShow, now: now) == .returningNoSeasonYet)
-        #expect(NextSeasonCalculator.status(for: fullShow, now: now) == .airing(season: 17))
+        #expect(NextSeasonCalculator.status(for: sampleShow, at: now) == .returningNoSeasonYet)
+        #expect(NextSeasonCalculator.status(for: fullShow, at: now) == .airing(season: 17))
 
         let outcome = try await WatchlistTracking.toggle(
             sampleShow,
@@ -182,7 +182,7 @@ struct WatchlistTrackingTests {
             source: .search,
             repository: repository,
             tvMaze: tvMaze,
-            undoRemoval: nil,
+            removalCoordinator: nil,
             analytics: analytics,
             notifications: makeNotificationService(analytics: analytics),
             prompt: WatchlistNotificationPromptState()
@@ -229,7 +229,7 @@ struct WatchlistTrackingTests {
             source: .detail,
             repository: repository,
             tvMaze: tvMaze,
-            undoRemoval: nil,
+            removalCoordinator: nil,
             analytics: analytics,
             notifications: makeNotificationService(analytics: analytics),
             prompt: WatchlistNotificationPromptState()
