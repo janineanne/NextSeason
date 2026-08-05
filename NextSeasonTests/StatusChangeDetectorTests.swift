@@ -5,6 +5,7 @@
 
 import Foundation
 import Testing
+
 @testable import NextSeason
 
 struct StatusChangeDetectorTests {
@@ -41,7 +42,9 @@ struct StatusChangeDetectorTests {
         )
 
         #expect(evaluation.notification != nil)
-        #expect(evaluation.tracked.lastNotifiedSignature == StatusChangeDetector.signature(for: .scheduled(season: 2, premiere: premiere)))
+        #expect(
+            evaluation.tracked.lastNotifiedSignature
+                == StatusChangeDetector.signature(for: .scheduled(season: 2, premiere: premiere)))
         #expect(evaluation.tracked.pendingChangeSignature == nil)
     }
 
@@ -55,7 +58,9 @@ struct StatusChangeDetectorTests {
         )
 
         #expect(first.notification == nil)
-        #expect(first.tracked.pendingChangeSignature == StatusChangeDetector.signature(for: .announcedUndated(season: 2)))
+        #expect(
+            first.tracked.pendingChangeSignature
+                == StatusChangeDetector.signature(for: .announcedUndated(season: 2)))
 
         let second = StatusChangeDetector.evaluate(
             tracked: first.tracked,
@@ -70,7 +75,8 @@ struct StatusChangeDetectorTests {
     @Test("The same transition is never notified twice")
     func duplicateTransitionIsSuppressed() {
         var show = tracked(nextSeason: .announcedUndated(season: 2))
-        show.lastNotifiedSignature = StatusChangeDetector.signature(for: .scheduled(season: 2, premiere: premiere))
+        show.lastNotifiedSignature = StatusChangeDetector.signature(
+            for: .scheduled(season: 2, premiere: premiere))
 
         let evaluation = StatusChangeDetector.evaluate(
             tracked: show,
@@ -91,7 +97,10 @@ struct StatusChangeDetectorTests {
         )
 
         #expect(evaluation.notification != nil)
-        #expect(evaluation.tracked.lastNotifiedSignature == StatusChangeDetector.signature(for: .scheduled(season: 2, premiere: laterPremiere)))
+        #expect(
+            evaluation.tracked.lastNotifiedSignature
+                == StatusChangeDetector.signature(
+                    for: .scheduled(season: 2, premiere: laterPremiere)))
     }
 
     @Test("Transition to airing notifies immediately")

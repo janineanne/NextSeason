@@ -28,8 +28,8 @@ enum NotificationRouting {
         center.delegate = NotificationCenterDelegate.shared
     }
 
-	/// If the coordinator has been set, queue the show from the notification tap.  If it has not, buffer
-	/// (save) it for processing later.
+    /// If the coordinator has been set, queue the show from the notification tap.  If it has not, buffer
+    /// (save) it for processing later.
     /// - Parameter animated: `true` when the app was already foreground-active at the
     ///   time of the tap (in-app navigation), `false` for a launch/foreground tap.
     static func routeToShow(showID: Int, animated: Bool) {
@@ -42,7 +42,7 @@ enum NotificationRouting {
         }
     }
 
-	/// Queue the buffered (saved) show information from the notification tap
+    /// Queue the buffered (saved) show information from the notification tap
     private static func deliverBufferedNavigation() {
         guard let showID = bufferedShowID, let coordinator else { return }
         bufferedShowID = nil
@@ -56,12 +56,12 @@ enum NotificationRouting {
     }
 
     #if DEBUG
-    /// Clears routing state between unit tests.
-    static func resetForTesting() {
-        coordinator = nil
-        analytics = nil
-        bufferedShowID = nil
-    }
+        /// Clears routing state between unit tests.
+        static func resetForTesting() {
+            coordinator = nil
+            analytics = nil
+            bufferedShowID = nil
+        }
     #endif
 }
 

@@ -33,11 +33,11 @@ struct ShowRowSkeleton: View {
 }
 
 #if DEBUG
-#Preview {
-    List {
-        ShowRowSkeleton()
-        ShowRowSkeleton()
+    #Preview {
+        List {
+            ShowRowSkeleton()
+            ShowRowSkeleton()
+        }
+        .listStyle(.plain)
     }
-    .listStyle(.plain)
-}
 #endif

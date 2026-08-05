@@ -4,6 +4,7 @@
 //
 
 import Testing
+
 @testable import NextSeason
 
 struct NotificationStatusPresentationTests {
@@ -35,7 +36,8 @@ struct NotificationStatusPresentationTests {
                 == "Enable Notifications"
         )
         #expect(
-            NotificationStatusPresentation.enablementButtonTitle(isAuthorizationNotDetermined: false)
+            NotificationStatusPresentation.enablementButtonTitle(
+                isAuthorizationNotDetermined: false)
                 == "Open Settings"
         )
     }

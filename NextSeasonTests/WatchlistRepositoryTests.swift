@@ -5,6 +5,7 @@
 
 import Foundation
 import Testing
+
 @testable import NextSeason
 
 @MainActor
@@ -24,8 +25,10 @@ struct WatchlistRepositoryTests {
             genres: ["Drama"],
             averageRuntime: 49,
             seasons: [
-                Season(id: 1, number: 1, premiereDate: TVMazeDate.dateOnly("2022-02-18"), endDate: TVMazeDate.dateOnly("2022-04-08"), episodeOrder: 9),
-                Season(id: 3, number: 3, premiereDate: nil, endDate: nil, episodeOrder: nil)
+                Season(
+                    id: 1, number: 1, premiereDate: TVMazeDate.dateOnly("2022-02-18"),
+                    endDate: TVMazeDate.dateOnly("2022-04-08"), episodeOrder: 9),
+                Season(id: 3, number: 3, premiereDate: nil, endDate: nil, episodeOrder: nil),
             ],
             nextEpisode: nil,
             updatedAt: .now

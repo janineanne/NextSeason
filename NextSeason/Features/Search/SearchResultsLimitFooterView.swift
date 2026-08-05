@@ -37,9 +37,9 @@ struct SearchResultsLimitFooterView: View {
 }
 
 #if DEBUG
-#Preview {
-    SearchResultsLimitFooterView(query: "Star Trek")
-        .padding()
-        .appScreenBackground()
-}
+    #Preview {
+        SearchResultsLimitFooterView(query: "Star Trek")
+            .padding()
+            .appScreenBackground()
+    }
 #endif

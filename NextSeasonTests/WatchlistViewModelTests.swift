@@ -6,6 +6,7 @@
 import CoreGraphics
 import Foundation
 import Testing
+
 @testable import NextSeason
 
 @MainActor
@@ -36,7 +37,8 @@ struct WatchlistViewModelTests {
 
     private func loadedViewModel(with shows: [Show]) async throws -> WatchlistViewModel {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -69,7 +71,8 @@ struct WatchlistViewModelTests {
     @Test("Reload loads tracked shows from persistence")
     func reloadLoadsTrackedShows() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -87,7 +90,8 @@ struct WatchlistViewModelTests {
     @Test("A pending removal keeps the show visible in the loaded list")
     func pendingRemovalKeepsRowVisible() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -107,7 +111,8 @@ struct WatchlistViewModelTests {
     @Test("Committing a pending removal reloads an empty watchlist")
     func commitPendingRemovalReloadsList() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -128,7 +133,8 @@ struct WatchlistViewModelTests {
     @Test("Animated removal drops the row from the loaded list")
     func removeShowAnimatedDropsRow() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -147,7 +153,8 @@ struct WatchlistViewModelTests {
     @Test("Pending-removal clear animates row away only after persistence removes it")
     func pendingRemovalClearAnimatesCommittedRemoval() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -167,7 +174,8 @@ struct WatchlistViewModelTests {
     @Test("Pending-removal clear leaves the row when undo restored it")
     func pendingRemovalClearKeepsRowAfterUndo() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -188,7 +196,8 @@ struct WatchlistViewModelTests {
     @Test("Replacing a pending removal drops the first show from the displayed list")
     func replacingPendingRemovalDropsFirstShowFromDisplayedList() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -223,7 +232,8 @@ struct WatchlistViewModelTests {
     @Test("Undo clears the pending removal flag")
     func undoPendingRemovalClearsPendingState() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -322,18 +332,20 @@ struct WatchlistViewModelTests {
             trackedShow(id: 2, name: "Ended Show", nextSeason: .ended),
             trackedShow(id: 3, name: "Airing Show", nextSeason: .airing(season: 2)),
             trackedShow(id: 4, name: "Waiting Show", nextSeason: .returningNoSeasonYet),
-            trackedShow(id: 5, name: "Coming Show", nextSeason: .scheduled(season: 3, premiere: premiere)),
+            trackedShow(
+                id: 5, name: "Coming Show", nextSeason: .scheduled(season: 3, premiere: premiere)),
         ]
 
         let groups = WatchlistViewModel.sectionGroups(from: shows)
 
-        #expect(groups.map(\.section) == [
-            .airingNow,
-            .comingSoon,
-            .waitingForADate,
-            .ended,
-            .unknown,
-        ])
+        #expect(
+            groups.map(\.section) == [
+                .airingNow,
+                .comingSoon,
+                .waitingForADate,
+                .ended,
+                .unknown,
+            ])
         #expect(groups.map { $0.shows.map(\.id) } == [[3], [5], [4], [2], [1]])
     }
 
@@ -354,7 +366,8 @@ struct WatchlistViewModelTests {
         let later = TVMazeDate.dateOnly("2026-12-01")!
         let groups = WatchlistViewModel.sectionGroups(from: [
             trackedShow(id: 1, name: "Later", nextSeason: .scheduled(season: 2, premiere: later)),
-            trackedShow(id: 2, name: "Earlier", nextSeason: .scheduled(season: 3, premiere: earlier)),
+            trackedShow(
+                id: 2, name: "Earlier", nextSeason: .scheduled(season: 3, premiere: earlier)),
         ])
 
         #expect(groups.map(\.section) == [.comingSoon])
@@ -378,7 +391,8 @@ struct WatchlistViewModelTests {
     @Test("Filtered section groups honor the search query")
     func filteredSectionGroupsHonorSearchQuery() async throws {
         let repository = InMemoryWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,
@@ -405,7 +419,8 @@ struct WatchlistViewModelTests {
     @Test("A slower older reload cannot overwrite a newer reload result")
     func slowerOlderReloadDoesNotOverwriteNewerResult() async throws {
         let repository = ReentrantWatchlistRepository()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: RecordingAnalyticsService())
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
         let viewModel = WatchlistViewModel(
             repository: repository,
             removalCoordinator: removalCoordinator,

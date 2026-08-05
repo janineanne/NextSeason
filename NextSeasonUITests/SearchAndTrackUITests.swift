@@ -22,7 +22,8 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         result.tap()
 
         waitForShowDetail()
-        XCTAssertTrue(app.staticTexts["Next Season"].waitForExistence(timeout: UITestTimeout.standard))
+        XCTAssertTrue(
+            app.staticTexts["Next Season"].waitForExistence(timeout: UITestTimeout.standard))
     }
 
     func testTrackShowAppearsOnWatchlist() {
@@ -114,7 +115,8 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         search(for: UITestingSearchQuery.failure)
 
         XCTAssertTrue(
-            app.staticTexts["Something Went Wrong"].waitForExistence(timeout: UITestTimeout.extended),
+            app.staticTexts["Something Went Wrong"].waitForExistence(
+                timeout: UITestTimeout.extended),
             "A failed search should surface an error state."
         )
         XCTAssertTrue(

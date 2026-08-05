@@ -166,7 +166,8 @@ final class ShowDetailViewModel {
         } catch is CancellationError {
             return
         } catch {
-            let errorContext = wasTracked || isPendingRemoval
+            let errorContext =
+                wasTracked || isPendingRemoval
                 ? "show_detail_watchlist_lookup"
                 : "watchlist_add_detail"
             analytics.trackNonFatalError(error, context: errorContext)

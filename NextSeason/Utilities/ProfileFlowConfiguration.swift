@@ -76,13 +76,13 @@ enum ProfileFlowConfiguration {
     /// Active profiling flow from `PROFILE_FLOW` env (preferred) or `-ProfileFlow <name>`.
     static var activeFlow: Flow? {
         if let env = ProcessInfo.processInfo.environment["PROFILE_FLOW"],
-           let flow = Flow(rawValue: env)
+            let flow = Flow(rawValue: env)
         {
             return flow
         }
         let arguments = ProcessInfo.processInfo.arguments
         guard let index = arguments.firstIndex(of: launchFlag),
-              index + 1 < arguments.count
+            index + 1 < arguments.count
         else { return nil }
         return Flow(rawValue: arguments[index + 1])
     }

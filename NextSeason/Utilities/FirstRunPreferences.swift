@@ -32,12 +32,12 @@ enum FirstRunPreferences {
     }
 
     #if DEBUG
-    static func resetSearchResultsHintForTesting() {
-        UserDefaults.standard.removeObject(forKey: searchResultsHintDismissedKey)
-    }
+        static func resetSearchResultsHintForTesting() {
+            UserDefaults.standard.removeObject(forKey: searchResultsHintDismissedKey)
+        }
 
-    static func resetFirstSearchCompletedForTesting() {
-        UserDefaults.standard.removeObject(forKey: hasCompletedFirstSearchKey)
-    }
+        static func resetFirstSearchCompletedForTesting() {
+            UserDefaults.standard.removeObject(forKey: hasCompletedFirstSearchKey)
+        }
     #endif
 }

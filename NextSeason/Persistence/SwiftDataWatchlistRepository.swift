@@ -4,8 +4,8 @@
 //
 
 import Foundation
-import os
 import SwiftData
+import os
 
 /// Production `WatchlistRepository` backed by SwiftData / `TrackedShowEntity`.
 ///

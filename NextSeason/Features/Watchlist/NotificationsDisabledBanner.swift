@@ -44,18 +44,20 @@ struct NotificationsDisabledBanner: View {
                         .fill(AppColor.warning.opacity(0.12))
                 }
         }
-        .listRowInsets(EdgeInsets(top: 8, leading: AppSpacing.screen, bottom: 8, trailing: AppSpacing.screen))
+        .listRowInsets(
+            EdgeInsets(top: 8, leading: AppSpacing.screen, bottom: 8, trailing: AppSpacing.screen)
+        )
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
     }
 }
 
 #if DEBUG
-#Preview {
-    List {
-        NotificationsDisabledBanner(openSettings: {})
+    #Preview {
+        List {
+            NotificationsDisabledBanner(openSettings: {})
+        }
+        .appPlainListStyle()
+        .appScreenBackground()
     }
-    .appPlainListStyle()
-    .appScreenBackground()
-}
 #endif

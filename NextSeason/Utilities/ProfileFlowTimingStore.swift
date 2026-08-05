@@ -28,7 +28,7 @@ enum ProfileFlowTimingStore {
             payload["phase"] = phase
         }
         guard let data = try? JSONSerialization.data(withJSONObject: payload),
-              let line = String(data: data, encoding: .utf8)
+            let line = String(data: data, encoding: .utf8)
         else { return }
         let out = line + "\n"
         if FileManager.default.fileExists(atPath: fileURL.path) {

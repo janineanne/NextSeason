@@ -46,7 +46,9 @@ nonisolated struct NotificationStatusPresentation: Equatable, Sendable {
     }
 
     @MainActor
-    static func load(using service: any NotificationManaging) async -> NotificationStatusPresentation {
+    static func load(using service: any NotificationManaging) async
+        -> NotificationStatusPresentation
+    {
         let canDeliver = await service.canDeliverVisibleAlerts()
         let status = await service.authorizationStatus()
         return NotificationStatusPresentation(

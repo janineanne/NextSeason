@@ -287,27 +287,27 @@ struct ShowDetailView: View {
 }
 
 #if DEBUG
-#Preview("With summary") {
-    NavigationStack {
-        ShowDetailView(
-            show: .preview,
-            service: PreviewTVMazeService(stub: .preview),
-            repository: InMemoryWatchlistRepository(),
-            notifications: NotificationService(analytics: RecordingAnalyticsService()),
-            analytics: RecordingAnalyticsService()
-        )
+    #Preview("With summary") {
+        NavigationStack {
+            ShowDetailView(
+                show: .preview,
+                service: PreviewTVMazeService(stub: .preview),
+                repository: InMemoryWatchlistRepository(),
+                notifications: NotificationService(analytics: RecordingAnalyticsService()),
+                analytics: RecordingAnalyticsService()
+            )
+        }
     }
-}
 
-#Preview("Missing summary") {
-    NavigationStack {
-        ShowDetailView(
-            show: .previewMissingSummary,
-            service: PreviewTVMazeService(stub: .previewMissingSummary),
-            repository: InMemoryWatchlistRepository(),
-            notifications: NotificationService(analytics: RecordingAnalyticsService()),
-            analytics: RecordingAnalyticsService()
-        )
+    #Preview("Missing summary") {
+        NavigationStack {
+            ShowDetailView(
+                show: .previewMissingSummary,
+                service: PreviewTVMazeService(stub: .previewMissingSummary),
+                repository: InMemoryWatchlistRepository(),
+                notifications: NotificationService(analytics: RecordingAnalyticsService()),
+                analytics: RecordingAnalyticsService()
+            )
+        }
     }
-}
 #endif

@@ -4,8 +4,8 @@
 //
 
 import Foundation
-import os
 import SwiftUI
+import os
 
 /// Drives a single user flow for Instruments when launched with `-ProfileFlow`.
 ///
@@ -299,7 +299,7 @@ struct ProfileFlowRunner {
         guard let show = await resolveExampleShow() else { return }
 
         let interval = Self.signposter.beginInterval("stress.searchDetailsBack")
-        for _ in 1 ... 20 {
+        for _ in 1...20 {
             coordinator.selectedTab = .search
             coordinator.profileFlowSearchQuery = FirstRunCopy.exampleSearchQuery
             await waitForSearchResults()
@@ -315,7 +315,7 @@ struct ProfileFlowRunner {
         guard let show = await resolveExampleShow() else { return }
 
         let interval = Self.signposter.beginInterval("stress.addRemoveWishlist")
-        for _ in 1 ... 50 {
+        for _ in 1...50 {
             do {
                 try await repository.add(show)
                 coordinator.notifyWatchlistDataChanged()
@@ -331,7 +331,7 @@ struct ProfileFlowRunner {
 
     private func runStressSearchEmpty() async {
         let interval = Self.signposter.beginInterval("stress.searchEmpty")
-        for _ in 1 ... 20 {
+        for _ in 1...20 {
             coordinator.selectedTab = .search
             coordinator.profileFlowSearchQuery = ProfileFlowConfiguration.SearchQuery.emptyResults
             await waitForSearchResults()

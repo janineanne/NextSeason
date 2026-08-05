@@ -36,9 +36,12 @@ nonisolated enum NextSeasonCalculator {
         let upcoming = seasons.filter { $0.number > latestAiredNumber }
 
         // 1. A not-yet-aired season with a known future premiere date.
-        let datedUpcoming = upcoming
+        let datedUpcoming =
+            upcoming
             .compactMap { season -> (number: Int, date: Date)? in
-                guard let date = season.premiereDate, TVMazeDate.isAfter(date, at) else { return nil }
+                guard let date = season.premiereDate, TVMazeDate.isAfter(date, at) else {
+                    return nil
+                }
                 return (season.number, date)
             }
             .sorted { $0.date < $1.date }
@@ -49,8 +52,9 @@ nonisolated enum NextSeasonCalculator {
         // 2. The next episode points at a season beyond the latest aired one —
         //    useful when that new season has no dated row yet.
         if let episode = show.nextEpisode,
-           let season = episode.season,
-           season > latestAiredNumber {
+            let season = episode.season,
+            season > latestAiredNumber
+        {
             if let date = episode.airdate {
                 if TVMazeDate.isAfter(date, at) {
                     return .scheduled(season: season, premiere: date)

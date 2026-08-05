@@ -44,50 +44,61 @@ enum AnalyticsDiagnosticsReport {
         launchDiagnostics: AppLaunchDiagnostics = AppDiagnosticsLogger.launchDiagnostics(),
         betaRefreshDiagnostics: BetaRefreshDiagnostics? = nil
     ) -> String {
-        let breadcrumbLines = recentBreadcrumbs.isEmpty
+        let breadcrumbLines =
+            recentBreadcrumbs.isEmpty
             ? "  (none this session)"
             : recentBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
-        let priorLines = persistedBreadcrumbs.isEmpty
+        let priorLines =
+            persistedBreadcrumbs.isEmpty
             ? "  (none persisted)"
             // Cap export size; full ring stays available in-app if needed.
             : persistedBreadcrumbs.suffix(10).map { "  \($0)" }.joined(separator: "\n")
-        let previousLaunchStatus = launchDiagnostics.previousLaunchEndedUnexpectedly
+        let previousLaunchStatus =
+            launchDiagnostics.previousLaunchEndedUnexpectedly
             ? "Ended unexpectedly"
             : "Clean or not detected"
-        let currentLaunchStarted = launchDiagnostics.currentLaunchStartedAt
+        let currentLaunchStarted =
+            launchDiagnostics.currentLaunchStartedAt
             .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Unknown"
-        let previousLaunchStarted = launchDiagnostics.previousLaunchStartedAt
+        let previousLaunchStarted =
+            launchDiagnostics.previousLaunchStartedAt
             .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Unknown"
-        let detectedAt = launchDiagnostics.unexpectedTerminationDetectedAt
+        let detectedAt =
+            launchDiagnostics.unexpectedTerminationDetectedAt
             .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Not applicable"
-        let lastGracefulExit = launchDiagnostics.lastGracefulExitAt
+        let lastGracefulExit =
+            launchDiagnostics.lastGracefulExitAt
             .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Never recorded"
-        let unexpectedBreadcrumbLines = launchDiagnostics.priorBreadcrumbs.isEmpty
+        let unexpectedBreadcrumbLines =
+            launchDiagnostics.priorBreadcrumbs.isEmpty
             ? "  (none captured)"
             : launchDiagnostics.priorBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
 
         var betaSection = ""
         if BetaBuildConfiguration.isAvailable, let betaRefreshDiagnostics {
-            let lastBackgroundRefresh = betaRefreshDiagnostics.lastBackgroundRefreshAt
+            let lastBackgroundRefresh =
+                betaRefreshDiagnostics.lastBackgroundRefreshAt
                 .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Never"
-            let nextRefresh = betaRefreshDiagnostics.nextScheduledRefreshAt
+            let nextRefresh =
+                betaRefreshDiagnostics.nextScheduledRefreshAt
                 .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Not scheduled yet"
             betaSection = """
 
-            Beta validation:
-            Last background refresh: \(lastBackgroundRefresh)
-            Next refresh window: \(nextRefresh)
-            Last background fetch result: \(betaRefreshDiagnostics.lastBackgroundFetchResult)
-            Last background notification decision: \(betaRefreshDiagnostics.lastBackgroundNotificationDecision)
-            """
+                Beta validation:
+                Last background refresh: \(lastBackgroundRefresh)
+                Next refresh window: \(nextRefresh)
+                Last background fetch result: \(betaRefreshDiagnostics.lastBackgroundFetchResult)
+                Last background notification decision: \(betaRefreshDiagnostics.lastBackgroundNotificationDecision)
+                """
             if let lastForegroundRefresh = betaRefreshDiagnostics.lastForegroundRefreshAt?
-                .formatted(date: .abbreviated, time: .standard) {
+                .formatted(date: .abbreviated, time: .standard)
+            {
                 betaSection += """
 
-            Last foreground refresh: \(lastForegroundRefresh)
-            Last foreground fetch result: \(betaRefreshDiagnostics.lastForegroundFetchResult)
-            Last foreground notification decision: \(betaRefreshDiagnostics.lastForegroundNotificationDecision)
-            """
+                    Last foreground refresh: \(lastForegroundRefresh)
+                    Last foreground fetch result: \(betaRefreshDiagnostics.lastForegroundFetchResult)
+                    Last foreground notification decision: \(betaRefreshDiagnostics.lastForegroundNotificationDecision)
+                    """
             }
             if let simulated = betaRefreshDiagnostics.lastSimulatedScenarioSummary {
                 betaSection += "\nLast simulation: \(simulated)"
@@ -95,39 +106,39 @@ enum AnalyticsDiagnosticsReport {
         }
 
         return """
-        NextSeason Diagnostics
+            NextSeason Diagnostics
 
-        Version: \(AppVersionInfo.displayString)
-        \(betaSection)
+            Version: \(AppVersionInfo.displayString)
+            \(betaSection)
 
-        App launches: \(counters.appLaunches)
-        Searches: \(counters.searchesPerformed)
-        Successful searches: \(counters.successfulSearches)
-        No-result searches: \(counters.noResultSearches)
-        Example searches: \(counters.exampleSearchesUsed)
-        Show detail views: \(counters.showDetailViews)
-        Watchlist adds: \(counters.watchlistAdditions)
-        Watchlist removals: \(counters.watchlistRemovals)
-        Notification permission requests: \(counters.notificationPermissionRequests)
-        Notification permission grants: \(counters.notificationPermissionGrants)
-        Notification reminders scheduled: \(counters.notificationRemindersScheduled)
-        Notifications enabled: \(notificationsEnabled)
+            App launches: \(counters.appLaunches)
+            Searches: \(counters.searchesPerformed)
+            Successful searches: \(counters.successfulSearches)
+            No-result searches: \(counters.noResultSearches)
+            Example searches: \(counters.exampleSearchesUsed)
+            Show detail views: \(counters.showDetailViews)
+            Watchlist adds: \(counters.watchlistAdditions)
+            Watchlist removals: \(counters.watchlistRemovals)
+            Notification permission requests: \(counters.notificationPermissionRequests)
+            Notification permission grants: \(counters.notificationPermissionGrants)
+            Notification reminders scheduled: \(counters.notificationRemindersScheduled)
+            Notifications enabled: \(notificationsEnabled)
 
-        Recent breadcrumbs (this session):
-        \(breadcrumbLines)
+            Recent breadcrumbs (this session):
+            \(breadcrumbLines)
 
-        Persisted breadcrumbs (prior session, if any):
-        \(priorLines)
+            Persisted breadcrumbs (prior session, if any):
+            \(priorLines)
 
-        Launch diagnostics:
-        Previous launch status: \(previousLaunchStatus)
-        Current launch started: \(currentLaunchStarted)
-        Previous unexpected launch started: \(previousLaunchStarted)
-        Unexpected termination detected: \(detectedAt)
-        Last graceful background/exit: \(lastGracefulExit)
+            Launch diagnostics:
+            Previous launch status: \(previousLaunchStatus)
+            Current launch started: \(currentLaunchStarted)
+            Previous unexpected launch started: \(previousLaunchStarted)
+            Unexpected termination detected: \(detectedAt)
+            Last graceful background/exit: \(lastGracefulExit)
 
-        Breadcrumbs from previous unexpected launch:
-        \(unexpectedBreadcrumbLines)
-        """
+            Breadcrumbs from previous unexpected launch:
+            \(unexpectedBreadcrumbLines)
+            """
     }
 }

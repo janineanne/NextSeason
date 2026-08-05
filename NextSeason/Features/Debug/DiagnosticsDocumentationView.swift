@@ -78,7 +78,7 @@ struct DiagnosticsDocumentationView: View {
 }
 
 #if DEBUG
-#Preview {
-    DiagnosticsDocumentationView()
-}
+    #Preview {
+        DiagnosticsDocumentationView()
+    }
 #endif

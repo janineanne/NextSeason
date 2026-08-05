@@ -35,7 +35,7 @@ extension AnalyticsCounters {
         switch event {
         case .appLaunched:
             appLaunches += 1
-        case let .searchPerformed(_, resultCount, _):
+        case .searchPerformed(_, let resultCount, _):
             searchesPerformed += 1
             if resultCount > 0 {
                 successfulSearches += 1
@@ -50,7 +50,7 @@ extension AnalyticsCounters {
             watchlistAdditions += 1
         case .watchlistRemoved:
             watchlistRemovals += 1
-        case let .notificationPermission(result):
+        case .notificationPermission(let result):
             notificationPermissionRequests += 1
             if result == .granted {
                 notificationPermissionGrants += 1
@@ -58,8 +58,8 @@ extension AnalyticsCounters {
         case .notificationReminderScheduled:
             notificationRemindersScheduled += 1
         case .searchResultOpened, .watchlistViewed, .watchlistItemOpened,
-             .notificationTapped, .appOpenedFromNotification, .emptyWatchlistShown,
-             .nonFatalError:
+            .notificationTapped, .appOpenedFromNotification, .emptyWatchlistShown,
+            .nonFatalError:
             break
         }
     }
@@ -77,7 +77,8 @@ final class AnalyticsCountersStore {
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
         if let data = userDefaults.data(forKey: Self.storageKey),
-           let decoded = try? JSONDecoder().decode(AnalyticsCounters.self, from: data) {
+            let decoded = try? JSONDecoder().decode(AnalyticsCounters.self, from: data)
+        {
             counters = decoded
         } else {
             counters = AnalyticsCounters()
@@ -94,10 +95,10 @@ final class AnalyticsCountersStore {
     }
 
     #if DEBUG
-    func resetForTesting() {
-        counters = AnalyticsCounters()
-        userDefaults.removeObject(forKey: Self.storageKey)
-    }
+        func resetForTesting() {
+            counters = AnalyticsCounters()
+            userDefaults.removeObject(forKey: Self.storageKey)
+        }
     #endif
 
     private func persist() {

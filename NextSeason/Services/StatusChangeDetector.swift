@@ -45,7 +45,7 @@ nonisolated enum StatusChangeDetector {
         case (_, .ended):
             return true
         case (.returningNoSeasonYet, .announcedUndated),
-             (.returningNoSeasonYet, .scheduled):
+            (.returningNoSeasonYet, .scheduled):
             return true
         default:
             return false
@@ -68,7 +68,9 @@ nonisolated enum StatusChangeDetector {
     /// A notification is included only when the delta is meaningful, not a duplicate
     /// of `lastNotifiedSignature`, and either date-backed (notify immediately) or
     /// confirmed across two consecutive polls (debounce soft changes).
-    static func evaluate(tracked: TrackedShow, newStatus: NextSeasonStatus, at: Date = .now) -> Evaluation {
+    static func evaluate(tracked: TrackedShow, newStatus: NextSeasonStatus, at: Date = .now)
+        -> Evaluation
+    {
         let previousStatus = tracked.nextSeason
         var updated = tracked
         updated.lastCheckedAt = at
@@ -79,12 +81,14 @@ nonisolated enum StatusChangeDetector {
         // Debounce confirmed: a prior poll stashed this soft change as pending, and
         // this poll sees the same signature again — notify and clear pending.
         if tracked.pendingChangeSignature == changeSignature,
-           changeSignature != tracked.lastNotifiedSignature {
+            changeSignature != tracked.lastNotifiedSignature
+        {
             updated.lastNotifiedSignature = changeSignature
             updated.pendingChangeSignature = nil
             return Evaluation(
                 tracked: updated,
-                notification: SeasonNotificationContent(showID: tracked.id, showName: tracked.name, status: newStatus)
+                notification: SeasonNotificationContent(
+                    showID: tracked.id, showName: tracked.name, status: newStatus)
             )
         }
 
@@ -106,7 +110,8 @@ nonisolated enum StatusChangeDetector {
             updated.pendingChangeSignature = nil
             return Evaluation(
                 tracked: updated,
-                notification: SeasonNotificationContent(showID: tracked.id, showName: tracked.name, status: newStatus)
+                notification: SeasonNotificationContent(
+                    showID: tracked.id, showName: tracked.name, status: newStatus)
             )
         }
 

@@ -85,7 +85,8 @@ extension AnalyticsTracking {
     /// Convenience that derives `AnalyticsErrorCategory` via `category(for:)` and
     /// records a `nonFatalError` with a short call-site `context` string.
     func trackNonFatalError(_ error: Error, context: String) {
-        track(.nonFatalError(category: AnalyticsErrorCategory.category(for: error), context: context))
+        track(
+            .nonFatalError(category: AnalyticsErrorCategory.category(for: error), context: context))
     }
 
     func countersSnapshot() -> AnalyticsCounters {
@@ -128,27 +129,27 @@ extension AnalyticsEvent {
 
     var parameters: [String: String] {
         switch self {
-        case let .searchPerformed(queryLength, resultCount, durationMs):
+        case .searchPerformed(let queryLength, let resultCount, let durationMs):
             [
                 "query_length": String(queryLength),
                 "result_count": String(resultCount),
-                "duration_ms": String(durationMs)
+                "duration_ms": String(durationMs),
             ]
-        case let .searchResultOpened(showID),
-             let .showDetailViewed(showID),
-             let .watchlistItemOpened(showID),
-             let .notificationTapped(showID),
-             let .appOpenedFromNotification(showID):
+        case .searchResultOpened(let showID),
+            .showDetailViewed(let showID),
+            .watchlistItemOpened(let showID),
+            .notificationTapped(let showID),
+            .appOpenedFromNotification(let showID):
             ["show_id": String(showID)]
-        case let .watchlistAdded(source, showID),
-             let .watchlistRemoved(source, showID):
+        case .watchlistAdded(let source, let showID),
+            .watchlistRemoved(let source, let showID):
             ["source": source.rawValue, "show_id": String(showID)]
-        case let .notificationPermission(result):
+        case .notificationPermission(let result):
             ["result": result.rawValue]
-        case let .nonFatalError(category, context):
+        case .nonFatalError(let category, let context):
             ["category": category.rawValue, "context": context]
         case .appLaunched, .exampleSearchUsed, .notificationReminderScheduled,
-             .watchlistViewed, .emptyWatchlistShown, .emptySearchResultsShown:
+            .watchlistViewed, .emptyWatchlistShown, .emptySearchResultsShown:
             [:]
         }
     }
@@ -197,25 +198,25 @@ final class AnalyticsService: AnalyticsTracking {
 }
 
 #if DEBUG
-/// In-memory analytics for unit tests: captures events for assertions without
-/// writing to Console or UserDefaults (unlike production `AnalyticsService`).
-@MainActor
-final class RecordingAnalyticsService: AnalyticsTracking {
-    private(set) var events: [AnalyticsEvent] = []
-    private var counters = AnalyticsCounters()
+    /// In-memory analytics for unit tests: captures events for assertions without
+    /// writing to Console or UserDefaults (unlike production `AnalyticsService`).
+    @MainActor
+    final class RecordingAnalyticsService: AnalyticsTracking {
+        private(set) var events: [AnalyticsEvent] = []
+        private var counters = AnalyticsCounters()
 
-    func track(_ event: AnalyticsEvent) {
-        events.append(event)
-        counters.record(event)
-    }
+        func track(_ event: AnalyticsEvent) {
+            events.append(event)
+            counters.record(event)
+        }
 
-    func countersSnapshot() -> AnalyticsCounters {
-        counters
-    }
+        func countersSnapshot() -> AnalyticsCounters {
+            counters
+        }
 
-    func reset() {
-        events.removeAll()
-        counters = AnalyticsCounters()
+        func reset() {
+            events.removeAll()
+            counters = AnalyticsCounters()
+        }
     }
-}
 #endif

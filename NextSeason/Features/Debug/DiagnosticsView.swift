@@ -62,8 +62,13 @@ struct DiagnosticsView: View {
                 Section {
                     let launchDiagnostics = AppDiagnosticsLogger.launchDiagnostics()
                     LabeledContent("Previous launch") {
-                        Text(launchDiagnostics.previousLaunchEndedUnexpectedly ? "Ended unexpectedly ⚠️" : "Clean or not detected")
-                            .foregroundStyle(launchDiagnostics.previousLaunchEndedUnexpectedly ? .orange : .secondary)
+                        Text(
+                            launchDiagnostics.previousLaunchEndedUnexpectedly
+                                ? "Ended unexpectedly ⚠️" : "Clean or not detected"
+                        )
+                        .foregroundStyle(
+                            launchDiagnostics.previousLaunchEndedUnexpectedly ? .orange : .secondary
+                        )
                     }
                     LabeledContent("Current launch started") {
                         Text(formattedDate(launchDiagnostics.currentLaunchStartedAt))
@@ -112,7 +117,8 @@ struct DiagnosticsView: View {
                     let counters = analytics.countersSnapshot()
                     LabeledContent("App launches", value: String(counters.appLaunches))
                     LabeledContent("Searches", value: String(counters.searchesPerformed))
-                    LabeledContent("Successful searches", value: String(counters.successfulSearches))
+                    LabeledContent(
+                        "Successful searches", value: String(counters.successfulSearches))
                     LabeledContent("No-result searches", value: String(counters.noResultSearches))
                     LabeledContent("Example searches", value: String(counters.exampleSearchesUsed))
                     LabeledContent("Show detail views", value: String(counters.showDetailViews))
@@ -186,14 +192,20 @@ struct DiagnosticsView: View {
                     .foregroundStyle(.secondary)
             }
             LabeledContent("Last background fetch result") {
-                Text(betaRefreshDiagnostics?.lastBackgroundFetchResult ?? "No background refresh recorded yet.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    betaRefreshDiagnostics?.lastBackgroundFetchResult
+                        ?? "No background refresh recorded yet."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             LabeledContent("Last background notification decision") {
-                Text(betaRefreshDiagnostics?.lastBackgroundNotificationDecision ?? "No background notification decision yet.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    betaRefreshDiagnostics?.lastBackgroundNotificationDecision
+                        ?? "No background notification decision yet."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             if let summary = betaRefreshDiagnostics?.lastSimulatedScenarioSummary {
                 LabeledContent("Last simulation") {
@@ -207,14 +219,20 @@ struct DiagnosticsView: View {
                     .foregroundStyle(.secondary)
             }
             LabeledContent("Last foreground fetch result") {
-                Text(betaRefreshDiagnostics?.lastForegroundFetchResult ?? "No foreground refresh recorded yet.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    betaRefreshDiagnostics?.lastForegroundFetchResult
+                        ?? "No foreground refresh recorded yet."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             LabeledContent("Last foreground notification decision") {
-                Text(betaRefreshDiagnostics?.lastForegroundNotificationDecision ?? "No foreground notification decision yet.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    betaRefreshDiagnostics?.lastForegroundNotificationDecision
+                        ?? "No foreground notification decision yet."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
         } header: {
             Text("Beta validation")
@@ -263,7 +281,9 @@ struct DiagnosticsView: View {
             Text("Beta actions")
         } footer: {
             if !notificationStatus.canDeliverVisibleAlerts {
-                Text("Notification test actions require alert permission. Enable notifications in Settings, then return here.")
+                Text(
+                    "Notification test actions require alert permission. Enable notifications in Settings, then return here."
+                )
             }
         }
     }
@@ -406,11 +426,13 @@ struct DiagnosticsView: View {
 }
 
 #if DEBUG
-#Preview {
-    DiagnosticsView()
-        .environment(\.analytics, RecordingAnalyticsService())
-        .environment(\.notificationService, NotificationService(analytics: RecordingAnalyticsService()))
-        .environment(\.watchlistRepository, InMemoryWatchlistRepository())
-        .environment(\.betaRefreshDiagnostics, BetaRefreshDiagnostics())
-}
+    #Preview {
+        DiagnosticsView()
+            .environment(\.analytics, RecordingAnalyticsService())
+            .environment(
+                \.notificationService, NotificationService(analytics: RecordingAnalyticsService())
+            )
+            .environment(\.watchlistRepository, InMemoryWatchlistRepository())
+            .environment(\.betaRefreshDiagnostics, BetaRefreshDiagnostics())
+    }
 #endif

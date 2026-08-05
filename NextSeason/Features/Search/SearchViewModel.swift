@@ -59,7 +59,7 @@ final class SearchViewModel {
         do {
             try await Task.sleep(for: debounce)
         } catch {
-            return // superseded by a newer query
+            return  // superseded by a newer query
         }
 
         // `.task(id: query)` runs again when returning from show detail; keep

@@ -186,19 +186,19 @@ struct ShowRowTrackButton: View {
 }
 
 #if DEBUG
-#Preview {
-    List {
-        ShowRowLabel(show: .preview)
-        ShowRowLabel(tracked: TrackedShow(from: .preview))
-        HStack {
+    #Preview {
+        List {
             ShowRowLabel(show: .preview)
-            ShowRowTrackButton(
-                showID: Show.preview.id,
-                showName: Show.preview.name,
-                isTracked: true,
-                isUpdating: false
-            ) { _ in }
+            ShowRowLabel(tracked: TrackedShow(from: .preview))
+            HStack {
+                ShowRowLabel(show: .preview)
+                ShowRowTrackButton(
+                    showID: Show.preview.id,
+                    showName: Show.preview.name,
+                    isTracked: true,
+                    isUpdating: false
+                ) { _ in }
+            }
         }
     }
-}
 #endif

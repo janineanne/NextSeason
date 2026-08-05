@@ -5,6 +5,7 @@
 
 import Foundation
 import Testing
+
 @testable import NextSeason
 
 @MainActor
@@ -55,7 +56,7 @@ struct WatchlistRefreshServiceTests {
     private func show(nextEpisode: NextEpisode? = nil, extraSeason: Season? = nil) -> Show {
         var seasons = [
             season(1, premiere: "2022-02-18", end: "2022-04-08"),
-            season(2, premiere: "2025-01-17", end: "2025-03-21")
+            season(2, premiere: "2025-01-17", end: "2025-03-21"),
         ]
         if let extraSeason { seasons.append(extraSeason) }
 
@@ -122,7 +123,8 @@ struct WatchlistRefreshServiceTests {
         tvMaze.updates = [:]
         tvMaze.shows[showID] = initial
 
-        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
+        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications)
+            .refreshAll()
 
         #expect(tvMaze.fetchedShowIDs.isEmpty)
         #expect(notifications.delivered.isEmpty)
@@ -146,7 +148,8 @@ struct WatchlistRefreshServiceTests {
         tvMaze.updates = [showID: fixedNow]
         tvMaze.shows[showID] = updated
 
-        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
+        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications)
+            .refreshAll()
 
         #expect(tvMaze.fetchedShowIDs == [showID])
         #expect(tvMaze.lastBypassCache == true)
@@ -343,7 +346,8 @@ struct WatchlistRefreshServiceTests {
         tvMaze.updates = [showID: fixedNow]
         tvMaze.shows = [:]
 
-        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
+        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications)
+            .refreshAll()
 
         let stored = try await repository.all()[0]
         #expect(stored.isStale)
@@ -355,7 +359,8 @@ struct WatchlistRefreshServiceTests {
         let repository = InMemoryWatchlistRepository()
         let tvMaze = MockTVMazeService()
         let notifications = RecordingNotificationService()
-        let service = makeService(repository: repository, tvMaze: tvMaze, notifications: notifications)
+        let service = makeService(
+            repository: repository, tvMaze: tvMaze, notifications: notifications)
 
         let betweenSeasons = show()
         try await repository.add(betweenSeasons)
@@ -373,7 +378,9 @@ struct WatchlistRefreshServiceTests {
         #expect(notifications.delivered.isEmpty)
 
         let pending = try await repository.all()[0]
-        #expect(pending.pendingChangeSignature == StatusChangeDetector.signature(for: .announcedUndated(season: 3)))
+        #expect(
+            pending.pendingChangeSignature
+                == StatusChangeDetector.signature(for: .announcedUndated(season: 3)))
 
         await service.refreshAll(force: true)
         #expect(notifications.delivered.count == 1)
@@ -393,7 +400,8 @@ struct WatchlistRefreshServiceTests {
         try await repository.updateAfterRefresh(tracked)
 
         tvMaze.updates = [:]
-        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
+        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications)
+            .refreshAll()
 
         #expect(tvMaze.lastUpdatePeriod == .week)
     }
@@ -411,7 +419,8 @@ struct WatchlistRefreshServiceTests {
         try await repository.updateAfterRefresh(tracked)
 
         tvMaze.updates = [:]
-        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications).refreshAll()
+        await makeService(repository: repository, tvMaze: tvMaze, notifications: notifications)
+            .refreshAll()
 
         #expect(tvMaze.lastUpdatePeriod == .month)
     }

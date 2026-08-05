@@ -18,7 +18,7 @@ struct TVMazeAttributionView: View {
 }
 
 #if DEBUG
-#Preview {
-    TVMazeAttributionView()
-}
+    #Preview {
+        TVMazeAttributionView()
+    }
 #endif

@@ -64,7 +64,8 @@ final class WatchlistPendingRemoval {
             pendingRemovalSource = nil
             pendingOnCommitted = nil
             Task { [weak self] in
-                await self?.persistRemoval(previous, source: previousSource, onCommitted: previousOnCommitted)
+                await self?.persistRemoval(
+                    previous, source: previousSource, onCommitted: previousOnCommitted)
             }
         }
 

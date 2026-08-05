@@ -258,8 +258,10 @@ struct SearchView: View {
                 Label("Can't Find Your Show?", systemImage: "magnifyingglass")
                     .appPrimaryText()
             } description: {
-                Text("Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”).")
-                    .appSecondaryText()
+                Text(
+                    "Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)."
+                )
+                .appSecondaryText()
             }
             .uiTestMarker(AccessibilityID.Search.noResults, label: "Can't Find Your Show?")
         case .failed(let message):
@@ -296,7 +298,10 @@ private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
             }
             .onChange(of: isSearching) { wasSearching, searching in
                 guard searching, !wasSearching, navigationPath.count > 0 else { return }
-                guard Date.now.timeIntervalSince(lastNavigationPathChange) > Self.navigationSettlingInterval else {
+                guard
+                    Date.now.timeIntervalSince(lastNavigationPathChange)
+                        > Self.navigationSettlingInterval
+                else {
                     return
                 }
                 navigationPath = NavigationPath()
@@ -305,18 +310,20 @@ private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
 }
 
 #if DEBUG
-#Preview {
-    @Previewable @State var path = NavigationPath()
-    let repository = InMemoryWatchlistRepository()
-    SearchView(
-        navigationPath: $path,
-        tvMaze: TVMazeClient(),
-        analytics: RecordingAnalyticsService()
-    )
-    .environment(\.watchlistRepository, repository)
-    .environment(\.watchlistPendingRemoval, WatchlistPendingRemoval(
-        repository: repository,
-        analytics: RecordingAnalyticsService()
-    ))
-}
+    #Preview {
+        @Previewable @State var path = NavigationPath()
+        let repository = InMemoryWatchlistRepository()
+        SearchView(
+            navigationPath: $path,
+            tvMaze: TVMazeClient(),
+            analytics: RecordingAnalyticsService()
+        )
+        .environment(\.watchlistRepository, repository)
+        .environment(
+            \.watchlistPendingRemoval,
+            WatchlistPendingRemoval(
+                repository: repository,
+                analytics: RecordingAnalyticsService()
+            ))
+    }
 #endif

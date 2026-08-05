@@ -134,7 +134,7 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
                 premiereDate: TVMazeDate.dateOnly("2025-01-10"),
                 endDate: TVMazeDate.dateOnly("2025-03-10"),
                 episodeOrder: 8
-            )
+            ),
         ]
 
         let upcomingSeason: Season
@@ -148,7 +148,8 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
                 episodeOrder: nil
             )
         case .updated:
-            let premiere = Calendar.current.date(byAdding: .month, value: 2, to: referenceDate)
+            let premiere =
+                Calendar.current.date(byAdding: .month, value: 2, to: referenceDate)
                 ?? referenceDate.addingTimeInterval(60 * 60 * 24 * 60)
             upcomingSeason = Season(
                 id: 3,

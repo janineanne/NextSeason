@@ -7,6 +7,7 @@ import CoreGraphics
 import Foundation
 import Testing
 import UserNotifications
+
 @testable import NextSeason
 
 @MainActor
@@ -97,7 +98,8 @@ struct WatchlistTrackingTests {
     func secondTapUndoesPendingRemoval() async throws {
         let repository = InMemoryWatchlistRepository()
         let analytics = RecordingAnalyticsService()
-        let removalCoordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: analytics)
         let notifications = makeNotificationService(analytics: analytics)
         let prompt = WatchlistNotificationPromptState()
         let tvMaze = MockTVMazeService()
@@ -216,7 +218,7 @@ struct WatchlistTrackingTests {
             genres: [],
             averageRuntime: nil,
             seasons: [
-                season(17, premiere: "2026-04-05", end: "2026-08-23"),
+                season(17, premiere: "2026-04-05", end: "2026-08-23")
             ],
             nextEpisode: nil,
             updatedAt: now

@@ -32,11 +32,11 @@ struct ContentView: View {
                 analytics: analytics,
                 onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }
             )
-                .accessibilityIdentifier(AccessibilityID.Tab.search)
-                .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
-                .tag(AppNavigationCoordinator.Tab.search)
+            .accessibilityIdentifier(AccessibilityID.Tab.search)
+            .tabItem {
+                Label("Search", systemImage: "magnifyingglass")
+            }
+            .tag(AppNavigationCoordinator.Tab.search)
 
             WatchlistView(
                 navigationPath: $coordinator.watchlistPath,
@@ -53,11 +53,11 @@ struct ContentView: View {
                     coordinator.notifyWatchlistDataChanged()
                 }
             )
-                .accessibilityIdentifier(AccessibilityID.Tab.watchlist)
-                .tabItem {
-                    Label("Watchlist", systemImage: "star")
-                }
-                .tag(AppNavigationCoordinator.Tab.watchlist)
+            .accessibilityIdentifier(AccessibilityID.Tab.watchlist)
+            .tabItem {
+                Label("Watchlist", systemImage: "star")
+            }
+            .tag(AppNavigationCoordinator.Tab.watchlist)
         }
         .appScreenBackground()
         .background {
@@ -111,13 +111,15 @@ struct ContentView: View {
 }
 
 #if DEBUG
-#Preview {
-    let repository = InMemoryWatchlistRepository()
-    ContentView(coordinator: AppNavigationCoordinator(), tvMaze: TVMazeClient())
-        .environment(\.watchlistRepository, repository)
-        .environment(\.watchlistPendingRemoval, WatchlistPendingRemoval(
-            repository: repository,
-            analytics: RecordingAnalyticsService()
-        ))
-}
+    #Preview {
+        let repository = InMemoryWatchlistRepository()
+        ContentView(coordinator: AppNavigationCoordinator(), tvMaze: TVMazeClient())
+            .environment(\.watchlistRepository, repository)
+            .environment(
+                \.watchlistPendingRemoval,
+                WatchlistPendingRemoval(
+                    repository: repository,
+                    analytics: RecordingAnalyticsService()
+                ))
+    }
 #endif

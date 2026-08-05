@@ -22,7 +22,8 @@ final class NavigationUITests: XCTestCase, NextSeasonUITesting {
             tryExampleButton.waitForExistence(timeout: UITestTimeout.standard),
             "Search idle state should offer Try an Example on launch."
         )
-        XCTAssertTrue(app.navigationBars["NextSeason"].waitForExistence(timeout: UITestTimeout.standard))
+        XCTAssertTrue(
+            app.navigationBars["NextSeason"].waitForExistence(timeout: UITestTimeout.standard))
         XCTAssertTrue(app.tabBars.buttons["Search"].exists)
     }
 
@@ -33,7 +34,8 @@ final class NavigationUITests: XCTestCase, NextSeasonUITesting {
             watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended),
             "Watchlist tab should show the empty state when no shows are tracked."
         )
-        XCTAssertTrue(app.navigationBars["Watchlist"].waitForExistence(timeout: UITestTimeout.standard))
+        XCTAssertTrue(
+            app.navigationBars["Watchlist"].waitForExistence(timeout: UITestTimeout.standard))
     }
 
     func testSwitchBetweenTabs() {

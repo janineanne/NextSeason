@@ -43,12 +43,15 @@ struct TabBarReselectHandler: UIViewControllerRepresentable {
 
         func installDelegateIfNeeded() {
             DispatchQueue.main.async { [weak self] in
-                guard let self, let tabBarController = self.hostingController.tabBarController else { return }
+                guard let self, let tabBarController = self.hostingController.tabBarController
+                else { return }
                 tabBarController.delegate = self
             }
         }
 
-        func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        func tabBarController(
+            _ tabBarController: UITabBarController, didSelect viewController: UIViewController
+        ) {
             let selectedIndex = tabBarController.selectedIndex
             defer { lastSelectedIndex = selectedIndex }
 

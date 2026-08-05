@@ -23,11 +23,11 @@ final class BetaBuildAvailability {
 
     var isAvailable: Bool {
         #if DEBUG
-        return true
+            return true
         #elseif TESTFLIGHT
-        return true
+            return true
         #else
-        return appStoreEnvironment == .sandbox || hasSandboxReceipt
+            return appStoreEnvironment == .sandbox || hasSandboxReceipt
         #endif
     }
 
@@ -35,56 +35,57 @@ final class BetaBuildAvailability {
         // Runtime fallback for TestFlight. Accessed with KVC to avoid the iOS 18
         // deprecation warning from Bundle.appStoreReceiptURL while still handling
         // TestFlight builds where AppTransaction is unavailable or delayed.
-        (Bundle.main.value(forKey: "appStoreReceiptURL") as? URL)?.lastPathComponent == "sandboxReceipt"
+        (Bundle.main.value(forKey: "appStoreReceiptURL") as? URL)?.lastPathComponent
+            == "sandboxReceipt"
     }
 
     var channelDisplayName: String {
         #if DEBUG
-        return "Debug"
+            return "Debug"
         #elseif TESTFLIGHT
-        return "TestFlight"
-        #else
-        guard detectionAttempted else { return "Detecting…" }
-
-        if hasSandboxReceipt {
             return "TestFlight"
-        }
+        #else
+            guard detectionAttempted else { return "Detecting…" }
 
-        switch appStoreEnvironment {
-        case .sandbox:
-            return "TestFlight / Sandbox"
-        case .production:
-            return "App Store"
-        case .xcode:
-            return "Xcode"
-        case .none:
-            return "Production"
-        @unknown default:
-            return "Unknown"
-        }
+            if hasSandboxReceipt {
+                return "TestFlight"
+            }
+
+            switch appStoreEnvironment {
+            case .sandbox:
+                return "TestFlight / Sandbox"
+            case .production:
+                return "App Store"
+            case .xcode:
+                return "Xcode"
+            case .none:
+                return "Production"
+            @unknown default:
+                return "Unknown"
+            }
         #endif
     }
 
     func refresh() async {
         #if DEBUG
-        detectionAttempted = true
-        appStoreEnvironment = .xcode
+            detectionAttempted = true
+            appStoreEnvironment = .xcode
         #elseif TESTFLIGHT
-        detectionAttempted = true
-        appStoreEnvironment = .sandbox
+            detectionAttempted = true
+            appStoreEnvironment = .sandbox
         #else
-        do {
-            let result = try await AppTransaction.shared
-            switch result {
-            case .verified(let appTransaction):
-                appStoreEnvironment = appTransaction.environment
-            case .unverified(let appTransaction, _):
-                appStoreEnvironment = appTransaction.environment
+            do {
+                let result = try await AppTransaction.shared
+                switch result {
+                case .verified(let appTransaction):
+                    appStoreEnvironment = appTransaction.environment
+                case .unverified(let appTransaction, _):
+                    appStoreEnvironment = appTransaction.environment
+                }
+            } catch {
+                appStoreEnvironment = nil
             }
-        } catch {
-            appStoreEnvironment = nil
-        }
-        detectionAttempted = true
+            detectionAttempted = true
         #endif
     }
 }

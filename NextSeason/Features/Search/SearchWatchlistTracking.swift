@@ -105,7 +105,8 @@ final class SearchWatchlistTracking {
         } catch is CancellationError {
             return
         } catch {
-            let errorContext = isTracked || isPendingRemoval
+            let errorContext =
+                isTracked || isPendingRemoval
                 ? "search_watchlist_tracking_lookup"
                 : "watchlist_add_search"
             context.analytics.trackNonFatalError(error, context: errorContext)
