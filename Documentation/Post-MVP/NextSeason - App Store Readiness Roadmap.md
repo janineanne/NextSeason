@@ -113,6 +113,76 @@ Introduce user accounts only if they become necessary to support Cloud Sync or b
 
 Review every use of fatalError, preconditionFailure, and similar deliberate crash mechanisms. Replace any that could be reached because of malformed data, persistence problems, API responses, migration failures, or other runtime conditions with recoverable error handling, safe fallback behavior, and appropriate logging. Retain deliberate crashes only for genuinely impossible programmer errors, and document why each remaining use is safe.
 
+# Diagnostics and Analytics
+
+* Review which diagnostics features should remain after the TestFlight beta.
+* Decide whether to keep or remove local analytics counters.
+* If retained:
+    * Remove beta-specific wording.
+    * Record when counters began accumulating.
+    * Add a way to reset counters.
+    * Continue storing aggregate counters in UserDefaults; only migrate to SwiftData if historical/queryable analytics are introduced.
+    
+# Production About & Diagnostics Screen
+
+The About and Diagnostics screens will remain part of NextSeason TV after the beta period, but their purpose will shift from developer testing to user support and troubleshooting.
+
+## About Screen
+
+The About screen should remain available to all users and continue to include:
+
+* Application name and version number
+* Build number
+* Attribution and acknowledgements (including TVMaze)
+* Links to privacy policy, support, and other user-facing resources
+* Notification guidance, if still applicable
+
+## Diagnostics Screen
+
+The Diagnostics screen should remain available as a lightweight support tool for production users.
+
+Retain:
+
+* Current application version/build
+* Last successful refresh time
+* Next scheduled refresh window (if available)
+* Most recent refresh result
+* Current notification authorization status
+* Other non-sensitive status information useful for troubleshooting
+* Copy Diagnostics
+* Share Diagnostics
+
+Remove beta-only functionality:
+
+* Force Refresh
+* Test Notification
+* Simulated Update
+* Any other controls intended only for development or TestFlight validation
+
+## Analytics Information
+
+Internal analytics counters used during beta testing should not be displayed in production builds unless they continue to provide meaningful value for customer support.
+
+If retained:
+* Remove beta-specific wording.
+* Record when counters began accumulating.
+* Add a way to reset counters.
+* Continue storing aggregate counters in UserDefaults; only migrate to SwiftData if historical/queryable analytics are introduced.
+
+## Support Report
+
+The diagnostics report should continue to provide enough information to assist in troubleshooting user issues while avoiding the inclusion of personal data or sensitive information.
+
+The report should contain only information that is safe for users to review and share with support.
+
+## Goal
+
+The production Diagnostics screen should answer the common support question:
+
+“Why didn’t I receive a notification?”
+
+without exposing implementation details that are only useful during development.
+
 # Product Analytics
 
 Transition Diagnostics into a production support feature while retaining diagnostic report generation. Continue using lightweight, privacy-preserving analytics to guide future product decisions.
