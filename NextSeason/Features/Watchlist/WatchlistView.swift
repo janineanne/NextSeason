@@ -240,8 +240,13 @@ struct WatchlistView: View {
             }
         case .failed(let message):
             ContentUnavailableView {
-                Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
-                    .appPrimaryText()
+                Label {
+                    Text("Something Went Wrong")
+                        .appAccentText()
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle")
+                        .appPrimaryText()
+                }
             } description: {
                 Text(message)
                     .appSecondaryText()
@@ -255,8 +260,13 @@ struct WatchlistView: View {
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("No Tracked Shows", systemImage: "star")
-                .appPrimaryText()
+            Label {
+                Text("No Tracked Shows")
+                    .appAccentText()
+            } icon: {
+                Image(systemName: "star")
+                    .appPrimaryText()
+            }
         } description: {
             Text(FirstRunCopy.watchlistEmptyDescription)
                 .appSecondaryText()
@@ -276,8 +286,13 @@ struct WatchlistView: View {
 
     private func noSearchResults(query: String) -> some View {
         ContentUnavailableView {
-            Label("No Matches", systemImage: "magnifyingglass")
-                .appPrimaryText()
+            Label {
+                Text("No Matches")
+                    .appAccentText()
+            } icon: {
+                Image(systemName: "magnifyingglass")
+                    .appPrimaryText()
+            }
         } description: {
             Text(
                 "No tracked shows match “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”."

@@ -255,8 +255,13 @@ struct SearchView: View {
             // so an empty result set does not mean the show is missing. Guide the
             // user toward a more specific query instead of implying it doesn't exist.
             ContentUnavailableView {
-                Label("Can't Find Your Show?", systemImage: "magnifyingglass")
-                    .appPrimaryText()
+                Label {
+                    Text("Can't Find Your Show?")
+                        .appAccentText()
+                } icon: {
+                    Image(systemName: "magnifyingglass")
+                        .appPrimaryText()
+                }
             } description: {
                 Text(
                     "Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)."
@@ -266,8 +271,13 @@ struct SearchView: View {
             .uiTestMarker(AccessibilityID.Search.noResults, label: "Can't Find Your Show?")
         case .failed(let message):
             ContentUnavailableView {
-                Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
-                    .appPrimaryText()
+                Label {
+                    Text("Something Went Wrong")
+                        .appAccentText()
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle")
+                        .appPrimaryText()
+                }
             } description: {
                 Text(message)
                     .appSecondaryText()
