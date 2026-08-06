@@ -53,6 +53,7 @@
 		E1670D433023D83E007F7098 /* 8-5-2026 Fix Text Color on Empty Result Views.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Fix Text Color on Empty Result Views.md"; sourceTree = "<group>"; };
 		E1670F7E30240FE5007F7098 /* 8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md"; sourceTree = "<group>"; };
 		E1670F7F30241008007F7098 /* 8-5-2026 Implement Swipe-to-Delete.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Implement Swipe-to-Delete.md"; sourceTree = "<group>"; };
+		E16711BA302415B5007F7098 /* 8-5-2026 Discussion of Platform Support.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Discussion of Platform Support.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -454,6 +455,7 @@
 				E1670D433023D83E007F7098 /* 8-5-2026 Fix Text Color on Empty Result Views.md */,
 				E1670F7E30240FE5007F7098 /* 8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md */,
 				E1670F7F30241008007F7098 /* 8-5-2026 Implement Swipe-to-Delete.md */,
+				E16711BA302415B5007F7098 /* 8-5-2026 Discussion of Platform Support.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
@@ -786,12 +788,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.TrialByFyre.NextSeason;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -821,12 +827,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.TrialByFyre.NextSeason;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -842,11 +852,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NextSeason.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NextSeason";
 			};
 			name = Debug;
@@ -863,11 +877,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NextSeason.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NextSeason";
 			};
 			name = Release;
@@ -883,11 +901,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = NextSeason;
 			};
 			name = Debug;
@@ -903,11 +925,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = NextSeason;
 			};
 			name = Release;

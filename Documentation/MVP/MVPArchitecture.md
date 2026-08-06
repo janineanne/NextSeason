@@ -23,7 +23,17 @@ The architecture favors explicit dependencies and small, testable components wit
 
 ---
 
-## 2. Application Composition and Dependency Injection
+## 2. Platform Support
+
+Current MVP supports:
+- iPhone only
+- Portrait orientation only
+
+The app intentionally does not support iPad, Mac, or Apple Vision at this stage. Those platforms will be evaluated after the iPhone MVP has shipped and user demand is better understood.
+
+---
+
+## 3. Application Composition and Dependency Injection
 
 `AppCompositionRoot` constructs the application’s long-lived dependencies:
 
@@ -52,7 +62,7 @@ This setup is skipped or replaced where necessary during UI testing.
 
 ---
 
-## 3. Presentation Layer
+## 4. Presentation Layer
 
 The root interface is a two-tab `TabView`:
 
@@ -107,7 +117,7 @@ This coordination is intentionally separate from `WatchlistViewModel` because pe
 
 ---
 
-## 4. Navigation Architecture
+## 5. Navigation Architecture
 
 `AppNavigationCoordinator` is an `@Observable`, `@MainActor` service that owns:
 
@@ -132,7 +142,7 @@ A deferred Watchlist push is used when changing tabs because immediately mutatin
 
 ---
 
-## 5. Data Model Boundaries
+## 6. Data Model Boundaries
 
 NextSeason uses three distinct model layers.
 
@@ -161,7 +171,7 @@ This separation prevents API response details and persistence mechanics from lea
 
 ---
 
-## 6. Networking
+## 7. Networking
 
 `TVMazeService` defines the network boundary:
 
@@ -193,7 +203,7 @@ The dedicated `URLSession` uses a modest private cache. TVMaze detail requests m
 
 ---
 
-## 7. Persistence
+## 8. Persistence
 
 `WatchlistRepository` is the persistence boundary:
 
@@ -229,7 +239,7 @@ The repository is the only layer that reads and writes `TrackedShowEntity`.
 
 ---
 
-## 8. Next-Season Calculation and Change Detection
+## 9. Next-Season Calculation and Change Detection
 
 `NextSeasonCalculator` is a pure domain component that derives `NextSeasonStatus` from a fully loaded `Show` and an injectable current date.
 
@@ -241,7 +251,7 @@ For changes not backed by a concrete date, `TrackedShow.pendingChangeSignature` 
 
 ---
 
-## 9. Refresh Pipeline
+## 10. Refresh Pipeline
 
 `WatchlistRefreshService` owns watchlist polling and update coordination. It remains `@MainActor` because the repository is main-actor-bound, while awaited network operations execute within the actor-backed TVMaze client.
 
@@ -268,7 +278,7 @@ The present system does not include a server that independently monitors shows a
 
 ---
 
-## 10. Notification Architecture
+## 11. Notification Architecture
 
 `NotificationService` implements notification authorization and local delivery behind `NotificationDelivering` and `NotificationManaging` protocols.
 
@@ -288,7 +298,7 @@ Responsibilities include:
 
 ---
 
-## 11. Analytics and Diagnostics
+## 12. Analytics and Diagnostics
 
 The current app does not use a third-party analytics SDK.
 
@@ -322,7 +332,7 @@ Persisted background diagnostics survive relaunch so beta testers can determine 
 
 ---
 
-## 12. Concurrency Model
+## 13. Concurrency Model
 
 The application uses Swift Concurrency with explicit isolation boundaries:
 
@@ -336,7 +346,7 @@ SwiftData’s `ModelContext` is kept behind the main-actor repository rather tha
 
 ---
 
-## 13. Accessibility and Visual System
+## 14. Accessibility and Visual System
 
 Accessibility is treated as a cross-cutting requirement rather than a separate feature layer.
 
@@ -355,7 +365,7 @@ The visual system remains intentionally lightweight. Reusable utilities provide 
 
 ---
 
-## 14. Testing Architecture
+## 15. Testing Architecture
 
 The test suite uses XCTest and XCUITest.
 
@@ -410,7 +420,7 @@ The repository includes scripts and profile flows for:
 
 ---
 
-## 15. Current Architectural Constraints
+## 16. Current Architectural Constraints
 
 The current implementation intentionally has the following constraints:
 
@@ -427,7 +437,7 @@ Planned product and architecture changes belong in the App Store Readiness and P
 
 ---
 
-## 16. Scope and Maintenance
+## 17. Scope and Maintenance
 
 This document describes the architecture of the completed MVP implementation. It should remain an accurate description of the MVP as released.
 
