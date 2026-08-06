@@ -54,6 +54,9 @@
 		E1670F7E30240FE5007F7098 /* 8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md"; sourceTree = "<group>"; };
 		E1670F7F30241008007F7098 /* 8-5-2026 Implement Swipe-to-Delete.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Implement Swipe-to-Delete.md"; sourceTree = "<group>"; };
 		E16711BA302415B5007F7098 /* 8-5-2026 Discussion of Platform Support.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Discussion of Platform Support.md"; sourceTree = "<group>"; };
+		E16713F6302512D0007F7098 /* 7-31-2026 Post-MVP Documentation Review and Cleanup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-31-2026 Post-MVP Documentation Review and Cleanup.md"; sourceTree = "<group>"; };
+		E16713F730251340007F7098 /* 8-6-2026 Discuss Floating Section Header Fix.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Discuss Floating Section Header Fix.md"; sourceTree = "<group>"; };
+		E16713F930251376007F7098 /* 8-6-2026 Implement Floating Section Header Fix.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Implement Floating Section Header Fix.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -445,6 +448,7 @@
 				E167ED92301A8BDC007F7098 /* 7-29-2026 Refactor theming and colors.md */,
 				E167F330301D2F41007F7098 /* 7-29-2026 Documentation Review and Cleanup.md */,
 				E167FE83301D42A3007F7098 /* 7-31-2026 Remove soak test code.md */,
+				E16713F6302512D0007F7098 /* 7-31-2026 Post-MVP Documentation Review and Cleanup.md */,
 				E167043A30230010007F7098 /* 8-4-2026 Human Code Review - Questions and Cleanup.md */,
 				E167068F3023BA77007F7098 /* 8-4-2026 Discuss Analytics Counters.md */,
 				E16706903023BA77007F7098 /* 8-4-2026 Remove unused files.md */,
@@ -456,6 +460,8 @@
 				E1670F7E30240FE5007F7098 /* 8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md */,
 				E1670F7F30241008007F7098 /* 8-5-2026 Implement Swipe-to-Delete.md */,
 				E16711BA302415B5007F7098 /* 8-5-2026 Discussion of Platform Support.md */,
+				E16713F730251340007F7098 /* 8-6-2026 Discuss Floating Section Header Fix.md */,
+				E16713F930251376007F7098 /* 8-6-2026 Implement Floating Section Header Fix.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

@@ -381,6 +381,9 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
                         .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(isExpanded ? 0 : -90))
                 }
+                .padding(.vertical, AppSpacing.tight)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AppColor.background)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
