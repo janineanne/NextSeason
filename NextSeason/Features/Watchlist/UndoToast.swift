@@ -180,9 +180,11 @@ private func toastPosition(
     let toastHeightEstimate: CGFloat = 48
     let spacing: CGFloat = 8
 
-    // Fall back when the trigger button has not reported a frame yet.
+    // Fall back when the trigger has not reported a frame yet. Prefer mid-screen
+    // over the bottom edge so the toast does not pull a near-bottom List row
+    // into a scroll jump when it appears.
     if anchor.width < 1 || anchor.height < 1 {
-        return CGPoint(x: proxy.size.width / 2, y: proxy.size.height - toastHeightEstimate)
+        return CGPoint(x: proxy.size.width / 2, y: proxy.size.height * 0.55)
     }
 
     // Global → local: subtract the overlay container's global origin.

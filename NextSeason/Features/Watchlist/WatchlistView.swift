@@ -6,7 +6,8 @@
 import SwiftUI
 
 /// Local watchlist: status-grouped tracked shows, in-list search, pull-to-refresh,
-/// undoable removal, and notification deep-link push into Show Detail.
+/// star (deferred) and swipe (immediate) undoable removal, and notification
+/// deep-link push into Show Detail.
 ///
 /// Lifecycle:
 /// - `.task(id: watchlistReloadToken)` creates the view model and reloads when the
@@ -44,6 +45,9 @@ struct WatchlistView: View {
     @State private var hasCompletedInitialLoad = false
     /// Sections the user has collapsed. Missing IDs are treated as expanded.
     @State private var collapsedSections: Set<WatchlistSection> = []
+    /// Global frames for watchlist rows, used to anchor the swipe-delete toast
+    /// near the deleted row instead of the bottom of the screen.
+    @State private var rowFrames: [Int: CGRect] = [:]
 
     init(
         navigationPath: Binding<NavigationPath>,
@@ -176,7 +180,20 @@ struct WatchlistView: View {
                     WatchlistCollapsibleSection(
                         title: group.section.title,
                         shows: group.shows,
-                        isExpanded: expansionBinding(for: group.section)
+                        isExpanded: expansionBinding(for: group.section),
+                        onDelete: { offsets in
+                            // Avoid notifyWatchlistDataChanged here — bumping the
+                            // reload token mid-delete jumps list scroll position.
+                            viewModel.deleteImmediately(
+                                at: offsets,
+                                in: group.shows,
+                                rowAnchors: rowFrames
+                            )
+                            for index in offsets {
+                                guard group.shows.indices.contains(index) else { continue }
+                                rowFrames[group.shows[index].id] = nil
+                            }
+                        }
                     ) { tracked in
                         HStack(spacing: AppSpacing.tight) {
                             NavigationLink(value: tracked) {
@@ -195,7 +212,7 @@ struct WatchlistView: View {
                                 trackButtonIdentifier: AccessibilityID.Watchlist.trackButton
                             ) { anchor in
                                 if viewModel.isPendingRemoval(tracked) {
-                                    viewModel.undoPendingRemoval()
+                                    Task { await viewModel.undoPendingRemoval() }
                                 } else {
                                     viewModel.requestRemoval(
                                         tracked,
@@ -203,6 +220,17 @@ struct WatchlistView: View {
                                         source: .watchlist
                                     )
                                 }
+                            }
+                        }
+                        .background {
+                            GeometryReader { geometry in
+                                Color.clear
+                                    .onAppear {
+                                        updateRowFrame(tracked.id, from: geometry)
+                                    }
+                                    .onChange(of: geometry.frame(in: .global)) { _, _ in
+                                        updateRowFrame(tracked.id, from: geometry)
+                                    }
                             }
                         }
                     }
@@ -315,6 +343,12 @@ struct WatchlistView: View {
             }
         )
     }
+
+    private func updateRowFrame(_ showID: Int, from geometry: GeometryProxy) {
+        let frame = geometry.frame(in: .global)
+        guard frame.width > 0, frame.height > 0 else { return }
+        rowFrames[showID] = frame
+    }
 }
 
 /// A status section the user can collapse.
@@ -322,6 +356,7 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
     let title: String
     let shows: [TrackedShow]
     @Binding var isExpanded: Bool
+    var onDelete: ((IndexSet) -> Void)?
     @ViewBuilder let row: (TrackedShow) -> Row
 
     var body: some View {
@@ -329,6 +364,7 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
             ForEach(shows) { tracked in
                 row(tracked)
             }
+            .onDelete(perform: onDelete)
         } header: {
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) {

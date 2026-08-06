@@ -51,6 +51,8 @@
 		E16708CD3023CB86007F7098 /* 8-5-2026 Set up swift-format.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Set up swift-format.md"; sourceTree = "<group>"; };
 		E1670B083023D507007F7098 /* 8-5-2026 Fix Empty Watchlist Alignment.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Fix Empty Watchlist Alignment.md"; sourceTree = "<group>"; };
 		E1670D433023D83E007F7098 /* 8-5-2026 Fix Text Color on Empty Result Views.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Fix Text Color on Empty Result Views.md"; sourceTree = "<group>"; };
+		E1670F7E30240FE5007F7098 /* 8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md"; sourceTree = "<group>"; };
+		E1670F7F30241008007F7098 /* 8-5-2026 Implement Swipe-to-Delete.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-5-2026 Implement Swipe-to-Delete.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -450,6 +452,8 @@
 				E16708CD3023CB86007F7098 /* 8-5-2026 Set up swift-format.md */,
 				E1670B083023D507007F7098 /* 8-5-2026 Fix Empty Watchlist Alignment.md */,
 				E1670D433023D83E007F7098 /* 8-5-2026 Fix Text Color on Empty Result Views.md */,
+				E1670F7E30240FE5007F7098 /* 8-5-2026 Discuss Adding Swipe-to-Delete to Watchlist.md */,
+				E1670F7F30241008007F7098 /* 8-5-2026 Implement Swipe-to-Delete.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

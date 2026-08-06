@@ -110,7 +110,7 @@ struct WatchlistTrackingStateTests {
             ).isEmpty
         )
 
-        _ = removalCoordinator.undoRemoval()
+        _ = await removalCoordinator.undoRemoval()
 
         #expect(
             try await WatchlistTrackingState.isTracked(

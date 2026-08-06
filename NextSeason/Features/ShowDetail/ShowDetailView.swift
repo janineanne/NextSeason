@@ -73,9 +73,9 @@ struct ShowDetailView: View {
 
     /// Dismisses a pending undoable removal when Show Detail is presented.
     /// Removals started from this screen keep their toast (onAppear already ran).
+    /// Deferred: cancels the pending delete. Immediate: keeps the delete, hides toast.
     private func cancelPendingRemovalForDetailPresentation() {
-        guard removalCoordinator?.pendingRemoval != nil else { return }
-        _ = removalCoordinator?.undoRemoval()
+        removalCoordinator?.dismissPendingRemovalForNavigation()
     }
 
     private func detailContent(viewModel: ShowDetailViewModel) -> some View {
