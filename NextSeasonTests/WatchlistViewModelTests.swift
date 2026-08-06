@@ -186,7 +186,7 @@ struct WatchlistViewModelTests {
         let tracked = try #require((try await repository.all()).first)
 
         viewModel.requestRemoval(tracked, anchor: .zero)
-        viewModel.undoPendingRemoval()
+        await viewModel.undoPendingRemoval()
         await viewModel.handlePendingRemovalIDChange(from: tracked.id, to: nil)
 
         #expect(viewModel.shows.count == 1)
@@ -229,6 +229,38 @@ struct WatchlistViewModelTests {
         #expect(try await repository.contains(showID: second.id))
     }
 
+    @Test("Swipe delete removes the row immediately and persists")
+    func deleteImmediatelyRemovesRowAndPersists() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            removalCoordinator: removalCoordinator,
+            analytics: RecordingAnalyticsService()
+        )
+        try await repository.add(sampleShow)
+        await viewModel.reload()
+        let tracked = try #require((try await repository.all()).first)
+
+        viewModel.deleteImmediately(
+            at: IndexSet(integer: 0),
+            in: [tracked],
+            rowAnchors: [tracked.id: CGRect(x: 0, y: 120, width: 300, height: 60)]
+        )
+
+        #expect(viewModel.shows.isEmpty)
+        #expect(removalCoordinator.pendingRemoval?.id == tracked.id)
+        #expect(removalCoordinator.toastAnchor?.minY == 120)
+
+        let deadline = Date().addingTimeInterval(1)
+        while Date() < deadline, try await repository.contains(showID: tracked.id) {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+
+        #expect(try await repository.contains(showID: tracked.id) == false)
+    }
+
     @Test("Undo clears the pending removal flag")
     func undoPendingRemovalClearsPendingState() async throws {
         let repository = InMemoryWatchlistRepository()
@@ -244,7 +276,7 @@ struct WatchlistViewModelTests {
         let tracked = try #require((try await repository.all()).first)
 
         viewModel.requestRemoval(tracked, anchor: .zero)
-        viewModel.undoPendingRemoval()
+        await viewModel.undoPendingRemoval()
 
         #expect(viewModel.pendingRemoval == nil)
         #expect(viewModel.isPendingRemoval(tracked) == false)

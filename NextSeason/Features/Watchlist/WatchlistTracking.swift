@@ -60,7 +60,7 @@ enum WatchlistTracking {
         onRemovalCommitted: @escaping () -> Void = {}
     ) async throws -> ToggleOutcome {
         if removalCoordinator?.pendingRemoval?.id == show.id {
-            _ = removalCoordinator?.undoRemoval()
+            _ = await removalCoordinator?.undoRemoval()
             return .undidPendingRemoval
         }
 

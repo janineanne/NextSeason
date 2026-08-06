@@ -86,7 +86,9 @@ private struct AppRootView: View {
         .watchlistUndoToast(
             isPresented: removalCoordinator.pendingRemoval != nil,
             anchor: removalCoordinator.toastAnchor,
-            undoAction: { _ = removalCoordinator.undoRemoval() },
+            undoAction: {
+                Task { _ = await removalCoordinator.undoRemoval() }
+            },
             confirmAction: {
                 Task {
                     await removalCoordinator.commitPendingRemovalIfNeeded()

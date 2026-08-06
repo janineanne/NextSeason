@@ -87,12 +87,72 @@ struct WatchlistPendingRemovalTests {
         let tracked = try #require((try await repository.all()).first)
 
         coordinator.requestRemoval(tracked, anchor: .zero, source: .watchlist)
-        let restored = coordinator.undoRemoval()
+        let restored = await coordinator.undoRemoval()
 
         #expect(restored?.id == tracked.id)
         #expect(coordinator.pendingRemoval == nil)
         #expect(coordinator.toastAnchor == nil)
         #expect(try await repository.contains(showID: tracked.id))
+    }
+
+    @Test("Immediate removal persists right away and undo restores the show")
+    func immediateRemovalPersistsThenUndoRestores() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        let coordinator = WatchlistPendingRemoval(repository: repository, analytics: analytics)
+        try await repository.add(sampleShow)
+        let tracked = try #require((try await repository.all()).first)
+
+        var committed = false
+        coordinator.requestImmediateRemoval(
+            tracked, anchor: CGRect(x: 10, y: 40, width: 100, height: 44), source: .watchlist
+        ) {
+            committed = true
+        }
+
+        let deadline = Date().addingTimeInterval(1)
+        while Date() < deadline, try await repository.contains(showID: tracked.id) {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+
+        #expect(try await repository.contains(showID: tracked.id) == false)
+        #expect(committed)
+        #expect(coordinator.pendingRemoval?.id == tracked.id)
+        #expect(coordinator.toastAnchor == CGRect(x: 10, y: 40, width: 100, height: 44))
+
+        let restored = await coordinator.undoRemoval()
+        #expect(restored?.id == tracked.id)
+        #expect(coordinator.pendingRemoval == nil)
+        #expect(try await repository.contains(showID: tracked.id))
+        #expect(
+            analytics.events.contains {
+                if case .watchlistRemoved(let source, let showID) = $0 {
+                    return source == .watchlist && showID == tracked.id
+                }
+                return false
+            }
+        )
+    }
+
+    @Test("Committing an immediate removal only dismisses the toast")
+    func commitImmediateRemovalDismissesToastOnly() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let coordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
+        try await repository.add(sampleShow)
+        let tracked = try #require((try await repository.all()).first)
+
+        coordinator.requestImmediateRemoval(tracked, anchor: .zero, source: .watchlist)
+
+        let deadline = Date().addingTimeInterval(1)
+        while Date() < deadline, try await repository.contains(showID: tracked.id) {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+
+        await coordinator.commitPendingRemovalIfNeeded()
+
+        #expect(coordinator.pendingRemoval == nil)
+        #expect(try await repository.contains(showID: tracked.id) == false)
     }
 
     @Test("A new pending removal commits the previous show")
@@ -126,7 +186,7 @@ struct WatchlistPendingRemovalTests {
         let repository = UndoDuringRemoveRepository()
         let coordinator = WatchlistPendingRemoval(
             repository: repository, analytics: RecordingAnalyticsService())
-        repository.undoProbe = { coordinator.undoRemoval() }
+        repository.undoProbe = { await coordinator.undoRemoval() }
         try await repository.add(sampleShow)
         let tracked = try #require((try await repository.all()).first)
 
@@ -247,7 +307,7 @@ struct WatchlistPendingRemovalTests {
 @MainActor
 private final class UndoDuringRemoveRepository: WatchlistRepository {
     private var shows: [Int: TrackedShow] = [:]
-    var undoProbe: (() -> TrackedShow?)?
+    var undoProbe: (() async -> TrackedShow?)?
     /// `nil` if `remove` never ran; `.some(nil)` if undo returned nil; `.some(show)` if undo restored.
     private(set) var undoDuringRemoveResult: TrackedShow??
 
@@ -273,7 +333,7 @@ private final class UndoDuringRemoveRepository: WatchlistRepository {
     }
 
     func remove(showID: Int) async throws {
-        undoDuringRemoveResult = .some(undoProbe?())
+        undoDuringRemoveResult = .some(await undoProbe?())
         shows.removeValue(forKey: showID)
     }
 

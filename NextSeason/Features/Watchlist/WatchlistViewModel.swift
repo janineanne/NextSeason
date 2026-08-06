@@ -145,8 +145,49 @@ final class WatchlistViewModel {
         }
     }
 
-    func undoPendingRemoval() {
-        removalCoordinator.undoRemoval()
+    /// Swipe-to-delete: drops rows from the list immediately, then persists and
+    /// shows an informational undo toast. Must run synchronously inside
+    /// `.onDelete` so `List` item counts stay consistent.
+    func deleteImmediately(
+        at offsets: IndexSet,
+        in sectionShows: [TrackedShow],
+        rowAnchors: [Int: CGRect]
+    ) {
+        let targets = offsets.compactMap { index -> TrackedShow? in
+            sectionShows.indices.contains(index) ? sectionShows[index] : nil
+        }
+        guard !targets.isEmpty else { return }
+
+        for tracked in targets {
+            removeShow(showID: tracked.id)
+        }
+
+        for tracked in targets {
+            let anchor = rowAnchors[tracked.id] ?? .zero
+            removalCoordinator.requestImmediateRemoval(
+                tracked,
+                anchor: anchor,
+                source: .watchlist,
+                onFailure: { [weak self] in
+                    self?.restoreShowAnimated(tracked)
+                    // Keep list aligned with persistence after a failed delete.
+                    Task { await self?.reload() }
+                }
+            )
+        }
+    }
+
+    func undoPendingRemoval() async {
+        _ = await removalCoordinator.undoRemoval()
+    }
+
+    /// Puts a show back into the in-memory list (e.g. after undoing an immediate delete).
+    func restoreShowAnimated(_ tracked: TrackedShow) {
+        guard !shows.contains(where: { $0.id == tracked.id }) else { return }
+        withAnimation(.easeInOut(duration: 0.35)) {
+            shows.append(tracked)
+            state = .loaded
+        }
     }
 
     /// Commits a pending removal and animates the row away when persistence
@@ -175,12 +216,26 @@ final class WatchlistViewModel {
         }
     }
 
-    /// Reacts when a pending removal ID clears. If persistence dropped the show
-    /// (commit), animates the row away; an undo leaves the list unchanged.
+    /// Reacts when a pending removal ID clears.
+    /// - Deferred commit / immediate delete: animates the row away if persistence dropped it.
+    /// - Deferred undo: row is still present — no-op.
+    /// - Immediate undo: show is back in the repository — restore it into the list.
     func handlePendingRemovalIDChange(from oldID: Int?, to newID: Int?) async {
         guard let oldID, newID == nil else { return }
-        guard await showWasRemoved(showID: oldID) else { return }
-        removeShowAnimated(showID: oldID)
+        if await showWasRemoved(showID: oldID) {
+            removeShowAnimated(showID: oldID)
+            return
+        }
+        guard !shows.contains(where: { $0.id == oldID }) else { return }
+        do {
+            if let tracked = try await repository.trackedShow(showID: oldID) {
+                restoreShowAnimated(tracked)
+            } else {
+                await reload()
+            }
+        } catch {
+            await reload()
+        }
     }
 
     private func showWasRemoved(showID: Int) async -> Bool {
