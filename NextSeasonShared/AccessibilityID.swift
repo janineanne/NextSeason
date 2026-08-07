@@ -43,6 +43,7 @@ enum AccessibilityID {
         static let emptyState = "watchlist.emptyState"
         static let noResults = "watchlist.noResults"
         static let row = "watchlist.row"
+        static let searchButton = "watchlist.search"
         static let trackButton = "watchlist.track"
         static let undoButton = "watchlist.undo"
         static let confirmButton = "watchlist.confirm"

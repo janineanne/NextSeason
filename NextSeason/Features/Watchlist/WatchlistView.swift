@@ -5,9 +5,9 @@
 
 import SwiftUI
 
-/// Local watchlist: status-grouped tracked shows, in-list search, pull-to-refresh,
-/// star (deferred) and swipe (immediate) undoable removal, and notification
-/// deep-link push into Show Detail.
+/// Local watchlist: status-grouped tracked shows, optional in-list search (toolbar
+/// toggle), pull-to-refresh, star (deferred) and swipe (immediate) undoable
+/// removal, and notification deep-link push into Show Detail.
 ///
 /// Lifecycle:
 /// - `.task(id: watchlistReloadToken)` creates the view model and reloads when the
@@ -22,9 +22,12 @@ struct WatchlistView: View {
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.analytics) private var analytics
+    @Environment(\.scenePhase) private var scenePhase
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
+    /// Root tab selection so in-list search can dismiss when leaving Watchlist.
+    private let selectedTab: AppNavigationCoordinator.Tab
     /// Called when the user taps "Find a Show" from the empty state, so the host
     /// can switch to the Search tab.
     private let onFindShow: () -> Void
@@ -48,10 +51,13 @@ struct WatchlistView: View {
     /// Global frames for watchlist rows, used to anchor the swipe-delete toast
     /// near the deleted row instead of the bottom of the screen.
     @State private var rowFrames: [Int: CGRect] = [:]
+    /// Whether the navigation-bar search drawer is visible (toggled from the toolbar).
+    @State private var isSearchPresented = false
 
     init(
         navigationPath: Binding<NavigationPath>,
         tvMaze: any TVMazeService,
+        selectedTab: AppNavigationCoordinator.Tab = .watchlist,
         watchlistReloadToken: Int = 0,
         pendingDetailToken: Int? = nil,
         onApplyPendingDetail: @escaping () -> Void = {},
@@ -60,6 +66,7 @@ struct WatchlistView: View {
     ) {
         _navigationPath = navigationPath
         self.tvMaze = tvMaze
+        self.selectedTab = selectedTab
         self.watchlistReloadToken = watchlistReloadToken
         self.pendingDetailToken = pendingDetailToken
         self.onApplyPendingDetail = onApplyPendingDetail
@@ -80,7 +87,33 @@ struct WatchlistView: View {
             .appScreenBackground()
             .navigationTitle("Watchlist")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    watchlistSearchToolbarButton
+                }
+            }
             .appAboutToolbarButton()
+            .modifier(
+                WatchlistSearchPresentationModifier(
+                    isPresented: $isSearchPresented,
+                    searchText: watchlistSearchTextBinding
+                )
+            )
+            .onChange(of: selectedTab) { _, tab in
+                if tab != .watchlist {
+                    dismissWatchlistSearch(animated: false)
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background {
+                    dismissWatchlistSearch(animated: false)
+                }
+            }
+            .onChange(of: isSearchPresented) { _, isPresented in
+                if !isPresented {
+                    viewModel?.searchText = ""
+                }
+            }
             .navigationDestination(for: TrackedShow.self) { tracked in
                 ShowDetailView(
                     show: Show(tracked: tracked),
@@ -143,6 +176,60 @@ struct WatchlistView: View {
     private func enableNotificationsFromBanner() async {
         await notificationService.enableNotificationsFromSettingsEntryPoint()
         await notificationStatus.refresh(using: notificationService)
+    }
+
+    private var watchlistSearchTextBinding: Binding<String> {
+        Binding(
+            get: { viewModel?.searchText ?? "" },
+            set: { viewModel?.searchText = $0 }
+        )
+    }
+
+    private var watchlistSearchToolbarButton: some View {
+        Button {
+            toggleWatchlistSearch()
+        } label: {
+            Image(systemName: isSearchPresented ? "xmark" : "magnifyingglass")
+        }
+        .accessibilityLabel(
+            isSearchPresented
+                ? String(localized: "Close watchlist search")
+                : String(localized: "Search watchlist")
+        )
+        .accessibilityIdentifier(AccessibilityID.Watchlist.searchButton)
+    }
+
+    private func toggleWatchlistSearch() {
+        if isSearchPresented {
+            dismissWatchlistSearch(animated: true)
+        } else {
+            presentWatchlistSearch()
+        }
+    }
+
+    /// Shows the drawer search field below the large title. Omitting `isPresented`
+    /// on `.searchable` keeps the field in the drawer instead of animating into
+    /// the navigation bar.
+    private func presentWatchlistSearch() {
+        guard viewModel != nil else { return }
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isSearchPresented = true
+        }
+    }
+
+    private func dismissWatchlistSearch(animated: Bool = true) {
+        guard isSearchPresented else { return }
+        if animated {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                isSearchPresented = false
+            }
+        } else {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                isSearchPresented = false
+            }
+        }
     }
 
     @ViewBuilder
@@ -271,11 +358,6 @@ struct WatchlistView: View {
                 value: viewModel.filteredShows.map { "\($0.id):\($0.nextSeason.headline)" }
             )
             .appPlainListStyle()
-            .searchable(
-                text: $viewModel.searchText,
-                placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "Search Watchlist"
-            )
             .refreshable {
                 await viewModel.refreshFromNetwork()
                 await notificationStatus.refresh(using: notificationService)
@@ -372,6 +454,26 @@ struct WatchlistView: View {
         let frame = geometry.frame(in: .global)
         guard frame.width > 0, frame.height > 0 else { return }
         rowFrames[showID] = frame
+    }
+}
+
+/// Applies `.searchable` only while watchlist search is open. The field stays in the
+/// navigation-bar drawer (below the large title) because no `isPresented` binding is
+/// passed to `.searchable`, which avoids UIKit's active-search jump into the bar.
+private struct WatchlistSearchPresentationModifier: ViewModifier {
+    @Binding var isPresented: Bool
+    @Binding var searchText: String
+
+    func body(content: Content) -> some View {
+        if isPresented {
+            content.searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search Watchlist"
+            )
+        } else {
+            content
+        }
     }
 }
 

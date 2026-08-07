@@ -60,6 +60,10 @@ extension NextSeasonUITesting where Self: XCTestCase {
         app.searchFields[watchlistSearchFieldPlaceholder]
     }
 
+    var watchlistSearchButton: XCUIElement {
+        app.descendants(matching: .any)[AccessibilityID.Watchlist.searchButton]
+    }
+
     var searchNoResults: XCUIElement {
         app.descendants(matching: .any)[AccessibilityID.Search.noResults]
     }
@@ -296,12 +300,28 @@ extension NextSeasonUITesting where Self: XCTestCase {
     }
 
     func searchWatchlist(for query: String) {
+        revealWatchlistSearchField()
         typeIntoSearchField(
             watchlistSearchField,
             placeholder: watchlistSearchFieldPlaceholder,
             query: query,
             missingFieldMessage:
                 "Watchlist should expose the “Search Watchlist” field before typing."
+        )
+    }
+
+    func revealWatchlistSearchField() {
+        if watchlistSearchField.exists {
+            return
+        }
+        assertExists(
+            watchlistSearchButton,
+            "Watchlist should expose a search toolbar button before revealing search."
+        )
+        watchlistSearchButton.tap()
+        assertExists(
+            watchlistSearchField,
+            "Tapping the watchlist search button should reveal the search field."
         )
     }
 

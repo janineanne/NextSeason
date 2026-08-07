@@ -18,10 +18,16 @@ final class WatchlistSearchUITests: XCTestCase, NextSeasonUITesting {
     func testWatchlistExposesSearchFieldWhenShowsTracked() {
         trackPreviewShowAndOpenWatchlist()
 
-        assertExists(
+        assertNotExists(
             watchlistSearchField,
-            "The watchlist should show a search field at the top when shows are tracked."
+            "The watchlist search field should stay hidden until the user opens search."
         )
+        assertExists(
+            watchlistSearchButton,
+            "The watchlist should show a search button in the navigation bar when shows are tracked."
+        )
+
+        revealWatchlistSearchField()
     }
 
     func testWatchlistSearchKeepsMatchingRowVisible() {

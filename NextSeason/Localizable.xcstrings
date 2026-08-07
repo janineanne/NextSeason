@@ -242,6 +242,9 @@
         }
       }
     },
+    "Close watchlist search" : {
+
+    },
     "Collapse section" : {
       "localizations" : {
         "en" : {
@@ -1523,6 +1526,9 @@
           }
         }
       }
+    },
+    "Search watchlist" : {
+
     },
     "Search Watchlist" : {
       "localizations" : {

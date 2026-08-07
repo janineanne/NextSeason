@@ -64,6 +64,7 @@ struct ContentView: View {
             WatchlistView(
                 navigationPath: $coordinator.watchlistPath,
                 tvMaze: tvMaze,
+                selectedTab: coordinator.selectedTab,
                 watchlistReloadToken: coordinator.watchlistReloadToken,
                 pendingDetailToken: coordinator.pendingWatchlistDetail?.id,
                 onApplyPendingDetail: {
