@@ -8,11 +8,10 @@ import SwiftUI
 /// Show detail: artwork, metadata, the derived next-season status, and a
 /// formatted summary, plus track / untrack.
 ///
-/// Lifecycle: `.task(id:)` loads seasons and cancels any in-flight undo toast from
-/// search/watchlist so it does not cover detail. `.onAppear` and pending-removal
-/// changes reconcile tracked state (e.g. after removal on the Watchlist tab).
-/// Removals started on this screen keep their toast — see
-/// `cancelPendingRemovalForDetailPresentation`.
+/// Lifecycle: `.task(id:)` loads seasons. Pending-removal cancellation when
+/// navigating *to* detail lives on the parent `navigationDestination` so tab
+/// switches that re-show an existing detail screen do not abort a removal.
+/// `.onAppear` and pending-removal outcomes reconcile tracked state.
 struct ShowDetailView: View {
     @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.onAutomationDetailLoaded) private var onAutomationDetailLoaded
@@ -48,32 +47,26 @@ struct ShowDetailView: View {
     var body: some View {
         detailContent(viewModel: viewModel)
             .task(id: viewModel.initialShow.id) {
-                // Opening detail abandons any in-flight undo toast from search/watchlist
-                // so the banner does not cover detail content.
-                cancelPendingRemovalForDetailPresentation()
                 await viewModel.load(removalCoordinator: removalCoordinator)
             }
             .onAppear {
                 analytics.track(.showDetailViewed(showID: viewModel.initialShow.id))
-                cancelPendingRemovalForDetailPresentation()
                 // Reconcile tracked state on reappear (e.g. returning to this screen
                 // after the show was removed on the Watchlist tab).
                 Task { await viewModel.refreshTrackedState(removalCoordinator: removalCoordinator) }
             }
-            .onChange(of: removalCoordinator?.pendingRemoval?.id) { _, _ in
-                Task { await viewModel.refreshTrackedState(removalCoordinator: removalCoordinator) }
+            .onChange(of: removalCoordinator?.outcomeGeneration) { _, _ in
+                guard removalCoordinator?.lastOutcome != nil else { return }
+                Task {
+                    await viewModel.handlePendingRemovalOutcome(
+                        removalCoordinator: removalCoordinator
+                    )
+                }
             }
             .onChange(of: viewModel.loadState) { _, loadState in
                 guard ProfileFlowConfiguration.isEnabled, loadState == .loaded else { return }
                 onAutomationDetailLoaded?()
             }
-    }
-
-    /// Dismisses a pending undoable removal when Show Detail is presented.
-    /// Removals started from this screen keep their toast (onAppear already ran).
-    /// Deferred: cancels the pending delete. Immediate: keeps the delete, hides toast.
-    private func cancelPendingRemovalForDetailPresentation() {
-        removalCoordinator?.dismissPendingRemovalForNavigation()
     }
 
     private func detailContent(viewModel: ShowDetailViewModel) -> some View {
@@ -140,6 +133,8 @@ struct ShowDetailView: View {
                 showName: viewModel.displayShow.name,
                 isTracked: viewModel.isTracked,
                 isUpdating: viewModel.isUpdatingWatchlist,
+                isPendingRemoval: removalCoordinator?.pendingRemoval?.id
+                    == viewModel.displayShow.id,
                 trackButtonIdentifier: AccessibilityID.ShowDetail.trackButton
             ) { anchor in
                 Task { await handleTrackButtonTap(viewModel: viewModel, anchor: anchor) }

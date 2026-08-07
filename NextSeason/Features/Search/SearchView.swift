@@ -11,8 +11,8 @@ import SwiftUI
 /// - `.task(id: query)` drives `SearchViewModel.search()` (debounce + cancel on edit).
 /// - `.task` and `.task(id: navigationPath.count)` refresh tracked IDs when the
 ///   screen appears or when returning from show detail.
-/// - `.task(id: pendingRemoval?.id)` keeps row track-button state in sync while an
-///   undoable removal is pending.
+/// - `.onChange(of: outcomeGeneration)` keeps row track-button state in sync when
+///   a pending removal commits, is undone, or is cancelled.
 ///
 /// First-run AppStorage (independent flags):
 /// - `hasCompletedFirstSearch` — retires the idle "Try an Example" button once the
@@ -72,6 +72,9 @@ struct SearchView: View {
                     )
                     .onAppear {
                         analytics.track(.searchResultOpened(showID: show.id))
+                        // Push-only: tab switches that re-show detail must not cancel
+                        // a pending removal started on another tab.
+                        removalCoordinator?.dismissPendingRemovalForNavigation()
                     }
                 }
                 .searchable(text: $viewModel.query, prompt: "Search TV shows")
@@ -95,8 +98,9 @@ struct SearchView: View {
                     }
                     await refreshTrackedShows()
                 }
-                .task(id: removalCoordinator?.pendingRemoval?.id) {
-                    await refreshTrackedShows()
+                .onChange(of: removalCoordinator?.outcomeGeneration) { _, _ in
+                    guard let outcome = removalCoordinator?.lastOutcome else { return }
+                    Task { await handlePendingRemovalOutcome(outcome) }
                 }
                 .watchlistNotificationPromptAlerts(
                     prompt: notificationPrompt,
@@ -112,6 +116,16 @@ struct SearchView: View {
             excludingPendingRemovalFrom: removalCoordinator,
             analytics: analytics
         )
+    }
+
+    private func handlePendingRemovalOutcome(_ outcome: PendingRemovalOutcome) async {
+        await refreshTrackedShows()
+        switch outcome {
+        case .committed, .replaced:
+            onWatchlistChanged()
+        case .undone, .cancelled, .failed:
+            break
+        }
     }
 
     private var watchlistTrackingContext: SearchWatchlistTracking.Context {
@@ -202,7 +216,8 @@ struct SearchView: View {
                                 showID: show.id,
                                 showName: show.name,
                                 isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
-                                isUpdating: watchlistTracking.updatingShowIDs.contains(show.id)
+                                isUpdating: watchlistTracking.updatingShowIDs.contains(show.id),
+                                isPendingRemoval: removalCoordinator?.pendingRemoval?.id == show.id
                             ) { anchor in
                                 Task {
                                     await watchlistTracking.handleTrackButton(

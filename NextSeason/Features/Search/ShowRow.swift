@@ -133,6 +133,9 @@ struct ShowRowTrackButton: View {
     let showName: String
     let isTracked: Bool
     let isUpdating: Bool
+    /// True while an undoable removal is pending — accurate label if VoiceOver
+    /// reaches the star; undo is also on the toast and row rotor action.
+    var isPendingRemoval: Bool = false
     var trackButtonIdentifier: String = AccessibilityID.Search.trackButton
     let action: (CGRect) -> Void
 
@@ -145,8 +148,10 @@ struct ShowRowTrackButton: View {
             Group {
                 if isUpdating {
                     ProgressView()
+                        .accessibilityHidden(true)
                 } else {
                     Image(systemName: isTracked ? "star.fill" : "star")
+                        .accessibilityHidden(true)
                 }
             }
             .frame(width: 44, height: 44)
@@ -154,6 +159,7 @@ struct ShowRowTrackButton: View {
         .buttonStyle(.borderless)
         .tint(isTracked ? AppColor.trackedStar : AppColor.untrackedStar)
         .disabled(isUpdating)
+        .accessibilitySortPriority(isPendingRemoval ? 2 : 0)
         .accessibilityLabel(trackAccessibilityLabel)
         .accessibilityIdentifier("\(trackButtonIdentifier).\(showID)")
         .accessibilityHint(String(localized: "Adds or removes this show from your watchlist"))
@@ -182,6 +188,9 @@ struct ShowRowTrackButton: View {
     private var trackAccessibilityLabel: String {
         if isUpdating {
             return String(localized: "Updating watchlist for \(showName)")
+        }
+        if isPendingRemoval {
+            return String(localized: "Undo removing \(showName) from watchlist")
         }
         return isTracked
             ? String(localized: "Stop tracking \(showName)")
