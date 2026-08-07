@@ -3,9 +3,13 @@
 # profile-flows.sh
 # NextSeason
 #
-# Records Release-build Instruments traces on a connected iPhone for:
+# Records Profile-build Instruments traces on a connected iPhone for:
 #   launch, searchEmpty, search, showDetails, viewWishlist, addToWishlist,
 #   removeFromWishlist, launch-with-data (after seedWatchlist setup)
+#
+# Uses the Xcode "Profile" configuration (Release optimizations + get-task-allow)
+# so xctrace can attach on device. Plain Release builds lack that entitlement
+# and fail with "Permission to debug ... was denied".
 #
 # Usage:
 #   ./Scripts/profile-flows.sh
@@ -18,50 +22,17 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SCHEME="NextSeason"
-CONFIGURATION="Release"
+# shellcheck source=lib/performance-suite-common.sh
+source "${ROOT}/Scripts/lib/performance-suite-common.sh"
+
+CONFIGURATION="${CONFIGURATION:-Profile}"
 OUTPUT_DIR="${ROOT}/.instruments"
 LAUNCH_TIME_LIMIT="${LAUNCH_TIME_LIMIT:-20s}"
 FLOW_TIME_LIMIT="${FLOW_TIME_LIMIT:-25s}"
 SEED_TIME_LIMIT="${SEED_TIME_LIMIT:-45s}"
 
 usage() {
-    sed -n '2,16p' "$0" | tr -d '#'
-}
-
-connected_device_udid() {
-    xcrun xctrace list devices 2>/dev/null | awk '
-        /^== Devices ==$/ { in_devices=1; next }
-        /^==/ { in_devices=0 }
-        in_devices && /iPhone/ {
-            if (match($0, /\(([0-9A-Fa-f-]+)\)[[:space:]]*$/)) {
-                print substr($0, RSTART + 1, RLENGTH - 2)
-                exit
-            }
-        }
-    '
-}
-
-resolve_app_path() {
-    local device="$1"
-    xcodebuild \
-        -project "${ROOT}/NextSeason.xcodeproj" \
-        -scheme "${SCHEME}" \
-        -configuration "${CONFIGURATION}" \
-        -destination "id=${device}" \
-        -showBuildSettings 2>/dev/null \
-        | awk '/TARGET_BUILD_DIR =/ { dir=$3 } /FULL_PRODUCT_NAME =/ { name=$3 } END { print dir "/" name }'
-}
-
-build_app() {
-    local device="$1"
-    echo "Building ${SCHEME} (${CONFIGURATION}) for device ${device}..."
-    xcodebuild \
-        -project "${ROOT}/NextSeason.xcodeproj" \
-        -scheme "${SCHEME}" \
-        -configuration "${CONFIGURATION}" \
-        -destination "id=${device}" \
-        build
+    sed -n '2,20p' "$0" | tr -d '#'
 }
 
 profile_launch() {
@@ -70,12 +41,9 @@ profile_launch() {
     local output="$3"
 
     echo "Profiling launch -> ${output}"
-    xcrun xctrace record \
+    run_xctrace_record "${LAUNCH_TIME_LIMIT}" "${output}" \
         --template "App Launch" \
         --device "${device}" \
-        --output "${output}" \
-        --time-limit "${LAUNCH_TIME_LIMIT}" \
-        --no-prompt \
         --launch -- "${app}"
 }
 
@@ -87,12 +55,9 @@ profile_flow() {
     local time_limit="${4:-${FLOW_TIME_LIMIT}}"
 
     echo "Profiling ${flow} -> ${output}"
-    xcrun xctrace record \
+    run_xctrace_record "${time_limit}" "${output}" \
         --template "Time Profiler" \
         --device "${device}" \
-        --output "${output}" \
-        --time-limit "${time_limit}" \
-        --no-prompt \
         --launch -- "${app}" -ProfileFlow "${flow}"
 }
 
@@ -118,19 +83,22 @@ main() {
 
     mkdir -p "${OUTPUT_DIR}"
 
-    if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
-        build_app "${device}"
-    fi
-
     local app
-    app="$(resolve_app_path "${device}")"
+    app="$(resolve_performance_app "${device}")"
     if [[ ! -d "${app}" ]]; then
         echo "error: app not found at ${app}. Build first or unset SKIP_BUILD." >&2
         exit 1
     fi
 
+    local core_device
+    core_device="$(core_device_uuid)"
+    install_app_on_device "${app}" "${core_device}" "${device}"
+
+    preflight_profiling_device
+
     echo "Device: ${device}"
     echo "App: ${app}"
+    echo "Configuration: ${CONFIGURATION}"
     echo "Traces: ${OUTPUT_DIR}"
     echo
 
@@ -146,10 +114,22 @@ main() {
     profile_launch "${device}" "${app}" "${OUTPUT_DIR}/launch-with-data.trace"
 
     echo
-    echo "Done. Open traces in Instruments:"
+    echo "Done. Traces are in ${OUTPUT_DIR}/"
+    echo
+    echo "Launch (App Launch template — no ProfileFlow signposts):"
     echo "  open \"${OUTPUT_DIR}/launch.trace\""
     echo "  open \"${OUTPUT_DIR}/launch-with-data.trace\""
-    echo "Flow signposts appear under Points of Interest (flow.*, search.empty, etc.)."
+    echo
+    echo "Flows (Time Profiler + ProfileFlow — Points of Interest signposts):"
+    echo "  open \"${OUTPUT_DIR}/search.trace\"          # flow.search, search.query"
+    echo "  open \"${OUTPUT_DIR}/showDetails.trace\"     # flow.showDetails, showDetails.load"
+    echo "  open \"${OUTPUT_DIR}/addToWishlist.trace\"   # flow.addToWishlist, watchlist.add"
+    echo "  # Also: searchEmpty, viewWishlist, removeFromWishlist"
+    echo
+    echo "In Instruments: open a flow trace above → Points of Interest → filter table to"
+    echo "  com.TrialByFyre.NextSeason (launch traces will not show flow.* signposts)."
+    echo
+    echo "For a markdown report, run: ./Scripts/profile-performance-suite.sh"
 }
 
 main "$@"

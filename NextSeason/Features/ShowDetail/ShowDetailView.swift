@@ -15,12 +15,12 @@ import SwiftUI
 /// `cancelPendingRemovalForDetailPresentation`.
 struct ShowDetailView: View {
     @Environment(\.watchlistPendingRemoval) private var removalCoordinator
+    @Environment(\.onAutomationDetailLoaded) private var onAutomationDetailLoaded
 
     @State private var viewModel: ShowDetailViewModel
 
     private let analytics: any AnalyticsTracking
     private let onWatchlistChanged: () -> Void
-    private let onProfileFlowDetailLoaded: (() -> Void)?
 
     init(
         show: Show,
@@ -29,8 +29,7 @@ struct ShowDetailView: View {
         notifications: any NotificationManaging,
         analytics: any AnalyticsTracking,
         isTracked: Bool = false,
-        onWatchlistChanged: @escaping () -> Void = {},
-        onProfileFlowDetailLoaded: (() -> Void)? = nil
+        onWatchlistChanged: @escaping () -> Void = {}
     ) {
         _viewModel = State(
             initialValue: ShowDetailViewModel(
@@ -44,7 +43,6 @@ struct ShowDetailView: View {
         )
         self.analytics = analytics
         self.onWatchlistChanged = onWatchlistChanged
-        self.onProfileFlowDetailLoaded = onProfileFlowDetailLoaded
     }
 
     var body: some View {
@@ -67,7 +65,7 @@ struct ShowDetailView: View {
             }
             .onChange(of: viewModel.loadState) { _, loadState in
                 guard ProfileFlowConfiguration.isEnabled, loadState == .loaded else { return }
-                onProfileFlowDetailLoaded?()
+                onAutomationDetailLoaded?()
             }
     }
 

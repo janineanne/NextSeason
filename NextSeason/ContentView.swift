@@ -6,8 +6,7 @@
 import SwiftUI
 
 /// Root tab shell: Search and Watchlist, wired to `AppNavigationCoordinator` for
-/// tab selection, navigation paths, watchlist reload tokens, notification deep
-/// links, and (when enabled) the profile-driven search flow.
+/// tab selection, navigation paths, watchlist reload tokens, and notification deep links.
 struct ContentView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.watchlistPendingRemoval) private var removalCoordinator
@@ -25,13 +24,37 @@ struct ContentView: View {
         TabView(selection: $coordinator.selectedTab) {
             SearchView(
                 navigationPath: $coordinator.searchPath,
-                profileFlowSearchQuery: $coordinator.profileFlowSearchQuery,
-                onProfileFlowSearchSettled: { coordinator.notifyProfileFlowSearchSettled() },
-                onProfileFlowDetailLoaded: { coordinator.notifyProfileFlowDetailLoaded() },
                 tvMaze: tvMaze,
                 analytics: analytics,
                 onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }
             )
+            // Instruments / ProfileFlow automation is wired here—not inside
+            // `SearchView` or `ShowDetailView`—so feature screens stay unaware
+            // of profiling. The runner (`ProfileFlowRunner`) drives tabs, paths,
+            // and repository work through `AppNavigationCoordinator`; it still
+            // needs two async completion signals that only the Search tab can
+            // observe:
+            //
+            // 1. Search settled — debounced `.task(id: query)` finishes and
+            //    `SearchViewModel.state` becomes `.results`, `.empty`, or `.failed`.
+            // 2. Detail loaded — a pushed `ShowDetailView` finishes its load task.
+            //
+            // Those signals travel through SwiftUI environment keys (see
+            // `AutomationEnvironment`) so `ShowDetailView` inherits the detail
+            // callback without taking a profiling parameter. Guards inside the
+            // consumers (`ProfileFlowConfiguration.isEnabled`) keep normal
+            // launches from bumping coordinator tokens even though the hooks
+            // are always installed.
+            .environment(
+                \.automationSearchQuery,
+                $coordinator.automationSearchQuery
+            )
+            .environment(\.onAutomationSearchSettled) {
+                coordinator.notifyAutomationSearchSettled()
+            }
+            .environment(\.onAutomationDetailLoaded) {
+                coordinator.notifyAutomationDetailLoaded()
+            }
             .accessibilityIdentifier(AccessibilityID.Tab.search)
             .tabItem {
                 Label("Search", systemImage: "magnifyingglass")
