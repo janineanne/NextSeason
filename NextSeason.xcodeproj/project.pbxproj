@@ -60,6 +60,8 @@
 		E167187630253A2C007F7098 /* 8-4-2026 Discuss ProfileFlow Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-4-2026 Discuss ProfileFlow Implementation.md"; sourceTree = "<group>"; };
 		E167187730253A58007F7098 /* 8-6-2026 Improve ProfileFlow Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = "8-6-2026 Improve ProfileFlow Implementation.md"; sourceTree = "<group>"; };
 		E167187830255850007F7098 /* 8-6-2026 Review Changes to ProfileFlow Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Review Changes to ProfileFlow Implementation.md"; sourceTree = "<group>"; };
+		E1671AB930255D9C007F7098 /* 8-6-2026 Discuss Making Undo Toast More Visible.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Discuss Making Undo Toast More Visible.md"; sourceTree = "<group>"; };
+		E1671ABA30256106007F7098 /* 8-6-2026 Implement Visibility Improvements to Undo Toast.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Implement Visibility Improvements to Undo Toast.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -468,6 +470,8 @@
 				E16713F930251376007F7098 /* 8-6-2026 Implement Floating Section Header Fix.md */,
 				E167187730253A58007F7098 /* 8-6-2026 Improve ProfileFlow Implementation.md */,
 				E167187830255850007F7098 /* 8-6-2026 Review Changes to ProfileFlow Implementation.md */,
+				E1671AB930255D9C007F7098 /* 8-6-2026 Discuss Making Undo Toast More Visible.md */,
+				E1671ABA30256106007F7098 /* 8-6-2026 Implement Visibility Improvements to Undo Toast.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
