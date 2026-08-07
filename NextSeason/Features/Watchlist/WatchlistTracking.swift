@@ -57,8 +57,7 @@ enum WatchlistTracking {
         removalCoordinator: WatchlistPendingRemoval?,
         analytics: any AnalyticsTracking,
         notifications: any NotificationManaging,
-        prompt: WatchlistNotificationPromptState,
-        onRemovalCommitted: @escaping () -> Void = {}
+        prompt: WatchlistNotificationPromptState
     ) async throws -> ToggleOutcome {
         if removalCoordinator?.pendingRemoval?.id == show.id {
             _ = await removalCoordinator?.undoRemoval()
@@ -73,8 +72,7 @@ enum WatchlistTracking {
             removalCoordinator.requestRemoval(
                 tracked,
                 anchor: anchor,
-                source: source,
-                onCommitted: onRemovalCommitted
+                source: source
             )
             return .removalRequested
         }

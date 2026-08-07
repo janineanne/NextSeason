@@ -88,8 +88,7 @@ final class SearchWatchlistTracking {
                 removalCoordinator: context.removalCoordinator,
                 analytics: context.analytics,
                 notifications: context.notificationService,
-                prompt: context.notificationPrompt,
-                onRemovalCommitted: context.onWatchlistChanged
+                prompt: context.notificationPrompt
             )
             switch outcome {
             case .ignored:

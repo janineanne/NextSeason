@@ -14,8 +14,8 @@ import SwiftUI
 ///   tab is selected (token bump from `ContentView` / the navigation coordinator).
 /// - `.onAppear` applies a buffered deep link and, after the first load, refreshes
 ///   on later tab returns without double-fetching the initial presentation.
-/// - Pending-removal ID changes keep the list's track-button / toast state in sync
-///   with `WatchlistPendingRemoval` shared across tabs.
+/// - Pending-removal outcomes from `WatchlistPendingRemoval` keep the list in
+///   sync across commit, undo, replace, and failure paths.
 struct WatchlistView: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.watchlistRefreshService) private var refreshService
@@ -93,6 +93,9 @@ struct WatchlistView: View {
                 )
                 .onAppear {
                     analytics.track(.watchlistItemOpened(showID: tracked.id))
+                    // Push-only: tab switches that re-show detail must not cancel
+                    // a pending removal started on another tab.
+                    removalCoordinator?.dismissPendingRemovalForNavigation()
                 }
             }
             .task(id: watchlistReloadToken) {
@@ -114,9 +117,6 @@ struct WatchlistView: View {
                 onApplyPendingDetail()
             }
             .refreshNotificationStatus(notificationStatus)
-            .onChange(of: removalCoordinator?.pendingRemoval?.id) { oldId, newId in
-                Task { await viewModel?.handlePendingRemovalIDChange(from: oldId, to: newId) }
-            }
         }
     }
 
@@ -143,6 +143,64 @@ struct WatchlistView: View {
     private func enableNotificationsFromBanner() async {
         await notificationService.enableNotificationsFromSettingsEntryPoint()
         await notificationStatus.refresh(using: notificationService)
+    }
+
+    @ViewBuilder
+    private func watchlistRow(for tracked: TrackedShow, viewModel: WatchlistViewModel) -> some View
+    {
+        let isPending = viewModel.isPendingRemoval(tracked)
+        HStack(spacing: AppSpacing.tight) {
+            Group {
+                if isPending {
+                    ShowRowLabel(tracked: tracked)
+                        .accessibilityIdentifier(
+                            "\(AccessibilityID.Watchlist.row).\(tracked.id)"
+                        )
+                        .accessibilityAction(named: String(localized: "Undo removal")) {
+                            Task { await viewModel.undoPendingRemoval() }
+                        }
+                } else {
+                    NavigationLink(value: tracked) {
+                        ShowRowLabel(tracked: tracked)
+                    }
+                    .buttonStyle(.plain)
+                    .showDetailLinkAccessibility()
+                    .accessibilityIdentifier(
+                        "\(AccessibilityID.Watchlist.row).\(tracked.id)")
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            ShowRowTrackButton(
+                showID: tracked.id,
+                showName: tracked.name,
+                isTracked: !isPending,
+                isUpdating: false,
+                isPendingRemoval: isPending,
+                trackButtonIdentifier: AccessibilityID.Watchlist.trackButton
+            ) { anchor in
+                if isPending {
+                    Task { await viewModel.undoPendingRemoval() }
+                } else {
+                    viewModel.requestRemoval(
+                        tracked,
+                        anchor: anchor,
+                        source: .watchlist
+                    )
+                }
+            }
+        }
+        .background {
+            GeometryReader { geometry in
+                Color.clear
+                    .onAppear {
+                        updateRowFrame(tracked.id, from: geometry)
+                    }
+                    .onChange(of: geometry.frame(in: .global)) { _, _ in
+                        updateRowFrame(tracked.id, from: geometry)
+                    }
+            }
+        }
     }
 
     @ViewBuilder
@@ -195,44 +253,7 @@ struct WatchlistView: View {
                             }
                         }
                     ) { tracked in
-                        HStack(spacing: AppSpacing.tight) {
-                            NavigationLink(value: tracked) {
-                                ShowRowLabel(tracked: tracked)
-                            }
-                            .buttonStyle(.plain)
-                            .showDetailLinkAccessibility()
-                            .accessibilityIdentifier(
-                                "\(AccessibilityID.Watchlist.row).\(tracked.id)")
-
-                            ShowRowTrackButton(
-                                showID: tracked.id,
-                                showName: tracked.name,
-                                isTracked: !viewModel.isPendingRemoval(tracked),
-                                isUpdating: false,
-                                trackButtonIdentifier: AccessibilityID.Watchlist.trackButton
-                            ) { anchor in
-                                if viewModel.isPendingRemoval(tracked) {
-                                    Task { await viewModel.undoPendingRemoval() }
-                                } else {
-                                    viewModel.requestRemoval(
-                                        tracked,
-                                        anchor: anchor,
-                                        source: .watchlist
-                                    )
-                                }
-                            }
-                        }
-                        .background {
-                            GeometryReader { geometry in
-                                Color.clear
-                                    .onAppear {
-                                        updateRowFrame(tracked.id, from: geometry)
-                                    }
-                                    .onChange(of: geometry.frame(in: .global)) { _, _ in
-                                        updateRowFrame(tracked.id, from: geometry)
-                                    }
-                            }
-                        }
+                        watchlistRow(for: tracked, viewModel: viewModel)
                     }
                 }
                 // Omit attribution when the empty/no-results overlay is up — a List

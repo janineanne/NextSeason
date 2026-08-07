@@ -112,6 +112,15 @@ final class ShowDetailViewModel {
         watchlistActionErrorMessage = nil
     }
 
+    /// Reconciles the track star when a shared pending removal commits, is
+    /// undone, cancelled, or fails. Does not notify the watchlist tab — callers
+    /// opened from Search already handle that at the parent level.
+    func handlePendingRemovalOutcome(
+        removalCoordinator: WatchlistPendingRemoval?
+    ) async {
+        await refreshTrackedState(removalCoordinator: removalCoordinator)
+    }
+
     /// Shared track/untrack orchestration; local star state updates from the outcome.
     func handleTrackButton(
         anchor: CGRect,
@@ -148,8 +157,7 @@ final class ShowDetailViewModel {
                 removalCoordinator: removalCoordinator,
                 analytics: analytics,
                 notifications: notifications,
-                prompt: notificationPrompt,
-                onRemovalCommitted: onWatchlistChanged
+                prompt: notificationPrompt
             )
             switch outcome {
             case .undidPendingRemoval:

@@ -143,12 +143,15 @@ private struct WatchlistUndoToastModifier: ViewModifier {
                 }
                 guard isVoiceOverRunning else { return }
                 Task { @MainActor in
-                    // Let the toast enter the accessibility tree before focusing.
+                    // Accessibility workaround: without a short wait VoiceOver
+                    // focuses Undo immediately and skips the status message.
+                    // Let the toast enter the tree, then focus the status first.
                     try? await Task.sleep(for: .milliseconds(150))
                     guard isPresented else { return }
                     toastFocus = .message
 
-                    // Read the message, then move focus to Undo for quick access.
+                    // After the status has had time to be read aloud, move focus
+                    // to Undo for quick access.
                     try? await Task.sleep(for: .milliseconds(1_800))
                     guard isPresented else { return }
                     toastFocus = .undo
@@ -156,19 +159,20 @@ private struct WatchlistUndoToastModifier: ViewModifier {
             }
     }
 
-    /// Bottom-centered layout avoids full-screen `GeometryReader` traps in VoiceOver.
+    /// Bottom-centered layout; pass-through overlay so the list stays reachable.
     private var voiceOverToast: some View {
-        VStack {
-            Spacer()
-            toastContent
-                .frame(maxWidth: 320)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 24)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .accessibilitySortPriority(1)
-        .zIndex(1)
-        .transition(.undoToastEntrance)
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+            .overlay(alignment: .bottom) {
+                toastContent
+                    .frame(maxWidth: 320)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 24)
+            }
+            .zIndex(1)
+            .transition(.undoToastEntrance)
     }
 
     private var anchoredToast: some View {
@@ -178,6 +182,7 @@ private struct WatchlistUndoToastModifier: ViewModifier {
             toastContent
                 .frame(maxWidth: min(320, proxy.size.width - 32))
                 .fixedSize(horizontal: false, vertical: true)
+                .allowsHitTesting(true)
                 .position(
                     toastPosition(
                         in: proxy,
@@ -186,7 +191,7 @@ private struct WatchlistUndoToastModifier: ViewModifier {
                     )
                 )
         }
-        .allowsHitTesting(true)
+        .allowsHitTesting(false)
         .zIndex(1)
         .transition(.undoToastEntrance)
     }

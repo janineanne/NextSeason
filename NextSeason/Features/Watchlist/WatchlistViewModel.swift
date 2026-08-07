@@ -94,6 +94,10 @@ final class WatchlistViewModel {
         self.refreshService = refreshService
         self.removalCoordinator = removalCoordinator
         self.analytics = analytics
+
+        removalCoordinator.addOutcomeHandler { [weak self] outcome in
+            self?.handleOutcome(outcome)
+        }
     }
 
     /// Re-reads the watchlist from persistence without flashing the loading
@@ -127,22 +131,17 @@ final class WatchlistViewModel {
     }
 
     /// Starts the undo window for removing `tracked`. The row stays visible
-    /// until the removal is committed or the user confirms with OK. On commit
-    /// (including when a later pending removal replaces this one), the row is
-    /// removed from the displayed list.
+    /// until the removal is committed or the user confirms with OK.
     func requestRemoval(
         _ tracked: TrackedShow,
         anchor: CGRect,
         source: WatchlistActionSource = .watchlist
     ) {
-        let showID = tracked.id
         removalCoordinator.requestRemoval(
             tracked,
             anchor: anchor,
             source: source
-        ) { [weak self] in
-            self?.removeShowAnimated(showID: showID)
-        }
+        )
     }
 
     /// Swipe-to-delete: drops rows from the list immediately, then persists and
@@ -167,12 +166,7 @@ final class WatchlistViewModel {
             removalCoordinator.requestImmediateRemoval(
                 tracked,
                 anchor: anchor,
-                source: .watchlist,
-                onFailure: { [weak self] in
-                    self?.restoreShowAnimated(tracked)
-                    // Keep list aligned with persistence after a failed delete.
-                    Task { await self?.reload() }
-                }
+                source: .watchlist
             )
         }
     }
@@ -190,16 +184,8 @@ final class WatchlistViewModel {
         }
     }
 
-    /// Commits a pending removal and animates the row away when persistence
-    /// confirms it; otherwise reloads so the list matches the repository.
-    func commitPendingRemovalIfNeeded(onCommitted: (() -> Void)? = nil) async {
-        let removedID = removalCoordinator.pendingRemoval?.id
-        await removalCoordinator.commitPendingRemovalIfNeeded(onCommitted: onCommitted)
-        if let removedID, await showWasRemoved(showID: removedID) {
-            removeShowAnimated(showID: removedID)
-        } else {
-            await reload()
-        }
+    func commitPendingRemovalIfNeeded() async {
+        await removalCoordinator.commitPendingRemovalIfNeeded()
     }
 
     /// Removes a row from the displayed list. Wrap in `withAnimation` at the call
@@ -216,19 +202,30 @@ final class WatchlistViewModel {
         }
     }
 
-    /// Reacts when a pending removal ID clears.
-    /// - Deferred commit / immediate delete: animates the row away if persistence dropped it.
-    /// - Deferred undo: row is still present — no-op.
-    /// - Immediate undo: show is back in the repository — restore it into the list.
-    func handlePendingRemovalIDChange(from oldID: Int?, to newID: Int?) async {
-        guard let oldID, newID == nil else { return }
-        if await showWasRemoved(showID: oldID) {
-            removeShowAnimated(showID: oldID)
-            return
+    /// Single path for keeping the displayed list aligned with pending-removal
+    /// transitions reported by `WatchlistPendingRemoval`.
+    func handleOutcome(_ outcome: PendingRemovalOutcome) {
+        switch outcome {
+        case .committed(let showID), .replaced(let showID):
+            removeShowAnimated(showID: showID)
+        case .undone(let showID):
+            Task { await restoreRowIfNeeded(showID: showID) }
+        case .cancelled:
+            break
+        case .failed(let showID):
+            Task { await reconcileAfterFailure(showID: showID) }
         }
-        guard !shows.contains(where: { $0.id == oldID }) else { return }
+    }
+
+    func isPendingRemoval(_ tracked: TrackedShow) -> Bool {
+        pendingRemoval?.id == tracked.id
+    }
+
+    /// Restores a row after immediate-mode undo or a failed immediate delete.
+    private func restoreRowIfNeeded(showID: Int) async {
+        guard !shows.contains(where: { $0.id == showID }) else { return }
         do {
-            if let tracked = try await repository.trackedShow(showID: oldID) {
+            if let tracked = try await repository.trackedShow(showID: showID) {
                 restoreShowAnimated(tracked)
             } else {
                 await reload()
@@ -238,15 +235,12 @@ final class WatchlistViewModel {
         }
     }
 
-    private func showWasRemoved(showID: Int) async -> Bool {
-        do {
-            return try await repository.contains(showID: showID) == false
-        } catch {
-            return false
+    /// Keeps the list aligned with persistence when a deferred commit fails or
+    /// an immediate delete could not be persisted.
+    private func reconcileAfterFailure(showID: Int) async {
+        await restoreRowIfNeeded(showID: showID)
+        if shows.contains(where: { $0.id == showID }) == false {
+            await reload()
         }
-    }
-
-    func isPendingRemoval(_ tracked: TrackedShow) -> Bool {
-        pendingRemoval?.id == tracked.id
     }
 }

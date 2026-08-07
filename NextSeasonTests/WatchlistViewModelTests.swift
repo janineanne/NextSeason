@@ -150,8 +150,8 @@ struct WatchlistViewModelTests {
         #expect(viewModel.shows.isEmpty)
     }
 
-    @Test("Pending-removal clear animates row away only after persistence removes it")
-    func pendingRemovalClearAnimatesCommittedRemoval() async throws {
+    @Test("Committing a pending removal animates the row away via outcome")
+    func commitPendingRemovalAnimatesRowAway() async throws {
         let repository = InMemoryWatchlistRepository()
         let removalCoordinator = WatchlistPendingRemoval(
             repository: repository, analytics: RecordingAnalyticsService())
@@ -166,13 +166,12 @@ struct WatchlistViewModelTests {
 
         viewModel.requestRemoval(tracked, anchor: .zero)
         await removalCoordinator.commitPendingRemovalIfNeeded()
-        await viewModel.handlePendingRemovalIDChange(from: tracked.id, to: nil)
 
         #expect(viewModel.shows.isEmpty)
     }
 
-    @Test("Pending-removal clear leaves the row when undo restored it")
-    func pendingRemovalClearKeepsRowAfterUndo() async throws {
+    @Test("Undo outcome leaves a deferred row visible")
+    func undoOutcomeKeepsDeferredRowVisible() async throws {
         let repository = InMemoryWatchlistRepository()
         let removalCoordinator = WatchlistPendingRemoval(
             repository: repository, analytics: RecordingAnalyticsService())
@@ -187,8 +186,37 @@ struct WatchlistViewModelTests {
 
         viewModel.requestRemoval(tracked, anchor: .zero)
         await viewModel.undoPendingRemoval()
-        await viewModel.handlePendingRemovalIDChange(from: tracked.id, to: nil)
 
+        #expect(viewModel.shows.count == 1)
+        #expect(try await repository.contains(showID: tracked.id))
+    }
+
+    @Test("Failed immediate delete restores the row via outcome")
+    func failedImmediateDeleteRestoresRow() async throws {
+        let repository = FailingRemoveWatchlistRepository()
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            removalCoordinator: removalCoordinator,
+            analytics: RecordingAnalyticsService()
+        )
+        try await repository.add(sampleShow)
+        await viewModel.reload()
+        let tracked = try #require((try await repository.all()).first)
+
+        viewModel.deleteImmediately(
+            at: IndexSet(integer: 0),
+            in: [tracked],
+            rowAnchors: [tracked.id: .zero]
+        )
+
+        let deadline = Date().addingTimeInterval(1)
+        while Date() < deadline, viewModel.shows.isEmpty {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+
+        #expect(removalCoordinator.lastOutcome == .failed(showID: tracked.id))
         #expect(viewModel.shows.count == 1)
         #expect(try await repository.contains(showID: tracked.id))
     }
@@ -509,6 +537,41 @@ private final class ReentrantWatchlistRepository: WatchlistRepository {
 
     func remove(showID: Int) async throws {
         shows.removeValue(forKey: showID)
+    }
+
+    func updateAfterRefresh(_ tracked: TrackedShow) async throws {
+        shows[tracked.id] = tracked
+    }
+}
+
+/// Stores shows normally but throws from `remove`.
+@MainActor
+private final class FailingRemoveWatchlistRepository: WatchlistRepository {
+    private var shows: [Int: TrackedShow] = [:]
+
+    func all() async throws -> [TrackedShow] {
+        shows.values.sorted { $0.dateAdded > $1.dateAdded }
+    }
+
+    func trackedShow(showID: Int) async throws -> TrackedShow? {
+        shows[showID]
+    }
+
+    func trackedShowIDs() async throws -> Set<Int> {
+        Set(shows.keys)
+    }
+
+    func contains(showID: Int) async throws -> Bool {
+        shows[showID] != nil
+    }
+
+    func add(_ show: Show) async throws {
+        guard shows[show.id] == nil else { return }
+        shows[show.id] = TrackedShow(from: show)
+    }
+
+    func remove(showID: Int) async throws {
+        throw URLError(.cannotConnectToHost)
     }
 
     func updateAfterRefresh(_ tracked: TrackedShow) async throws {

@@ -26,6 +26,10 @@ final class WatchlistPendingRemoval {
     /// Set when deferred persistence fails after the undo window ends.
     private(set) var removalErrorMessage: String?
 
+    /// Increments whenever `lastOutcome` changes so SwiftUI can observe outcomes.
+    private(set) var outcomeGeneration = 0
+    private(set) var lastOutcome: PendingRemovalOutcome?
+
     static var undoWindowSeconds: TimeInterval {
         AccessibilityPreferences.undoRemovalWindowSeconds()
     }
@@ -33,9 +37,9 @@ final class WatchlistPendingRemoval {
     private let repository: any WatchlistRepository
     private let analytics: any AnalyticsTracking
     private var commitRemovalTask: Task<Void, Never>?
-    private var pendingOnCommitted: (() -> Void)?
     private var pendingRemovalSource: WatchlistActionSource?
     private var pendingMode: Mode = .deferred
+    private var outcomeHandlers: [@MainActor (PendingRemovalOutcome) -> Void] = []
 
     /// Test override for the undo window; nil uses the accessibility-aware default.
     var undoWindowSecondsOverride: TimeInterval?
@@ -49,6 +53,11 @@ final class WatchlistPendingRemoval {
         self.analytics = analytics
     }
 
+    /// Registers a handler invoked on every significant pending-removal transition.
+    func addOutcomeHandler(_ handler: @escaping @MainActor (PendingRemovalOutcome) -> Void) {
+        outcomeHandlers.append(handler)
+    }
+
     func clearRemovalError() {
         removalErrorMessage = nil
     }
@@ -58,8 +67,7 @@ final class WatchlistPendingRemoval {
     func requestRemoval(
         _ tracked: TrackedShow,
         anchor: CGRect,
-        source: WatchlistActionSource,
-        onCommitted: @escaping () -> Void = {}
+        source: WatchlistActionSource
     ) {
         commitRemovalTask?.cancel()
         AppDiagnosticsLogger.logTaskCancel("undo_removal_timer")
@@ -70,7 +78,6 @@ final class WatchlistPendingRemoval {
         finalizeReplacedPendingRemoval()
 
         pendingMode = .deferred
-        pendingOnCommitted = onCommitted
         pendingRemovalSource = source
         performRequestRemoval(tracked, anchor: anchor)
     }
@@ -83,9 +90,7 @@ final class WatchlistPendingRemoval {
     func requestImmediateRemoval(
         _ tracked: TrackedShow,
         anchor: CGRect,
-        source: WatchlistActionSource,
-        onCommitted: @escaping () -> Void = {},
-        onFailure: @escaping () -> Void = {}
+        source: WatchlistActionSource
     ) {
         commitRemovalTask?.cancel()
         AppDiagnosticsLogger.logTaskCancel("undo_removal_timer")
@@ -94,7 +99,6 @@ final class WatchlistPendingRemoval {
         finalizeReplacedPendingRemoval()
 
         pendingMode = .immediate
-        pendingOnCommitted = nil
         pendingRemovalSource = source
         pendingRemoval = tracked
         toastAnchor = anchor
@@ -105,12 +109,12 @@ final class WatchlistPendingRemoval {
             do {
                 try await self.repository.remove(showID: tracked.id)
                 self.analytics.track(.watchlistRemoved(source: source, showID: tracked.id))
-                onCommitted()
+                self.emitOutcome(.committed(showID: tracked.id))
             } catch {
                 self.analytics.trackNonFatalError(error, context: "watchlist_remove")
                 self.removalErrorMessage = WatchlistTracking.updateFailedMessage
                 self.clearPendingPresentation()
-                onFailure()
+                self.emitOutcome(.failed(showID: tracked.id))
                 AppDiagnosticsLogger.logTaskComplete("immediate_removal")
                 return
             }
@@ -133,6 +137,7 @@ final class WatchlistPendingRemoval {
         commitRemovalTask?.cancel()
         commitRemovalTask = nil
         guard let tracked = pendingRemoval else { return nil }
+        let showID = tracked.id
         let mode = pendingMode
 
         if mode == .immediate {
@@ -146,6 +151,7 @@ final class WatchlistPendingRemoval {
         }
 
         clearPendingPresentation()
+        emitOutcome(.undone(showID: showID))
         return tracked
     }
 
@@ -153,31 +159,38 @@ final class WatchlistPendingRemoval {
     /// (still persisted, so the show stays tracked). Immediate removals keep the
     /// delete and only hide the toast.
     func dismissPendingRemovalForNavigation() {
-        guard pendingRemoval != nil else { return }
+        guard let tracked = pendingRemoval else { return }
+        let showID = tracked.id
+        let mode = pendingMode
         commitRemovalTask?.cancel()
         commitRemovalTask = nil
         clearPendingPresentation()
+        if mode == .deferred {
+            emitOutcome(.cancelled(showID: showID))
+        }
     }
 
     /// Forces any in-flight undoable removal to its terminal state (e.g. before
     /// refresh or leaving a screen where the toast would otherwise outlive the
     /// context). Deferred: persists. Immediate: dismisses toast only.
-    func commitPendingRemovalIfNeeded(onCommitted: (() -> Void)? = nil) async {
-        await commitPendingRemoval(cancelTimer: true, onCommitted: onCommitted)
+    func commitPendingRemovalIfNeeded() async {
+        await commitPendingRemoval(cancelTimer: true)
     }
 
     private func finalizeReplacedPendingRemoval() {
         guard let pending = pendingRemoval else { return }
         let previous = pending
         let previousSource = pendingRemovalSource ?? .watchlist
-        let previousOnCommitted = pendingOnCommitted
         let previousMode = pendingMode
         clearPendingPresentation()
 
         if previousMode == .deferred {
             Task { [weak self] in
                 await self?.persistRemoval(
-                    previous, source: previousSource, onCommitted: previousOnCommitted)
+                    previous,
+                    source: previousSource,
+                    outcome: .replaced(showID: previous.id)
+                )
             }
         }
         // Immediate replacements are already persisted; nothing to do.
@@ -205,10 +218,7 @@ final class WatchlistPendingRemoval {
         }
     }
 
-    private func commitPendingRemoval(
-        cancelTimer: Bool,
-        onCommitted: (() -> Void)? = nil
-    ) async {
+    private func commitPendingRemoval(cancelTimer: Bool) async {
         if cancelTimer {
             commitRemovalTask?.cancel()
         }
@@ -222,7 +232,7 @@ final class WatchlistPendingRemoval {
         }
 
         let source = pendingRemovalSource ?? .watchlist
-        let callback = onCommitted ?? pendingOnCommitted
+        let showID = tracked.id
 
         // End the undo window as soon as commit begins so Undo cannot race with
         // an in-flight `repository.remove`.
@@ -238,14 +248,14 @@ final class WatchlistPendingRemoval {
         await persistRemoval(
             tracked,
             source: source,
-            onCommitted: callback
+            outcome: .committed(showID: showID)
         )
     }
 
     private func persistRemoval(
         _ tracked: TrackedShow,
         source: WatchlistActionSource,
-        onCommitted: (() -> Void)? = nil
+        outcome: PendingRemovalOutcome
     ) async {
         // After the undo window ends, finish persistence even if the SwiftUI /
         // lifecycle task that started commit is cancelled (tab switch, refresh).
@@ -259,7 +269,7 @@ final class WatchlistPendingRemoval {
                     self.clearPendingPresentation()
                 }
                 self.analytics.track(.watchlistRemoved(source: source, showID: tracked.id))
-                onCommitted?()
+                self.emitOutcome(outcome)
             } catch {
                 // This task is unstructured, so caller cancellation should not
                 // reach here. Any failure (including unexpected cancellation)
@@ -269,6 +279,7 @@ final class WatchlistPendingRemoval {
                 if self.pendingRemoval?.id == tracked.id {
                     self.clearPendingPresentation()
                 }
+                self.emitOutcome(.failed(showID: tracked.id))
             }
         }.value
     }
@@ -282,8 +293,15 @@ final class WatchlistPendingRemoval {
     private func clearPendingPresentation() {
         pendingRemoval = nil
         toastAnchor = nil
-        pendingOnCommitted = nil
         pendingRemovalSource = nil
         pendingMode = .deferred
+    }
+
+    private func emitOutcome(_ outcome: PendingRemovalOutcome) {
+        lastOutcome = outcome
+        outcomeGeneration += 1
+        for handler in outcomeHandlers {
+            handler(outcome)
+        }
     }
 }

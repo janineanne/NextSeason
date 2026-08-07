@@ -90,20 +90,20 @@ struct ContentView: View {
         }
         .modifier(BetaDiagnosticsPresentationModifier())
         .onChange(of: coordinator.selectedTab) { oldTab, tab in
-            if tab == .search, oldTab != .search {
-                coordinator.popSearchToRoot()
-            }
-            // Commit deferred removals when leaving the Watchlist tab — not when
-            // pushing Show Detail (NavigationStack onDisappear would false-trigger).
-            if oldTab == .watchlist, tab != .watchlist {
-                Task {
+            // Commit before other tab-side effects so a Search-stack detail screen
+            // reappearing during the switch cannot cancel the removal first.
+            Task { @MainActor in
+                if oldTab == .watchlist, tab != .watchlist {
                     AppDiagnosticsLogger.logTaskStart("watchlist_commit_on_leave_tab")
                     await removalCoordinator?.commitPendingRemovalIfNeeded()
                     AppDiagnosticsLogger.logTaskComplete("watchlist_commit_on_leave_tab")
                 }
-            }
-            if tab == .watchlist {
-                coordinator.notifyWatchlistDataChanged()
+                if tab == .search, oldTab != .search {
+                    coordinator.popSearchToRoot()
+                }
+                if tab == .watchlist {
+                    coordinator.notifyWatchlistDataChanged()
+                }
             }
         }
         .task {
