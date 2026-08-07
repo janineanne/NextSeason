@@ -78,9 +78,9 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
     var phaseLabel: String {
         switch currentPhase {
         case .baseline:
-            "Baseline (undated next season)"
+            String(localized: "Baseline (undated next season)")
         case .updated:
-            "Updated (dated next season)"
+            String(localized: "Updated (dated next season)")
         }
     }
 

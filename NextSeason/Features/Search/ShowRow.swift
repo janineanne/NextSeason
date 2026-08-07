@@ -48,7 +48,7 @@ struct ShowRowLabel: View {
             subtitle: tracked.nextSeason.headline,
             posterURL: tracked.posterMediumURL,
             isStale: tracked.isStale,
-            footer: "Updated \(updated)"
+            footer: String(localized: "Updated \(updated)")
         )
     }
 
@@ -86,7 +86,7 @@ struct ShowRowLabel: View {
     private var accessibilityLabel: String {
         var parts = [name, subtitle]
         if isStale {
-            parts.append("No longer on TVMaze")
+            parts.append(String(localized: "No longer on TVMaze"))
         }
         if let detailLine {
             parts.append(detailLine)
@@ -156,7 +156,7 @@ struct ShowRowTrackButton: View {
         .disabled(isUpdating)
         .accessibilityLabel(trackAccessibilityLabel)
         .accessibilityIdentifier("\(trackButtonIdentifier).\(showID)")
-        .accessibilityHint("Adds or removes this show from your watchlist")
+        .accessibilityHint(String(localized: "Adds or removes this show from your watchlist"))
         .background {
             GeometryReader { geometry in
                 Color.clear
@@ -180,8 +180,12 @@ struct ShowRowTrackButton: View {
     }
 
     private var trackAccessibilityLabel: String {
-        if isUpdating { return "Updating watchlist for \(showName)" }
-        return isTracked ? "Stop tracking \(showName)" : "Track \(showName)"
+        if isUpdating {
+            return String(localized: "Updating watchlist for \(showName)")
+        }
+        return isTracked
+            ? String(localized: "Stop tracking \(showName)")
+            : String(localized: "Track \(showName)")
     }
 }
 

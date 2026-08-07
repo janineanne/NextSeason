@@ -193,7 +193,7 @@ private struct WatchlistUndoToastModifier: ViewModifier {
 
     private var toastContent: some View {
         UndoToast(
-            message: "Removed from watchlist",
+            message: String(localized: "Removed from watchlist"),
             undoAction: undoAction,
             confirmAction: confirmAction,
             toastFocus: $toastFocus

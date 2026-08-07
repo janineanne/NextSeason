@@ -41,27 +41,27 @@ final class BetaBuildAvailability {
 
     var channelDisplayName: String {
         #if DEBUG
-            return "Debug"
+            return String(localized: "Debug")
         #elseif TESTFLIGHT
-            return "TestFlight"
+            return String(localized: "TestFlight")
         #else
-            guard detectionAttempted else { return "Detecting…" }
+            guard detectionAttempted else { return String(localized: "Detecting…") }
 
             if hasSandboxReceipt {
-                return "TestFlight"
+                return String(localized: "TestFlight")
             }
 
             switch appStoreEnvironment {
             case .sandbox:
-                return "TestFlight / Sandbox"
+                return String(localized: "TestFlight / Sandbox")
             case .production:
-                return "App Store"
+                return String(localized: "App Store")
             case .xcode:
-                return "Xcode"
+                return String(localized: "Xcode")
             case .none:
-                return "Production"
+                return String(localized: "Production")
             @unknown default:
-                return "Unknown"
+                return String(localized: "Unknown")
             }
         #endif
     }

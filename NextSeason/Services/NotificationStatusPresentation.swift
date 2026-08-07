@@ -21,11 +21,12 @@ nonisolated struct NotificationStatusPresentation: Equatable, Sendable {
     )
 
     var statusLabel: String {
-        canDeliverVisibleAlerts ? "Enabled" : "Disabled"
+        canDeliverVisibleAlerts
+            ? String(localized: "Enabled") : String(localized: "Disabled")
     }
 
     var diagnosticsEnabledLabel: String {
-        canDeliverVisibleAlerts ? "Yes" : "No"
+        canDeliverVisibleAlerts ? String(localized: "Yes") : String(localized: "No")
     }
 
     var symbolName: String {
@@ -42,7 +43,9 @@ nonisolated struct NotificationStatusPresentation: Equatable, Sendable {
     }
 
     static func enablementButtonTitle(isAuthorizationNotDetermined: Bool) -> String {
-        isAuthorizationNotDetermined ? "Enable Notifications" : "Open Settings"
+        isAuthorizationNotDetermined
+            ? String(localized: "Enable Notifications")
+            : String(localized: "Open Settings")
     }
 
     @MainActor

@@ -126,21 +126,25 @@ struct AppAboutView: View {
         }
     }
 
-    private let notificationsExplanation =
-        "NextSeason periodically checks your watchlist for new seasons and will notify you when one is found. iOS decides when apps may perform background checks, so opening the app occasionally helps keep your watchlist up to date."
+    private let notificationsExplanation = String(
+        localized:
+            "NextSeason periodically checks your watchlist for new seasons and will notify you when one is found. iOS decides when apps may perform background checks, so opening the app occasionally helps keep your watchlist up to date."
+    )
 
     private var notificationsFooterText: String {
         if notificationStatus.canDeliverVisibleAlerts {
-            return "Opens Settings where you can manage notification preferences."
+            return String(
+                localized: "Opens Settings where you can manage notification preferences."
+            )
         }
         return FirstRunCopy.notificationsSettingsReminderMessage
     }
 
     private var notificationsAccessibilityHint: String {
         if notificationStatus.canDeliverVisibleAlerts {
-            return "Opens Settings to manage notifications."
+            return String(localized: "Opens Settings to manage notifications.")
         }
-        return "Opens notification settings or asks for permission."
+        return String(localized: "Opens notification settings or asks for permission.")
     }
 
     private func handleNotificationsTap() async {

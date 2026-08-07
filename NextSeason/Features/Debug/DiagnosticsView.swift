@@ -62,30 +62,29 @@ struct DiagnosticsView: View {
                 Section {
                     let launchDiagnostics = AppDiagnosticsLogger.launchDiagnostics()
                     LabeledContent("Previous launch") {
-                        Text(
-                            launchDiagnostics.previousLaunchEndedUnexpectedly
-                                ? "Ended unexpectedly ⚠️" : "Clean or not detected"
-                        )
+                        Group {
+                            if launchDiagnostics.previousLaunchEndedUnexpectedly {
+                                Text("Ended unexpectedly ⚠️")
+                            } else {
+                                Text("Clean or not detected")
+                            }
+                        }
                         .foregroundStyle(
                             launchDiagnostics.previousLaunchEndedUnexpectedly ? .orange : .secondary
                         )
                     }
                     LabeledContent("Current launch started") {
-                        Text(formattedDate(launchDiagnostics.currentLaunchStartedAt))
-                            .foregroundStyle(.secondary)
+                        formattedDateLabel(launchDiagnostics.currentLaunchStartedAt)
                     }
                     LabeledContent("Last graceful background") {
-                        Text(formattedDate(launchDiagnostics.lastGracefulExitAt))
-                            .foregroundStyle(.secondary)
+                        formattedDateLabel(launchDiagnostics.lastGracefulExitAt)
                     }
                     if launchDiagnostics.previousLaunchEndedUnexpectedly {
                         LabeledContent("Prior launch started") {
-                            Text(formattedDate(launchDiagnostics.previousLaunchStartedAt))
-                                .foregroundStyle(.secondary)
+                            formattedDateLabel(launchDiagnostics.previousLaunchStartedAt)
                         }
                         LabeledContent("Detected") {
-                            Text(formattedDate(launchDiagnostics.unexpectedTerminationDetectedAt))
-                                .foregroundStyle(.secondary)
+                            formattedDateLabel(launchDiagnostics.unexpectedTerminationDetectedAt)
                         }
                     }
 
@@ -184,26 +183,39 @@ struct DiagnosticsView: View {
         // Persisted / in-memory samples from `BetaRefreshDiagnostics`.
         Section {
             LabeledContent("Last background refresh") {
-                Text(formattedDate(betaRefreshDiagnostics?.lastBackgroundRefreshAt))
-                    .foregroundStyle(.secondary)
+                formattedDateLabel(betaRefreshDiagnostics?.lastBackgroundRefreshAt)
             }
             LabeledContent("Next refresh window") {
-                Text(formattedNextRefreshWindow)
-                    .foregroundStyle(.secondary)
+                Group {
+                    if let nextDate = betaRefreshDiagnostics?.nextScheduledRefreshAt {
+                        Text(
+                            "\(nextDate.formatted(date: .abbreviated, time: .standard)) — 12 h (production cadence)"
+                        )
+                    } else {
+                        Text("Not scheduled yet")
+                    }
+                }
+                .foregroundStyle(.secondary)
             }
             LabeledContent("Last background fetch result") {
-                Text(
-                    betaRefreshDiagnostics?.lastBackgroundFetchResult
-                        ?? "No background refresh recorded yet."
-                )
+                Group {
+                    if let result = betaRefreshDiagnostics?.lastBackgroundFetchResult {
+                        Text(result)
+                    } else {
+                        Text("No background refresh recorded yet.")
+                    }
+                }
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
             LabeledContent("Last background notification decision") {
-                Text(
-                    betaRefreshDiagnostics?.lastBackgroundNotificationDecision
-                        ?? "No background notification decision yet."
-                )
+                Group {
+                    if let decision = betaRefreshDiagnostics?.lastBackgroundNotificationDecision {
+                        Text(decision)
+                    } else {
+                        Text("No background notification decision yet.")
+                    }
+                }
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
@@ -215,22 +227,27 @@ struct DiagnosticsView: View {
                 }
             }
             LabeledContent("Last foreground refresh") {
-                Text(formattedDate(betaRefreshDiagnostics?.lastForegroundRefreshAt))
-                    .foregroundStyle(.secondary)
+                formattedDateLabel(betaRefreshDiagnostics?.lastForegroundRefreshAt)
             }
             LabeledContent("Last foreground fetch result") {
-                Text(
-                    betaRefreshDiagnostics?.lastForegroundFetchResult
-                        ?? "No foreground refresh recorded yet."
-                )
+                Group {
+                    if let result = betaRefreshDiagnostics?.lastForegroundFetchResult {
+                        Text(result)
+                    } else {
+                        Text("No foreground refresh recorded yet.")
+                    }
+                }
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
             LabeledContent("Last foreground notification decision") {
-                Text(
-                    betaRefreshDiagnostics?.lastForegroundNotificationDecision
-                        ?? "No foreground notification decision yet."
-                )
+                Group {
+                    if let decision = betaRefreshDiagnostics?.lastForegroundNotificationDecision {
+                        Text(decision)
+                    } else {
+                        Text("No foreground notification decision yet.")
+                    }
+                }
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
@@ -244,10 +261,15 @@ struct DiagnosticsView: View {
             Button {
                 Task { await forceRefreshNow() }
             } label: {
-                Label(
-                    isForceRefreshing ? "Refreshing…" : "Force Refresh Now",
-                    systemImage: "arrow.clockwise"
-                )
+                Label {
+                    if isForceRefreshing {
+                        Text("Refreshing…")
+                    } else {
+                        Text("Force Refresh Now")
+                    }
+                } icon: {
+                    Image(systemName: "arrow.clockwise")
+                }
             }
             .disabled(isForceRefreshing || refreshService == nil)
 
@@ -290,30 +312,37 @@ struct DiagnosticsView: View {
 
     private func notificationActionButton(
         isLoading: Bool,
-        loadingTitle: String,
-        title: String,
+        loadingTitle: LocalizedStringKey,
+        title: LocalizedStringKey,
         systemImage: String,
         action: @escaping () async -> Void
     ) -> some View {
         Button {
             Task { await action() }
         } label: {
-            Label(isLoading ? loadingTitle : title, systemImage: systemImage)
+            Label {
+                if isLoading {
+                    Text(loadingTitle)
+                } else {
+                    Text(title)
+                }
+            } icon: {
+                Image(systemName: systemImage)
+            }
         }
         .disabled(isLoading || !notificationStatus.canDeliverVisibleAlerts)
         .foregroundStyle(notificationStatus.canDeliverVisibleAlerts ? .primary : .secondary)
     }
 
-    private var formattedNextRefreshWindow: String {
-        guard let nextDate = betaRefreshDiagnostics?.nextScheduledRefreshAt else {
-            return "Not scheduled yet"
+    @ViewBuilder
+    private func formattedDateLabel(_ date: Date?) -> some View {
+        if let date {
+            Text(date.formatted(date: .abbreviated, time: .standard))
+                .foregroundStyle(.secondary)
+        } else {
+            Text("Never")
+                .foregroundStyle(.secondary)
         }
-        return "\(formattedDate(nextDate)) — 12 h (production cadence)"
-    }
-
-    private func formattedDate(_ date: Date?) -> String {
-        guard let date else { return "Never" }
-        return date.formatted(date: .abbreviated, time: .standard)
     }
 
     private static let testNotificationDelaySeconds: TimeInterval = 5
@@ -334,7 +363,7 @@ struct DiagnosticsView: View {
 
     private func recordMissingWatchlistTestShow() {
         betaRefreshDiagnostics?.recordSimulatedScenarioSummary(
-            "Track a show on the watchlist to send a test notification."
+            String(localized: "Track a show on the watchlist to send a test notification.")
         )
         refreshReportText()
     }
@@ -377,7 +406,9 @@ struct DiagnosticsView: View {
             delay: Self.testNotificationDelaySeconds
         )
         betaRefreshDiagnostics?.recordSimulatedScenarioSummary(
-            "Test notification scheduled for \(tracked.name): \(content.body)"
+            String(
+                localized: "Test notification scheduled for \(tracked.name): \(content.body)"
+            )
         )
         refreshReportText()
 

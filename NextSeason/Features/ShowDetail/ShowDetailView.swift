@@ -247,14 +247,14 @@ struct ShowDetailView: View {
     private func nextSeasonAccessibilityLabel(for viewModel: ShowDetailViewModel) -> String {
         switch viewModel.loadState {
         case .loading:
-            return "Next Season, Checking next season status"
+            return String(localized: "Next Season, Checking next season status")
         case .loaded:
             if let status = viewModel.nextSeasonStatus {
-                return "Next Season, \(status.headline)"
+                return String(localized: "Next Season, \(status.headline)")
             }
-            return "Next Season"
+            return String(localized: "Next Season")
         case .failed(let message):
-            return "Next Season, \(message)"
+            return String(localized: "Next Season, \(message)")
         }
     }
 

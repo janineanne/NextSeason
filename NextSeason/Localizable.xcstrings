@@ -1,0 +1,2102 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "  (none captured)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "  (none captured)"
+          }
+        }
+      }
+    },
+    "  (none persisted)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "  (none persisted)"
+          }
+        }
+      }
+    },
+    "  (none this session)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "  (none this session)"
+          }
+        }
+      }
+    },
+    " (forced)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (forced)"
+          }
+        }
+      }
+    },
+    ", skipped %lld unchanged": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", skipped %lld unchanged"
+          }
+        }
+      }
+    },
+    "%@ — 12 h (production cadence)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 12 h (production cadence)"
+          }
+        }
+      }
+    },
+    "About": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        }
+      }
+    },
+    "About NextSeason": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About NextSeason"
+          }
+        }
+      }
+    },
+    "Adds or removes this show from your watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds or removes this show from your watchlist"
+          }
+        }
+      }
+    },
+    "Airing Now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Airing Now"
+          }
+        }
+      }
+    },
+    "App": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App"
+          }
+        }
+      }
+    },
+    "App launches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App launches"
+          }
+        }
+      }
+    },
+    "App Store": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store"
+          }
+        }
+      }
+    },
+    "Baseline (undated next season)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baseline (undated next season)"
+          }
+        }
+      }
+    },
+    "baseline fake data": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "baseline fake data"
+          }
+        }
+      }
+    },
+    "Beta actions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beta actions"
+          }
+        }
+      }
+    },
+    "Beta validation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beta validation"
+          }
+        }
+      }
+    },
+    "Beta validation — Background": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beta validation — Background"
+          }
+        }
+      }
+    },
+    "Beta validation — Foreground": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beta validation — Foreground"
+          }
+        }
+      }
+    },
+    "Beta validation — Simulation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beta validation — Simulation"
+          }
+        }
+      }
+    },
+    "Build channel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build channel"
+          }
+        }
+      }
+    },
+    "Can't Find Your Show?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can't Find Your Show?"
+          }
+        }
+      }
+    },
+    "Checking next season…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking next season…"
+          }
+        }
+      }
+    },
+    "Clean or not detected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clean or not detected"
+          }
+        }
+      }
+    },
+    "Collapse section": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse section"
+          }
+        }
+      }
+    },
+    "Coming Soon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coming Soon"
+          }
+        }
+      }
+    },
+    "Completed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        }
+      }
+    },
+    "Confirms removal from your watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirms removal from your watchlist"
+          }
+        }
+      }
+    },
+    "Copy Report": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Report"
+          }
+        }
+      }
+    },
+    "Couldn't reach TVMaze. Check your connection and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't reach TVMaze. Check your connection and try again."
+          }
+        }
+      }
+    },
+    "Couldn't Update Watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't Update Watchlist"
+          }
+        }
+      }
+    },
+    "Credits": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits"
+          }
+        }
+      }
+    },
+    "Current launch started": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current launch started"
+          }
+        }
+      }
+    },
+    "Currently showing Season %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Currently showing Season %lld"
+          }
+        }
+      }
+    },
+    "Data provided by TVMaze": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data provided by TVMaze"
+          }
+        }
+      }
+    },
+    "Debug": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debug"
+          }
+        }
+      }
+    },
+    "Delayed pipeline (%llds): %@. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delayed pipeline (%1$llds): %2$@. %3$@"
+          }
+        }
+      }
+    },
+    "Delayed pipeline tests are unavailable in production builds.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delayed pipeline tests are unavailable in production builds."
+          }
+        }
+      }
+    },
+    "Delivered for %@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delivered for %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "Detected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detected"
+          }
+        }
+      }
+    },
+    "Detecting…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detecting…"
+          }
+        }
+      }
+    },
+    "Diagnostics": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostics"
+          }
+        }
+      }
+    },
+    "Diagnostics are available only in Debug and TestFlight builds.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostics are available only in Debug and TestFlight builds."
+          }
+        }
+      }
+    },
+    "Diagnostics help": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostics help"
+          }
+        }
+      }
+    },
+    "Diagnostics Help": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostics Help"
+          }
+        }
+      }
+    },
+    "diagnostics.help.appSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**Version** and **Build channel** identify the build you are running.\n\n**Notifications enabled** reflects whether the app can deliver alerts on this device (system permission granted)."
+          }
+        }
+      }
+    },
+    "diagnostics.help.backgroundSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These fields reflect **real watchlist polling** against TVMaze during a background refresh task—not simulated data. All three are **saved across app launches**.\n\n**Last background refresh** is when iOS last woke the app to check tracked shows in the background. Opening Diagnostics or using the app in the foreground does not update this timestamp.\n\n**Next refresh window** is the earliest time the next background refresh is scheduled. Production builds use a 12-hour cadence.\n\n**Last background fetch result** summarizes that background run—for example, how many shows were checked, whether TVMaze reported changes, or if an error occurred.\n\n**Last background notification decision** records what the notification pipeline decided after that background run—for example, whether an alert was sent, held for debounce, or skipped because nothing changed."
+          }
+        }
+      }
+    },
+    "diagnostics.help.betaActionsSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**Force Refresh Now** runs an immediate watchlist refresh using live TVMaze data. When it finishes, check the **Last foreground refresh** fields above for the result.\n\nThe notification test actions below require **Notifications enabled** (alert permission). They are disabled until permission is granted.\n\n**Send Test Notification** delivers a sample “new season” alert using the first tracked watchlist show, without going through the refresh pipeline. Useful for confirming that notifications appear on this device.\n\n**Schedule Pipeline Test Notification** seeds a fake new-season update for that same watchlist show, runs it through the real refresh and notification decision path, and schedules delivery in 5–10 seconds so you can background the app and confirm the alert arrives. Track at least one show first.\n\n**Run Simulated Update Scenario** is a two-step exercise: tap once for baseline fake data (step 1), then tap again for updated fake data (step 2) to exercise debounce and date-backed notification logic. Your real watchlist is not affected."
+          }
+        }
+      }
+    },
+    "diagnostics.help.foregroundSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These fields update only when you tap **Force Refresh Now** in Beta actions. They reflect a **manual** refresh using live TVMaze data and your real watchlist. They are **not saved**—they reset when the app is terminated.\n\nAutomatic refreshes when you open or return to the app do not update these fields (even though the app may skip network work if a refresh ran within the last 15 minutes).\n\n**Last foreground refresh** is when that manual refresh completed.\n\n**Last foreground fetch result** and **Last foreground notification decision** summarize the outcome the same way as the background fields above."
+          }
+        }
+      }
+    },
+    "diagnostics.help.launchInvestigationSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**Previous launch** flags when the prior session did not reach a normal background transition—for example, a crash or force quit. It does not replace TestFlight crash reports; it only gives testers a quick signal and context to share.\n\n**Current launch started** and **Last graceful background** help correlate timing with unexpected termination.\n\nWhen a prior launch ended unexpectedly, additional timestamps and breadcrumbs from that session are shown. **Breadcrumbs** are lightweight event markers recorded during the current session (and the prior session when relevant) to help reproduce issues."
+          }
+        }
+      }
+    },
+    "diagnostics.help.overview": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostics are available only in Debug and TestFlight builds. Use this screen to validate background refresh, notifications, and launch stability during beta testing.\n\n**Background** fields show what happened the last time iOS ran a background refresh task while the app was not in use. They are saved across app launches.\n\n**Foreground** fields show the result of the last **Force Refresh Now** tap in this session only. Opening the app or returning from the background does not update them."
+          }
+        }
+      }
+    },
+    "diagnostics.help.shareReportSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**Share Report** and **Copy Report** export a text summary of the fields above, usage counters, and recent breadcrumbs.\n\nBackground refresh fields are always included. Foreground refresh fields are included only if you used **Force Refresh Now** during this session. **Last simulation** is included when present.\n\nNothing is sent automatically. Share this report only if you choose to—for example, when filing beta feedback."
+          }
+        }
+      }
+    },
+    "diagnostics.help.simulationSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**Last simulation** appears after you run a beta action that uses fake data. It summarizes that run only and never reflects your real watchlist.\n\nSimulated updates use fake data only and never modify your tracked shows."
+          }
+        }
+      }
+    },
+    "diagnostics.help.usageSection": {
+      "comment": "Diagnostics help",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local counters for how you have used the app in this install. They are included in the shareable report and are not sent automatically."
+          }
+        }
+      }
+    },
+    "Disabled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disabled"
+          }
+        }
+      }
+    },
+    "Don't see your show? NextSeason shows TVMaze's top matches only. You may find more on TVMaze.com.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don't see your show? NextSeason shows TVMaze's top matches only. You may find more on TVMaze.com."
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "Enable Notifications": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Notifications"
+          }
+        }
+      }
+    },
+    "Enable notifications to get alerts when a tracked show's next season gets a release date or status update.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable notifications to get alerts when a tracked show's next season gets a release date or status update."
+          }
+        }
+      }
+    },
+    "Enabled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enabled"
+          }
+        }
+      }
+    },
+    "Ended": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended"
+          }
+        }
+      }
+    },
+    "Ended — no next season expected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended — no next season expected"
+          }
+        }
+      }
+    },
+    "Ended unexpectedly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended unexpectedly"
+          }
+        }
+      }
+    },
+    "Ended unexpectedly ⚠️": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended unexpectedly ⚠️"
+          }
+        }
+      }
+    },
+    "Example searches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example searches"
+          }
+        }
+      }
+    },
+    "Expand section": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand section"
+          }
+        }
+      }
+    },
+    "Explains what each field and action does": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explains what each field and action does"
+          }
+        }
+      }
+    },
+    "Failed to fetch TVMaze updates": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to fetch TVMaze updates"
+          }
+        }
+      }
+    },
+    "Failed to load watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to load watchlist"
+          }
+        }
+      }
+    },
+    "Find a Show": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find a Show"
+          }
+        }
+      }
+    },
+    "Find Your Next Season": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find Your Next Season"
+          }
+        }
+      }
+    },
+    "Force Refresh Now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Force Refresh Now"
+          }
+        }
+      }
+    },
+    "Get alerts when a tracked show's next season gets a release date or status update.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get alerts when a tracked show's next season gets a release date or status update."
+          }
+        }
+      }
+    },
+    "How notifications work": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How notifications work"
+          }
+        }
+      }
+    },
+    "How notifications work. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How notifications work. %@"
+          }
+        }
+      }
+    },
+    "In Development": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Development"
+          }
+        }
+      }
+    },
+    "Last background fetch result": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last background fetch result"
+          }
+        }
+      }
+    },
+    "Last background notification decision": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last background notification decision"
+          }
+        }
+      }
+    },
+    "Last background refresh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last background refresh"
+          }
+        }
+      }
+    },
+    "Last foreground fetch result": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last foreground fetch result"
+          }
+        }
+      }
+    },
+    "Last foreground notification decision": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last foreground notification decision"
+          }
+        }
+      }
+    },
+    "Last foreground refresh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last foreground refresh"
+          }
+        }
+      }
+    },
+    "Last graceful background": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last graceful background"
+          }
+        }
+      }
+    },
+    "Last simulation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last simulation"
+          }
+        }
+      }
+    },
+    "Launch investigation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch investigation"
+          }
+        }
+      }
+    },
+    "Loading watchlist…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading watchlist…"
+          }
+        }
+      }
+    },
+    "Marked stale: %@ not found on TVMaze": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marked stale: %@ not found on TVMaze"
+          }
+        }
+      }
+    },
+    "Never": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never"
+          }
+        }
+      }
+    },
+    "Never recorded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never recorded"
+          }
+        }
+      }
+    },
+    "Next refresh window": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next refresh window"
+          }
+        }
+      }
+    },
+    "Next Season": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Season"
+          }
+        }
+      }
+    },
+    "Next season status unknown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next season status unknown"
+          }
+        }
+      }
+    },
+    "Next Season, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Season, %@"
+          }
+        }
+      }
+    },
+    "Next Season, Checking next season status": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Season, Checking next season status"
+          }
+        }
+      }
+    },
+    "NextSeason": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NextSeason"
+          }
+        }
+      }
+    },
+    "NextSeason couldn't update your Watchlist. Please try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NextSeason couldn't update your Watchlist. Please try again."
+          }
+        }
+      }
+    },
+    "NextSeason Diagnostics": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NextSeason Diagnostics"
+          }
+        }
+      }
+    },
+    "NextSeason periodically checks your watchlist for new seasons and will notify you when one is found. iOS decides when apps may perform background checks, so opening the app occasionally helps keep your watchlist up to date.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NextSeason periodically checks your watchlist for new seasons and will notify you when one is found. iOS decides when apps may perform background checks, so opening the app occasionally helps keep your watchlist up to date."
+          }
+        }
+      }
+    },
+    "No": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No"
+          }
+        }
+      }
+    },
+    "No background notification decision yet.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No background notification decision yet."
+          }
+        }
+      }
+    },
+    "No background refresh recorded yet.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No background refresh recorded yet."
+          }
+        }
+      }
+    },
+    "No breadcrumbs recorded this session.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No breadcrumbs recorded this session."
+          }
+        }
+      }
+    },
+    "No foreground notification decision yet.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No foreground notification decision yet."
+          }
+        }
+      }
+    },
+    "No foreground refresh recorded yet.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No foreground refresh recorded yet."
+          }
+        }
+      }
+    },
+    "No longer on TVMaze": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No longer on TVMaze"
+          }
+        }
+      }
+    },
+    "No Matches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Matches"
+          }
+        }
+      }
+    },
+    "No notification (no meaningful change)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No notification (no meaningful change)"
+          }
+        }
+      }
+    },
+    "No notification for %@ (no meaningful change)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No notification for %@ (no meaningful change)"
+          }
+        }
+      }
+    },
+    "No simulated show found": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No simulated show found"
+          }
+        }
+      }
+    },
+    "No Tracked Shows": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Tracked Shows"
+          }
+        }
+      }
+    },
+    "No tracked shows match “%@”.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tracked shows match “%@”."
+          }
+        }
+      }
+    },
+    "No TVMaze changes for %lld tracked show(s)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No TVMaze changes for %lld tracked show(s)"
+          }
+        }
+      }
+    },
+    "No-result searches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No-result searches"
+          }
+        }
+      }
+    },
+    "Not applicable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not applicable"
+          }
+        }
+      }
+    },
+    "Not Now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        }
+      }
+    },
+    "Not scheduled yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not scheduled yet"
+          }
+        }
+      }
+    },
+    "Notification permission grants": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification permission grants"
+          }
+        }
+      }
+    },
+    "Notification permission requests": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification permission requests"
+          }
+        }
+      }
+    },
+    "Notification reminders scheduled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification reminders scheduled"
+          }
+        }
+      }
+    },
+    "Notification test actions require alert permission. Enable notifications in Settings, then return here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification test actions require alert permission. Enable notifications in Settings, then return here."
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        }
+      }
+    },
+    "Notifications Are Off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications Are Off"
+          }
+        }
+      }
+    },
+    "Notifications enabled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications enabled"
+          }
+        }
+      }
+    },
+    "Notifications Not Enabled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications Not Enabled"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "Ongoing series": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongoing series"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        }
+      }
+    },
+    "Opens notification settings or asks for permission.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens notification settings or asks for permission."
+          }
+        }
+      }
+    },
+    "Opens Settings to manage notifications.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Settings to manage notifications."
+          }
+        }
+      }
+    },
+    "Opens Settings where you can manage notification preferences.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Settings where you can manage notification preferences."
+          }
+        }
+      }
+    },
+    "Opens show details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens show details"
+          }
+        }
+      }
+    },
+    "Pending debounce for %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending debounce for %@"
+          }
+        }
+      }
+    },
+    "Previous launch": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous launch"
+          }
+        }
+      }
+    },
+    "Prior launch started": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prior launch started"
+          }
+        }
+      }
+    },
+    "Production": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Production"
+          }
+        }
+      }
+    },
+    "Refresh did not complete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh did not complete"
+          }
+        }
+      }
+    },
+    "Refreshed %lld show(s)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshed %lld show(s)"
+          }
+        }
+      }
+    },
+    "Refreshing…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshing…"
+          }
+        }
+      }
+    },
+    "Removed from watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed from watchlist"
+          }
+        }
+      }
+    },
+    "Restores the show to your watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restores the show to your watchlist"
+          }
+        }
+      }
+    },
+    "Returning — no next season announced yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returning — no next season announced yet"
+          }
+        }
+      }
+    },
+    "Returning — watch for next season news.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returning — watch for next season news."
+          }
+        }
+      }
+    },
+    "Returning, no season announced yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returning, no season announced yet"
+          }
+        }
+      }
+    },
+    "Run Simulated Update Scenario": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run Simulated Update Scenario"
+          }
+        }
+      }
+    },
+    "Running…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running…"
+          }
+        }
+      }
+    },
+    "Schedule Pipeline Test Notification": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schedule Pipeline Test Notification"
+          }
+        }
+      }
+    },
+    "Scheduling…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduling…"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        }
+      }
+    },
+    "Search for a show to see its next-season status. Use the search field above, or try an example.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search for a show to see its next-season status. Use the search field above, or try an example."
+          }
+        }
+      }
+    },
+    "Search on TVMaze.com": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search on TVMaze.com"
+          }
+        }
+      }
+    },
+    "Search TV shows": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search TV shows"
+          }
+        }
+      }
+    },
+    "Search Watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search Watchlist"
+          }
+        }
+      }
+    },
+    "Searches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Searches"
+          }
+        }
+      }
+    },
+    "Season %lld airing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %lld airing"
+          }
+        }
+      }
+    },
+    "Season %lld announced — date to be confirmed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %lld announced — date to be confirmed"
+          }
+        }
+      }
+    },
+    "Season %lld announced — date to be confirmed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %lld announced — date to be confirmed."
+          }
+        }
+      }
+    },
+    "Season %lld announced without a date": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %lld announced without a date"
+          }
+        }
+      }
+    },
+    "Season %lld is now airing.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %lld is now airing."
+          }
+        }
+      }
+    },
+    "Season %lld premieres %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %lld premieres %@"
+          }
+        }
+      }
+    },
+    "Season %lld premieres %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %lld premieres %@."
+          }
+        }
+      }
+    },
+    "Send Test Notification": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send Test Notification"
+          }
+        }
+      }
+    },
+    "Sending…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sending…"
+          }
+        }
+      }
+    },
+    "Share report": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share report"
+          }
+        }
+      }
+    },
+    "Share Report": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share Report"
+          }
+        }
+      }
+    },
+    "Show detail views": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show detail views"
+          }
+        }
+      }
+    },
+    "Shows version and beta diagnostics": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows version and beta diagnostics"
+          }
+        }
+      }
+    },
+    "Simulated scenarios are unavailable in production builds.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulated scenarios are unavailable in production builds."
+          }
+        }
+      }
+    },
+    "Skipped: empty watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skipped: empty watchlist"
+          }
+        }
+      }
+    },
+    "Something Went Wrong": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something Went Wrong"
+          }
+        }
+      }
+    },
+    "Something went wrong. Please try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong. Please try again."
+          }
+        }
+      }
+    },
+    "Stay in the Loop": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stay in the Loop"
+          }
+        }
+      }
+    },
+    "Step %@ (%@): %@. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step %1$@ (%2$@): %3$@. %4$@"
+          }
+        }
+      }
+    },
+    "Stop tracking %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop tracking %@"
+          }
+        }
+      }
+    },
+    "Successful searches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Successful searches"
+          }
+        }
+      }
+    },
+    "Suppressed for %@ (interactive refresh): %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suppressed for %1$@ (interactive refresh): %2$@"
+          }
+        }
+      }
+    },
+    "Tap the star to track a show, or tap the row to see its next-season details.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the star to track a show, or tap the row to see its next-season details."
+          }
+        }
+      }
+    },
+    "Test notification scheduled for %@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test notification scheduled for %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "TestFlight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TestFlight"
+          }
+        }
+      }
+    },
+    "TestFlight / Sandbox": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TestFlight / Sandbox"
+          }
+        }
+      }
+    },
+    "That show couldn't be found.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That show couldn't be found."
+          }
+        }
+      }
+    },
+    "There's a next season update.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There's a next season update."
+          }
+        }
+      }
+    },
+    "This series has ended.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This series has ended."
+          }
+        }
+      }
+    },
+    "To Be Determined": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To Be Determined"
+          }
+        }
+      }
+    },
+    "Too many requests right now. Please wait a moment and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too many requests right now. Please wait a moment and try again."
+          }
+        }
+      }
+    },
+    "Track %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Track %@"
+          }
+        }
+      }
+    },
+    "Track a show on the watchlist to send a test notification.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Track a show on the watchlist to send a test notification."
+          }
+        }
+      }
+    },
+    "Track shows you care about — tap the star on any search result.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Track shows you care about — tap the star on any search result."
+          }
+        }
+      }
+    },
+    "Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)."
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        }
+      }
+    },
+    "Try an Example": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try an Example"
+          }
+        }
+      }
+    },
+    "TVMaze is having trouble right now. Please try again later.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TVMaze is having trouble right now. Please try again later."
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        }
+      }
+    },
+    "Unknown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        }
+      }
+    },
+    "Updated (dated next season)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated (dated next season)"
+          }
+        }
+      }
+    },
+    "Updated %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated %@"
+          }
+        }
+      }
+    },
+    "updated fake data": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "updated fake data"
+          }
+        }
+      }
+    },
+    "Updating watchlist for %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updating watchlist for %@"
+          }
+        }
+      }
+    },
+    "Usage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage"
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        }
+      }
+    },
+    "View on TVMaze": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View on TVMaze"
+          }
+        }
+      }
+    },
+    "Waiting for a Date": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for a Date"
+          }
+        }
+      }
+    },
+    "Watchlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watchlist"
+          }
+        }
+      }
+    },
+    "Watchlist adds": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watchlist adds"
+          }
+        }
+      }
+    },
+    "Watchlist removals": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watchlist removals"
+          }
+        }
+      }
+    },
+    "We couldn't read the data from TVMaze.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We couldn't read the data from TVMaze."
+          }
+        }
+      }
+    },
+    "Xcode": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode"
+          }
+        }
+      }
+    },
+    "Yes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes"
+          }
+        }
+      }
+    },
+    "You can turn on notifications in Settings to get alerts when a tracked show's next season gets a release date or status update.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can turn on notifications in Settings to get alerts when a tracked show's next season gets a release date or status update."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

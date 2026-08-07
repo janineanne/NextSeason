@@ -31,6 +31,6 @@ extension View {
 
     /// VoiceOver hint for list rows that push show detail.
     func showDetailLinkAccessibility() -> some View {
-        accessibilityHint("Opens show details")
+        accessibilityHint(String(localized: "Opens show details"))
     }
 }

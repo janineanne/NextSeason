@@ -83,7 +83,9 @@ final class DiagnosticsSimulatedUpdateRunner {
             BetaBuildConfiguration.isAvailable
         }
         guard betaValidationAvailable else {
-            return "Simulated scenarios are unavailable in production builds."
+            return String(
+                localized: "Simulated scenarios are unavailable in production builds."
+            )
         }
 
         if !isSeeded {
@@ -95,10 +97,15 @@ final class DiagnosticsSimulatedUpdateRunner {
         let outcome = await refreshService.refreshAll(force: true)
 
         let tracked = repository.show(id: dataProvider.showID)
-        let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
-        let notificationDecision = outcome?.notificationDecision ?? "Refresh did not complete"
-        let summary =
-            "Step \(phase.stepNumber) (\(phase.shortLabel)): \(statusSummary). \(notificationDecision)"
+        let statusSummary =
+            tracked?.nextSeason.headlineSummary
+            ?? String(localized: "No simulated show found")
+        let notificationDecision =
+            outcome?.notificationDecision ?? String(localized: "Refresh did not complete")
+        let summary = String(
+            localized:
+                "Step \(phase.stepNumber) (\(phase.shortLabel)): \(statusSummary). \(notificationDecision)"
+        )
 
         diagnostics.recordSimulatedScenarioSummary(summary)
         dataProvider.advanceAfterRun()
@@ -125,7 +132,9 @@ final class DiagnosticsSimulatedUpdateRunner {
             BetaBuildConfiguration.isAvailable
         }
         guard betaValidationAvailable else {
-            return "Delayed pipeline tests are unavailable in production builds."
+            return String(
+                localized: "Delayed pipeline tests are unavailable in production builds."
+            )
         }
 
         resetScenario()
@@ -150,11 +159,16 @@ final class DiagnosticsSimulatedUpdateRunner {
         let outcome = await pipelineRefresh.refreshAll(force: true)
 
         let tracked = repository.show(id: dataProvider.showID)
-        let statusSummary = tracked?.nextSeason.headlineSummary ?? "No simulated show found"
-        let notificationDecision = outcome?.notificationDecision ?? "Refresh did not complete"
+        let statusSummary =
+            tracked?.nextSeason.headlineSummary
+            ?? String(localized: "No simulated show found")
+        let notificationDecision =
+            outcome?.notificationDecision ?? String(localized: "Refresh did not complete")
         let delaySeconds = Int(delay.rounded())
-        let summary =
-            "Delayed pipeline (\(delaySeconds)s): \(statusSummary). \(notificationDecision)"
+        let summary = String(
+            localized:
+                "Delayed pipeline (\(delaySeconds)s): \(statusSummary). \(notificationDecision)"
+        )
 
         diagnostics.recordSimulatedScenarioSummary(summary)
         resetScenario()
@@ -239,8 +253,8 @@ extension DiagnosticsSimulatedDataProvider.Phase {
 
     fileprivate var shortLabel: String {
         switch self {
-        case .baseline: "baseline fake data"
-        case .updated: "updated fake data"
+        case .baseline: String(localized: "baseline fake data")
+        case .updated: String(localized: "updated fake data")
         }
     }
 }
@@ -249,17 +263,20 @@ extension NextSeasonStatus {
     fileprivate var headlineSummary: String {
         switch self {
         case .airing(let season):
-            "Season \(season) airing"
+            String(localized: "Season \(season) airing")
         case .scheduled(let season, let premiere):
-            "Season \(season) premieres \(premiere.formatted(date: .abbreviated, time: .omitted))"
+            String(
+                localized:
+                    "Season \(season) premieres \(premiere.formatted(date: .abbreviated, time: .omitted))"
+            )
         case .announcedUndated(let season):
-            "Season \(season) announced without a date"
+            String(localized: "Season \(season) announced without a date")
         case .returningNoSeasonYet:
-            "Returning, no season announced yet"
+            String(localized: "Returning, no season announced yet")
         case .ended:
-            "Ended"
+            String(localized: "Ended")
         case .unknown:
-            "Unknown"
+            String(localized: "Unknown")
         }
     }
 }
