@@ -2,7 +2,8 @@
 # Expects ROOT to be set by the caller before sourcing.
 
 SCHEME="${SCHEME:-NextSeason}"
-CONFIGURATION="${CONFIGURATION:-Release}"
+# Profile = Release optimizations + get-task-allow for on-device Instruments attach.
+CONFIGURATION="${CONFIGURATION:-Profile}"
 
 connected_device_udid() {
     xcrun xctrace list devices 2>/dev/null | awk '
@@ -81,4 +82,71 @@ resolve_performance_app() {
     fi
 
     echo "${app}"
+}
+
+preflight_profiling_device() {
+    echo "Preflight: keep the iPhone unlocked with the screen on for the entire run."
+    echo "Preflight: a locked screen often makes xctrace hang past --time-limit."
+}
+
+# Converts xctrace --time-limit values (20s, 2m, …) to whole seconds.
+parse_time_limit_seconds() {
+    local limit="$1"
+    if [[ "${limit}" =~ ^([0-9]+)(ms|s|m|h)$ ]]; then
+        local value="${BASH_REMATCH[1]}"
+        local unit="${BASH_REMATCH[2]}"
+        case "${unit}" in
+            ms) echo 0 ;;
+            s) echo "${value}" ;;
+            m) echo $((value * 60)) ;;
+            h) echo $((value * 3600)) ;;
+        esac
+    elif [[ "${limit}" =~ ^([0-9]+)$ ]]; then
+        echo "${BASH_REMATCH[1]}"
+    else
+        echo 30
+    fi
+}
+
+remove_trace_output() {
+    local output="$1"
+    if [[ -e "${output}" ]]; then
+        rm -rf "${output}"
+    fi
+}
+
+# xctrace occasionally ignores --time-limit when launch/attach stalls; enforce a watchdog.
+run_xctrace_record() {
+    local time_limit="$1"
+    local output="$2"
+    shift 2
+
+    remove_trace_output "${output}"
+
+    local limit_seconds watchdog
+    limit_seconds="$(parse_time_limit_seconds "${time_limit}")"
+    watchdog=$((limit_seconds + 45))
+
+    xcrun xctrace record \
+        --output "${output}" \
+        --time-limit "${time_limit}" \
+        --no-prompt \
+        "$@" &
+    local pid=$!
+    local elapsed=0
+
+    while kill -0 "${pid}" 2>/dev/null && ((elapsed < watchdog)); do
+        sleep 2
+        elapsed=$((elapsed + 2))
+    done
+
+    if kill -0 "${pid}" 2>/dev/null; then
+        echo "error: xctrace hung after ${watchdog}s (requested limit ${time_limit})." >&2
+        echo "error: unlock the iPhone, disable auto-lock briefly, and retry." >&2
+        kill -9 "${pid}" 2>/dev/null || true
+        wait "${pid}" 2>/dev/null || true
+        return 124
+    fi
+
+    wait "${pid}"
 }

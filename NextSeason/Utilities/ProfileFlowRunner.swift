@@ -11,7 +11,7 @@ import os
 ///
 /// Sets coordinator state (tab, search query, navigation path) and waits on
 /// tokens that Search/Show Detail bump when UI work settles
-/// (`profileFlowSearchSettledToken`, `profileFlowDetailLoadedToken`). Emits
+/// (`automationSearchSettledToken`, `automationDetailLoadedToken`). Emits
 /// `OSSignposter` intervals for Instruments and records durations via
 /// `AppDiagnosticsLogger` / `ProfileFlowTimingStore`.
 ///
@@ -137,7 +137,7 @@ struct ProfileFlowRunner {
         let phaseStart = Date.now
         let interval = Self.signposter.beginInterval("search.query")
         coordinator.selectedTab = .search
-        coordinator.profileFlowSearchQuery = FirstRunCopy.exampleSearchQuery
+        coordinator.automationSearchQuery = FirstRunCopy.exampleSearchQuery
         await waitForSearchResults()
         Self.signposter.endInterval("search.query", interval)
         AppDiagnosticsLogger.logProfileFlowTiming(
@@ -150,7 +150,7 @@ struct ProfileFlowRunner {
     private func runSearchEmpty() async {
         let interval = Self.signposter.beginInterval("search.empty")
         coordinator.selectedTab = .search
-        coordinator.profileFlowSearchQuery = ProfileFlowConfiguration.SearchQuery.emptyResults
+        coordinator.automationSearchQuery = ProfileFlowConfiguration.SearchQuery.emptyResults
         await waitForSearchResults()
         Self.signposter.endInterval("search.empty", interval)
     }
@@ -178,7 +178,7 @@ struct ProfileFlowRunner {
 
         let phaseStart = Date.now
         let interval = Self.signposter.beginInterval("showDetails.load")
-        let detailToken = coordinator.profileFlowDetailLoadedToken
+        let detailToken = coordinator.automationDetailLoadedToken
         coordinator.selectedTab = .search
         coordinator.searchPath.append(show)
         analytics.track(.showDetailViewed(showID: show.id))
@@ -215,8 +215,8 @@ struct ProfileFlowRunner {
         }
 
         coordinator.selectedTab = .search
-        let searchToken = coordinator.profileFlowSearchSettledToken
-        coordinator.profileFlowSearchQuery = FirstRunCopy.exampleSearchQuery
+        let searchToken = coordinator.automationSearchSettledToken
+        coordinator.automationSearchQuery = FirstRunCopy.exampleSearchQuery
         await waitForSearchResults(since: searchToken)
 
         do {
@@ -271,23 +271,23 @@ struct ProfileFlowRunner {
         }
     }
 
-    /// Polls until SearchView bumps `profileFlowSearchSettledToken`, or times out.
+    /// Polls until SearchView bumps `automationSearchSettledToken`, or times out.
     private func waitForSearchResults(since startToken: Int? = nil) async {
-        let baseline = startToken ?? coordinator.profileFlowSearchSettledToken
+        let baseline = startToken ?? coordinator.automationSearchSettledToken
         let deadline = Date.now.addingTimeInterval(15)
         while Date.now < deadline {
-            if coordinator.profileFlowSearchSettledToken > baseline {
+            if coordinator.automationSearchSettledToken > baseline {
                 return
             }
             try? await Task.sleep(for: .milliseconds(50))
         }
     }
 
-    /// Polls until ShowDetailView bumps `profileFlowDetailLoadedToken`, or times out.
+    /// Polls until ShowDetailView bumps `automationDetailLoadedToken`, or times out.
     private func waitForDetailLoaded(since startToken: Int) async {
         let deadline = Date.now.addingTimeInterval(12)
         while Date.now < deadline {
-            if coordinator.profileFlowDetailLoadedToken > startToken {
+            if coordinator.automationDetailLoadedToken > startToken {
                 return
             }
             try? await Task.sleep(for: .milliseconds(50))
@@ -301,7 +301,7 @@ struct ProfileFlowRunner {
         let interval = Self.signposter.beginInterval("stress.searchDetailsBack")
         for _ in 1...20 {
             coordinator.selectedTab = .search
-            coordinator.profileFlowSearchQuery = FirstRunCopy.exampleSearchQuery
+            coordinator.automationSearchQuery = FirstRunCopy.exampleSearchQuery
             await waitForSearchResults()
             coordinator.searchPath.append(show)
             try? await Task.sleep(for: .milliseconds(500))
@@ -333,7 +333,7 @@ struct ProfileFlowRunner {
         let interval = Self.signposter.beginInterval("stress.searchEmpty")
         for _ in 1...20 {
             coordinator.selectedTab = .search
-            coordinator.profileFlowSearchQuery = ProfileFlowConfiguration.SearchQuery.emptyResults
+            coordinator.automationSearchQuery = ProfileFlowConfiguration.SearchQuery.emptyResults
             await waitForSearchResults()
         }
         Self.signposter.endInterval("stress.searchEmpty", interval)

@@ -25,19 +25,23 @@ final class AppNavigationCoordinator {
     var selectedTab: Tab = .search
     var watchlistPath = NavigationPath()
     var searchPath = NavigationPath()
-    /// Set by `ProfileFlowRunner` so SearchView can drive a query during Instruments runs.
-    var profileFlowSearchQuery: String?
-    /// Bumped when search reaches a settled outcome during a profile flow run.
-    private(set) var profileFlowSearchSettledToken = 0
-    /// Bumped when show detail finishes loading during a profile flow run.
-    private(set) var profileFlowDetailLoadedToken = 0
+    /// One-shot query injection for external automation (Instruments `ProfileFlowRunner`).
+    /// `ContentView` binds this into the Search tab environment; the runner sets it
+    /// directly. Unused in normal launches.
+    var automationSearchQuery: String?
+    /// Bumped when search reaches a settled outcome during an automated run.
+    /// `ProfileFlowRunner` polls this token after setting `automationSearchQuery`.
+    private(set) var automationSearchSettledToken = 0
+    /// Bumped when show detail finishes loading during an automated run.
+    /// `ProfileFlowRunner` polls this after pushing onto `searchPath`.
+    private(set) var automationDetailLoadedToken = 0
 
-    func notifyProfileFlowSearchSettled() {
-        profileFlowSearchSettledToken &+= 1
+    func notifyAutomationSearchSettled() {
+        automationSearchSettledToken &+= 1
     }
 
-    func notifyProfileFlowDetailLoaded() {
-        profileFlowDetailLoadedToken &+= 1
+    func notifyAutomationDetailLoaded() {
+        automationDetailLoadedToken &+= 1
     }
 
     private(set) var pendingShowID: Int?

@@ -26,9 +26,6 @@ struct SearchView: View {
     @Environment(\.dismissSearch) private var dismissSearch
 
     @Binding var navigationPath: NavigationPath
-    @Binding var profileFlowSearchQuery: String?
-    private let onProfileFlowSearchSettled: (() -> Void)?
-    private let onProfileFlowDetailLoaded: (() -> Void)?
     private let tvMaze: any TVMazeService
     private let analytics: any AnalyticsTracking
     private let onWatchlistChanged: () -> Void
@@ -45,17 +42,11 @@ struct SearchView: View {
 
     init(
         navigationPath: Binding<NavigationPath>,
-        profileFlowSearchQuery: Binding<String?> = .constant(nil),
-        onProfileFlowSearchSettled: (() -> Void)? = nil,
-        onProfileFlowDetailLoaded: (() -> Void)? = nil,
         tvMaze: any TVMazeService,
         analytics: any AnalyticsTracking,
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
         _navigationPath = navigationPath
-        _profileFlowSearchQuery = profileFlowSearchQuery
-        self.onProfileFlowSearchSettled = onProfileFlowSearchSettled
-        self.onProfileFlowDetailLoaded = onProfileFlowDetailLoaded
         self.tvMaze = tvMaze
         self.analytics = analytics
         self.onWatchlistChanged = onWatchlistChanged
@@ -77,8 +68,7 @@ struct SearchView: View {
                         notifications: notificationService,
                         analytics: analytics,
                         isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
-                        onWatchlistChanged: onWatchlistChanged,
-                        onProfileFlowDetailLoaded: onProfileFlowDetailLoaded
+                        onWatchlistChanged: onWatchlistChanged
                     )
                     .onAppear {
                         analytics.track(.searchResultOpened(showID: show.id))
@@ -95,11 +85,7 @@ struct SearchView: View {
                 .onChange(of: viewModel.state) { _, newState in
                     markFirstSearchCompletedIfNeeded(for: newState)
                 }
-                .searchProfileFlow(
-                    profileFlowSearchQuery: $profileFlowSearchQuery,
-                    viewModel: viewModel,
-                    onProfileFlowSearchSettled: onProfileFlowSearchSettled
-                )
+                .automationSearchHooks(viewModel: viewModel)
                 .task {
                     await refreshTrackedShows()
                 }

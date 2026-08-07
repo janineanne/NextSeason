@@ -57,6 +57,9 @@
 		E16713F6302512D0007F7098 /* 7-31-2026 Post-MVP Documentation Review and Cleanup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-31-2026 Post-MVP Documentation Review and Cleanup.md"; sourceTree = "<group>"; };
 		E16713F730251340007F7098 /* 8-6-2026 Discuss Floating Section Header Fix.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Discuss Floating Section Header Fix.md"; sourceTree = "<group>"; };
 		E16713F930251376007F7098 /* 8-6-2026 Implement Floating Section Header Fix.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Implement Floating Section Header Fix.md"; sourceTree = "<group>"; };
+		E167187630253A2C007F7098 /* 8-4-2026 Discuss ProfileFlow Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-4-2026 Discuss ProfileFlow Implementation.md"; sourceTree = "<group>"; };
+		E167187730253A58007F7098 /* 8-6-2026 Improve ProfileFlow Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = "8-6-2026 Improve ProfileFlow Implementation.md"; sourceTree = "<group>"; };
+		E167187830255850007F7098 /* 8-6-2026 Review Changes to ProfileFlow Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Review Changes to ProfileFlow Implementation.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -452,6 +455,7 @@
 				E167043A30230010007F7098 /* 8-4-2026 Human Code Review - Questions and Cleanup.md */,
 				E167068F3023BA77007F7098 /* 8-4-2026 Discuss Analytics Counters.md */,
 				E16706903023BA77007F7098 /* 8-4-2026 Remove unused files.md */,
+				E167187630253A2C007F7098 /* 8-4-2026 Discuss ProfileFlow Implementation.md */,
 				E167068D3023BA77007F7098 /* 8-4-2026 Add diagnostics cleanup to pre-App Store Roadmap.md */,
 				E167068E3023BA77007F7098 /* 8-4-2026 Add fatalError to pre-App Store Roadmap.md */,
 				E16708CD3023CB86007F7098 /* 8-5-2026 Set up swift-format.md */,
@@ -462,6 +466,8 @@
 				E16711BA302415B5007F7098 /* 8-5-2026 Discussion of Platform Support.md */,
 				E16713F730251340007F7098 /* 8-6-2026 Discuss Floating Section Header Fix.md */,
 				E16713F930251376007F7098 /* 8-6-2026 Implement Floating Section Header Fix.md */,
+				E167187730253A58007F7098 /* 8-6-2026 Improve ProfileFlow Implementation.md */,
+				E167187830255850007F7098 /* 8-6-2026 Review Changes to ProfileFlow Implementation.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
@@ -896,6 +902,144 @@
 			};
 			name = Release;
 		};
+		E1PROF0013024001007F7098 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 6U9C675XYA;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Profile;
+		};
+		E1PROF0023024001007F7098 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Profiling.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 22;
+				DEVELOPMENT_TEAM = JTVUXCB28U;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "App-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = NextSeason;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TrialByFyre.NextSeason;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Profile;
+		};
+		E1PROF0033024001007F7098 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JTVUXCB28U;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NextSeason.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NextSeason";
+			};
+			name = Profile;
+		};
+		E1PROF0043024001007F7098 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JTVUXCB28U;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TBF.NextSeasonUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = NextSeason;
+			};
+			name = Profile;
+		};
 		E1UI000A2FE400000076FCDD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -952,6 +1096,7 @@
 			buildConfigurations = (
 				E13811D62FDB795E009C141B /* Debug */,
 				E13811D72FDB795E009C141B /* Release */,
+				E1PROF0013024001007F7098 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -961,6 +1106,7 @@
 			buildConfigurations = (
 				E13811D92FDB795E009C141B /* Debug */,
 				E13811DA2FDB795E009C141B /* Release */,
+				E1PROF0023024001007F7098 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -970,6 +1116,7 @@
 			buildConfigurations = (
 				E1DAC5602FDF5A4B00BD81E5 /* Debug */,
 				E1DAC5612FDF5A4B00BD81E5 /* Release */,
+				E1PROF0033024001007F7098 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -979,6 +1126,7 @@
 			buildConfigurations = (
 				E1UI000A2FE400000076FCDD /* Debug */,
 				E1UI000B2FE400000076FCDD /* Release */,
+				E1PROF0043024001007F7098 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
