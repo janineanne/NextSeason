@@ -21,34 +21,68 @@ struct UndoToast: View {
 
     private var toastContents: some View {
         HStack(spacing: 12) {
+            Image(systemName: "trash.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppColor.accent)
+                .accessibilityHidden(true)
+
             Text(message)
                 .font(.subheadline)
-                .appSecondaryText()
+                .appPrimaryText()
                 .accessibilityFocused($toastFocus, equals: .message)
+
             Spacer(minLength: 0)
+
             Button("Undo", action: undoAction)
                 .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppColor.accent)
+                .buttonStyle(.plain)
                 .accessibilityIdentifier(AccessibilityID.Watchlist.undoButton)
                 .accessibilityHint("Restores the show to your watchlist")
                 .accessibilityFocused($toastFocus, equals: .undo)
+
             Button("OK", action: confirmAction)
                 .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .buttonStyle(.plain)
                 .accessibilityIdentifier(AccessibilityID.Watchlist.confirmButton)
                 .accessibilityHint("Confirms removal from your watchlist")
         }
     }
 }
 
-/// Floating chrome for the undo toast: Liquid Glass on iOS 26+, material below.
+/// Floating chrome for the undo toast: Liquid Glass on iOS 26+, tinted surface below.
 private struct UndoToastChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
             content
+                .background {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(AppColor.accent.opacity(0.1))
+                }
                 .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
         } else {
             content
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .background {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(AppColor.surface)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(AppColor.accent.opacity(0.12))
+                        }
+                }
+                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
         }
+    }
+}
+
+/// Brief slide-up + fade when the toast appears after a row removal.
+extension AnyTransition {
+    fileprivate static var undoToastEntrance: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.combined(with: .offset(y: 10)),
+            removal: .opacity
+        )
     }
 }
 
@@ -101,7 +135,7 @@ private struct WatchlistUndoToastModifier: ViewModifier {
                     }
                 }
             }
-            .animation(.default, value: isPresented)
+            .animation(.easeOut(duration: 0.2), value: isPresented)
             .onChange(of: isPresented) { _, presented in
                 guard presented else {
                     toastFocus = nil
@@ -134,7 +168,7 @@ private struct WatchlistUndoToastModifier: ViewModifier {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilitySortPriority(1)
         .zIndex(1)
-        .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .bottom)))
+        .transition(.undoToastEntrance)
     }
 
     private var anchoredToast: some View {
@@ -154,7 +188,7 @@ private struct WatchlistUndoToastModifier: ViewModifier {
         }
         .allowsHitTesting(true)
         .zIndex(1)
-        .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
+        .transition(.undoToastEntrance)
     }
 
     private var toastContent: some View {
