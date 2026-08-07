@@ -46,42 +46,48 @@ enum AnalyticsDiagnosticsReport {
     ) -> String {
         let breadcrumbLines =
             recentBreadcrumbs.isEmpty
-            ? "  (none this session)"
+            ? String(localized: "  (none this session)")
             : recentBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
         let priorLines =
             persistedBreadcrumbs.isEmpty
-            ? "  (none persisted)"
+            ? String(localized: "  (none persisted)")
             // Cap export size; full ring stays available in-app if needed.
             : persistedBreadcrumbs.suffix(10).map { "  \($0)" }.joined(separator: "\n")
         let previousLaunchStatus =
             launchDiagnostics.previousLaunchEndedUnexpectedly
-            ? "Ended unexpectedly"
-            : "Clean or not detected"
+            ? String(localized: "Ended unexpectedly")
+            : String(localized: "Clean or not detected")
         let currentLaunchStarted =
             launchDiagnostics.currentLaunchStartedAt
-            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Unknown"
+            .map { $0.formatted(date: .abbreviated, time: .standard) }
+            ?? String(localized: "Unknown")
         let previousLaunchStarted =
             launchDiagnostics.previousLaunchStartedAt
-            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Unknown"
+            .map { $0.formatted(date: .abbreviated, time: .standard) }
+            ?? String(localized: "Unknown")
         let detectedAt =
             launchDiagnostics.unexpectedTerminationDetectedAt
-            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Not applicable"
+            .map { $0.formatted(date: .abbreviated, time: .standard) }
+            ?? String(localized: "Not applicable")
         let lastGracefulExit =
             launchDiagnostics.lastGracefulExitAt
-            .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Never recorded"
+            .map { $0.formatted(date: .abbreviated, time: .standard) }
+            ?? String(localized: "Never recorded")
         let unexpectedBreadcrumbLines =
             launchDiagnostics.priorBreadcrumbs.isEmpty
-            ? "  (none captured)"
+            ? String(localized: "  (none captured)")
             : launchDiagnostics.priorBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
 
         var betaSection = ""
         if BetaBuildConfiguration.isAvailable, let betaRefreshDiagnostics {
             let lastBackgroundRefresh =
                 betaRefreshDiagnostics.lastBackgroundRefreshAt
-                .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Never"
+                .map { $0.formatted(date: .abbreviated, time: .standard) }
+                ?? String(localized: "Never")
             let nextRefresh =
                 betaRefreshDiagnostics.nextScheduledRefreshAt
-                .map { $0.formatted(date: .abbreviated, time: .standard) } ?? "Not scheduled yet"
+                .map { $0.formatted(date: .abbreviated, time: .standard) }
+                ?? String(localized: "Not scheduled yet")
             betaSection = """
 
                 Beta validation:
@@ -106,7 +112,7 @@ enum AnalyticsDiagnosticsReport {
         }
 
         return """
-            NextSeason Diagnostics
+            \(String(localized: "NextSeason Diagnostics"))
 
             Version: \(AppVersionInfo.displayString)
             \(betaSection)

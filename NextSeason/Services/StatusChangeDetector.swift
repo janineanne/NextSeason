@@ -132,18 +132,18 @@ nonisolated struct SeasonNotificationContent: Sendable {
     var body: String {
         switch status {
         case .airing(let season):
-            return "Season \(season) is now airing."
+            return String(localized: "Season \(season) is now airing.")
         case .scheduled(let season, let premiere):
             let date = premiere.formatted(date: .abbreviated, time: .omitted)
-            return "Season \(season) premieres \(date)."
+            return String(localized: "Season \(season) premieres \(date).")
         case .announcedUndated(let season):
-            return "Season \(season) announced — date to be confirmed."
+            return String(localized: "Season \(season) announced — date to be confirmed.")
         case .returningNoSeasonYet:
-            return "Returning — watch for next season news."
+            return String(localized: "Returning — watch for next season news.")
         case .ended:
-            return "This series has ended."
+            return String(localized: "This series has ended.")
         case .unknown:
-            return "There's a next season update."
+            return String(localized: "There's a next season update.")
         }
     }
 }

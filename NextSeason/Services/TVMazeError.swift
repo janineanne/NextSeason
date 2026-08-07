@@ -18,17 +18,23 @@ nonisolated enum TVMazeError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL, .invalidResponse:
-            "Something went wrong. Please try again."
+            String(localized: "Something went wrong. Please try again.")
         case .network:
-            "Couldn't reach TVMaze. Check your connection and try again."
+            String(localized: "Couldn't reach TVMaze. Check your connection and try again.")
         case .decoding:
-            "We couldn't read the data from TVMaze."
+            String(localized: "We couldn't read the data from TVMaze.")
         case .notFound:
-            "That show couldn't be found."
+            String(localized: "That show couldn't be found.")
         case .rateLimited:
-            "Too many requests right now. Please wait a moment and try again."
+            String(
+                localized:
+                    "Too many requests right now. Please wait a moment and try again."
+            )
         case .server:
-            "TVMaze is having trouble right now. Please try again later."
+            String(
+                localized:
+                    "TVMaze is having trouble right now. Please try again later."
+            )
         }
     }
 }

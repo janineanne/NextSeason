@@ -18,15 +18,15 @@ enum WatchlistSection: Int, CaseIterable, Identifiable, Sendable {
     var title: String {
         switch self {
         case .airingNow:
-            "Airing Now"
+            String(localized: "Airing Now")
         case .comingSoon:
-            "Coming Soon"
+            String(localized: "Coming Soon")
         case .waitingForADate:
-            "Waiting for a Date"
+            String(localized: "Waiting for a Date")
         case .ended:
-            "Ended"
+            String(localized: "Ended")
         case .unknown:
-            "Unknown"
+            String(localized: "Unknown")
         }
     }
 

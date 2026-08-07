@@ -10,7 +10,9 @@ struct NotificationsDisabledBanner: View {
     let buttonTitle: String
     let openSettings: () -> Void
 
-    init(buttonTitle: String = "Open Settings", openSettings: @escaping () -> Void) {
+    init(
+        buttonTitle: String = String(localized: "Open Settings"), openSettings: @escaping () -> Void
+    ) {
         self.buttonTitle = buttonTitle
         self.openSettings = openSettings
     }

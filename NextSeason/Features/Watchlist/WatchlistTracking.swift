@@ -9,8 +9,9 @@ import Foundation
 @MainActor
 enum WatchlistTracking {
     /// Generic user-facing copy for thrown watchlist add/remove failures.
-    static let updateFailedMessage =
-        "NextSeason couldn’t update your Watchlist. Please try again."
+    static let updateFailedMessage = String(
+        localized: "NextSeason couldn't update your Watchlist. Please try again."
+    )
 
     /// Result of a track-button tap after shared side effects have run.
     enum ToggleOutcome: Equatable {

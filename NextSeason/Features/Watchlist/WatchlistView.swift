@@ -323,7 +323,10 @@ struct WatchlistView: View {
             }
         } description: {
             Text(
-                "No tracked shows match “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”."
+                String(
+                    localized:
+                        "No tracked shows match “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”."
+                )
             )
             .appSecondaryText()
         }
@@ -388,7 +391,11 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(title)
-            .accessibilityHint(isExpanded ? "Collapse section" : "Expand section")
+            .accessibilityHint(
+                isExpanded
+                    ? String(localized: "Collapse section")
+                    : String(localized: "Expand section")
+            )
             .accessibilityAddTraits(.isHeader)
         }
     }

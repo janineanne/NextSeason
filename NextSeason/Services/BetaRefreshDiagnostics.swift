@@ -23,11 +23,19 @@ final class BetaRefreshDiagnostics {
         "BetaRefreshDiagnostics.lastBackgroundNotificationDecision"
 
     private(set) var lastBackgroundRefreshAt: Date?
-    private(set) var lastBackgroundFetchResult = "No background refresh recorded yet."
-    private(set) var lastBackgroundNotificationDecision = "No background notification decision yet."
+    private(set) var lastBackgroundFetchResult = String(
+        localized: "No background refresh recorded yet."
+    )
+    private(set) var lastBackgroundNotificationDecision = String(
+        localized: "No background notification decision yet."
+    )
     private(set) var lastForegroundRefreshAt: Date?
-    private(set) var lastForegroundFetchResult = "No foreground refresh recorded yet."
-    private(set) var lastForegroundNotificationDecision = "No foreground notification decision yet."
+    private(set) var lastForegroundFetchResult = String(
+        localized: "No foreground refresh recorded yet."
+    )
+    private(set) var lastForegroundNotificationDecision = String(
+        localized: "No foreground notification decision yet."
+    )
     private(set) var nextScheduledRefreshAt: Date?
     private(set) var lastSimulatedScenarioSummary: String?
 

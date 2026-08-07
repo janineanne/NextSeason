@@ -27,10 +27,10 @@ nonisolated enum ShowStatus: Sendable, Hashable {
 
     var displayLabel: String {
         switch self {
-        case .running: "Ongoing series"
-        case .ended: "Ended"
-        case .toBeDetermined: "To Be Determined"
-        case .inDevelopment: "In Development"
+        case .running: String(localized: "Ongoing series")
+        case .ended: String(localized: "Ended")
+        case .toBeDetermined: String(localized: "To Be Determined")
+        case .inDevelopment: String(localized: "In Development")
         case .unknown(let value): value
         }
     }

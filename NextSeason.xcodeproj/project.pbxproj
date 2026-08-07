@@ -63,6 +63,9 @@
 		E1671AB930255D9C007F7098 /* 8-6-2026 Discuss Making Undo Toast More Visible.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Discuss Making Undo Toast More Visible.md"; sourceTree = "<group>"; };
 		E1671ABA30256106007F7098 /* 8-6-2026 Implement Visibility Improvements to Undo Toast.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Implement Visibility Improvements to Undo Toast.md"; sourceTree = "<group>"; };
 		E1671CF93025678A007F7098 /* 8-6-2026 Decision to Not Consolidate Duplicated Code For Tracking Button.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = "8-6-2026 Decision to Not Consolidate Duplicated Code For Tracking Button.md"; sourceTree = "<group>"; };
+		E1671F3A30259521007F7098 /* 8-6-2026 Review String Extraction.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Review String Extraction.md"; sourceTree = "<group>"; };
+		E1671F3B302595B1007F7098 /* 8-6-2026 Discuss String Extraction.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Discuss String Extraction.md"; sourceTree = "<group>"; };
+		E1671F3C3025960B007F7098 /* 8-6-2026 Implement String Extraction (by Cursor).md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-6-2026 Implement String Extraction (by Cursor).md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -474,6 +477,9 @@
 				E1671AB930255D9C007F7098 /* 8-6-2026 Discuss Making Undo Toast More Visible.md */,
 				E1671ABA30256106007F7098 /* 8-6-2026 Implement Visibility Improvements to Undo Toast.md */,
 				E1671CF93025678A007F7098 /* 8-6-2026 Decision to Not Consolidate Duplicated Code For Tracking Button.md */,
+				E1671F3B302595B1007F7098 /* 8-6-2026 Discuss String Extraction.md */,
+				E1671F3C3025960B007F7098 /* 8-6-2026 Implement String Extraction (by Cursor).md */,
+				E1671F3A30259521007F7098 /* 8-6-2026 Review String Extraction.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

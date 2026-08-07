@@ -95,9 +95,11 @@ final class WatchlistRefreshService {
                 "watchlist_refresh_start force=\(force, privacy: .public) notify=\(deliverNotifications, privacy: .public)"
             )
         AppDiagnosticsLogger.breadcrumb("watchlist_refresh_start")
-        var fetchResult = "Completed"
+        var fetchResult = String(localized: "Completed")
         // Last per-show notification decision string wins for the outcome summary.
-        var lastNotificationDecision = "No notification (no meaningful change)"
+        var lastNotificationDecision = String(
+            localized: "No notification (no meaningful change)"
+        )
         var refreshedShowCount = 0
         var skippedShowCount = 0
 
@@ -112,11 +114,11 @@ final class WatchlistRefreshService {
             analytics.trackNonFatalError(error, context: "watchlist_refresh_load")
             recordBackgroundDiagnosticsIfNeeded(
                 recordDiagnostics,
-                fetchResult: "Failed to load watchlist",
+                fetchResult: String(localized: "Failed to load watchlist"),
                 notificationDecision: lastNotificationDecision
             )
             return WatchlistRefreshOutcome(
-                fetchResult: "Failed to load watchlist",
+                fetchResult: String(localized: "Failed to load watchlist"),
                 notificationDecision: lastNotificationDecision
             )
         }
@@ -126,7 +128,7 @@ final class WatchlistRefreshService {
                 "watchlist_refresh_complete empty_watchlist")
             AppDiagnosticsLogger.breadcrumb("watchlist_refresh_complete")
             let outcome = WatchlistRefreshOutcome(
-                fetchResult: "Skipped: empty watchlist",
+                fetchResult: String(localized: "Skipped: empty watchlist"),
                 notificationDecision: lastNotificationDecision
             )
             recordBackgroundDiagnosticsIfNeeded(
@@ -152,11 +154,11 @@ final class WatchlistRefreshService {
                 analytics.trackNonFatalError(error, context: "watchlist_refresh_updates")
                 recordBackgroundDiagnosticsIfNeeded(
                     recordDiagnostics,
-                    fetchResult: "Failed to fetch TVMaze updates",
+                    fetchResult: String(localized: "Failed to fetch TVMaze updates"),
                     notificationDecision: lastNotificationDecision
                 )
                 return WatchlistRefreshOutcome(
-                    fetchResult: "Failed to fetch TVMaze updates",
+                    fetchResult: String(localized: "Failed to fetch TVMaze updates"),
                     notificationDecision: lastNotificationDecision
                 )
             }
@@ -211,7 +213,9 @@ final class WatchlistRefreshService {
                 tracked.lastCheckedAt = clock()
                 try? await repository.updateAfterRefresh(tracked)
                 refreshedShowCount += 1
-                lastNotificationDecision = "Marked stale: \(tracked.name) not found on TVMaze"
+                lastNotificationDecision = String(
+                    localized: "Marked stale: \(tracked.name) not found on TVMaze"
+                )
             } catch {
                 // Per-show failure: leave this row alone and continue the rest.
                 analytics.trackNonFatalError(error, context: "watchlist_refresh_show")
@@ -220,14 +224,16 @@ final class WatchlistRefreshService {
         }
 
         if refreshedShowCount == 0, skippedShowCount > 0 {
-            fetchResult = "No TVMaze changes for \(skippedShowCount) tracked show(s)"
+            fetchResult = String(
+                localized: "No TVMaze changes for \(skippedShowCount) tracked show(s)"
+            )
         } else {
-            fetchResult = "Refreshed \(refreshedShowCount) show(s)"
+            fetchResult = String(localized: "Refreshed \(refreshedShowCount) show(s)")
             if skippedShowCount > 0 {
-                fetchResult += ", skipped \(skippedShowCount) unchanged"
+                fetchResult += String(localized: ", skipped \(skippedShowCount) unchanged")
             }
             if force {
-                fetchResult += " (forced)"
+                fetchResult += String(localized: " (forced)")
             }
         }
 
@@ -266,14 +272,21 @@ final class WatchlistRefreshService {
     ) -> String {
         if let notification = evaluation.notification {
             if deliverNotifications {
-                return "Delivered for \(showName): \(notification.body)"
+                return String(
+                    localized: "Delivered for \(showName): \(notification.body)"
+                )
             }
-            return "Suppressed for \(showName) (interactive refresh): \(notification.body)"
+            return String(
+                localized:
+                    "Suppressed for \(showName) (interactive refresh): \(notification.body)"
+            )
         }
         if evaluation.tracked.pendingChangeSignature != nil {
-            return "Pending debounce for \(showName)"
+            return String(localized: "Pending debounce for \(showName)")
         }
-        return "No notification for \(showName) (no meaningful change)"
+        return String(
+            localized: "No notification for \(showName) (no meaningful change)"
+        )
     }
 
     /// Statuses that can change without TVMaze bumping `updated` (calendar drift,
