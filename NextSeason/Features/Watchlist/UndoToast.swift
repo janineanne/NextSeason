@@ -182,7 +182,6 @@ private struct WatchlistUndoToastModifier: ViewModifier {
             toastContent
                 .frame(maxWidth: min(320, proxy.size.width - 32))
                 .fixedSize(horizontal: false, vertical: true)
-                .allowsHitTesting(true)
                 .position(
                     toastPosition(
                         in: proxy,
@@ -191,7 +190,6 @@ private struct WatchlistUndoToastModifier: ViewModifier {
                     )
                 )
         }
-        .allowsHitTesting(false)
         .zIndex(1)
         .transition(.undoToastEntrance)
     }
