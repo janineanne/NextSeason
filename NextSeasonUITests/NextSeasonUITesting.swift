@@ -61,7 +61,7 @@ extension NextSeasonUITesting where Self: XCTestCase {
     }
 
     var watchlistSearchButton: XCUIElement {
-        app.descendants(matching: .any)[AccessibilityID.Watchlist.searchButton]
+        app.navigationBars["Watchlist"].buttons[AccessibilityID.Watchlist.searchButton]
     }
 
     var searchNoResults: XCUIElement {
@@ -154,6 +154,30 @@ extension NextSeasonUITesting where Self: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
         }
         return false
+    }
+
+    /// Waits until a track star reflects a pending undoable removal.
+    func waitForPendingUntrackTrackButton(
+        _ identifier: String,
+        timeout: TimeInterval = UITestTimeout.standard
+    ) -> Bool {
+        waitForButton(identifier, labelContaining: "Undo removing", timeout: timeout)
+    }
+
+    /// Waits until the watchlist row for a show is no longer visible.
+    func waitForWatchlistRowToDisappear(
+        named showName: String,
+        showID: Int = UITestPreviewShow.id,
+        timeout: TimeInterval = UITestTimeout.extended
+    ) {
+        let row = watchlistRow(named: showName, showID: showID)
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if !row.exists { return }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        recordFailureContext("Watchlist row should disappear for “\(showName)”")
+        XCTFail("Watchlist row should disappear for “\(showName)”.")
     }
 
     func watchlistRow(named showName: String, showID: Int = UITestPreviewShow.id) -> XCUIElement {

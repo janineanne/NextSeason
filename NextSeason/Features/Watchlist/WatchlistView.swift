@@ -197,6 +197,7 @@ struct WatchlistView: View {
                 : String(localized: "Search watchlist")
         )
         .accessibilityIdentifier(AccessibilityID.Watchlist.searchButton)
+        .accessibilityElement(children: .ignore)
     }
 
     private func toggleWatchlistSearch() {

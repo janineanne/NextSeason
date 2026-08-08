@@ -197,10 +197,8 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
             "Untracking from the search row should offer Undo."
         )
         XCTAssertTrue(
-            waitForButton(
-                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
-                labelContaining: "Track",
-                timeout: UITestTimeout.standard
+            waitForPendingUntrackTrackButton(
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)"
             ),
             "The search-row star should reflect the pending untrack state."
         )
@@ -237,8 +235,9 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
 
         watchlistConfirmButton.tap()
 
+        waitForWatchlistRowToDisappear(named: previewShowName)
         XCTAssertTrue(
-            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended),
+            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.standard),
             "After confirming removal, the watchlist should show its empty state."
         )
 
@@ -265,7 +264,7 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
             waitForButton(
                 "\(AccessibilityID.Watchlist.trackButton).\(UITestPreviewShow.id)",
                 labelContaining: "Stop tracking",
-                timeout: UITestTimeout.standard
+                timeout: UITestTimeout.trackState
             ),
             "Undo should restore the tracked star on the watchlist row."
         )
@@ -296,10 +295,8 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
             "Untracking from detail should offer Undo."
         )
         XCTAssertTrue(
-            waitForButton(
-                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
-                labelContaining: "Track",
-                timeout: UITestTimeout.standard
+            waitForPendingUntrackTrackButton(
+                "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)"
             ),
             "The detail star should reflect the pending untrack state."
         )
@@ -324,8 +321,9 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         watchlistConfirmButton.tap()
 
         app.tabBars.buttons["Watchlist"].tap()
+        waitForWatchlistRowToDisappear(named: previewShowName)
         XCTAssertTrue(
-            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.extended),
+            watchlistEmptyState.waitForExistence(timeout: UITestTimeout.standard),
             "Confirming removal from detail should clear the watchlist."
         )
     }
