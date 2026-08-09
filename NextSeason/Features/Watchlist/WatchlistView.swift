@@ -92,7 +92,7 @@ struct WatchlistView: View {
                     watchlistSearchToolbarButton
                 }
             }
-            .appAboutToolbarButton()
+            .appAboutFooter()
             .modifier(
                 WatchlistSearchPresentationModifier(
                     isPresented: $isSearchPresented,

@@ -20,30 +20,42 @@ extension EnvironmentValues {
 }
 
 extension View {
-    /// Adds the standard trailing "About NextSeason" toolbar button when an
-    /// About entry point is available in the environment.
-    func appAboutToolbarButton() -> some View {
-        modifier(AppAboutToolbarButtonModifier())
+    /// Pins a subtle About footer above the tab bar when an About entry point is
+    /// available (beta / DEBUG). Kept off show detail so content screens stay clean.
+    func appAboutFooter() -> some View {
+        modifier(AppAboutFooterModifier())
     }
 }
 
-private struct AppAboutToolbarButtonModifier: ViewModifier {
+private struct AppAboutFooterModifier: ViewModifier {
     @Environment(\.openAppAbout) private var openAppAbout
 
     func body(content: Content) -> some View {
-        content.toolbar {
-            if let openAppAbout {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        openAppAbout()
-                    } label: {
-                        Image(systemName: "info.circle")
-                    }
-                    .accessibilityLabel("About NextSeason")
-                    .accessibilityHint("Shows version and beta diagnostics")
-                }
+        content.safeAreaInset(edge: .bottom, spacing: 0) {
+            if openAppAbout != nil {
+                AppAboutFooterButton()
             }
         }
+    }
+}
+
+/// Quiet version line used as the beta About entry point on Search and Watchlist.
+private struct AppAboutFooterButton: View {
+    @Environment(\.openAppAbout) private var openAppAbout
+
+    var body: some View {
+        Button {
+            openAppAbout?()
+        } label: {
+            Text("About NextSeason")
+                .font(.footnote)
+                .appSecondaryText()
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppSpacing.tight)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Shows version and beta diagnostics")
+        .accessibilityIdentifier(AccessibilityID.App.aboutFooter)
     }
 }
 

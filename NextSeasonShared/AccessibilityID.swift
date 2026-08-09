@@ -20,6 +20,10 @@ enum UITestingSearchQuery {
 
 /// Stable accessibility identifiers for UI tests.
 enum AccessibilityID {
+    enum App {
+        static let aboutFooter = "app.aboutFooter"
+    }
+
     enum Tab {
         static let search = "tab.search"
         static let watchlist = "tab.watchlist"
