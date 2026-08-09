@@ -84,7 +84,6 @@ struct ShowDetailView: View {
         .scrollContentBackground(.hidden)
         .navigationTitle(viewModel.displayShow.name)
         .navigationBarTitleDisplayMode(.inline)
-        .appAboutToolbarButton()
         .watchlistNotificationPromptAlerts(
             prompt: viewModel.notificationPrompt,
             notificationService: viewModel.notificationService
