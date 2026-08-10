@@ -1,216 +1,181 @@
-# NextSeason -- Product Evolution Roadmap
-
-This document captures enhancements planned after the initial App Store release. Features are grouped by area rather than priority, and will be implemented based on user feedback, technical dependencies, and product direction.
+# NextSeason — App Store Readiness Roadmap
 
 ## Purpose
 
-This document captures enhancements planned after the initial App Store release. Content has been preserved from the original roadmap and reorganized by release timing rather than topic.
+This roadmap captures the work remaining before NextSeason’s first public App Store release. It covers product changes required for release, engineering and reliability work, final validation, and App Store submission.
 
-# Core Product Improvements
+Completed MVP work is documented elsewhere and is not repeated here.
 
-## Search Improvements
+# Product and Engineering Readiness
 
-- Support common abbreviations and acronyms if users demonstrate a need.
-- Continue refining search quality based on analytics and user feedback.
+## Search Coverage
 
-## Watchlist Management
+TVMaze already provides fuzzy matching, alternate-title support, partial-title matching, punctuation tolerance, and relevance ordering. However, the current ten-result limit must be eliminated before the first App Store release.
 
-- Support swipe-to-delete in the Watchlist, in addition to tapping the star.
-- User-selectable sorting.
+- Evaluate one or more search-focused providers that can provide broader result coverage.
+- Continue using the most appropriate metadata source for season tracking.
+- Preserve TVMaze relevance ordering where it remains useful.
+- Map provider identifiers when a show is selected.
+- Keep the search layer provider-independent so that providers can be added or replaced with minimal user impact.
+- Validate common searches, ambiguous titles, alternate titles, punctuation differences, and older or less-popular shows.
 
-Continue to favor fast, predictable title matching over discovery-oriented fuzzy search.
+### Search Analytics
 
-## Notification Enhancements
+Add only the analytics needed to evaluate search quality while preserving the app’s privacy approach.
 
--   Global notification preferences.
--   Per-show preferences.
--   Quiet hours.
--   Notification history.
--   Additional notification categories.
+Recommended events and properties:
 
-## Streaming Availability
+- `search_performed`
+- Query length
+- Result count
+- Whether a result was selected
+- Whether the selected show was already on the watchlist
 
-Implement only if users demonstrate meaningful demand.
+## Watchlist Section Scrolling
 
-If sufficient demand exists:
+The watchlist currently uses `List` with `Section`. Native pinned section headers allow rows to scroll beneath the header, which creates an unattractive text-over-text effect in the current design.
 
--   Integrate with a dedicated streaming provider.
--   Display current regional availability.
--   Deep-link to supported services.
+- Replace the sectioned `List` with `ScrollView` and `LazyVStack`, unless another native solution produces an equally polished result.
+- Preserve accessibility, Dynamic Type behavior, separators, row navigation, deletion, and editing behavior.
+- Verify that section headers scroll normally rather than remaining pinned.
+- Re-test the tab bar, search field, empty state, and VoiceOver order after the change.
 
-Do not use TVMaze's crowdsourced provider data.
+## SwiftData Migration Strategy
 
-### Dependent Future Features
+- Add and test a SwiftData migration plan before changing persistent models.
+- Verify that upgrades preserve user data.
+- Include migration testing in release validation.
+- Keep representative stores from older builds for testing.
 
--   Record subscribed services.
--   Highlight available shows.
--   Filter/group by availability.
--   Tailor notifications.
+## Persistence Recovery
 
-## AI-Assisted Show Insights
+Replace the startup `fatalError` with a user-facing recovery flow before release.
 
-Evaluate Apple’s on-device Foundation Models as the primary implementation for concise, privacy-preserving viewing insights.
+- Log diagnostics before attempting recovery.
+- Explain the consequences before resetting local data.
+- Allow the user to export diagnostics before resetting.
+- Provide a clear **Reset Local Data** action when recovery is not possible.
 
-Potential capabilities:
+## Crash-Loop Prevention
 
-- Generate a brief "Why you might like this" summary.
-- Highlight the types of viewers the show is best suited for.
-- Describe tone and pacing in a few concise bullet points.
-- Produce consistent, spoiler-free summaries that fit naturally within the existing UI.
+- Detect repeated launch failures where practical.
+- Offer a safe recovery path rather than repeatedly crashing.
+- Preserve useful diagnostics for troubleshooting.
+- Verify that recovery does not create a new launch loop.
 
-Implementation principles:
+## Accessibility Review
 
-- Use Apple's on-device Foundation Models when available.
-- Cache generated insights so each show is processed only once.
-- Gracefully fall back to the standard TVMaze description on unsupported devices or OS versions.
-- Clearly identify this as a feature available only on supported versions of iOS, ensuring the app continues to provide a complete experience on older devices.
-- Keep AI optional, unobtrusive, and focused on helping users decide whether to add a show to their Watchlist.
-- Preserve user privacy by performing generation on-device whenever possible.
+Complete a final accessibility pass and address everything that can reasonably be corrected before release.
 
-## Continuous Improvement
+- Verify VoiceOver labels, values, hints, traits, and navigation order.
+- Verify Dynamic Type at the largest accessibility sizes.
+- Verify sufficient contrast in every theme.
+- Verify controls remain usable with Button Shapes, Increase Contrast, Reduce Transparency, and Reduce Motion enabled.
+- Verify that state is not communicated by color alone.
+- Test empty, loading, error, and recovery states.
 
-- Refine the user experience based on App Store reviews and user feedback.
-- Continue improving accessibility.
-- Improve performance and battery efficiency.
-- Reduce maintenance burden through ongoing codebase simplification.
+# Documentation Readiness
 
-# Platform Features
+## AI-Assisted Development Workflow
 
-## Cross-Device Sync
-
--   Cloud sync.
--   Cross-device watchlists.
--   Backup and restore.
--   Device migration.
-
-## Apple Platform Expansion
-
-Potential platforms:
-
-Planned after Cloud Sync is implemented:
-
-- iPad
-- Mac
-- Apple TV companion app
-
-Vision Pro is not currently planned.
-
-## Monitoring & Notifications
-
-- Move season monitoring to a backend service.
-- Deliver reliable push notifications even when the app is not running.
-- Reduce dependence on background app refresh.
-- Keep notification delivery consistent across all of a user’s devices.
-- Minimize battery impact by performing monitoring on the server whenever possible.
-
-## Identity & Accounts
-
-Introduce user accounts only if they become necessary to support Cloud Sync or backend monitoring.
-
-# Reliability and Error Handling
-
-## Audit and eliminate production-reachable fatalError calls
-
-Review every use of fatalError, preconditionFailure, and similar deliberate crash mechanisms. Replace any that could be reached because of malformed data, persistence problems, API responses, migration failures, or other runtime conditions with recoverable error handling, safe fallback behavior, and appropriate logging. Retain deliberate crashes only for genuinely impossible programmer errors, and document why each remaining use is safe.
-
-# Diagnostics and Analytics
-
-* Review which diagnostics features should remain after the TestFlight beta.
-* Decide whether to keep or remove local analytics counters.
-* If retained:
-    * Remove beta-specific wording.
-    * Record when counters began accumulating.
-    * Add a way to reset counters.
-    * Continue storing aggregate counters in UserDefaults; only migrate to SwiftData if historical/queryable analytics are introduced.
-    
-# Production About & Diagnostics Screen
-
-The About and Diagnostics screens will remain part of NextSeason TV after the beta period, but their purpose will shift from developer testing to user support and troubleshooting.
-
-## About Screen
-
-The About screen should remain available to all users and continue to include:
-
-* Application name and version number
-* Build number
-* Attribution and acknowledgements (including TVMaze)
-* Links to privacy policy, support, and other user-facing resources
-* Notification guidance, if still applicable
-
-## Diagnostics Screen
-
-The Diagnostics screen should remain available as a lightweight support tool for production users.
-
-Retain:
-
-* Current application version/build
-* Last successful refresh time
-* Next scheduled refresh window (if available)
-* Most recent refresh result
-* Current notification authorization status
-* Other non-sensitive status information useful for troubleshooting
-* Copy Diagnostics
-* Share Diagnostics
-
-Remove beta-only functionality:
-
-* Force Refresh
-* Test Notification
-* Simulated Update
-* Any other controls intended only for development or TestFlight validation
-
-## Analytics Information
-
-Internal analytics counters used during beta testing should not be displayed in production builds unless they continue to provide meaningful value for customer support.
-
-If retained:
-* Remove beta-specific wording.
-* Record when counters began accumulating.
-* Add a way to reset counters.
-* Continue storing aggregate counters in UserDefaults; only migrate to SwiftData if historical/queryable analytics are introduced.
-
-## Support Report
-
-The diagnostics report should continue to provide enough information to assist in troubleshooting user issues while avoiding the inclusion of personal data or sensitive information.
-
-The report should contain only information that is safe for users to review and share with support.
-
-## Goal
-
-The production Diagnostics screen should answer the common support question:
-
-“Why didn’t I receive a notification?”
-
-without exposing implementation details that are only useful during development.
-
-# Product Analytics
-
-Transition Diagnostics into a production support feature while retaining diagnostic report generation. Continue using lightweight, privacy-preserving analytics to guide future product decisions.
-
-# Business Options
-
--   One-time purchase.
--   Premium upgrade.
--   Subscription.
--   Affiliate revenue.
--   **Initial release**: One-time paid purchase. Future pricing models (including free, freemium, subscriptions, or optional purchases) will be evaluated based on user feedback, adoption, and operating costs.
-
-# Product Principles
-
--   Remain focused on season tracking.
--   Avoid unnecessary complexity.
--   Favor privacy.
--   Work well without requiring an account.
--   Integrate naturally with Apple's platforms.
--   Earn user trust through reliability.
--   Do one thing exceptionally well before expanding scope.
-
-# Explicit Non-Goals
-
--   Social networking.
--   User reviews.
--   Episode tracking.
--   Discussion forums.
--   General TV discovery.
--   Recommendation engines.
--   Comprehensive media database features.
+Write a document explaining how AI was used during development, including:
+
+- Why AI-assisted development was used.
+- The distinct roles of ChatGPT and Cursor.
+- How generated code and recommendations were reviewed and validated.
+- Which product, design, and engineering decisions remained mine.
+- Links to representative transcripts, such as initial architecture, accessibility review, performance review, analytics, TestFlight preparation, and README review.
+
+## Documentation Review
+
+- Verify that documentation reflects the release candidate rather than an earlier MVP state.
+- Check all links among documentation files.
+- Remove references to diagrams that are no longer included.
+- Update README screenshots to match the release candidate.
+- Verify that all repository links point to the public repository.
+- Remove internal-only notes, temporary instructions, and obsolete planning text.
+- Archive a v1.0 documentation snapshot before beginning substantial post-launch work.
+
+# App Store Submission Checklist
+
+These tasks are listed in approximately sequential order.
+
+## Legal and Business
+
+- Receive the D-U-N-S Number for Trial by Fyre, LLC.
+- Convert the Apple Developer account to an Organization account.
+- Verify company information in App Store Connect.
+- Complete tax and banking information.
+- Confirm the support email address.
+- Confirm the support website.
+- Publish and verify the Privacy Policy.
+- Decide whether user support will use a knowledge base, email, GitHub Issues, or another channel.
+
+## App Store Assets and Metadata
+
+- Export and validate the final production app icon.
+- Capture App Store screenshots for every required device size.
+- Decide whether to create an App Preview video.
+- Write the App Store description.
+- Write promotional text.
+- Choose keywords.
+- Select primary and secondary categories.
+- Prepare copyright information.
+
+## Privacy and Compliance
+
+- Complete the App Privacy questionnaire and Privacy Nutrition Label.
+- Verify that all privacy answers remain accurate for the release build.
+- Confirm encryption questionnaire answers.
+- Review required legal acknowledgements and third-party licenses.
+- Verify that all external services and data sources are disclosed where required.
+
+## Final Quality Pass
+
+- Complete a full regression test.
+- Test on the current public iOS release.
+- Test on the latest iOS beta, when practical.
+- Verify upgrade from earlier TestFlight builds.
+- Verify a clean installation.
+- Verify notification permission flows.
+- Verify background refresh behavior.
+- Verify behavior with notifications disabled.
+- Verify behavior with Background App Refresh disabled.
+- Verify all supported themes.
+- Verify Dynamic Type and VoiceOver.
+- Verify English-only localization assumptions and text expansion.
+- Verify offline and poor-network behavior.
+- Run Instruments one final time for leaks, memory growth, and performance problems.
+- Review all user-facing error messages and recovery paths.
+
+## TestFlight Release Candidate
+
+- Create the release-candidate build.
+- Invite final external testers.
+- Address remaining beta feedback.
+- Remove, hide, or appropriately gate developer-only diagnostics.
+- Confirm which diagnostics remain intentionally available to users.
+- Increment version and build numbers for release.
+- Confirm the release candidate matches the screenshots and App Store description.
+
+## App Store Connect
+
+- Create the production app version.
+- Upload and select the release-candidate build.
+- Complete “What’s New” release notes.
+- Upload screenshots and other assets.
+- Complete pricing and availability.
+- Select countries and regions.
+- Configure the age rating.
+- Complete App Review information.
+- Provide review notes explaining any behavior that may not be obvious.
+- Provide a demo account only if one becomes necessary.
+- Submit the app for review.
+
+## Launch
+
+- Decide between automatic release and manual release after approval.
+- Publish launch announcements on LinkedIn, GitHub, and the project website.
+- Monitor App Review status and respond promptly to reviewer questions.
+- Monitor crash reports, reviews, and support messages after launch.
+- Prioritize launch-related fixes before beginning major new features.
