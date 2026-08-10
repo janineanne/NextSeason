@@ -36,6 +36,7 @@ struct UndoToast: View {
             Button("Undo", action: undoAction)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppColor.accent)
+                .modifier(UndoToastActionHitTargetModifier())
                 .buttonStyle(.plain)
                 .accessibilityIdentifier(AccessibilityID.Watchlist.undoButton)
                 .accessibilityHint("Restores the show to your watchlist")
@@ -44,6 +45,7 @@ struct UndoToast: View {
             Button("OK", action: confirmAction)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.primary)
+                .modifier(UndoToastActionHitTargetModifier())
                 .buttonStyle(.plain)
                 .accessibilityIdentifier(AccessibilityID.Watchlist.confirmButton)
                 .accessibilityHint("Confirms removal from your watchlist")
@@ -51,7 +53,21 @@ struct UndoToast: View {
     }
 }
 
+/// Extra padding + explicit content shape so plain-text Undo/OK stay easy to hit.
+private struct UndoToastActionHitTargetModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+    }
+}
+
 /// Floating chrome for the undo toast: Liquid Glass on iOS 26+, tinted surface below.
+///
+/// Deliberately non-interactive glass: `.interactive()` on this container can
+/// claim the touch for the glass highlight and never deliver it to Undo/OK,
+/// which leaves the toast up until the removal timer expires.
 private struct UndoToastChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
@@ -60,7 +76,7 @@ private struct UndoToastChromeModifier: ViewModifier {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(AppColor.accent.opacity(0.1))
                 }
-                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+                .glassEffect(.regular, in: .rect(cornerRadius: 16))
         } else {
             content
                 .background {

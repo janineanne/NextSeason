@@ -72,6 +72,7 @@
 		E16724EF30269D7B007F7098 /* 8-7-2026 Implement Watchlist Search Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-7-2026 Implement Watchlist Search Changes.md"; sourceTree = "<group>"; };
 		E167285930291CC5007F7098 /* 8-9-2026 Discuss Placement of Info Button.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-9-2026 Discuss Placement of Info Button.md"; sourceTree = "<group>"; };
 		E167285A30291D09007F7098 /* 8-9-2026 DIscuss and Implement About Footer.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-9-2026 DIscuss and Implement About Footer.md"; sourceTree = "<group>"; };
+		E1672AA23029988F007F7098 /* 8-9-2026 Fix Undo Toast Bug.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-9-2026 Fix Undo Toast Bug.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -492,6 +493,7 @@
 				E16724EF30269D7B007F7098 /* 8-7-2026 Implement Watchlist Search Changes.md */,
 				E167285930291CC5007F7098 /* 8-9-2026 Discuss Placement of Info Button.md */,
 				E167285A30291D09007F7098 /* 8-9-2026 DIscuss and Implement About Footer.md */,
+				E1672AA23029988F007F7098 /* 8-9-2026 Fix Undo Toast Bug.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

@@ -177,6 +177,23 @@ final class WatchlistPendingRemoval {
         await commitPendingRemoval(cancelTimer: true)
     }
 
+    /// OK button entry point: cancels the undo timer and dismisses the toast on
+    /// the tap turn, then persists in a follow-up task.
+    ///
+    /// Prefer this over `Task { await commitPendingRemovalIfNeeded() }` from a
+    /// button action so a delayed MainActor hop cannot leave the toast visible
+    /// until the timer fires.
+    func confirmPendingRemoval() {
+        guard let work = beginCommit(cancelTimer: true) else { return }
+        Task { [weak self] in
+            await self?.persistRemoval(
+                work.tracked,
+                source: work.source,
+                outcome: .committed(showID: work.showID)
+            )
+        }
+    }
+
     private func finalizeReplacedPendingRemoval() {
         guard let pending = pendingRemoval else { return }
         let previous = pending
@@ -219,16 +236,35 @@ final class WatchlistPendingRemoval {
     }
 
     private func commitPendingRemoval(cancelTimer: Bool) async {
+        guard let work = beginCommit(cancelTimer: cancelTimer) else { return }
+        await persistRemoval(
+            work.tracked,
+            source: work.source,
+            outcome: .committed(showID: work.showID)
+        )
+    }
+
+    /// Snapshot of a deferred removal that still needs persistence.
+    private struct CommitWork {
+        let tracked: TrackedShow
+        let source: WatchlistActionSource
+        let showID: Int
+    }
+
+    /// Cancels the undo timer (when requested) and clears toast presentation.
+    /// Returns work to persist for deferred mode; `nil` when there is nothing
+    /// left to write (no pending item, or immediate-mode dismiss-only).
+    private func beginCommit(cancelTimer: Bool) -> CommitWork? {
         if cancelTimer {
             commitRemovalTask?.cancel()
         }
         commitRemovalTask = nil
 
-        guard let tracked = pendingRemoval else { return }
+        guard let tracked = pendingRemoval else { return nil }
 
         if pendingMode == .immediate {
             clearPendingPresentation()
-            return
+            return nil
         }
 
         let source = pendingRemovalSource ?? .watchlist
@@ -245,11 +281,7 @@ final class WatchlistPendingRemoval {
         // SwiftData repository, which completes remove before observation resumes.
         clearPendingPresentation()
 
-        await persistRemoval(
-            tracked,
-            source: source,
-            outcome: .committed(showID: showID)
-        )
+        return CommitWork(tracked: tracked, source: source, showID: showID)
     }
 
     private func persistRemoval(
