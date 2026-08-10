@@ -90,9 +90,7 @@ private struct AppRootView: View {
                 Task { _ = await removalCoordinator.undoRemoval() }
             },
             confirmAction: {
-                Task {
-                    await removalCoordinator.commitPendingRemovalIfNeeded()
-                }
+                removalCoordinator.confirmPendingRemoval()
             }
         )
         .alert(

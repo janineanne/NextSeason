@@ -77,6 +77,36 @@ struct WatchlistPendingRemovalTests {
         #expect(outcomes == [.committed(showID: tracked.id)])
     }
 
+    @Test("OK confirm dismisses the toast before persistence finishes")
+    func confirmPendingRemovalDismissesSynchronously() async throws {
+        let repository = GatedCancellationAwareRemoveRepository()
+        let coordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
+        try await repository.add(sampleShow)
+        let tracked = try #require((try await repository.all()).first)
+
+        var outcomes: [PendingRemovalOutcome] = []
+        coordinator.addOutcomeHandler { outcomes.append($0) }
+        coordinator.requestRemoval(tracked, anchor: .zero, source: .watchlist)
+
+        coordinator.confirmPendingRemoval()
+
+        // Toast presentation must clear on the button-action turn, not after remove.
+        #expect(coordinator.pendingRemoval == nil)
+        #expect(coordinator.toastAnchor == nil)
+
+        await repository.waitUntilRemoveBegan()
+        repository.resumeRemove()
+
+        let deadline = Date().addingTimeInterval(1)
+        while Date() < deadline, outcomes.isEmpty {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+
+        #expect(try await repository.contains(showID: tracked.id) == false)
+        #expect(outcomes == [.committed(showID: tracked.id)])
+    }
+
     @Test("Undo emits an explicit undone outcome")
     func undoEmitsUndoneOutcome() async throws {
         let repository = InMemoryWatchlistRepository()
