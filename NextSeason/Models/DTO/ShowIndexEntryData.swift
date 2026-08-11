@@ -13,9 +13,7 @@ nonisolated struct ShowIndexEntryData: Codable, Sendable, Equatable {
     let externals: ShowExternalsData?
 }
 
-/// External ids attached to a TVMaze show.
+/// External ids attached to a TVMaze show (compatibility index uses `thetvdb`).
 nonisolated struct ShowExternalsData: Codable, Sendable, Equatable {
     let thetvdb: Int?
-    let imdb: String?
-    let tvrage: Int?
 }

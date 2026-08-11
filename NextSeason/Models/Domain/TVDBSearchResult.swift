@@ -21,8 +21,8 @@ nonisolated struct TVDBSearchResult: Identifiable, Sendable, Hashable {
     /// search rows rather than mapped into TVMaze's `ShowStatus`.
     let status: String?
     let posterURL: URL?
-    /// IMDb id when present (e.g. `tt11280740`), used as a narrow TVMaze lookup
-    /// fallback when the local compatibility index has no TheTVDB mapping.
+    /// IMDb id when present (e.g. `tt11280740`), used as a TVMaze lookup
+    /// fallback during open/track when TheTVDB → TVMaze resolution fails.
     let imdbID: String?
 
     /// Compact subtitle for search rows (year and/or status).

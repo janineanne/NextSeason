@@ -16,7 +16,8 @@ actor InMemoryCompatibilityIndex: TVDBTVMazeCompatibilityIndex {
             schemaVersion: CompatibilityIndexMetadata.currentSchemaVersion,
             generatedAt: nil,
             highestTVMazeID: 0,
-            lastSuccessfulSyncAt: nil
+            lastSuccessfulSyncAt: nil,
+            updatesResumeCursor: nil
         )
     ) {
         self.map = map

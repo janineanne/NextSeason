@@ -22,26 +22,15 @@ struct SearchViewModelTests {
     private struct MockTVMazeService: TVMazeService {
         var lookupHandler: @Sendable (Int) async throws -> Show = { _ in .preview }
         var showHandler: @Sendable (Int) async throws -> Show = { _ in .preview }
-        var imdbHandler: @Sendable (String) async throws -> Show = { _ in
-            throw TVMazeError.notFound
-        }
-        private(set) var lookupCallCount = 0
-        private(set) var imdbCallCount = 0
-
-        mutating func resetCounts() {
-            lookupCallCount = 0
-            imdbCallCount = 0
-        }
 
         func searchShows(matching query: String) async throws -> [Show] { [] }
 
         func lookupShow(theTVDBID: Int) async throws -> Show {
-            // Counts are best-effort for assertions in single-threaded tests.
-            return try await lookupHandler(theTVDBID)
+            try await lookupHandler(theTVDBID)
         }
 
         func lookupShow(imdbID: String) async throws -> Show {
-            try await imdbHandler(imdbID)
+            throw TVMazeError.notFound
         }
 
         func show(id: Int, bypassCache: Bool) async throws -> Show {
@@ -57,17 +46,10 @@ struct SearchViewModelTests {
     private final class LookupCounter: @unchecked Sendable {
         private let lock = NSLock()
         private(set) var theTVDBLookups = 0
-        private(set) var imdbLookups = 0
 
         func recordTheTVDB() {
             lock.lock()
             theTVDBLookups += 1
-            lock.unlock()
-        }
-
-        func recordIMDb() {
-            lock.lock()
-            imdbLookups += 1
             lock.unlock()
         }
     }
@@ -75,9 +57,6 @@ struct SearchViewModelTests {
     private struct CountingTVMazeService: TVMazeService {
         let counter: LookupCounter
         var showHandler: @Sendable (Int) async throws -> Show = { _ in .preview }
-        var imdbHandler: @Sendable (String) async throws -> Show = { _ in
-            throw TVMazeError.notFound
-        }
 
         func searchShows(matching query: String) async throws -> [Show] { [] }
 
@@ -87,8 +66,7 @@ struct SearchViewModelTests {
         }
 
         func lookupShow(imdbID: String) async throws -> Show {
-            counter.recordIMDb()
-            return try await imdbHandler(imdbID)
+            throw TVMazeError.notFound
         }
 
         func show(id: Int, bypassCache: Bool) async throws -> Show {
@@ -371,7 +349,6 @@ struct SearchViewModelTests {
         viewModel.query = "severance"
         await viewModel.search()
         #expect(counter.theTVDBLookups == 0)
-        #expect(counter.imdbLookups == 0)
     }
 
     private final class CallCounter: @unchecked Sendable {

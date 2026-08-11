@@ -106,7 +106,8 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
                 ?? CompatibilityIndexMetadata.currentSchemaVersion,
             generatedAt: Self.parseDate(metaValue("generated_at")),
             highestTVMazeID: Int(metaValue("highest_tvmaze_id") ?? "") ?? 0,
-            lastSuccessfulSyncAt: Self.parseDate(metaValue("last_successful_sync_at"))
+            lastSuccessfulSyncAt: Self.parseDate(metaValue("last_successful_sync_at")),
+            updatesResumeCursor: updatesResumeCursor()
         )
     }
 
@@ -116,6 +117,25 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
 
     func setLastSuccessfulSyncAt(_ date: Date) throws {
         try setMeta(key: "last_successful_sync_at", value: Self.formatDate(date))
+    }
+
+    func setUpdatesResumeCursor(_ cursor: CompatibilityIndexUpdatesResumeCursor) throws {
+        try setMeta(key: "updates_resume_at", value: Self.formatDate(cursor.updatedAt))
+        try setMeta(key: "updates_resume_show_id", value: String(cursor.showID))
+    }
+
+    func clearUpdatesResumeCursor() throws {
+        try setMeta(key: "updates_resume_at", value: "")
+        try setMeta(key: "updates_resume_show_id", value: "")
+    }
+
+    private func updatesResumeCursor() -> CompatibilityIndexUpdatesResumeCursor? {
+        guard let updatedAt = Self.parseDate(metaValue("updates_resume_at")),
+            let showID = Int(metaValue("updates_resume_show_id") ?? "")
+        else {
+            return nil
+        }
+        return CompatibilityIndexUpdatesResumeCursor(updatedAt: updatedAt, showID: showID)
     }
 
     /// Closes the SQLite handle. Used by tests before replacing files on disk.

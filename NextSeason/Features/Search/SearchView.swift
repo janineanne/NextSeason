@@ -214,12 +214,8 @@ struct SearchView: View {
             .accessibilityIdentifier(AccessibilityID.Search.idlePrompt)
         case .loading:
             List {
-                Section {
-                    ForEach(0..<3, id: \.self) { _ in
-                        ShowRowSkeleton()
-                    }
-                } footer: {
-                    TheTVDBAttributionView()
+                ForEach(0..<3, id: \.self) { _ in
+                    ShowRowSkeleton()
                 }
             }
             .appPlainListStyle()
