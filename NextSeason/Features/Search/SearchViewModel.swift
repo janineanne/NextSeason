@@ -65,8 +65,8 @@ final class SearchViewModel {
     private var displayedQuery: String?
     /// Next TheTVDB `offset` for the active `displayedQuery` (sum of fetched counts).
     private var nextOffset = 0
-    /// Cache of TheTVDB series id → TVMaze show id from the local index (and
-    /// narrow IMDb fallback). Used for search-row stars without network prefetch.
+    /// Cache of TheTVDB series id → TVMaze show id from the local index.
+    /// Used for search-row stars without network prefetch.
     private var resolvedTVMazeIDsByTVDBID: [Int: Int] = [:]
     /// Cache of full TVMaze shows after an explicit open/track resolve.
     private var resolvedShowsByTVDBID: [Int: Show] = [:]
@@ -250,8 +250,8 @@ final class SearchViewModel {
         var hasMore: Bool
     }
 
-    /// Fetches TheTVDB pages and keeps only hits that map via the local index
-    /// (with a narrow IMDb network fallback for unmapped hits that carry IMDb).
+    /// Fetches TheTVDB pages and keeps only hits present in the local
+    /// TVDB→TVMaze compatibility index.
     private func collectActionableResults(
         matching query: String,
         startingOffset: Int,
@@ -297,24 +297,11 @@ final class SearchViewModel {
         actionable.reserveCapacity(results.count)
 
         for result in results {
-            if let mappedID = await compatibilityIndex.tvMazeID(forTVDBID: result.id) {
-                resolvedTVMazeIDsByTVDBID[result.id] = mappedID
-                actionable.append(result)
+            guard let mappedID = await compatibilityIndex.tvMazeID(forTVDBID: result.id) else {
                 continue
             }
-
-            // Narrow fallback: only unmapped hits that already carry an IMDb id.
-            // Avoids the old per-result TheTVDB lookup storm while reducing false
-            // negatives when TVMaze lacks `externals.thetvdb` but has IMDb.
-            guard let imdbID = result.imdbID else { continue }
-            do {
-                let show = try await tvMaze.lookupShow(imdbID: imdbID)
-                resolvedTVMazeIDsByTVDBID[result.id] = show.id
-                resolvedShowsByTVDBID[result.id] = show
-                actionable.append(result)
-            } catch {
-                continue
-            }
+            resolvedTVMazeIDsByTVDBID[result.id] = mappedID
+            actionable.append(result)
         }
 
         return actionable
