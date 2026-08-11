@@ -26,7 +26,9 @@ You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and relat
 
 ## Data Sources
 
-- TVMaze API
+- TheTVDB API — guest search only (paginated series search)
+- TVMaze API — canonical show/season provider for detail, watchlist, and refresh
+  (resolve TheTVDB hits to TVMaze before entering those flows)
 
 ## Coding Style
 

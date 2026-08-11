@@ -29,7 +29,12 @@ enum UITestTimeout {
 /// Values that match the stubbed preview show returned during UI testing.
 enum UITestPreviewShow {
     static let name = "Severance"
+    /// Canonical TVMaze id (detail / watchlist).
     static let id = 44933
+    /// TheTVDB series id used by search-row accessibility identifiers.
+    static let tvdbID = 371980
+    /// Search-row subtitle from TheTVDB stub (`year · status`).
+    static let searchStatus = "2022 · Continuing"
 }
 
 /// Shared UI-test surface: launched app + helpers. Conform from an `XCTestCase`.
@@ -184,11 +189,11 @@ extension NextSeasonUITesting where Self: XCTestCase {
         app.descendants(matching: .any)["\(AccessibilityID.Watchlist.row).\(showID)"]
     }
 
-    /// Search result row in the list (NavigationLink). Labels include genres after the status.
+    /// Search result row in the list. Labels include network after the subtitle.
     func searchResultRow(
         named showName: String,
-        showID: Int = UITestPreviewShow.id,
-        status: String = "Ongoing series"
+        showID: Int = UITestPreviewShow.tvdbID,
+        status: String = UITestPreviewShow.searchStatus
     ) -> XCUIElement {
         let byID = app.descendants(matching: .any)["\(AccessibilityID.Search.result).\(showID)"]
         if byID.exists { return byID }
@@ -203,8 +208,8 @@ extension NextSeasonUITesting where Self: XCTestCase {
     @discardableResult
     func waitForSearchResultRow(
         named showName: String,
-        showID: Int = UITestPreviewShow.id,
-        status: String = "Ongoing series",
+        showID: Int = UITestPreviewShow.tvdbID,
+        status: String = UITestPreviewShow.searchStatus,
         timeout: TimeInterval = UITestTimeout.standard
     ) -> XCUIElement {
         let deadline = Date().addingTimeInterval(timeout)
@@ -250,7 +255,7 @@ extension NextSeasonUITesting where Self: XCTestCase {
         return byLabel
     }
 
-    func searchTrackButton(showID: Int = UITestPreviewShow.id) -> XCUIElement {
+    func searchTrackButton(showID: Int = UITestPreviewShow.tvdbID) -> XCUIElement {
         let byID = app.descendants(matching: .any)[
             "\(AccessibilityID.Search.trackButton).\(showID)"]
         if byID.exists { return byID }

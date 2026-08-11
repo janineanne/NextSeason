@@ -82,13 +82,60 @@
         ]
     }
 
+    extension TVDBSearchResult {
+        /// Matches `Show.preview` via TheTVDB id `371980` (Severance).
+        /// UI tests assert search-row identifiers against this id (`tvdbID`).
+        nonisolated static let previewSearchResult = TVDBSearchResult(
+            id: 371980,
+            name: "Severance",
+            year: "2022",
+            network: "Apple TV",
+            status: "Continuing",
+            posterURL: nil,
+            imdbID: "tt11280740"
+        )
+    }
+
+    /// A `TheTVDBService` that returns fixed search pages so previews/UI tests
+    /// never hit the network.
+    ///
+    /// Sentinel queries match `UITestingSearchQuery` so XCUITests can drive
+    /// empty and failure states through the same Search UI as production.
+    struct PreviewTheTVDBService: TheTVDBService {
+        let stub: TVDBSearchResult
+        /// Extra pages returned from `offset > 0` (empty by default).
+        var moreResults: [TVDBSearchResult] = []
+
+        func searchSeries(matching query: String, offset: Int) async throws -> TheTVDBSearchPage {
+            switch query {
+            case UITestingConfiguration.SearchQuery.noResults:
+                return TheTVDBSearchPage(results: [], hasMore: false)
+            case UITestingConfiguration.SearchQuery.failure:
+                throw TheTVDBError.server(statusCode: 500)
+            default:
+                if offset > 0 {
+                    return TheTVDBSearchPage(results: moreResults, hasMore: false)
+                }
+                return TheTVDBSearchPage(
+                    results: [stub],
+                    // Offer "Load more" only when the preview was given a second page.
+                    hasMore: !moreResults.isEmpty
+                )
+            }
+        }
+    }
+
     /// A `TVMazeService` that returns fixed data so previews never hit the network.
+    ///
+    /// `lookupShow` maps the preview TheTVDB / IMDb ids onto `stub` so Search's
+    /// resolve path works under `-UITesting` without live redirects.
     struct PreviewTVMazeService: TVMazeService {
         let stub: Show
 
         func searchShows(matching query: String) async throws -> [Show] {
             // Recognize UI-test sentinels so tests can exercise the empty and failure
             // states. Previews never use these queries, so behavior there is unchanged.
+            // (Guest search now goes through TheTVDB; this remains for profile tooling.)
             switch query {
             case UITestingConfiguration.SearchQuery.noResults:
                 return []
@@ -97,6 +144,20 @@
             default:
                 return [stub]
             }
+        }
+
+        func lookupShow(theTVDBID: Int) async throws -> Show {
+            guard theTVDBID == TVDBSearchResult.previewSearchResult.id else {
+                throw TVMazeError.notFound
+            }
+            return stub
+        }
+
+        func lookupShow(imdbID: String) async throws -> Show {
+            guard imdbID == TVDBSearchResult.previewSearchResult.imdbID else {
+                throw TVMazeError.notFound
+            }
+            return stub
         }
 
         func show(id: Int, bypassCache: Bool) async throws -> Show { stub }

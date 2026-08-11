@@ -73,7 +73,7 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         trackButton.tap()
         XCTAssertTrue(
             waitForButton(
-                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.tvdbID)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             )
@@ -176,7 +176,7 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         )
         XCTAssertTrue(
             waitForButton(
-                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.tvdbID)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             ),
@@ -198,7 +198,7 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         )
         XCTAssertTrue(
             waitForPendingUntrackTrackButton(
-                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)"
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.tvdbID)"
             ),
             "The search-row star should reflect the pending untrack state."
         )
@@ -338,7 +338,7 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         trackButton.tap()
         XCTAssertTrue(
             waitForButton(
-                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.id)",
+                "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.tvdbID)",
                 labelContaining: "Stop tracking",
                 timeout: UITestTimeout.trackState
             ),

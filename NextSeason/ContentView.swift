@@ -13,10 +13,16 @@ struct ContentView: View {
     @Environment(\.analytics) private var analytics
     @Bindable var coordinator: AppNavigationCoordinator
 
+    private let searchService: any TheTVDBService
     private let tvMaze: any TVMazeService
 
-    init(coordinator: AppNavigationCoordinator, tvMaze: any TVMazeService) {
+    init(
+        coordinator: AppNavigationCoordinator,
+        searchService: any TheTVDBService,
+        tvMaze: any TVMazeService
+    ) {
         _coordinator = Bindable(coordinator)
+        self.searchService = searchService
         self.tvMaze = tvMaze
     }
 
@@ -24,6 +30,7 @@ struct ContentView: View {
         TabView(selection: $coordinator.selectedTab) {
             SearchView(
                 navigationPath: $coordinator.searchPath,
+                searchService: searchService,
                 tvMaze: tvMaze,
                 analytics: analytics,
                 onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }
@@ -137,13 +144,17 @@ struct ContentView: View {
 #if DEBUG
     #Preview {
         let repository = InMemoryWatchlistRepository()
-        ContentView(coordinator: AppNavigationCoordinator(), tvMaze: TVMazeClient())
-            .environment(\.watchlistRepository, repository)
-            .environment(
-                \.watchlistPendingRemoval,
-                WatchlistPendingRemoval(
-                    repository: repository,
-                    analytics: RecordingAnalyticsService()
-                ))
+        ContentView(
+            coordinator: AppNavigationCoordinator(),
+            searchService: PreviewTheTVDBService(stub: .previewSearchResult),
+            tvMaze: PreviewTVMazeService(stub: .preview)
+        )
+        .environment(\.watchlistRepository, repository)
+        .environment(
+            \.watchlistPendingRemoval,
+            WatchlistPendingRemoval(
+                repository: repository,
+                analytics: RecordingAnalyticsService()
+            ))
     }
 #endif

@@ -24,7 +24,7 @@ nonisolated enum TVMazeError: Error, LocalizedError {
         case .decoding:
             String(localized: "We couldn't read the data from TVMaze.")
         case .notFound:
-            String(localized: "That show couldn't be found.")
+            String(localized: "That show isn't available in NextSeason yet.")
         case .rateLimited:
             String(
                 localized:

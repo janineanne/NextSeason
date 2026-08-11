@@ -24,9 +24,9 @@ enum FirstRunCopy {
             "Tap the star to track a show, or tap the row to see its next-season details."
     )
 
-    static let searchResultsLimitMessage = String(
+    static let searchEmptyDescription = String(
         localized:
-            "Don't see your show? NextSeason shows TVMaze's top matches only. You may find more on TVMaze.com."
+            "Try a more specific title — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)."
     )
 
     static let notificationPromptMessage = String(

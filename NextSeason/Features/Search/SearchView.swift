@@ -7,6 +7,9 @@ import SwiftUI
 
 /// Guest search: type a title, browse matching shows, and track from the results list.
 ///
+/// Search hits come from TheTVDB (paginated). Selecting or tracking a row resolves
+/// that hit to TVMaze before the existing show-detail / watchlist flow runs.
+///
 /// Lifecycle / refresh matrix:
 /// - `.task(id: query)` drives `SearchViewModel.search()` (debounce + cancel on edit).
 /// - `.task` and `.task(id: navigationPath.count)` refresh tracked IDs when the
@@ -42,6 +45,7 @@ struct SearchView: View {
 
     init(
         navigationPath: Binding<NavigationPath>,
+        searchService: any TheTVDBService,
         tvMaze: any TVMazeService,
         analytics: any AnalyticsTracking,
         onWatchlistChanged: @escaping () -> Void = {}
@@ -50,7 +54,13 @@ struct SearchView: View {
         self.tvMaze = tvMaze
         self.analytics = analytics
         self.onWatchlistChanged = onWatchlistChanged
-        _viewModel = State(initialValue: SearchViewModel(service: tvMaze, analytics: analytics))
+        _viewModel = State(
+            initialValue: SearchViewModel(
+                searchService: searchService,
+                tvMaze: tvMaze,
+                analytics: analytics
+            )
+        )
     }
 
     var body: some View {
@@ -106,6 +116,19 @@ struct SearchView: View {
                     prompt: notificationPrompt,
                     notificationService: notificationService
                 )
+                .alert(
+                    "Something Went Wrong",
+                    isPresented: Binding(
+                        get: { viewModel.resolveErrorMessage != nil },
+                        set: { if !$0 { viewModel.clearResolveError() } }
+                    )
+                ) {
+                    Button("OK", role: .cancel) {
+                        viewModel.clearResolveError()
+                    }
+                } message: {
+                    Text(viewModel.resolveErrorMessage ?? "")
+                }
         }
         .scrollDismissesKeyboard(.immediately)
     }
@@ -192,7 +215,7 @@ struct SearchView: View {
                         ShowRowSkeleton()
                     }
                 } footer: {
-                    TVMazeAttributionView()
+                    TheTVDBAttributionView()
                 }
             }
             .appPlainListStyle()
@@ -201,35 +224,16 @@ struct SearchView: View {
                 isScrollDismissingKeyboard: $isScrollDismissingKeyboard,
                 dismissSearch: dismissSearch
             )
-        case .results(let shows):
+        case .results(let page):
             List {
                 Section {
-                    ForEach(shows) { show in
-                        HStack(spacing: AppSpacing.tight) {
-                            NavigationLink(value: show) {
-                                ShowRowLabel(show: show)
-                            }
-                            .buttonStyle(.plain)
-                            .showDetailLinkAccessibility()
-                            .accessibilityIdentifier("\(AccessibilityID.Search.result).\(show.id)")
-                            ShowRowTrackButton(
-                                showID: show.id,
-                                showName: show.name,
-                                isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
-                                isUpdating: watchlistTracking.updatingShowIDs.contains(show.id),
-                                isPendingRemoval: removalCoordinator?.pendingRemoval?.id == show.id
-                            ) { anchor in
-                                Task {
-                                    await watchlistTracking.handleTrackButton(
-                                        for: show,
-                                        anchor: anchor,
-                                        context: watchlistTrackingContext
-                                    )
-                                }
-                            }
-                        }
+                    ForEach(page.items) { result in
+                        searchResultRow(result)
                     }
-                    SearchResultsLimitFooterView(query: viewModel.query)
+                    if page.hasMore {
+                        SearchLoadMoreFooterView(isLoading: viewModel.isLoadingMore) {
+                            Task { await viewModel.loadMore() }
+                        }
                         .listRowInsets(
                             EdgeInsets(
                                 top: AppSpacing.tight,
@@ -240,8 +244,9 @@ struct SearchView: View {
                         )
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
+                    }
                 } footer: {
-                    TVMazeAttributionView()
+                    TheTVDBAttributionView()
                 }
             }
             .appPlainListStyle()
@@ -252,9 +257,6 @@ struct SearchView: View {
             )
             .searchResultsHintInset(isVisible: !searchResultsHintDismissed)
         case .empty:
-            // TVMaze's public search returns at most 10 results with no pagination,
-            // so an empty result set does not mean the show is missing. Guide the
-            // user toward a more specific query instead of implying it doesn't exist.
             ContentUnavailableView {
                 Label {
                     Text("Can't Find Your Show?")
@@ -264,10 +266,8 @@ struct SearchView: View {
                         .appPrimaryText()
                 }
             } description: {
-                Text(
-                    "Try a more specific title instead of a single word — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)."
-                )
-                .appSecondaryText()
+                Text(FirstRunCopy.searchEmptyDescription)
+                    .appSecondaryText()
             }
             .uiTestMarker(AccessibilityID.Search.noResults, label: "Can't Find Your Show?")
         case .failed(let message):
@@ -288,6 +288,78 @@ struct SearchView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func searchResultRow(_ result: TVDBSearchResult) -> some View {
+        // Row identity stays on TheTVDB id so UI tests and VoiceOver remain stable
+        // before TVMaze resolution. Tracked-star state uses the resolved TVMaze id.
+        let resolvedID = viewModel.resolvedTVMazeID(for: result.id)
+        let isTracked = resolvedID.map { watchlistTracking.trackedShowIDs.contains($0) } ?? false
+        let isResolving = viewModel.resolvingResultIDs.contains(result.id)
+        let isUpdating =
+            isResolving
+            || (resolvedID.map { watchlistTracking.updatingShowIDs.contains($0) } ?? false)
+
+        HStack(spacing: AppSpacing.tight) {
+            Button {
+                Task { await openAndPresent(result) }
+            } label: {
+                ShowRowLabel(result: result)
+            }
+            .buttonStyle(.plain)
+            .showDetailLinkAccessibility()
+            .accessibilityIdentifier("\(AccessibilityID.Search.result).\(result.id)")
+            .disabled(isResolving)
+
+            ShowRowTrackButton(
+                showID: result.id,
+                showName: result.name,
+                isTracked: isTracked,
+                isUpdating: isUpdating,
+                isPendingRemoval: resolvedID.map {
+                    removalCoordinator?.pendingRemoval?.id == $0
+                } ?? false
+            ) { anchor in
+                Task {
+                    await trackResult(result, anchor: anchor)
+                }
+            }
+        }
+    }
+
+    /// Resolve TheTVDB → TVMaze, then push the existing `Show` detail destination.
+    private func openAndPresent(_ result: TVDBSearchResult) async {
+        do {
+            let show = try await viewModel.resolveShow(for: result)
+            navigationPath.append(show)
+        } catch is CancellationError {
+            return
+        } catch {
+            analytics.trackNonFatalError(error, context: "search_resolve_open")
+            await setResolveError(error.localizedDescription)
+        }
+    }
+
+    /// Resolve TheTVDB → TVMaze, then reuse the shared watchlist toggle path.
+    private func trackResult(_ result: TVDBSearchResult, anchor: CGRect) async {
+        do {
+            let show = try await viewModel.resolveShow(for: result)
+            await watchlistTracking.handleTrackButton(
+                for: show,
+                anchor: anchor,
+                context: watchlistTrackingContext
+            )
+        } catch is CancellationError {
+            return
+        } catch {
+            analytics.trackNonFatalError(error, context: "search_resolve_track")
+            await setResolveError(error.localizedDescription)
+        }
+    }
+
+    private func setResolveError(_ message: String) async {
+        viewModel.presentResolveError(message)
     }
 }
 
@@ -326,7 +398,8 @@ private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
         let repository = InMemoryWatchlistRepository()
         SearchView(
             navigationPath: $path,
-            tvMaze: TVMazeClient(),
+            searchService: PreviewTheTVDBService(stub: .previewSearchResult),
+            tvMaze: PreviewTVMazeService(stub: .preview),
             analytics: RecordingAnalyticsService()
         )
         .environment(\.watchlistRepository, repository)
