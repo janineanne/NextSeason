@@ -30,6 +30,26 @@ nonisolated protocol TVMazeService: Sendable {
 
     /// Show IDs updated since the given window (`GET /updates/shows`).
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date]
+
+    /// One page of the TVMaze show index (`GET /shows?page=`).
+    ///
+    /// Throws `TVMazeError.notFound` when the page is past the end of the index.
+    /// Used only by the compatibility-index generator/refresh path — not Search.
+    func showsIndex(page: Int) async throws -> [ShowIndexEntryData]
+
+    /// Lightweight show fetch for compatibility refresh (`id` + `externals`).
+    func showIndexEntry(id: Int) async throws -> ShowIndexEntryData
+}
+
+extension TVMazeService {
+    /// Default stubs so existing test doubles need not implement index APIs.
+    func showsIndex(page: Int) async throws -> [ShowIndexEntryData] {
+        throw TVMazeError.notFound
+    }
+
+    func showIndexEntry(id: Int) async throws -> ShowIndexEntryData {
+        throw TVMazeError.notFound
+    }
 }
 
 /// Query window for `GET /updates/shows` (`?since=day|week|month`).

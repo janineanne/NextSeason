@@ -1,0 +1,393 @@
+//
+//  CompatibilityIndexDatabase.swift
+//  NextSeason
+//
+
+import Foundation
+import SQLite3
+
+/// Direct SQLite store for TheTVDB → TVMaze compatibility mappings.
+///
+/// Intentionally not SwiftData: the data is relational, tiny, and updated
+/// incrementally outside the watchlist persistence stack.
+actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
+    nonisolated static let bundledResourceName = "tvdb_tvmaze_compatibility"
+    nonisolated static let bundledResourceExtension = "sqlite"
+    nonisolated static let writableFileName = "tvdb_tvmaze_compatibility.sqlite"
+
+    /// SQLite handle; `nonisolated(unsafe)` because `OpaquePointer` is not Sendable
+    /// and actor `deinit` must close it without hopping.
+    nonisolated(unsafe) private var db: OpaquePointer?
+    private let fileURL: URL
+    private let bundledURL: URL?
+
+    init(fileURL: URL, bundledURL: URL?) throws {
+        self.fileURL = fileURL
+        self.bundledURL = bundledURL
+        try Self.prepareWritableDatabase(at: fileURL, bundledURL: bundledURL)
+        let opened = try Self.openDatabase(at: fileURL)
+        try Self.migrateIfNeeded(opened)
+        db = opened
+    }
+
+    /// Opens an already-prepared database file (tests / in-memory setups).
+    init(preparedFileURL: URL) throws {
+        self.fileURL = preparedFileURL
+        self.bundledURL = nil
+        let opened = try Self.openDatabase(at: preparedFileURL)
+        try Self.migrateIfNeeded(opened)
+        db = opened
+    }
+
+    deinit {
+        if let db {
+            sqlite3_close(db)
+        }
+    }
+
+    func tvMazeID(forTVDBID id: Int) async -> Int? {
+        lookupTVMazeID(forTVDBID: id)
+    }
+
+    func lookupTVMazeID(forTVDBID id: Int) -> Int? {
+        guard let db else { return nil }
+        let sql = "SELECT tvmaze_id FROM mappings WHERE tvdb_id = ? LIMIT 1;"
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            return nil
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_int64(statement, 1, sqlite3_int64(id))
+        guard sqlite3_step(statement) == SQLITE_ROW else { return nil }
+        return Int(sqlite3_column_int64(statement, 0))
+    }
+
+    func upsert(tvdbID: Int, tvMazeID: Int) throws {
+        try execute(
+            "INSERT INTO mappings(tvdb_id, tvmaze_id) VALUES(?, ?) "
+                + "ON CONFLICT(tvdb_id) DO UPDATE SET tvmaze_id = excluded.tvmaze_id;",
+            bind: { statement in
+                sqlite3_bind_int64(statement, 1, sqlite3_int64(tvdbID))
+                sqlite3_bind_int64(statement, 2, sqlite3_int64(tvMazeID))
+            }
+        )
+    }
+
+    func removeMapping(forTVDBID tvdbID: Int) throws {
+        try execute(
+            "DELETE FROM mappings WHERE tvdb_id = ?;",
+            bind: { statement in
+                sqlite3_bind_int64(statement, 1, sqlite3_int64(tvdbID))
+            }
+        )
+    }
+
+    func removeMappings(forTVMazeID tvMazeID: Int) throws {
+        try execute(
+            "DELETE FROM mappings WHERE tvmaze_id = ?;",
+            bind: { statement in
+                sqlite3_bind_int64(statement, 1, sqlite3_int64(tvMazeID))
+            }
+        )
+    }
+
+    func applyMapping(tvMazeID: Int, tvdbID: Int?) throws {
+        // A show can change or lose its TheTVDB external; clear prior rows for
+        // this TVMaze id, then write the current mapping when present.
+        try removeMappings(forTVMazeID: tvMazeID)
+        if let tvdbID, tvdbID > 0 {
+            try upsert(tvdbID: tvdbID, tvMazeID: tvMazeID)
+        }
+    }
+
+    func metadata() throws -> CompatibilityIndexMetadata {
+        CompatibilityIndexMetadata(
+            schemaVersion: Int(metaValue("schema_version") ?? "")
+                ?? CompatibilityIndexMetadata.currentSchemaVersion,
+            generatedAt: Self.parseDate(metaValue("generated_at")),
+            highestTVMazeID: Int(metaValue("highest_tvmaze_id") ?? "") ?? 0,
+            lastSuccessfulSyncAt: Self.parseDate(metaValue("last_successful_sync_at"))
+        )
+    }
+
+    func setHighestTVMazeID(_ value: Int) throws {
+        try setMeta(key: "highest_tvmaze_id", value: String(value))
+    }
+
+    func setLastSuccessfulSyncAt(_ date: Date) throws {
+        try setMeta(key: "last_successful_sync_at", value: Self.formatDate(date))
+    }
+
+    /// Closes the SQLite handle. Used by tests before replacing files on disk.
+    func close() {
+        if let db {
+            sqlite3_close(db)
+            self.db = nil
+        }
+    }
+
+    /// Replaces the writable database from the bundled baseline after corruption.
+    func recreateFromBundledBaseline() throws {
+        if let db {
+            sqlite3_close(db)
+            self.db = nil
+        }
+        try Self.prepareWritableDatabase(
+            at: fileURL,
+            bundledURL: bundledURL,
+            forceReplace: true
+        )
+        let opened = try Self.openDatabase(at: fileURL)
+        try Self.migrateIfNeeded(opened)
+        db = opened
+    }
+
+    // MARK: - File bootstrap
+
+    nonisolated static func defaultWritableURL(
+        fileManager: FileManager = .default
+    ) throws -> URL {
+        let folder = try fileManager.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )
+        .appendingPathComponent("Compatibility", isDirectory: true)
+        try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder.appendingPathComponent(writableFileName)
+    }
+
+    nonisolated static func bundledDatabaseURL(
+        bundle: Bundle = .main
+    ) -> URL? {
+        bundle.url(
+            forResource: bundledResourceName,
+            withExtension: bundledResourceExtension,
+            subdirectory: "Resources/Compatibility"
+        )
+            ?? bundle.url(
+                forResource: bundledResourceName,
+                withExtension: bundledResourceExtension,
+                subdirectory: "Compatibility"
+            )
+            ?? bundle.url(
+                forResource: bundledResourceName,
+                withExtension: bundledResourceExtension
+            )
+    }
+
+    nonisolated static func prepareWritableDatabase(
+        at fileURL: URL,
+        bundledURL: URL?,
+        forceReplace: Bool = false,
+        fileManager: FileManager = .default
+    ) throws {
+        let folder = fileURL.deletingLastPathComponent()
+        try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
+
+        if forceReplace, fileManager.fileExists(atPath: fileURL.path) {
+            try fileManager.removeItem(at: fileURL)
+        }
+
+        if fileManager.fileExists(atPath: fileURL.path), !forceReplace {
+            if isReadableDatabase(at: fileURL) { return }
+            try fileManager.removeItem(at: fileURL)
+        }
+
+        guard let bundledURL else {
+            try createEmptyDatabase(at: fileURL)
+            return
+        }
+
+        try fileManager.copyItem(at: bundledURL, to: fileURL)
+        // Ensure the Application Support copy is writable even if the bundle
+        // resource was copied with restrictive permissions.
+        try fileManager.setAttributes(
+            [.posixPermissions: 0o644],
+            ofItemAtPath: fileURL.path
+        )
+    }
+
+    nonisolated static func createEmptyDatabase(at fileURL: URL) throws {
+        var db: OpaquePointer?
+        guard sqlite3_open(fileURL.path, &db) == SQLITE_OK, let db else {
+            throw CompatibilityIndexError.sqlite("Unable to create empty compatibility database")
+        }
+        defer { sqlite3_close(db) }
+        try exec(
+            db,
+            """
+            CREATE TABLE IF NOT EXISTS meta (
+                key TEXT PRIMARY KEY NOT NULL,
+                value TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS mappings (
+                tvdb_id INTEGER PRIMARY KEY NOT NULL,
+                tvmaze_id INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_mappings_tvmaze_id ON mappings(tvmaze_id);
+            """
+        )
+        try exec(
+            db,
+            """
+            INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '1');
+            INSERT OR REPLACE INTO meta(key, value) VALUES('generated_at', '');
+            INSERT OR REPLACE INTO meta(key, value) VALUES('highest_tvmaze_id', '0');
+            INSERT OR REPLACE INTO meta(key, value) VALUES('last_successful_sync_at', '');
+            INSERT OR REPLACE INTO meta(key, value) VALUES('source', 'TVMaze');
+            INSERT OR REPLACE INTO meta(key, value) VALUES('license', 'CC BY-SA');
+            """
+        )
+    }
+
+    nonisolated private static func isReadableDatabase(at fileURL: URL) -> Bool {
+        var db: OpaquePointer?
+        guard sqlite3_open_v2(fileURL.path, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK,
+            let db
+        else {
+            return false
+        }
+        defer { sqlite3_close(db) }
+        var statement: OpaquePointer?
+        let sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='mappings';"
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            return false
+        }
+        defer { sqlite3_finalize(statement) }
+        return sqlite3_step(statement) == SQLITE_ROW
+    }
+
+    nonisolated private static func openDatabase(at fileURL: URL) throws -> OpaquePointer {
+        var db: OpaquePointer?
+        let flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
+        guard sqlite3_open_v2(fileURL.path, &db, flags, nil) == SQLITE_OK, let db else {
+            throw CompatibilityIndexError.sqlite("Unable to open compatibility database")
+        }
+        return db
+    }
+
+    // MARK: - Internals
+
+    nonisolated private static func migrateIfNeeded(_ db: OpaquePointer) throws {
+        try exec(
+            db,
+            """
+            CREATE TABLE IF NOT EXISTS meta (
+                key TEXT PRIMARY KEY NOT NULL,
+                value TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS mappings (
+                tvdb_id INTEGER PRIMARY KEY NOT NULL,
+                tvmaze_id INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_mappings_tvmaze_id ON mappings(tvmaze_id);
+            """
+        )
+        if readMetaValue(db, key: "schema_version") == nil {
+            try writeMetaValue(
+                db,
+                key: "schema_version",
+                value: String(CompatibilityIndexMetadata.currentSchemaVersion)
+            )
+        }
+    }
+
+    nonisolated private static func readMetaValue(_ db: OpaquePointer, key: String) -> String? {
+        let sql = "SELECT value FROM meta WHERE key = ? LIMIT 1;"
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            return nil
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_text(
+            statement, 1, key, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+        guard sqlite3_step(statement) == SQLITE_ROW else { return nil }
+        guard let cString = sqlite3_column_text(statement, 0) else { return nil }
+        return String(cString: cString)
+    }
+
+    nonisolated private static func writeMetaValue(
+        _ db: OpaquePointer,
+        key: String,
+        value: String
+    ) throws {
+        let sql =
+            "INSERT INTO meta(key, value) VALUES(?, ?) "
+            + "ON CONFLICT(key) DO UPDATE SET value = excluded.value;"
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_text(
+            statement, 1, key, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+        sqlite3_bind_text(
+            statement, 2, value, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+        guard sqlite3_step(statement) == SQLITE_DONE else {
+            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+        }
+    }
+
+    private func metaValue(_ key: String) -> String? {
+        guard let db else { return nil }
+        return Self.readMetaValue(db, key: key)
+    }
+
+    private func setMeta(key: String, value: String) throws {
+        guard let db else { throw CompatibilityIndexError.sqlite("Database is closed") }
+        try Self.writeMetaValue(db, key: key, value: value)
+    }
+
+    private func execute(
+        _ sql: String,
+        bind: ((OpaquePointer?) -> Void)? = nil
+    ) throws {
+        guard let db else { throw CompatibilityIndexError.sqlite("Database is closed") }
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+        }
+        defer { sqlite3_finalize(statement) }
+        bind?(statement)
+        let step = sqlite3_step(statement)
+        // Multi-statement scripts use exec instead; single statements end at DONE.
+        guard step == SQLITE_DONE || step == SQLITE_ROW else {
+            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+        }
+    }
+
+    nonisolated private static func exec(_ db: OpaquePointer, _ sql: String) throws {
+        var errorMessage: UnsafeMutablePointer<CChar>?
+        let result = sqlite3_exec(db, sql, nil, nil, &errorMessage)
+        if result != SQLITE_OK {
+            let message = errorMessage.map { String(cString: $0) } ?? "SQLite error"
+            sqlite3_free(errorMessage)
+            throw CompatibilityIndexError.sqlite(message)
+        }
+    }
+
+    nonisolated private static func parseDate(_ raw: String?) -> Date? {
+        guard let raw, !raw.isEmpty else { return nil }
+        return ISO8601DateFormatter().date(from: raw)
+    }
+
+    nonisolated private static func formatDate(_ date: Date) -> String {
+        ISO8601DateFormatter().string(from: date)
+    }
+}
+
+enum CompatibilityIndexError: Error, LocalizedError {
+    case sqlite(String)
+    case missingBundledDatabase
+
+    var errorDescription: String? {
+        switch self {
+        case .sqlite(let message):
+            return message
+        case .missingBundledDatabase:
+            return "Bundled compatibility database is missing."
+        }
+    }
+}
