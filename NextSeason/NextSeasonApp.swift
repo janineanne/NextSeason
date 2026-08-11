@@ -41,6 +41,7 @@ struct NextSeasonApp: App {
                 navigationCoordinator: navigationCoordinator,
                 removalCoordinator: composition.watchlistPendingRemoval,
                 refreshService: composition.refreshService,
+                searchService: composition.theTVDB,
                 tvMaze: composition.tvMaze
             )
             .environment(\.watchlistRepository, composition.watchlistRepository)
@@ -65,7 +66,7 @@ struct NextSeasonApp: App {
 }
 
 /// Root content host: scene-phase watchlist refresh, undo toast for deferred
-/// watchlist removals, and UITest TVMaze stubbing.
+/// watchlist removals, and UITest network stubbing.
 ///
 /// Undo lives here (not inside Watchlist) so the toast remains visible across
 /// tab switches while a removal is still pending confirmation.
@@ -75,11 +76,13 @@ private struct AppRootView: View {
     @Bindable var navigationCoordinator: AppNavigationCoordinator
     @Bindable var removalCoordinator: WatchlistPendingRemoval
     let refreshService: WatchlistRefreshService
+    let searchService: any TheTVDBService
     let tvMaze: any TVMazeService
 
     var body: some View {
         ContentView(
             coordinator: navigationCoordinator,
+            searchService: theTVDBService(testing: UITestingConfiguration.isEnabled),
             tvMaze: tvMazeService(testing: UITestingConfiguration.isEnabled)
         )
         .appAccentTint()
@@ -131,8 +134,8 @@ private struct AppRootView: View {
         }
     }
 
-    /// UI tests get `PreviewTVMazeService` so search / detail never hit the network;
-    /// production always uses the injected live client.
+    /// UI tests get preview stubs so search / detail never hit the network;
+    /// production always uses the injected live clients.
     private func tvMazeService(testing: Bool) -> any TVMazeService {
         #if DEBUG
             if testing {
@@ -140,5 +143,14 @@ private struct AppRootView: View {
             }
         #endif
         return tvMaze
+    }
+
+    private func theTVDBService(testing: Bool) -> any TheTVDBService {
+        #if DEBUG
+            if testing {
+                return PreviewTheTVDBService(stub: .previewSearchResult)
+            }
+        #endif
+        return searchService
     }
 }

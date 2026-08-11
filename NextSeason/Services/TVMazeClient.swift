@@ -64,6 +64,42 @@ actor TVMazeClient: TVMazeService {
         return shows
     }
 
+    /// `GET /lookup/shows?thetvdb=` — bridges a TheTVDB search hit to TVMaze.
+    ///
+    /// TVMaze responds with HTTP 301 to the canonical `/shows/:id` URL;
+    /// `URLSession` follows the redirect and we decode the final show body.
+    /// Used after guest search (TheTVDB) before detail / watchlist, which are
+    /// TVMaze-id keyed end-to-end.
+    func lookupShow(theTVDBID: Int) async throws -> Show {
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("lookup_thetvdb_start tvdb_id=\(theTVDBID, privacy: .public)")
+        AppDiagnosticsLogger.breadcrumb("network_lookup_thetvdb:\(theTVDBID)")
+        var components = URLComponents(
+            url: baseURL.appending(path: "lookup/shows"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "thetvdb", value: String(theTVDBID))]
+        let data: ShowData = try await get(components)
+        return data.toDomain()
+    }
+
+    /// `GET /lookup/shows?imdb=` — fallback when TheTVDB → TVMaze id mapping is missing.
+    ///
+    /// Same 301-follow behavior as the TheTVDB lookup. Search hits often carry
+    /// an IMDb id in TheTVDB `remote_ids` even when TVMaze has not linked the
+    /// TheTVDB id yet.
+    func lookupShow(imdbID: String) async throws -> Show {
+        let trimmed = imdbID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { throw TVMazeError.notFound }
+
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("lookup_imdb_start")
+        AppDiagnosticsLogger.breadcrumb("network_lookup_imdb")
+        var components = URLComponents(
+            url: baseURL.appending(path: "lookup/shows"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "imdb", value: trimmed)]
+        let data: ShowData = try await get(components)
+        return data.toDomain()
+    }
+
     /// `GET /shows/:id` with embedded seasons + next episode for status calculation.
     /// Pass `bypassCache: true` for refresh paths that must not reuse a stale hour-old body.
     func show(id: Int, bypassCache: Bool = false) async throws -> Show {

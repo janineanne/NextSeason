@@ -8,7 +8,22 @@ import Foundation
 /// Abstraction over the TVMaze API so view models can be tested with a mock.
 nonisolated protocol TVMazeService: Sendable {
     /// Shows matching a free-text query, best matches first. Empty query → `[]`.
+    ///
+    /// Guest search uses TheTVDB; this remains for profile tooling and as a
+    /// fallback path that still speaks TVMaze ids.
     func searchShows(matching query: String) async throws -> [Show]
+
+    /// Resolves an external TheTVDB series id to the matching TVMaze show.
+    ///
+    /// Bridge used after guest search: Search lists TheTVDB hits, then this
+    /// maps the selected id into the TVMaze-keyed detail / watchlist world.
+    func lookupShow(theTVDBID: Int) async throws -> Show
+
+    /// Resolves an IMDb id (e.g. `tt0944947`) to the matching TVMaze show.
+    ///
+    /// Fallback when TVMaze has not linked a TheTVDB id but the search hit
+    /// still carries an IMDb remote id.
+    func lookupShow(imdbID: String) async throws -> Show
 
     /// Full show info including embedded seasons and next episode.
     func show(id: Int, bypassCache: Bool) async throws -> Show

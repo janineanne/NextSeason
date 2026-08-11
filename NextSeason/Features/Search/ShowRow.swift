@@ -41,6 +41,17 @@ struct ShowRowLabel: View {
         )
     }
 
+    /// TheTVDB search hit: year/status as subtitle, network as the detail line.
+    /// (Unlike `Show`, these rows are not yet TVMaze-resolved.)
+    init(result: TVDBSearchResult) {
+        self.init(
+            name: result.name,
+            subtitle: result.searchSubtitle,
+            posterURL: result.posterURL,
+            detailLine: result.network
+        )
+    }
+
     init(tracked: TrackedShow) {
         let updated = tracked.lastCheckedAt.formatted(date: .abbreviated, time: .shortened)
         self.init(

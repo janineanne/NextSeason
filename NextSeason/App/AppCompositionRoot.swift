@@ -18,12 +18,14 @@ struct AppCompositionRoot {
     let notificationService: NotificationService
     let betaRefreshDiagnostics: BetaRefreshDiagnostics
     let tvMaze: any TVMazeService
+    let theTVDB: any TheTVDBService
 
     init() throws {
         analyticsService = AnalyticsService()
         notificationService = NotificationService(analytics: analyticsService)
         betaRefreshDiagnostics = BetaRefreshDiagnostics()
         tvMaze = TVMazeClient()
+        theTVDB = TheTVDBClient()
 
         let repository: any WatchlistRepository
         if UITestingConfiguration.isEnabled {
