@@ -68,8 +68,7 @@ actor TVMazeClient: TVMazeService {
     ///
     /// TVMaze responds with HTTP 301 to the canonical `/shows/:id` URL;
     /// `URLSession` follows the redirect and we decode the final show body.
-    /// Used after guest search (TheTVDB) before detail / watchlist, which are
-    /// TVMaze-id keyed end-to-end.
+    /// Used when Search's local compatibility mapping is missing or stale.
     func lookupShow(theTVDBID: Int) async throws -> Show {
         AppDiagnosticsLogger.logger(for: .network)
             .notice("lookup_thetvdb_start tvdb_id=\(theTVDBID, privacy: .public)")
@@ -77,25 +76,6 @@ actor TVMazeClient: TVMazeService {
         var components = URLComponents(
             url: baseURL.appending(path: "lookup/shows"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "thetvdb", value: String(theTVDBID))]
-        let data: ShowData = try await get(components)
-        return data.toDomain()
-    }
-
-    /// `GET /lookup/shows?imdb=` — fallback when TheTVDB → TVMaze id mapping is missing.
-    ///
-    /// Same 301-follow behavior as the TheTVDB lookup. Search hits often carry
-    /// an IMDb id in TheTVDB `remote_ids` even when TVMaze has not linked the
-    /// TheTVDB id yet.
-    func lookupShow(imdbID: String) async throws -> Show {
-        let trimmed = imdbID.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { throw TVMazeError.notFound }
-
-        AppDiagnosticsLogger.logger(for: .network)
-            .notice("lookup_imdb_start")
-        AppDiagnosticsLogger.breadcrumb("network_lookup_imdb")
-        var components = URLComponents(
-            url: baseURL.appending(path: "lookup/shows"), resolvingAgainstBaseURL: false)
-        components?.queryItems = [URLQueryItem(name: "imdb", value: trimmed)]
         let data: ShowData = try await get(components)
         return data.toDomain()
     }
@@ -136,6 +116,21 @@ actor TVMazeClient: TVMazeService {
         var components = URLComponents(
             url: baseURL.appending(path: "updates/shows"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "since", value: period.rawValue)]
+        return try await decodeUpdatedShows(components)
+    }
+
+    /// `GET /updates/shows` with no `since` filter — last-update time for every show.
+    /// Used after long absences that exceed TVMaze's `since=month` window.
+    func allUpdatedShows() async throws -> [Int: Date] {
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("updates_start period=all")
+        AppDiagnosticsLogger.breadcrumb("network_updates_all")
+        let components = URLComponents(
+            url: baseURL.appending(path: "updates/shows"), resolvingAgainstBaseURL: false)
+        return try await decodeUpdatedShows(components)
+    }
+
+    private func decodeUpdatedShows(_ components: URLComponents?) async throws -> [Int: Date] {
         let epochs: [String: TimeInterval] = try await get(components, bypassCache: true)
         var result: [Int: Date] = [:]
         result.reserveCapacity(epochs.count)
@@ -165,7 +160,7 @@ actor TVMazeClient: TVMazeService {
     func showIndexEntry(id: Int) async throws -> ShowIndexEntryData {
         AppDiagnosticsLogger.logger(for: .network)
             .notice("show_index_entry_start show_id=\(id, privacy: .public)")
-        var components = URLComponents(
+        let components = URLComponents(
             url: baseURL.appending(path: "shows/\(id)"), resolvingAgainstBaseURL: false)
         return try await get(components, bypassCache: true)
     }

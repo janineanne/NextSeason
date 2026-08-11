@@ -34,10 +34,6 @@ struct WatchlistRefreshServiceTests {
             throw TVMazeError.notFound
         }
 
-        func lookupShow(imdbID: String) async throws -> Show {
-            throw TVMazeError.notFound
-        }
-
         func show(id: Int, bypassCache: Bool) async throws -> Show {
             fetchedShowIDs.append(id)
             lastBypassCache = bypassCache

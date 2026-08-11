@@ -23,9 +23,19 @@ struct TVMazeUpdatePeriodTests {
         #expect(TVMazeUpdatePeriod.covering(since: oldest, at: now) == .week)
     }
 
-    @Test("Month window covers checks older than a week")
+    @Test("Month window covers checks older than a week but within about a month")
     func monthWindow() {
         let oldest = now.addingTimeInterval(-8 * 86_400)
         #expect(TVMazeUpdatePeriod.covering(since: oldest, at: now) == .month)
+        #expect(
+            TVMazeUpdatePeriod.requiresUnfilteredUpdateMap(since: oldest, at: now) == false
+        )
+    }
+
+    @Test("Gaps older than a month require the unfiltered updates map")
+    func unfilteredMapRequiredAfterMonth() {
+        let oldest = now.addingTimeInterval(-(TVMazeUpdatePeriod.monthWindow + 86_400))
+        #expect(TVMazeUpdatePeriod.covering(since: oldest, at: now) == .month)
+        #expect(TVMazeUpdatePeriod.requiresUnfilteredUpdateMap(since: oldest, at: now))
     }
 }

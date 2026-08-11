@@ -16,8 +16,9 @@ import os
 ///
 /// Search uses `limit` / `offset` pagination (`TheTVDBConfiguration.pageSize`).
 /// TheTVDB's `links.next` URLs are occasionally malformed (duplicate `?`), so
-/// page advancement is computed from `offset` + result count rather than by
-/// following those URLs.
+/// page advancement is computed from `offset` + **raw** response row count
+/// rather than by following those URLs or counting domain results after
+/// sparse records are dropped.
 actor TheTVDBClient: TheTVDBService {
     private let session: URLSession
     private let decoder = JSONDecoder()
@@ -30,12 +31,14 @@ actor TheTVDBClient: TheTVDBService {
 
     init(
         session: URLSession = .shared,
-        apiKey: String = TheTVDBConfiguration.apiKey,
         baseURL: URL = TheTVDBConfiguration.baseURL,
         pageSize: Int = TheTVDBConfiguration.pageSize
     ) {
         self.session = session
-        self.apiKey = apiKey
+        self.apiKey =
+            Bundle.main.object(
+                forInfoDictionaryKey: "TVDBApiKey"
+            ) as? String ?? ""
         self.baseURL = baseURL
         self.pageSize = pageSize
     }
@@ -47,7 +50,7 @@ actor TheTVDBClient: TheTVDBService {
     func searchSeries(matching query: String, offset: Int) async throws -> TheTVDBSearchPage {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            return TheTVDBSearchPage(results: [], hasMore: false)
+            return TheTVDBSearchPage(results: [], hasMore: false, nextOffset: 0)
         }
 
         AppDiagnosticsLogger.logger(for: .network)
@@ -57,6 +60,7 @@ actor TheTVDBClient: TheTVDBService {
         AppDiagnosticsLogger.breadcrumb("network_tvdb_search")
         let searchStarted = Date.now
 
+        let requestOffset = max(offset, 0)
         var components = URLComponents(
             url: baseURL.appending(path: "search"),
             resolvingAgainstBaseURL: false
@@ -65,18 +69,15 @@ actor TheTVDBClient: TheTVDBService {
             URLQueryItem(name: "query", value: trimmed),
             URLQueryItem(name: "type", value: "series"),
             URLQueryItem(name: "limit", value: String(pageSize)),
-            URLQueryItem(name: "offset", value: String(max(offset, 0))),
+            URLQueryItem(name: "offset", value: String(requestOffset)),
         ]
 
         let response: TheTVDBListResponseData<TheTVDBSearchResultData> = try await authorizedGet(
             components
         )
-        // Drop hits that lack a parseable series id / name rather than failing
-        // the whole page — TheTVDB occasionally returns sparse records.
-        let results = (response.data ?? []).compactMap { $0.toDomain() }
-        let hasMore = Self.hasMorePages(
-            fetchedCount: results.count,
-            offset: max(offset, 0),
+        let page = Self.makeSearchPage(
+            rawItems: response.data ?? [],
+            requestOffset: requestOffset,
             pageSize: pageSize,
             links: response.links
         )
@@ -84,26 +85,55 @@ actor TheTVDBClient: TheTVDBService {
         let elapsedMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
         AppDiagnosticsLogger.logger(for: .network)
             .notice(
-                "tvdb_search_complete result_count=\(results.count, privacy: .public) has_more=\(hasMore, privacy: .public) duration_ms=\(elapsedMs, privacy: .public)"
+                "tvdb_search_complete result_count=\(page.results.count, privacy: .public) has_more=\(page.hasMore, privacy: .public) next_offset=\(page.nextOffset, privacy: .public) duration_ms=\(elapsedMs, privacy: .public)"
             )
-        return TheTVDBSearchPage(results: results, hasMore: hasMore)
+        return page
+    }
+
+    /// Builds a search page whose pagination cursor uses the raw API row count.
+    ///
+    /// Domain mapping still drops sparse records via `compactMap`, but
+    /// `nextOffset` / `hasMore` ignore that filtering so a malformed hit cannot
+    /// shrink the TheTVDB offset window.
+    nonisolated static func makeSearchPage(
+        rawItems: [TheTVDBSearchResultData],
+        requestOffset: Int,
+        pageSize: Int,
+        links: TheTVDBLinksData?
+    ) -> TheTVDBSearchPage {
+        let offset = max(requestOffset, 0)
+        let rawCount = rawItems.count
+        // Drop hits that lack a parseable series id / name rather than failing
+        // the whole page — TheTVDB occasionally returns sparse records.
+        let results = rawItems.compactMap { $0.toDomain() }
+        let hasMore = hasMorePages(
+            rawFetchedCount: rawCount,
+            offset: offset,
+            pageSize: pageSize,
+            links: links
+        )
+        return TheTVDBSearchPage(
+            results: results,
+            hasMore: hasMore,
+            nextOffset: offset + rawCount
+        )
     }
 
     /// Prefer `links.total_items` or a present `links.next`; otherwise treat a
-    /// full page as evidence that another page may exist.
-    private static func hasMorePages(
-        fetchedCount: Int,
+    /// full raw page as evidence that another page may exist.
+    nonisolated static func hasMorePages(
+        rawFetchedCount: Int,
         offset: Int,
         pageSize: Int,
         links: TheTVDBLinksData?
     ) -> Bool {
         if let total = links?.totalItems {
-            return offset + fetchedCount < total
+            return offset + rawFetchedCount < total
         }
         if links?.next != nil {
             return true
         }
-        return fetchedCount >= pageSize
+        return rawFetchedCount >= pageSize
     }
 
     private func authorizedGet<T: Decodable>(_ components: URLComponents?) async throws -> T {

@@ -29,6 +29,13 @@ enum FirstRunCopy {
             "Try a more specific title — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)."
     )
 
+    /// Shown when filtered search pages found nothing actionable yet, but more
+    /// TheTVDB pages remain (so Load More can continue the search).
+    static let searchMoreAvailableDescription = String(
+        localized:
+            "No trackable shows in these results yet. Load more to keep looking."
+    )
+
     static let notificationPromptMessage = String(
         localized:
             "Get alerts when a tracked show's next season gets a release date or status update."

@@ -42,9 +42,9 @@ final class SearchViewModel {
     }
 
     /// Soft target for how many actionable rows to gather before stopping page fill.
-    static let actionablePageTarget = TheTVDBConfiguration.pageSize
+    nonisolated static let actionablePageTarget = TheTVDBConfiguration.pageSize
     /// Cap on TheTVDB pages fetched per search / load-more burst.
-    static let maxTheTVDBPagesPerFill = 6
+    nonisolated static let maxTheTVDBPagesPerFill = 6
 
     private(set) var state: State = .idle
     var query: String = ""
@@ -130,7 +130,7 @@ final class SearchViewModel {
             let durationMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
             displayedQuery = trimmed
             nextOffset = fill.nextOffset
-            if fill.items.isEmpty {
+            if fill.items.isEmpty, !fill.hasMore {
                 state = .empty
                 analytics.track(
                     .searchPerformed(
@@ -141,6 +141,8 @@ final class SearchViewModel {
                 )
                 analytics.track(.emptySearchResultsShown)
             } else {
+                // Empty items with hasMore means the page-fill cap found nothing
+                // actionable yet, but TheTVDB still has pages — keep Load More.
                 state = .results(ResultsPage(items: fill.items, hasMore: fill.hasMore))
                 analytics.track(
                     .searchPerformed(
@@ -201,7 +203,12 @@ final class SearchViewModel {
                 merged.append(result)
             }
             nextOffset = fill.nextOffset
-            state = .results(ResultsPage(items: merged, hasMore: fill.hasMore))
+            if merged.isEmpty, !fill.hasMore {
+                state = .empty
+                analytics.track(.emptySearchResultsShown)
+            } else {
+                state = .results(ResultsPage(items: merged, hasMore: fill.hasMore))
+            }
         } catch is CancellationError {
             return
         } catch {
@@ -213,7 +220,8 @@ final class SearchViewModel {
     /// Resolves a TheTVDB hit to the canonical TVMaze `Show` (with seasons when possible).
     ///
     /// Uses the in-memory show cache when present. Otherwise prefers the local
-    /// compatibility id (`show(id:)`), then TheTVDB lookup, then IMDb fallback.
+    /// compatibility id (`show(id:)`), then live TheTVDB lookup if that mapping
+    /// is missing or stale.
     func resolveShow(for result: TVDBSearchResult) async throws -> Show {
         if let cached = resolvedShowsByTVDBID[result.id] {
             return try await enrichedShow(from: cached)
@@ -267,12 +275,16 @@ final class SearchViewModel {
         while collected.count < targetCount, tvdbHasMore, pagesFetched < Self.maxTheTVDBPagesPerFill
         {
             try Task.checkCancellation()
+            let previousOffset = offset
             let page = try await searchService.searchSeries(matching: query, offset: offset)
             pagesFetched += 1
-            offset += page.results.count
+            // Trust the service's cursor — it advances by raw API row count, not
+            // domain `results.count` after sparse records are dropped.
+            offset = page.nextOffset
             tvdbHasMore = page.hasMore
 
-            if page.results.isEmpty {
+            // Refuse to spin if a page claims more results but did not advance.
+            if page.hasMore, offset <= previousOffset {
                 tvdbHasMore = false
                 break
             }
@@ -319,18 +331,11 @@ final class SearchViewModel {
             do {
                 return try await tvMaze.show(id: mappedID)
             } catch TVMazeError.notFound {
-                // Mapping may be stale; fall through to live lookups.
+                // Mapping may be stale; fall through to live TheTVDB lookup.
             }
         }
 
-        do {
-            return try await tvMaze.lookupShow(theTVDBID: result.id)
-        } catch TVMazeError.notFound {
-            if let imdbID = result.imdbID {
-                return try await tvMaze.lookupShow(imdbID: imdbID)
-            }
-            throw TVMazeError.notFound
-        }
+        return try await tvMaze.lookupShow(theTVDBID: result.id)
     }
 
     /// Lookup / index payloads may omit embeds; fetch full detail when seasons

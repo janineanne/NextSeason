@@ -66,7 +66,7 @@ struct AppCompositionRoot {
                     bundledURL: bundledURL
                 )
             }
-            compatibilityIndex = LocalCompatibilityIndex(database: database)
+            compatibilityIndex = database
             compatibilityIndexRefresh = CompatibilityIndexRefreshService(
                 database: database,
                 tvMaze: liveTVMaze

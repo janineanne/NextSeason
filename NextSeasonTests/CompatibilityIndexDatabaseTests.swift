@@ -110,7 +110,6 @@ struct CompatibilityIndexDatabaseTests {
     private struct FailingIndexTVMazeService: TVMazeService {
         func searchShows(matching query: String) async throws -> [Show] { [] }
         func lookupShow(theTVDBID: Int) async throws -> Show { throw TVMazeError.notFound }
-        func lookupShow(imdbID: String) async throws -> Show { throw TVMazeError.notFound }
         func show(id: Int, bypassCache: Bool) async throws -> Show { throw TVMazeError.notFound }
         func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] {
             throw TVMazeError.network(URLError(.notConnectedToInternet))

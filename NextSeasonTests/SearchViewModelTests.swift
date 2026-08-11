@@ -29,10 +29,6 @@ struct SearchViewModelTests {
             try await lookupHandler(theTVDBID)
         }
 
-        func lookupShow(imdbID: String) async throws -> Show {
-            throw TVMazeError.notFound
-        }
-
         func show(id: Int, bypassCache: Bool) async throws -> Show {
             try await showHandler(id)
         }
@@ -65,10 +61,6 @@ struct SearchViewModelTests {
             throw TVMazeError.notFound
         }
 
-        func lookupShow(imdbID: String) async throws -> Show {
-            throw TVMazeError.notFound
-        }
-
         func show(id: Int, bypassCache: Bool) async throws -> Show {
             try await showHandler(id)
         }
@@ -88,14 +80,28 @@ struct SearchViewModelTests {
         year: "2022",
         network: "Apple TV",
         status: "Continuing",
-        posterURL: nil,
-        imdbID: "tt11280740"
+        posterURL: nil
     )
 
     private func compatibleIndex(
         map: [Int: Int] = [371980: 44933]
     ) -> InMemoryCompatibilityIndex {
         InMemoryCompatibilityIndex(map: map)
+    }
+
+    /// Mock page helper: when `rawCount` is omitted, advances by `results.count`
+    /// (no sparse drops). Pass an explicit `rawCount` to simulate malformed rows.
+    nonisolated private static func page(
+        _ results: [TVDBSearchResult],
+        hasMore: Bool,
+        offset: Int = 0,
+        rawCount: Int? = nil
+    ) -> TheTVDBSearchPage {
+        TheTVDBSearchPage(
+            results: results,
+            hasMore: hasMore,
+            nextOffset: offset + (rawCount ?? results.count)
+        )
     }
 
     private func makeViewModel(
@@ -117,7 +123,7 @@ struct SearchViewModelTests {
         let viewModel = makeViewModel(
             search: MockSearchService { _, _ in
                 Issue.record("service should not be called")
-                return TheTVDBSearchPage(results: [], hasMore: false)
+                return Self.page([], hasMore: false)
             }
         )
         viewModel.query = "   "
@@ -128,8 +134,8 @@ struct SearchViewModelTests {
     @Test("Matching compatible shows populate the results state")
     func resultsPopulateState() async {
         let viewModel = makeViewModel(
-            search: MockSearchService { _, _ in
-                TheTVDBSearchPage(results: [sampleResult], hasMore: false)
+            search: MockSearchService { _, offset in
+                Self.page([sampleResult], hasMore: false, offset: offset)
             }
         )
         viewModel.query = "severance"
@@ -149,13 +155,12 @@ struct SearchViewModelTests {
             year: "2020",
             network: nil,
             status: "Ended",
-            posterURL: nil,
-            imdbID: nil
+            posterURL: nil
         )
         let counter = LookupCounter()
         let viewModel = makeViewModel(
-            search: MockSearchService { _, _ in
-                TheTVDBSearchPage(results: [sampleResult, incompatible], hasMore: false)
+            search: MockSearchService { _, offset in
+                Self.page([sampleResult, incompatible], hasMore: false, offset: offset)
             },
             tvMaze: CountingTVMazeService(counter: counter),
             index: compatibleIndex(map: [371980: 44933])
@@ -177,8 +182,7 @@ struct SearchViewModelTests {
             year: nil,
             network: nil,
             status: nil,
-            posterURL: nil,
-            imdbID: nil
+            posterURL: nil
         )
         let page2Mapped = TVDBSearchResult(
             id: 2,
@@ -186,17 +190,16 @@ struct SearchViewModelTests {
             year: "2021",
             network: nil,
             status: "Continuing",
-            posterURL: nil,
-            imdbID: nil
+            posterURL: nil
         )
         let offsets = CallCounter()
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
                 offsets.value += 1
                 if offset == 0 {
-                    return TheTVDBSearchPage(results: [page1Only], hasMore: true)
+                    return Self.page([page1Only], hasMore: true, offset: offset)
                 }
-                return TheTVDBSearchPage(results: [page2Mapped], hasMore: false)
+                return Self.page([page2Mapped], hasMore: false, offset: offset)
             },
             index: compatibleIndex(map: [2: 99])
         )
@@ -209,6 +212,46 @@ struct SearchViewModelTests {
         #expect(offsets.value == 2)
     }
 
+    @Test("Search advances using page nextOffset, not filtered result count")
+    func searchUsesPageNextOffsetNotResultCount() async {
+        let unmapped = TVDBSearchResult(
+            id: 1,
+            name: "Unmapped",
+            year: nil,
+            network: nil,
+            status: nil,
+            posterURL: nil
+        )
+        let mapped = TVDBSearchResult(
+            id: 2,
+            name: "Mapped",
+            year: "2021",
+            network: nil,
+            status: "Continuing",
+            posterURL: nil
+        )
+        let requestedOffsets = OffsetRecorder()
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, offset in
+                requestedOffsets.append(offset)
+                if offset == 0 {
+                    // One usable hit after discarding sparse rows from a full page.
+                    return Self.page([unmapped], hasMore: true, offset: offset, rawCount: 10)
+                }
+                #expect(offset == 10)
+                return Self.page([mapped], hasMore: false, offset: offset)
+            },
+            index: compatibleIndex(map: [2: 99])
+        )
+        viewModel.query = "sparse-page"
+        await viewModel.search()
+        #expect(
+            viewModel.state
+                == .results(SearchViewModel.ResultsPage(items: [mapped], hasMore: false))
+        )
+        #expect(requestedOffsets.values == [0, 10])
+    }
+
     @Test("Pagination terminates correctly when there are no more results")
     func paginationTerminatesWhenExhausted() async {
         let unmapped = TVDBSearchResult(
@@ -217,15 +260,14 @@ struct SearchViewModelTests {
             year: nil,
             network: nil,
             status: nil,
-            posterURL: nil,
-            imdbID: nil
+            posterURL: nil
         )
         let offsets = CallCounter()
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
                 offsets.value += 1
                 #expect(offset == 0)
-                return TheTVDBSearchPage(results: [unmapped], hasMore: false)
+                return Self.page([unmapped], hasMore: false, offset: offset)
             },
             index: compatibleIndex(map: [:])
         )
@@ -235,11 +277,89 @@ struct SearchViewModelTests {
         #expect(offsets.value == 1)
     }
 
+    @Test("Zero actionable hits with more TVDB pages offers Load More instead of empty")
+    func emptyActionableWithMorePagesKeepsLoadMore() async {
+        let unmapped = TVDBSearchResult(
+            id: 1,
+            name: "Unmapped",
+            year: nil,
+            network: nil,
+            status: nil,
+            posterURL: nil
+        )
+        let mapped = TVDBSearchResult(
+            id: 99,
+            name: "Mapped Later",
+            year: "2024",
+            network: nil,
+            status: "Continuing",
+            posterURL: nil
+        )
+        let maxPages = SearchViewModel.maxTheTVDBPagesPerFill
+        let offsets = CallCounter()
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, offset in
+                offsets.value += 1
+                // Fill advances via nextOffset (1 per mock page), so the first
+                // burst uses offsets 0..<maxPages before Load More.
+                if offset < maxPages {
+                    return Self.page([unmapped], hasMore: true, offset: offset)
+                }
+                return Self.page([mapped], hasMore: false, offset: offset)
+            },
+            index: compatibleIndex(map: [99: 44933])
+        )
+        viewModel.query = "sparse"
+        await viewModel.search()
+        #expect(
+            viewModel.state
+                == .results(SearchViewModel.ResultsPage(items: [], hasMore: true))
+        )
+        #expect(offsets.value == maxPages)
+
+        await viewModel.loadMore()
+        #expect(
+            viewModel.state
+                == .results(SearchViewModel.ResultsPage(items: [mapped], hasMore: false))
+        )
+    }
+
+    @Test("Load More that exhausts with no actionable hits becomes empty")
+    func loadMoreExhaustionYieldsEmpty() async {
+        let unmapped = TVDBSearchResult(
+            id: 1,
+            name: "Unmapped",
+            year: nil,
+            network: nil,
+            status: nil,
+            posterURL: nil
+        )
+        let maxPages = SearchViewModel.maxTheTVDBPagesPerFill
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, offset in
+                // First fill: maxPages unmapped pages that still report hasMore.
+                if offset < maxPages {
+                    return Self.page([unmapped], hasMore: true, offset: offset)
+                }
+                return Self.page([unmapped], hasMore: false, offset: offset)
+            },
+            index: compatibleIndex(map: [:])
+        )
+        viewModel.query = "never"
+        await viewModel.search()
+        #expect(
+            viewModel.state
+                == .results(SearchViewModel.ResultsPage(items: [], hasMore: true))
+        )
+        await viewModel.loadMore()
+        #expect(viewModel.state == .empty)
+    }
+
     @Test("No matches yield the empty state")
     func noMatchesYieldEmpty() async {
         let viewModel = makeViewModel(
-            search: MockSearchService { _, _ in
-                TheTVDBSearchPage(results: [], hasMore: false)
+            search: MockSearchService { _, offset in
+                Self.page([], hasMore: false, offset: offset)
             }
         )
         viewModel.query = "no-such-show"
@@ -260,8 +380,8 @@ struct SearchViewModelTests {
     @Test("Clearing the query after results returns to idle")
     func clearingQueryReturnsToIdle() async {
         let viewModel = makeViewModel(
-            search: MockSearchService { _, _ in
-                TheTVDBSearchPage(results: [sampleResult], hasMore: false)
+            search: MockSearchService { _, offset in
+                Self.page([sampleResult], hasMore: false, offset: offset)
             }
         )
         viewModel.query = FirstRunCopy.exampleSearchQuery
@@ -280,9 +400,9 @@ struct SearchViewModelTests {
     func repeatedQuerySkipsReload() async {
         let counter = CallCounter()
         let viewModel = makeViewModel(
-            search: MockSearchService { _, _ in
+            search: MockSearchService { _, offset in
                 counter.value += 1
-                return TheTVDBSearchPage(results: [sampleResult], hasMore: false)
+                return Self.page([sampleResult], hasMore: false, offset: offset)
             }
         )
         viewModel.query = "severance"
@@ -301,15 +421,14 @@ struct SearchViewModelTests {
             year: "2020",
             network: nil,
             status: "Ended",
-            posterURL: nil,
-            imdbID: nil
+            posterURL: nil
         )
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
                 if offset == 0 {
-                    return TheTVDBSearchPage(results: [sampleResult], hasMore: true)
+                    return Self.page([sampleResult], hasMore: true, offset: offset)
                 }
-                return TheTVDBSearchPage(results: [second], hasMore: false)
+                return Self.page([second], hasMore: false, offset: offset)
             },
             index: compatibleIndex(map: [371980: 44933, 2: 82])
         )
@@ -327,8 +446,8 @@ struct SearchViewModelTests {
     @Test("Resolve maps a TheTVDB hit to a TVMaze show via compatibility id")
     func resolveMapsToTVMazeShow() async throws {
         let viewModel = makeViewModel(
-            search: MockSearchService { _, _ in
-                TheTVDBSearchPage(results: [sampleResult], hasMore: false)
+            search: MockSearchService { _, offset in
+                Self.page([sampleResult], hasMore: false, offset: offset)
             }
         )
         let show = try await viewModel.resolveShow(for: sampleResult)
@@ -340,8 +459,8 @@ struct SearchViewModelTests {
     func searchDoesNotPrefetchTheTVDBLookups() async {
         let counter = LookupCounter()
         let viewModel = makeViewModel(
-            search: MockSearchService { _, _ in
-                TheTVDBSearchPage(results: [sampleResult], hasMore: false)
+            search: MockSearchService { _, offset in
+                Self.page([sampleResult], hasMore: false, offset: offset)
             },
             tvMaze: CountingTVMazeService(counter: counter),
             index: compatibleIndex(map: [371980: 44933])
@@ -353,5 +472,16 @@ struct SearchViewModelTests {
 
     private final class CallCounter: @unchecked Sendable {
         var value = 0
+    }
+
+    private final class OffsetRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private(set) var values: [Int] = []
+
+        func append(_ value: Int) {
+            lock.lock()
+            values.append(value)
+            lock.unlock()
+        }
     }
 }

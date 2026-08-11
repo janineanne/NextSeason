@@ -22,10 +22,18 @@ nonisolated struct CompatibilityIndexMetadata: Equatable, Sendable {
     var generatedAt: Date?
     /// Highest TVMaze show id represented in the local index.
     var highestTVMazeID: Int
-    /// Last time an on-device incremental refresh completed successfully end-to-end.
+    /// Upper watermark of the last fully completed updates sync.
     var lastSuccessfulSyncAt: Date?
+    /// Fixed start time of the in-progress sync. Updates after this are deferred
+    /// until the next sync so a multi-pass drain cannot skip mid-flight changes.
+    var syncHorizonAt: Date?
     /// When set, an updates pass was capped mid-way and should resume next opportunity.
     var updatesResumeCursor: CompatibilityIndexUpdatesResumeCursor?
+
+    /// True while a sync was started but has not yet committed its horizon.
+    var hasInProgressSync: Bool {
+        syncHorizonAt != nil || updatesResumeCursor != nil
+    }
 
     static let currentSchemaVersion = 1
 }

@@ -91,8 +91,7 @@
             year: "2022",
             network: "Apple TV",
             status: "Continuing",
-            posterURL: nil,
-            imdbID: "tt11280740"
+            posterURL: nil
         )
     }
 
@@ -109,17 +108,22 @@
         func searchSeries(matching query: String, offset: Int) async throws -> TheTVDBSearchPage {
             switch query {
             case UITestingConfiguration.SearchQuery.noResults:
-                return TheTVDBSearchPage(results: [], hasMore: false)
+                return TheTVDBSearchPage(results: [], hasMore: false, nextOffset: offset)
             case UITestingConfiguration.SearchQuery.failure:
                 throw TheTVDBError.server(statusCode: 500)
             default:
                 if offset > 0 {
-                    return TheTVDBSearchPage(results: moreResults, hasMore: false)
+                    return TheTVDBSearchPage(
+                        results: moreResults,
+                        hasMore: false,
+                        nextOffset: offset + moreResults.count
+                    )
                 }
                 return TheTVDBSearchPage(
                     results: [stub],
                     // Offer "Load more" only when the preview was given a second page.
-                    hasMore: !moreResults.isEmpty
+                    hasMore: !moreResults.isEmpty,
+                    nextOffset: offset + 1
                 )
             }
         }
@@ -127,8 +131,8 @@
 
     /// A `TVMazeService` that returns fixed data so previews never hit the network.
     ///
-    /// `lookupShow` maps the preview TheTVDB / IMDb ids onto `stub` so Search's
-    /// resolve path works under `-UITesting` without live redirects.
+    /// `lookupShow` maps the preview TheTVDB id onto `stub` so Search's resolve
+    /// path works under `-UITesting` without live redirects.
     struct PreviewTVMazeService: TVMazeService {
         let stub: Show
 
@@ -148,13 +152,6 @@
 
         func lookupShow(theTVDBID: Int) async throws -> Show {
             guard theTVDBID == TVDBSearchResult.previewSearchResult.id else {
-                throw TVMazeError.notFound
-            }
-            return stub
-        }
-
-        func lookupShow(imdbID: String) async throws -> Show {
-            guard imdbID == TVDBSearchResult.previewSearchResult.imdbID else {
                 throw TVMazeError.notFound
             }
             return stub

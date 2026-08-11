@@ -12,9 +12,15 @@ import os
 /// untouched aside from whatever partial writes already committed — the bundled
 /// baseline remains a recovery path via `CompatibilityIndexDatabase`.
 ///
-/// Update passes are newest-first and **resumable**: when the per-opportunity
-/// fetch cap is hit, a cursor is stored and `lastSuccessfulSyncAt` is left
-/// unchanged so the next foreground opportunity continues the remaining work.
+/// Update passes are newest-first and **resumable**. Each sync captures a fixed
+/// upper watermark (`syncHorizonAt`) when it begins. Only updates at or before
+/// that horizon are drained; when the backlog finishes, `lastSuccessfulSyncAt`
+/// is set to the horizon (not “now”), so changes that arrived mid-drain are
+/// picked up on the next sync instead of being skipped forever.
+///
+/// The updates lower watermark is `lastSuccessfulSyncAt ?? generatedAt`, so a
+/// freshly installed bundled database does not re-fetch a week of mappings that
+/// were already baked into the snapshot.
 actor CompatibilityIndexRefreshService {
     /// Roughly weekly refreshes are enough for search filtering freshness.
     static let refreshInterval: TimeInterval = 7 * 24 * 60 * 60
@@ -56,12 +62,18 @@ actor CompatibilityIndexRefreshService {
 
         do {
             let metadata = try await database.metadata()
-            let hasResumeCursor = metadata.updatesResumeCursor != nil
-            if !hasResumeCursor,
+            if !metadata.hasInProgressSync,
                 let lastSync = metadata.lastSuccessfulSyncAt,
                 now().timeIntervalSince(lastSync) < Self.refreshInterval
             {
                 return
+            }
+
+            // Freeze the upper bound for this sync. Mid-drain TVMaze changes after
+            // this instant are deferred until the next sync cycle.
+            let horizonAt = metadata.syncHorizonAt ?? now()
+            if metadata.syncHorizonAt == nil {
+                try await database.setSyncHorizonAt(horizonAt)
             }
 
             AppDiagnosticsLogger.logger(for: .network)
@@ -69,13 +81,20 @@ actor CompatibilityIndexRefreshService {
             AppDiagnosticsLogger.breadcrumb("compatibility_index_refresh")
 
             try await refreshTail(fromHighestID: metadata.highestTVMazeID)
+            // Prefer the last completed sync; on first launch fall back to the
+            // bundled snapshot's generation time so we only pull genuinely new
+            // changes instead of rechecking a default week of already-mapped shows.
+            let updatesWatermark = metadata.lastSuccessfulSyncAt ?? metadata.generatedAt
             let updatesFinished = try await refreshUpdatedShows(
-                since: metadata.lastSuccessfulSyncAt,
+                since: updatesWatermark,
+                horizonAt: horizonAt,
                 resumeCursor: metadata.updatesResumeCursor
             )
             if updatesFinished {
-                try await database.clearUpdatesResumeCursor()
-                try await database.setLastSuccessfulSyncAt(now())
+                // Commit the horizon, not wall-clock "now", so anything newer than
+                // the horizon remains eligible for the next sync window.
+                try await database.setLastSuccessfulSyncAt(horizonAt)
+                try await database.clearInProgressSyncState()
                 AppDiagnosticsLogger.logger(for: .network)
                     .notice("compatibility_index_refresh_complete")
             } else {
@@ -131,22 +150,20 @@ actor CompatibilityIndexRefreshService {
 
     /// Refreshes mappings for shows TVMaze reports as updated since the last sync.
     ///
-    /// - Returns: `true` when the updates window is fully drained; `false` when
+    /// - Returns: `true` when the horizon window is fully drained; `false` when
     ///   work remains and a resume cursor was persisted.
     private func refreshUpdatedShows(
         since lastSync: Date?,
+        horizonAt: Date,
         resumeCursor: CompatibilityIndexUpdatesResumeCursor?
     ) async throws -> Bool {
-        let period: TVMazeUpdatePeriod
-        if let lastSync {
-            period = TVMazeUpdatePeriod.covering(since: lastSync, at: now())
-        } else {
-            // First on-device sync after install: prefer a bounded window.
-            period = .week
-        }
-
-        let updates = try await tvMaze.updatedShows(since: period)
-        let pending = Self.pendingUpdates(from: updates, resumeCursor: resumeCursor)
+        let updates = try await fetchUpdates(since: lastSync, horizonAt: horizonAt)
+        let pending = Self.pendingUpdates(
+            from: updates,
+            updatedAfter: lastSync,
+            horizonAt: horizonAt,
+            resumeCursor: resumeCursor
+        )
         guard !pending.isEmpty else { return true }
 
         var fetched = 0
@@ -179,14 +196,49 @@ actor CompatibilityIndexRefreshService {
         return true
     }
 
+    /// Loads the TVMaze update map for this sync window.
+    ///
+    /// When the last sync is older than TVMaze's `since=month` filter can cover,
+    /// fetches the unfiltered map and relies on local watermark filtering.
+    private func fetchUpdates(
+        since lastSync: Date?,
+        horizonAt: Date
+    ) async throws -> [Int: Date] {
+        if let lastSync,
+            TVMazeUpdatePeriod.requiresUnfilteredUpdateMap(since: lastSync, at: horizonAt)
+        {
+            AppDiagnosticsLogger.breadcrumb("compatibility_index_updates_unfiltered")
+            return try await tvMaze.allUpdatedShows()
+        }
+
+        let period: TVMazeUpdatePeriod
+        if let lastSync {
+            // Cover from the updates watermark through the fixed horizon, not
+            // wall-clock now — keeps the window stable across resume passes.
+            period = TVMazeUpdatePeriod.covering(since: lastSync, at: horizonAt)
+        } else {
+            // No sync history and no bundled generation timestamp: bounded fallback.
+            period = .week
+        }
+        return try await tvMaze.updatedShows(since: period)
+    }
+
     /// Newest-first ordering by update timestamp, then show id for stability.
-    /// When resuming, keeps only entries strictly older than the stored cursor.
+    ///
+    /// Keeps updates strictly after `updatedAfter` (prior sync watermark) and at
+    /// or before `horizonAt`. When resuming, also keeps only entries strictly
+    /// older than the stored cursor.
     nonisolated static func pendingUpdates(
         from updates: [Int: Date],
+        updatedAfter: Date?,
+        horizonAt: Date,
         resumeCursor: CompatibilityIndexUpdatesResumeCursor?
     ) -> [CompatibilityIndexUpdatesResumeCursor] {
-        let items = updates.map {
-            CompatibilityIndexUpdatesResumeCursor(updatedAt: $0.value, showID: $0.key)
+        let items = updates.compactMap {
+            showID, updatedAt -> CompatibilityIndexUpdatesResumeCursor? in
+            if let updatedAfter, updatedAt <= updatedAfter { return nil }
+            guard updatedAt <= horizonAt else { return nil }
+            return CompatibilityIndexUpdatesResumeCursor(updatedAt: updatedAt, showID: showID)
         }
         let filtered: [CompatibilityIndexUpdatesResumeCursor]
         if let resumeCursor {

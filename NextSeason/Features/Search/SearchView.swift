@@ -227,8 +227,33 @@ struct SearchView: View {
         case .results(let page):
             List {
                 Section {
-                    ForEach(page.items) { result in
-                        searchResultRow(result)
+                    if page.items.isEmpty {
+                        ContentUnavailableView {
+                            Label {
+                                Text("Still Looking…")
+                                    .appAccentText()
+                            } icon: {
+                                Image(systemName: "magnifyingglass")
+                                    .appPrimaryText()
+                            }
+                        } description: {
+                            Text(FirstRunCopy.searchMoreAvailableDescription)
+                                .appSecondaryText()
+                        }
+                        .listRowInsets(
+                            EdgeInsets(
+                                top: AppSpacing.section,
+                                leading: AppSpacing.screen,
+                                bottom: AppSpacing.section,
+                                trailing: AppSpacing.screen
+                            )
+                        )
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    } else {
+                        ForEach(page.items) { result in
+                            searchResultRow(result)
+                        }
                     }
                     if page.hasMore {
                         SearchLoadMoreFooterView(isLoading: viewModel.isLoadingMore) {
@@ -255,7 +280,7 @@ struct SearchView: View {
                 isScrollDismissingKeyboard: $isScrollDismissingKeyboard,
                 dismissSearch: dismissSearch
             )
-            .searchResultsHintInset(isVisible: !searchResultsHintDismissed)
+            .searchResultsHintInset(isVisible: !page.items.isEmpty && !searchResultsHintDismissed)
         case .empty:
             ContentUnavailableView {
                 Label {
@@ -311,6 +336,9 @@ struct SearchView: View {
             .showDetailLinkAccessibility()
             .accessibilityIdentifier("\(AccessibilityID.Search.result).\(result.id)")
             .disabled(isResolving)
+            // Match watchlist rows: expand the label so the track control stays
+            // trailing instead of hugging the title/subtitle width.
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             ShowRowTrackButton(
                 showID: result.id,

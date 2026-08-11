@@ -17,6 +17,7 @@ actor InMemoryCompatibilityIndex: TVDBTVMazeCompatibilityIndex {
             generatedAt: nil,
             highestTVMazeID: 0,
             lastSuccessfulSyncAt: nil,
+            syncHorizonAt: nil,
             updatesResumeCursor: nil
         )
     ) {

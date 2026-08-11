@@ -216,6 +216,7 @@ struct ShowRowTrackButton: View {
             ShowRowLabel(tracked: TrackedShow(from: .preview))
             HStack {
                 ShowRowLabel(show: .preview)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 ShowRowTrackButton(
                     showID: Show.preview.id,
                     showName: Show.preview.name,
