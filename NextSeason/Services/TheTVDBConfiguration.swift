@@ -18,10 +18,6 @@ nonisolated enum TheTVDBConfiguration {
     /// Public site used for attribution links (not the API host).
     static let websiteURL = URL(string: "https://www.thetvdb.com")!
 
-    /// Project API key for `POST /login`. The JWT returned by login is cached
-    /// on `TheTVDBClient`; this key is never sent as a Bearer token.
-    static let apiKey = [REDACTED TVDB API KEY]
-
     /// Results per search page. TheTVDB paginates with `limit` + `offset`
     /// (not a 1-based page index).
     static let pageSize = 10

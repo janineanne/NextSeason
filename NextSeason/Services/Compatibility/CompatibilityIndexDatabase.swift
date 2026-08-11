@@ -107,6 +107,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
             generatedAt: Self.parseDate(metaValue("generated_at")),
             highestTVMazeID: Int(metaValue("highest_tvmaze_id") ?? "") ?? 0,
             lastSuccessfulSyncAt: Self.parseDate(metaValue("last_successful_sync_at")),
+            syncHorizonAt: Self.parseDate(metaValue("sync_horizon_at")),
             updatesResumeCursor: updatesResumeCursor()
         )
     }
@@ -119,6 +120,18 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         try setMeta(key: "last_successful_sync_at", value: Self.formatDate(date))
     }
 
+    func setGeneratedAt(_ date: Date) throws {
+        try setMeta(key: "generated_at", value: Self.formatDate(date))
+    }
+
+    func setSyncHorizonAt(_ date: Date) throws {
+        try setMeta(key: "sync_horizon_at", value: Self.formatDate(date))
+    }
+
+    func clearSyncHorizonAt() throws {
+        try setMeta(key: "sync_horizon_at", value: "")
+    }
+
     func setUpdatesResumeCursor(_ cursor: CompatibilityIndexUpdatesResumeCursor) throws {
         try setMeta(key: "updates_resume_at", value: Self.formatDate(cursor.updatedAt))
         try setMeta(key: "updates_resume_show_id", value: String(cursor.showID))
@@ -127,6 +140,12 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
     func clearUpdatesResumeCursor() throws {
         try setMeta(key: "updates_resume_at", value: "")
         try setMeta(key: "updates_resume_show_id", value: "")
+    }
+
+    /// Clears in-progress sync markers after a horizon is successfully committed.
+    func clearInProgressSyncState() throws {
+        try clearUpdatesResumeCursor()
+        try clearSyncHorizonAt()
     }
 
     private func updatesResumeCursor() -> CompatibilityIndexUpdatesResumeCursor? {

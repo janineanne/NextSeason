@@ -56,10 +56,6 @@ struct ShowDetailViewModelTests {
             throw TVMazeError.notFound
         }
 
-        func lookupShow(imdbID: String) async throws -> Show {
-            throw TVMazeError.notFound
-        }
-
         func show(id: Int, bypassCache: Bool) async throws -> Show {
             if let showToReturn { return showToReturn }
             Issue.record("Unexpected show fetch in watchlist-toggle tests")

@@ -42,11 +42,9 @@ nonisolated struct TheTVDBLoginTokenData: Decodable, Sendable {
 }
 
 /// Mirrors a TheTVDB `/search` hit. Only fields NextSeason uses are decoded;
-/// unknown keys (translations, overviews, etc.) are ignored.
+/// unknown keys (translations, overviews, remote ids, etc.) are ignored.
 ///
-/// `tvdb_id` arrives as a string in JSON even though it is numeric. Remote ids
-/// carry IMDb / TMDB / etc. for TVMaze lookup fallback when TheTVDB → TVMaze
-/// id mapping is missing.
+/// `tvdb_id` arrives as a string in JSON even though it is numeric.
 nonisolated struct TheTVDBSearchResultData: Codable, Sendable {
     let tvdbID: String?
     let name: String?
@@ -55,24 +53,10 @@ nonisolated struct TheTVDBSearchResultData: Codable, Sendable {
     let status: String?
     let imageURL: String?
     let thumbnail: String?
-    let remoteIDs: [TheTVDBRemoteIDData]?
 
     enum CodingKeys: String, CodingKey {
         case tvdbID = "tvdb_id"
         case name, year, network, status, thumbnail
         case imageURL = "image_url"
-        case remoteIDs = "remote_ids"
-    }
-}
-
-/// External identifier attached to a TheTVDB search hit (`remote_ids` array).
-nonisolated struct TheTVDBRemoteIDData: Codable, Sendable {
-    let id: String?
-    /// e.g. `"IMDB"`, `"TheMovieDB.com"` — matched case-insensitively in mapping.
-    let sourceName: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case sourceName
     }
 }

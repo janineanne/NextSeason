@@ -21,10 +21,6 @@ struct AppNavigationCoordinatorTests {
             throw TVMazeError.notFound
         }
 
-        func lookupShow(imdbID: String) async throws -> Show {
-            throw TVMazeError.notFound
-        }
-
         func show(id: Int, bypassCache: Bool) async throws -> Show {
             fetchedIDs.append(id)
             guard let show = shows[id] else { throw TVMazeError.notFound }

@@ -16,20 +16,22 @@ nonisolated protocol TVMazeService: Sendable {
     /// Resolves an external TheTVDB series id to the matching TVMaze show.
     ///
     /// Bridge used after guest search: Search lists TheTVDB hits, then this
-    /// maps the selected id into the TVMaze-keyed detail / watchlist world.
+    /// maps the selected id into the TVMaze-keyed detail / watchlist world when
+    /// a local compatibility mapping is missing or stale.
     func lookupShow(theTVDBID: Int) async throws -> Show
-
-    /// Resolves an IMDb id (e.g. `tt0944947`) to the matching TVMaze show.
-    ///
-    /// Fallback when TVMaze has not linked a TheTVDB id but the search hit
-    /// still carries an IMDb remote id.
-    func lookupShow(imdbID: String) async throws -> Show
 
     /// Full show info including embedded seasons and next episode.
     func show(id: Int, bypassCache: Bool) async throws -> Show
 
-    /// Show IDs updated since the given window (`GET /updates/shows`).
+    /// Show IDs updated since the given window (`GET /updates/shows?since=`).
     func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date]
+
+    /// Full show-update map (`GET /updates/shows` with no `since` filter).
+    ///
+    /// Large payload. Used when the last successful sync is older than TVMaze's
+    /// coarsest `since=month` window so long-absent installs can still see
+    /// external-ID changes by filtering locally against a stored watermark.
+    func allUpdatedShows() async throws -> [Int: Date]
 
     /// One page of the TVMaze show index (`GET /shows?page=`).
     ///
@@ -42,7 +44,11 @@ nonisolated protocol TVMazeService: Sendable {
 }
 
 extension TVMazeService {
-    /// Default stubs so existing test doubles need not implement index APIs.
+    /// Default stubs so existing test doubles need not implement index / full-map APIs.
+    func allUpdatedShows() async throws -> [Int: Date] {
+        [:]
+    }
+
     func showsIndex(page: Int) async throws -> [ShowIndexEntryData] {
         throw TVMazeError.notFound
     }
@@ -56,13 +62,19 @@ extension TVMazeService {
 nonisolated enum TVMazeUpdatePeriod: String, Sendable {
     case day, week, month
 
+    /// Approximate length of TVMaze's `since=month` window.
+    static let monthWindow: TimeInterval = 30 * 86_400
+
     /// Smallest TVMaze update window that still covers every change since
     /// `oldestCheck`. Background refresh is best-effort and may be delayed, so
     /// the window must grow with the polling gap — otherwise a show that changed
     /// just outside a too-small window would be silently skipped.
     ///
     /// Thresholds: ≤1 day → `.day`, ≤1 week → `.week`, otherwise `.month`
-    /// (TVMaze's coarsest supported `since` value).
+    /// (TVMaze's coarsest supported `since` value). Gaps older than
+    /// `monthWindow` cannot be covered by `since=` alone — callers that must
+    /// not miss older changes should use the unfiltered updates endpoint and
+    /// filter locally (see `requiresUnfilteredUpdateMap`).
     static func covering(since oldestCheck: Date, at: Date = .now) -> TVMazeUpdatePeriod {
         let elapsed = at.timeIntervalSince(oldestCheck)
         let oneDay: TimeInterval = 86_400
@@ -71,6 +83,11 @@ nonisolated enum TVMazeUpdatePeriod: String, Sendable {
         if elapsed <= oneDay { return .day }
         if elapsed <= oneWeek { return .week }
         return .month
+    }
+
+    /// `true` when `since=month` may omit changes that happened after `oldestCheck`.
+    static func requiresUnfilteredUpdateMap(since oldestCheck: Date, at: Date = .now) -> Bool {
+        at.timeIntervalSince(oldestCheck) > monthWindow
     }
 }
 

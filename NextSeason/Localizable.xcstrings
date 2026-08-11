@@ -1125,6 +1125,9 @@
         }
       }
     },
+    "No trackable shows in these results yet. Load more to keep looking." : {
+
+    },
     "No Tracked Shows" : {
       "localizations" : {
         "en" : {
@@ -1762,6 +1765,9 @@
           }
         }
       }
+    },
+    "Still Looking…" : {
+
     },
     "Stop tracking %@" : {
       "localizations" : {
