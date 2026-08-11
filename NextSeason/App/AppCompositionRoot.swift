@@ -19,12 +19,15 @@ struct AppCompositionRoot {
     let betaRefreshDiagnostics: BetaRefreshDiagnostics
     let tvMaze: any TVMazeService
     let theTVDB: any TheTVDBService
+    let compatibilityIndex: any TVDBTVMazeCompatibilityIndex
+    let compatibilityIndexRefresh: CompatibilityIndexRefreshService?
 
     init() throws {
         analyticsService = AnalyticsService()
         notificationService = NotificationService(analytics: analyticsService)
         betaRefreshDiagnostics = BetaRefreshDiagnostics()
-        tvMaze = TVMazeClient()
+        let liveTVMaze = TVMazeClient()
+        tvMaze = liveTVMaze
         theTVDB = TheTVDBClient()
 
         let repository: any WatchlistRepository
@@ -37,10 +40,37 @@ struct AppCompositionRoot {
                 configurations: configuration
             )
             repository = InMemoryWatchlistRepository()
+            // Severance preview ids used by UI tests / PreviewTheTVDBService.
+            compatibilityIndex = InMemoryCompatibilityIndex(map: [371980: 44933])
+            compatibilityIndexRefresh = nil
         } else {
             let container = try ModelContainer(for: TrackedShowEntity.self)
             modelContainer = container
             repository = SwiftDataWatchlistRepository(context: ModelContext(container))
+            let writableURL = try CompatibilityIndexDatabase.defaultWritableURL()
+            let bundledURL = CompatibilityIndexDatabase.bundledDatabaseURL()
+            let database: CompatibilityIndexDatabase
+            do {
+                database = try CompatibilityIndexDatabase(
+                    fileURL: writableURL,
+                    bundledURL: bundledURL
+                )
+            } catch {
+                try CompatibilityIndexDatabase.prepareWritableDatabase(
+                    at: writableURL,
+                    bundledURL: bundledURL,
+                    forceReplace: true
+                )
+                database = try CompatibilityIndexDatabase(
+                    fileURL: writableURL,
+                    bundledURL: bundledURL
+                )
+            }
+            compatibilityIndex = LocalCompatibilityIndex(database: database)
+            compatibilityIndexRefresh = CompatibilityIndexRefreshService(
+                database: database,
+                tvMaze: liveTVMaze
+            )
         }
 
         watchlistRepository = repository
@@ -71,6 +101,11 @@ struct AppCompositionRoot {
 
         configureBackgroundRefresh()
         analyticsService.track(.appLaunched)
+    }
+
+    /// Opportunistic compatibility-index refresh; never blocks launch or Search.
+    func refreshCompatibilityIndexIfNeeded() async {
+        await compatibilityIndexRefresh?.refreshIfNeeded()
     }
 
     // registers the ~12h background watchlist refresh task (aka background refresh)

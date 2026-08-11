@@ -148,6 +148,28 @@ actor TVMazeClient: TVMazeService {
         return result
     }
 
+    /// `GET /shows?page=` — paginated catalog used to build/refresh the
+    /// TheTVDB↔TVMaze compatibility index. Index pages are cached up to 24h by
+    /// TVMaze; we still send a normal UA and honor 429 back-off via `perform`.
+    func showsIndex(page: Int) async throws -> [ShowIndexEntryData] {
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("shows_index_start page=\(page, privacy: .public)")
+        AppDiagnosticsLogger.breadcrumb("network_shows_index:\(page)")
+        var components = URLComponents(
+            url: baseURL.appending(path: "shows"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "page", value: String(page))]
+        return try await get(components)
+    }
+
+    /// `GET /shows/:id` decoded as id + externals for compatibility refresh.
+    func showIndexEntry(id: Int) async throws -> ShowIndexEntryData {
+        AppDiagnosticsLogger.logger(for: .network)
+            .notice("show_index_entry_start show_id=\(id, privacy: .public)")
+        var components = URLComponents(
+            url: baseURL.appending(path: "shows/\(id)"), resolvingAgainstBaseURL: false)
+        return try await get(components, bypassCache: true)
+    }
+
     /// Builds the request with TVMaze’s preferred User-Agent and optional cache bypass.
     private func get<T: Decodable>(_ components: URLComponents?, bypassCache: Bool = false)
         async throws -> T

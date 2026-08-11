@@ -5,14 +5,18 @@
 
 import Foundation
 
-/// Debounced TheTVDB title search for `SearchView`, with TVMaze resolution on select.
+/// Debounced TheTVDB title search for `SearchView`, with local compatibility
+/// filtering and TVMaze resolution on select.
 ///
 /// Intended to be driven by `.task(id: query)`: each keystroke cancels the prior
 /// task, and `search()` sleeps for `debounce` before hitting the network — so
 /// rapid typing only fetches the final query.
 ///
 /// Provider split:
-/// - **Search list** — TheTVDB hits (`TVDBSearchResult`), paginated.
+/// - **Search list** — TheTVDB hits (`TVDBSearchResult`), paginated, then filtered
+///   through the local TVDB↔TVMaze compatibility index (not a TVMaze network
+///   lookup per hit). Pages are advanced until a reasonable actionable batch is
+///   collected or TheTVDB results are exhausted.
 /// - **Open / track** — resolve to a TVMaze `Show` first, then use the existing
 ///   detail and watchlist flows unchanged (those still key off TVMaze ids).
 ///
@@ -23,7 +27,7 @@ import Foundation
 @Observable
 @MainActor
 final class SearchViewModel {
-    /// Visible page of TheTVDB hits plus whether "Load more" should appear.
+    /// Visible page of actionable TheTVDB hits plus whether "Load more" should appear.
     struct ResultsPage: Equatable {
         var items: [TVDBSearchResult]
         var hasMore: Bool
@@ -37,6 +41,11 @@ final class SearchViewModel {
         case failed(String)
     }
 
+    /// Soft target for how many actionable rows to gather before stopping page fill.
+    static let actionablePageTarget = TheTVDBConfiguration.pageSize
+    /// Cap on TheTVDB pages fetched per search / load-more burst.
+    static let maxTheTVDBPagesPerFill = 6
+
     private(set) var state: State = .idle
     var query: String = ""
     /// TheTVDB series ids currently resolving to TVMaze (row / navigation lock).
@@ -48,6 +57,7 @@ final class SearchViewModel {
 
     private let searchService: any TheTVDBService
     private let tvMaze: any TVMazeService
+    private let compatibilityIndex: any TVDBTVMazeCompatibilityIndex
     private let analytics: any AnalyticsTracking
     private let debounce: Duration
     /// Trimmed query that produced the current `.results` or `.empty` state; `nil`
@@ -55,18 +65,22 @@ final class SearchViewModel {
     private var displayedQuery: String?
     /// Next TheTVDB `offset` for the active `displayedQuery` (sum of fetched counts).
     private var nextOffset = 0
-    /// Cache of TheTVDB series id → resolved TVMaze show (lookup payload).
-    /// Used for open/track and to light search-row stars after prefetch.
+    /// Cache of TheTVDB series id → TVMaze show id from the local index (and
+    /// narrow IMDb fallback). Used for search-row stars without network prefetch.
+    private var resolvedTVMazeIDsByTVDBID: [Int: Int] = [:]
+    /// Cache of full TVMaze shows after an explicit open/track resolve.
     private var resolvedShowsByTVDBID: [Int: Show] = [:]
 
     init(
         searchService: any TheTVDBService,
         tvMaze: any TVMazeService,
+        compatibilityIndex: any TVDBTVMazeCompatibilityIndex,
         analytics: any AnalyticsTracking,
         debounce: Duration = .milliseconds(300)
     ) {
         self.searchService = searchService
         self.tvMaze = tvMaze
+        self.compatibilityIndex = compatibilityIndex
         self.analytics = analytics
         self.debounce = debounce
     }
@@ -98,18 +112,25 @@ final class SearchViewModel {
         state = .loading
         isLoadingMore = false
         nextOffset = 0
+        resolvedTVMazeIDsByTVDBID.removeAll(keepingCapacity: true)
+        resolvedShowsByTVDBID.removeAll(keepingCapacity: true)
         let searchStarted = Date.now
         AppDiagnosticsLogger.breadcrumb("search_viewmodel_start")
         do {
-            let page = try await searchService.searchSeries(matching: trimmed, offset: 0)
+            let fill = try await collectActionableResults(
+                matching: trimmed,
+                startingOffset: 0,
+                existingIDs: [],
+                targetCount: Self.actionablePageTarget
+            )
             guard !Task.isCancelled else {
                 AppDiagnosticsLogger.logTaskCancel("search_viewmodel")
                 return
             }
             let durationMs = Int(Date.now.timeIntervalSince(searchStarted) * 1000)
             displayedQuery = trimmed
-            nextOffset = page.results.count
-            if page.results.isEmpty {
+            nextOffset = fill.nextOffset
+            if fill.items.isEmpty {
                 state = .empty
                 analytics.track(
                     .searchPerformed(
@@ -120,17 +141,14 @@ final class SearchViewModel {
                 )
                 analytics.track(.emptySearchResultsShown)
             } else {
-                // Publish results before prefetch so the list is not blocked on
-                // TVMaze lookups; stars fill in as mappings arrive.
-                state = .results(ResultsPage(items: page.results, hasMore: page.hasMore))
+                state = .results(ResultsPage(items: fill.items, hasMore: fill.hasMore))
                 analytics.track(
                     .searchPerformed(
                         queryLength: trimmed.count,
-                        resultCount: page.results.count,
+                        resultCount: fill.items.count,
                         durationMs: max(durationMs, 0)
                     )
                 )
-                await prefetchResolutions(for: page.results)
             }
         } catch is CancellationError {
             AppDiagnosticsLogger.logTaskCancel("search_viewmodel")
@@ -155,10 +173,10 @@ final class SearchViewModel {
         }
     }
 
-    /// Appends the next TheTVDB page for the current query.
+    /// Appends another batch of actionable TheTVDB hits for the current query.
     ///
-    /// Dedupes by TheTVDB id in case a later page repeats a hit, then
-    /// prefetches TVMaze mappings for the newly appended rows only.
+    /// Continues requesting TheTVDB pages (with a safety cap) until enough
+    /// locally mappable results are gathered or TheTVDB has no more pages.
     func loadMore() async {
         guard case .results(let page) = state, page.hasMore, !isLoadingMore else { return }
         let trimmed = displayedQuery ?? query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -168,23 +186,22 @@ final class SearchViewModel {
         defer { isLoadingMore = false }
 
         do {
-            let nextPage = try await searchService.searchSeries(
+            let existingIDs = Set(page.items.map(\.id))
+            let fill = try await collectActionableResults(
                 matching: trimmed,
-                offset: nextOffset
+                startingOffset: nextOffset,
+                existingIDs: existingIDs,
+                targetCount: Self.actionablePageTarget
             )
             guard !Task.isCancelled else { return }
             guard case .results(let current) = state else { return }
 
             var merged = current.items
-            let existingIDs = Set(merged.map(\.id))
-            for result in nextPage.results where !existingIDs.contains(result.id) {
+            for result in fill.items where !existingIDs.contains(result.id) {
                 merged.append(result)
             }
-            // Advance by the raw fetch count (including any skipped dupes) so
-            // the next offset stays aligned with TheTVDB's pagination cursor.
-            nextOffset += nextPage.results.count
-            state = .results(ResultsPage(items: merged, hasMore: nextPage.hasMore))
-            await prefetchResolutions(for: nextPage.results)
+            nextOffset = fill.nextOffset
+            state = .results(ResultsPage(items: merged, hasMore: fill.hasMore))
         } catch is CancellationError {
             return
         } catch {
@@ -195,9 +212,8 @@ final class SearchViewModel {
 
     /// Resolves a TheTVDB hit to the canonical TVMaze `Show` (with seasons when possible).
     ///
-    /// Uses the in-memory cache when present, otherwise looks up via TheTVDB id
-    /// (IMDb fallback). Lookup payloads omit season embeds, so we fetch full
-    /// detail when seasons are empty before returning to the caller.
+    /// Uses the in-memory show cache when present. Otherwise prefers the local
+    /// compatibility id (`show(id:)`), then TheTVDB lookup, then IMDb fallback.
     func resolveShow(for result: TVDBSearchResult) async throws -> Show {
         if let cached = resolvedShowsByTVDBID[result.id] {
             return try await enrichedShow(from: cached)
@@ -208,12 +224,13 @@ final class SearchViewModel {
 
         let lookedUp = try await lookupTVMazeShow(for: result)
         resolvedShowsByTVDBID[result.id] = lookedUp
+        resolvedTVMazeIDsByTVDBID[result.id] = lookedUp.id
         return try await enrichedShow(from: lookedUp)
     }
 
-    /// TVMaze show id previously resolved for a TheTVDB hit, if any.
+    /// TVMaze show id known for a TheTVDB hit (local index / prior resolve).
     func resolvedTVMazeID(for resultID: Int) -> Int? {
-        resolvedShowsByTVDBID[resultID]?.id
+        resolvedTVMazeIDsByTVDBID[resultID] ?? resolvedShowsByTVDBID[resultID]?.id
     }
 
     func clearResolveError() {
@@ -225,60 +242,115 @@ final class SearchViewModel {
         resolveErrorMessage = message
     }
 
-    private func lookupTVMazeShow(for result: TVDBSearchResult) async throws -> Show {
-        try await Self.lookupTVMazeShow(result, tvMaze: tvMaze)
+    // MARK: - Compatibility filtering
+
+    private struct ActionableFill {
+        var items: [TVDBSearchResult]
+        var nextOffset: Int
+        var hasMore: Bool
     }
 
-    /// Lookup payloads omit embeds; fetch full detail when seasons are missing
-    /// so tracking / detail have next-season inputs immediately.
-    private func enrichedShow(from show: Show) async throws -> Show {
-        if !show.seasons.isEmpty { return show }
-        return try await tvMaze.show(id: show.id)
-    }
+    /// Fetches TheTVDB pages and keeps only hits that map via the local index
+    /// (with a narrow IMDb network fallback for unmapped hits that carry IMDb).
+    private func collectActionableResults(
+        matching query: String,
+        startingOffset: Int,
+        existingIDs: Set<Int>,
+        targetCount: Int
+    ) async throws -> ActionableFill {
+        var collected: [TVDBSearchResult] = []
+        var seen = existingIDs
+        var offset = startingOffset
+        var pagesFetched = 0
+        var tvdbHasMore = true
 
-    /// Best-effort TheTVDB → TVMaze id mapping so search-row stars can reflect
-    /// the watchlist without waiting for an explicit open/track.
-    ///
-    /// Failures are swallowed per-hit: a missing TVMaze counterpart should not
-    /// block the rest of the page (the user still sees the TheTVDB row and gets
-    /// a clear error if they try to open that one).
-    private func prefetchResolutions(for results: [TVDBSearchResult]) async {
-        let pending = results.filter { resolvedShowsByTVDBID[$0.id] == nil }
-        guard !pending.isEmpty else { return }
+        while collected.count < targetCount, tvdbHasMore, pagesFetched < Self.maxTheTVDBPagesPerFill
+        {
+            try Task.checkCancellation()
+            let page = try await searchService.searchSeries(matching: query, offset: offset)
+            pagesFetched += 1
+            offset += page.results.count
+            tvdbHasMore = page.hasMore
 
-        await withTaskGroup(of: (Int, Show)?.self) { group in
-            for result in pending {
-                group.addTask { [tvMaze] in
-                    do {
-                        let show = try await Self.lookupTVMazeShow(result, tvMaze: tvMaze)
-                        return (result.id, show)
-                    } catch {
-                        return nil
-                    }
-                }
+            if page.results.isEmpty {
+                tvdbHasMore = false
+                break
             }
-            for await mapped in group {
-                guard let (tvdbID, show) = mapped else { continue }
-                resolvedShowsByTVDBID[tvdbID] = show
+
+            let actionable = await filterActionable(page.results)
+            for result in actionable where !seen.contains(result.id) {
+                seen.insert(result.id)
+                collected.append(result)
+                if collected.count >= targetCount { break }
+            }
+
+            // Stop when TheTVDB reports exhaustion even if under target — do not
+            // keep requesting solely to chase an arbitrary count.
+            if !page.hasMore { break }
+        }
+
+        return ActionableFill(items: collected, nextOffset: offset, hasMore: tvdbHasMore)
+    }
+
+    private func filterActionable(_ results: [TVDBSearchResult]) async -> [TVDBSearchResult] {
+        var actionable: [TVDBSearchResult] = []
+        actionable.reserveCapacity(results.count)
+
+        for result in results {
+            if let mappedID = await compatibilityIndex.tvMazeID(forTVDBID: result.id) {
+                resolvedTVMazeIDsByTVDBID[result.id] = mappedID
+                actionable.append(result)
+                continue
+            }
+
+            // Narrow fallback: only unmapped hits that already carry an IMDb id.
+            // Avoids the old per-result TheTVDB lookup storm while reducing false
+            // negatives when TVMaze lacks `externals.thetvdb` but has IMDb.
+            guard let imdbID = result.imdbID else { continue }
+            do {
+                let show = try await tvMaze.lookupShow(imdbID: imdbID)
+                resolvedTVMazeIDsByTVDBID[result.id] = show.id
+                resolvedShowsByTVDBID[result.id] = show
+                actionable.append(result)
+            } catch {
+                continue
             }
         }
+
+        return actionable
     }
 
-    /// Shared TheTVDB → TVMaze lookup used by resolve and prefetch.
-    /// `nonisolated` so task-group workers can call it without hopping to MainActor.
-    private nonisolated static func lookupTVMazeShow(
-        _ result: TVDBSearchResult,
-        tvMaze: any TVMazeService
-    ) async throws -> Show {
+    private func lookupTVMazeShow(for result: TVDBSearchResult) async throws -> Show {
+        let mappedID: Int?
+        if let cached = resolvedTVMazeIDsByTVDBID[result.id] {
+            mappedID = cached
+        } else {
+            mappedID = await compatibilityIndex.tvMazeID(forTVDBID: result.id)
+        }
+
+        if let mappedID {
+            do {
+                return try await tvMaze.show(id: mappedID)
+            } catch TVMazeError.notFound {
+                // Mapping may be stale; fall through to live lookups.
+            }
+        }
+
         do {
             return try await tvMaze.lookupShow(theTVDBID: result.id)
         } catch TVMazeError.notFound {
-            // Some catalog gaps still have an IMDb id on the TheTVDB hit.
             if let imdbID = result.imdbID {
                 return try await tvMaze.lookupShow(imdbID: imdbID)
             }
             throw TVMazeError.notFound
         }
+    }
+
+    /// Lookup / index payloads may omit embeds; fetch full detail when seasons
+    /// are missing so tracking / detail have next-season inputs immediately.
+    private func enrichedShow(from show: Show) async throws -> Show {
+        if !show.seasons.isEmpty { return show }
+        return try await tvMaze.show(id: show.id)
     }
 
     private var isShowingSearchOutcome: Bool {

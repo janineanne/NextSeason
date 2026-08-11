@@ -28,7 +28,10 @@ You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and relat
 
 - TheTVDB API — guest search only (paginated series search)
 - TVMaze API — canonical show/season provider for detail, watchlist, and refresh
-  (resolve TheTVDB hits to TVMaze before entering those flows)
+ (resolve TheTVDB hits to TVMaze before entering those flows)
+- Bundled TVDB↔TVMaze compatibility SQLite index — offline Search filtering
+ (regenerate with `Scripts/generate-tvdb-tvmaze-compatibility-db.py` before release;
+ see `NextSeason/Resources/Compatibility/ATTRIBUTION.md`)
 
 ## Coding Style
 

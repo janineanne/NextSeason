@@ -158,6 +158,30 @@ Normally invoked automatically by `run-profile-flows-uninstrumented.sh`.
 
 ---
 
+## Compatibility index
+
+### `generate-tvdb-tvmaze-compatibility-db.py`
+
+Walks TVMaze’s paginated show index and regenerates the bundled
+`NextSeason/Resources/Compatibility/tvdb_tvmaze_compatibility.sqlite` mapping
+(TheTVDB id → TVMaze id).
+
+**When to run:** manually before an App Store release (or whenever the catalog
+should be refreshed in source control). Not hooked into normal Xcode builds.
+Safe to invoke from future CI.
+
+**Usage:**
+
+```bash
+./Scripts/generate-tvdb-tvmaze-compatibility-db.py
+./Scripts/generate-tvdb-tvmaze-compatibility-db.py --output /tmp/out.sqlite
+```
+
+Respects TVMaze rate limits with polite pacing. The generated file is
+TVMaze-derived (CC BY-SA); see `NextSeason/Resources/Compatibility/ATTRIBUTION.md`.
+
+---
+
 ## Diagnostics
 
 ### `verify-crash-reporting.sh`
