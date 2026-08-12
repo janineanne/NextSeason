@@ -69,12 +69,14 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
         self.clock = clock
     }
 
+    /// Which fake payload the next `show(id:)` call will return.
     var currentPhase: Phase {
         lock.lock()
         defer { lock.unlock() }
         return phase
     }
 
+    /// Localized label for the diagnostics UI (baseline vs updated payload).
     var phaseLabel: String {
         switch currentPhase {
         case .baseline:
@@ -84,12 +86,14 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
         }
     }
 
+    /// Returns the machine to the undated baseline payload.
     func reset() {
         lock.lock()
         phase = .baseline
         lock.unlock()
     }
 
+    /// Jumps to a specific phase without waiting for `advanceAfterRun`.
     func forcePhase(_ newPhase: Phase) {
         lock.lock()
         phase = newPhase
@@ -105,10 +109,12 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
 
     func searchShows(matching query: String) async throws -> [Show] { [] }
 
+    /// Diagnostics never exercise TheTVDB resolve; always not found.
     func lookupShow(theTVDBID: Int) async throws -> Show {
         throw TVMazeError.notFound
     }
 
+    /// Only the reserved diagnostics `showID` is served; other ids throw `.notFound`.
     func show(id: Int, bypassCache: Bool) async throws -> Show {
         guard id == showID else {
             throw TVMazeError.notFound

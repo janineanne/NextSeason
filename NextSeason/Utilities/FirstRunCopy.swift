@@ -24,6 +24,7 @@ enum FirstRunCopy {
             "Tap the star to track a show, or tap the row to see its next-season details."
     )
 
+    /// Empty-state guidance when TheTVDB returned no actionable (index-mapped) hits.
     static let searchEmptyDescription = String(
         localized:
             "Try a more specific title — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)."
