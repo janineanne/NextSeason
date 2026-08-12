@@ -11,6 +11,7 @@ nonisolated enum TVMazeError: Error, LocalizedError {
     case invalidResponse
     case network(URLError)
     case decoding(Error)
+    /// Missing show **or** end of the `/shows?page=` index (`showsIndex` past last page).
     case notFound
     case rateLimited
     case server(statusCode: Int)

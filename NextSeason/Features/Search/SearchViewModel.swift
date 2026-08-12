@@ -33,6 +33,7 @@ final class SearchViewModel {
         var hasMore: Bool
     }
 
+    /// Search screen outcome driven by `.task(id: query)` and load-more.
     enum State: Equatable {
         case idle
         case loading
@@ -241,6 +242,7 @@ final class SearchViewModel {
         resolvedTVMazeIDsByTVDBID[resultID] ?? resolvedShowsByTVDBID[resultID]?.id
     }
 
+    /// Clears the resolve / load-more alert message.
     func clearResolveError() {
         resolveErrorMessage = nil
     }
@@ -304,6 +306,8 @@ final class SearchViewModel {
         return ActionableFill(items: collected, nextOffset: offset, hasMore: tvdbHasMore)
     }
 
+    /// Keeps only hits present in the local compatibility index and caches their
+    /// TVMaze ids for row stars / later resolve.
     private func filterActionable(_ results: [TVDBSearchResult]) async -> [TVDBSearchResult] {
         var actionable: [TVDBSearchResult] = []
         actionable.reserveCapacity(results.count)
@@ -319,6 +323,8 @@ final class SearchViewModel {
         return actionable
     }
 
+    /// Resolves a hit to TVMaze: cached/local mapping → `show(id:)`, then
+    /// `lookupShow(theTVDBID:)` if the mapping is missing or the mapped show 404s.
     private func lookupTVMazeShow(for result: TVDBSearchResult) async throws -> Show {
         let mappedID: Int?
         if let cached = resolvedTVMazeIDsByTVDBID[result.id] {

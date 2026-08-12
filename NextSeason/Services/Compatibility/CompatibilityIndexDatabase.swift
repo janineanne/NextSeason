@@ -45,10 +45,13 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         }
     }
 
+    /// Protocol entry point — hops onto the actor, then uses the sync lookup.
     func tvMazeID(forTVDBID id: Int) async -> Int? {
         lookupTVMazeID(forTVDBID: id)
     }
 
+    /// Synchronous TheTVDB → TVMaze lookup for callers already on this actor
+    /// (refresh writes, recovery). Prefer `tvMazeID(forTVDBID:)` from outside.
     func lookupTVMazeID(forTVDBID id: Int) -> Int? {
         guard let db else { return nil }
         let sql = "SELECT tvmaze_id FROM mappings WHERE tvdb_id = ? LIMIT 1;"
@@ -62,6 +65,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         return Int(sqlite3_column_int64(statement, 0))
     }
 
+    /// Inserts or replaces the mapping keyed by TheTVDB id.
     func upsert(tvdbID: Int, tvMazeID: Int) throws {
         try execute(
             "INSERT INTO mappings(tvdb_id, tvmaze_id) VALUES(?, ?) "
@@ -73,6 +77,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         )
     }
 
+    /// Removes a single TheTVDB → TVMaze row.
     func removeMapping(forTVDBID tvdbID: Int) throws {
         try execute(
             "DELETE FROM mappings WHERE tvdb_id = ?;",
@@ -82,6 +87,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         )
     }
 
+    /// Removes every mapping that points at this TVMaze show (0–N TheTVDB ids).
     func removeMappings(forTVMazeID tvMazeID: Int) throws {
         try execute(
             "DELETE FROM mappings WHERE tvmaze_id = ?;",
@@ -91,15 +97,18 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         )
     }
 
+    /// Reconciles one TVMaze show's external TheTVDB id into the index.
+    ///
+    /// A show can change or lose its TheTVDB external; clear prior rows for
+    /// this TVMaze id, then write the current mapping when present.
     func applyMapping(tvMazeID: Int, tvdbID: Int?) throws {
-        // A show can change or lose its TheTVDB external; clear prior rows for
-        // this TVMaze id, then write the current mapping when present.
         try removeMappings(forTVMazeID: tvMazeID)
         if let tvdbID, tvdbID > 0 {
             try upsert(tvdbID: tvdbID, tvMazeID: tvMazeID)
         }
     }
 
+    /// Reads sync / generation meta keys into a single value type.
     func metadata() throws -> CompatibilityIndexMetadata {
         CompatibilityIndexMetadata(
             schemaVersion: Int(metaValue("schema_version") ?? "")
@@ -112,31 +121,38 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         )
     }
 
+    /// High-water mark for the `/shows?page=` tail crawl.
     func setHighestTVMazeID(_ value: Int) throws {
         try setMeta(key: "highest_tvmaze_id", value: String(value))
     }
 
+    /// Commits the upper watermark after a fully drained updates pass.
     func setLastSuccessfulSyncAt(_ date: Date) throws {
         try setMeta(key: "last_successful_sync_at", value: Self.formatDate(date))
     }
 
+    /// Records when the bundled (or fully regenerated) snapshot was produced.
     func setGeneratedAt(_ date: Date) throws {
         try setMeta(key: "generated_at", value: Self.formatDate(date))
     }
 
+    /// Pins the in-progress sync start so mid-flight updates are deferred.
     func setSyncHorizonAt(_ date: Date) throws {
         try setMeta(key: "sync_horizon_at", value: Self.formatDate(date))
     }
 
+    /// Clears the in-progress horizon after a successful commit (or abort cleanup).
     func clearSyncHorizonAt() throws {
         try setMeta(key: "sync_horizon_at", value: "")
     }
 
+    /// Persists where a rate-limited updates drain should resume next opportunity.
     func setUpdatesResumeCursor(_ cursor: CompatibilityIndexUpdatesResumeCursor) throws {
         try setMeta(key: "updates_resume_at", value: Self.formatDate(cursor.updatedAt))
         try setMeta(key: "updates_resume_show_id", value: String(cursor.showID))
     }
 
+    /// Clears a partial updates drain cursor.
     func clearUpdatesResumeCursor() throws {
         try setMeta(key: "updates_resume_at", value: "")
         try setMeta(key: "updates_resume_show_id", value: "")
@@ -183,6 +199,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
 
     // MARK: - File bootstrap
 
+    /// Application Support path for the mutable on-device copy of the index.
     nonisolated static func defaultWritableURL(
         fileManager: FileManager = .default
     ) throws -> URL {
@@ -197,6 +214,8 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         return folder.appendingPathComponent(writableFileName)
     }
 
+    /// Locates the read-only bundled baseline; tries a few resource layouts so
+    /// Xcode folder references and flat copies both resolve.
     nonisolated static func bundledDatabaseURL(
         bundle: Bundle = .main
     ) -> URL? {
@@ -216,6 +235,11 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
             )
     }
 
+    /// Ensures a writable SQLite file exists at `fileURL`.
+    ///
+    /// Reuses an existing readable file, replaces a corrupt one, copies the
+    /// bundled baseline when available, or creates an empty schema otherwise.
+    /// `forceReplace` is the recovery path after open failures.
     nonisolated static func prepareWritableDatabase(
         at fileURL: URL,
         bundledURL: URL?,
@@ -231,6 +255,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
 
         if fileManager.fileExists(atPath: fileURL.path), !forceReplace {
             if isReadableDatabase(at: fileURL) { return }
+            // Unreadable / truncated file — drop it and fall through to copy/create.
             try fileManager.removeItem(at: fileURL)
         }
 
@@ -248,6 +273,8 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         )
     }
 
+    /// Creates a minimal empty index (schema + default meta) when no bundled
+    /// baseline is available — Search simply finds no actionable hits until refresh.
     nonisolated static func createEmptyDatabase(at fileURL: URL) throws {
         var db: OpaquePointer?
         guard sqlite3_open(fileURL.path, &db) == SQLITE_OK, let db else {
@@ -309,6 +336,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
 
     // MARK: - Internals
 
+    /// Ensures `meta` / `mappings` exist and seeds `schema_version` when missing.
     nonisolated private static func migrateIfNeeded(_ db: OpaquePointer) throws {
         try exec(
             db,
@@ -417,8 +445,14 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
     }
 }
 
+/// Failures opening, preparing, or mutating the compatibility SQLite store.
+///
+/// Surfaced to composition-root recovery and tests; Search treats a missing
+/// mapping as “not actionable” rather than throwing these errors.
 enum CompatibilityIndexError: Error, LocalizedError {
+    /// Low-level SQLite prepare / step / exec failure (message from `sqlite3_errmsg`).
     case sqlite(String)
+    /// Bundled baseline resource could not be located in the app bundle.
     case missingBundledDatabase
 
     var errorDescription: String? {

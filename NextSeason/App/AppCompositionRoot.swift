@@ -17,9 +17,13 @@ struct AppCompositionRoot {
     let analyticsService: AnalyticsService
     let notificationService: NotificationService
     let betaRefreshDiagnostics: BetaRefreshDiagnostics
+    /// Canonical show / season provider (detail, watchlist, refresh).
     let tvMaze: any TVMazeService
+    /// Guest search provider (paginated series search only).
     let theTVDB: any TheTVDBService
+    /// Offline TheTVDB → TVMaze filter for Search results.
     let compatibilityIndex: any TVDBTVMazeCompatibilityIndex
+    /// Opportunistic on-device index refresh; `nil` under UI tests.
     let compatibilityIndexRefresh: CompatibilityIndexRefreshService?
 
     init() throws {
@@ -56,6 +60,8 @@ struct AppCompositionRoot {
                     bundledURL: bundledURL
                 )
             } catch {
+                // Corrupt / unreadable writable copy — force-replace from the
+                // bundled baseline (or empty schema) and reopen once.
                 try CompatibilityIndexDatabase.prepareWritableDatabase(
                     at: writableURL,
                     bundledURL: bundledURL,
@@ -87,6 +93,9 @@ struct AppCompositionRoot {
         )
     }
 
+    /// Production-only launch wiring: diagnostics, MetricKit, notification
+    /// routing, background refresh registration, and the launch analytics event.
+    /// Skipped under `-UITesting` so XCUITests stay deterministic.
     func configureNonUITestRuntime() {
         AppDiagnosticsLogger.recordAppLaunch()
         MetricKitDiagnosticsSubscriber.installIfNeeded()
@@ -108,7 +117,8 @@ struct AppCompositionRoot {
         await compatibilityIndexRefresh?.refreshIfNeeded()
     }
 
-    // registers the ~12h background watchlist refresh task (aka background refresh)
+    /// Registers the ~12h background watchlist refresh task and schedules the
+    /// next run. Compatibility-index refresh stays foreground-only.
     private func configureBackgroundRefresh() {
         RefreshScheduler.registerBackgroundTask()
         let refreshServiceForBackground = refreshService

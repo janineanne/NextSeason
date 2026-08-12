@@ -50,6 +50,7 @@ MAX_RETRIES = 5
 
 
 def http_get_json(url: str) -> tuple[int, Any]:
+    """GET `url` and return `(status, decoded JSON or None)` without raising on HTTP errors."""
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
@@ -88,6 +89,7 @@ def fetch_shows_page(page: int) -> list[dict[str, Any]] | None:
 
 
 def create_schema(connection: sqlite3.Connection) -> None:
+    """Creates empty `meta` / `mappings` tables matching the on-device schema."""
     connection.executescript(
         """
         PRAGMA journal_mode = OFF;
@@ -109,6 +111,7 @@ def create_schema(connection: sqlite3.Connection) -> None:
 
 
 def set_meta(connection: sqlite3.Connection, key: str, value: str) -> None:
+    """Inserts or replaces a single meta key/value pair."""
     connection.execute(
         "INSERT INTO meta(key, value) VALUES(?, ?) "
         "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
@@ -117,6 +120,7 @@ def set_meta(connection: sqlite3.Connection, key: str, value: str) -> None:
 
 
 def generate(output_path: Path) -> None:
+    """Walks the TVMaze show index and atomically writes the SQLite snapshot."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     temp_path = output_path.with_suffix(output_path.suffix + ".tmp")
     if temp_path.exists():

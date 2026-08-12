@@ -29,6 +29,7 @@ actor InMemoryCompatibilityIndex: TVDBTVMazeCompatibilityIndex {
         map[id]
     }
 
+    /// Inserts or replaces a mapping and bumps `highestTVMazeID` when needed.
     func upsert(tvdbID: Int, tvMazeID: Int) {
         map[tvdbID] = tvMazeID
         if tvMazeID > metadata.highestTVMazeID {
@@ -44,6 +45,7 @@ actor InMemoryCompatibilityIndex: TVDBTVMazeCompatibilityIndex {
         map = map.filter { $0.value != tvMazeID }
     }
 
+    /// Same clear-then-upsert semantics as `CompatibilityIndexDatabase.applyMapping`.
     func applyMapping(tvMazeID: Int, tvdbID: Int?) {
         removeMappings(forTVMazeID: tvMazeID)
         if let tvdbID, tvdbID > 0 {
@@ -59,6 +61,7 @@ actor InMemoryCompatibilityIndex: TVDBTVMazeCompatibilityIndex {
         metadata.highestTVMazeID = value
     }
 
+    /// Snapshot of the full map for test assertions.
     func allMappings() -> [Int: Int] {
         map
     }
