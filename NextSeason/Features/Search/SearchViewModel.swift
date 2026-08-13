@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Debounced TheTVDB title search for `SearchView`, with local compatibility
+/// Debounced TheTVDB title search for `SearchView`, with local show ID mapping
 /// filtering and TVMaze resolution on select.
 ///
 /// Intended to be driven by `.task(id: query)`: each keystroke cancels the prior
@@ -14,7 +14,7 @@ import Foundation
 ///
 /// Provider split:
 /// - **Search list** — TheTVDB hits (`TVDBSearchResult`), paginated, then filtered
-///   through the local TVDB↔TVMaze compatibility index (not a TVMaze network
+///   through the local TVDB↔TVMaze show ID mapping (not a TVMaze network
 ///   lookup per hit). Pages are advanced until a reasonable actionable batch is
 ///   collected or TheTVDB results are exhausted.
 /// - **Open / track** — resolve to a TVMaze `Show` first, then use the existing
@@ -58,7 +58,7 @@ final class SearchViewModel {
 
     private let searchService: any TheTVDBService
     private let tvMaze: any TVMazeService
-    private let compatibilityIndex: any TVDBTVMazeCompatibilityIndex
+    private let showIDMapping: any ShowIDMapping
     private let analytics: any AnalyticsTracking
     private let debounce: Duration
     /// Trimmed query that produced the current `.results` or `.empty` state; `nil`
@@ -66,7 +66,7 @@ final class SearchViewModel {
     private var displayedQuery: String?
     /// Next TheTVDB `offset` for the active `displayedQuery` (sum of fetched counts).
     private var nextOffset = 0
-    /// Cache of TheTVDB series id → TVMaze show id from the local index.
+    /// Cache of TheTVDB series id → TVMaze show id from the local mapping.
     /// Used for search-row stars without network prefetch.
     private var resolvedTVMazeIDsByTVDBID: [Int: Int] = [:]
     /// Cache of full TVMaze shows after an explicit open/track resolve.
@@ -75,13 +75,13 @@ final class SearchViewModel {
     init(
         searchService: any TheTVDBService,
         tvMaze: any TVMazeService,
-        compatibilityIndex: any TVDBTVMazeCompatibilityIndex,
+        showIDMapping: any ShowIDMapping,
         analytics: any AnalyticsTracking,
         debounce: Duration = .milliseconds(300)
     ) {
         self.searchService = searchService
         self.tvMaze = tvMaze
-        self.compatibilityIndex = compatibilityIndex
+        self.showIDMapping = showIDMapping
         self.analytics = analytics
         self.debounce = debounce
     }
@@ -221,7 +221,7 @@ final class SearchViewModel {
     /// Resolves a TheTVDB hit to the canonical TVMaze `Show` (with seasons when possible).
     ///
     /// Uses the in-memory show cache when present. Otherwise prefers the local
-    /// compatibility id (`show(id:)`), then live TheTVDB lookup if that mapping
+    /// mapped id (`show(id:)`), then live TheTVDB lookup if that mapping
     /// is missing or stale.
     func resolveShow(for result: TVDBSearchResult) async throws -> Show {
         if let cached = resolvedShowsByTVDBID[result.id] {
@@ -237,7 +237,7 @@ final class SearchViewModel {
         return try await enrichedShow(from: lookedUp)
     }
 
-    /// TVMaze show id known for a TheTVDB hit (local index / prior resolve).
+    /// TVMaze show id known for a TheTVDB hit (local mapping / prior resolve).
     func resolvedTVMazeID(for resultID: Int) -> Int? {
         resolvedTVMazeIDsByTVDBID[resultID] ?? resolvedShowsByTVDBID[resultID]?.id
     }
@@ -252,7 +252,7 @@ final class SearchViewModel {
         resolveErrorMessage = message
     }
 
-    // MARK: - Compatibility filtering
+    // MARK: - Show ID mapping
 
     private struct ActionableFill {
         var items: [TVDBSearchResult]
@@ -261,7 +261,7 @@ final class SearchViewModel {
     }
 
     /// Fetches TheTVDB pages and keeps only hits present in the local
-    /// TVDB→TVMaze compatibility index.
+    /// TVDB→TVMaze show ID mapping.
     private func collectActionableResults(
         matching query: String,
         startingOffset: Int,
@@ -306,14 +306,14 @@ final class SearchViewModel {
         return ActionableFill(items: collected, nextOffset: offset, hasMore: tvdbHasMore)
     }
 
-    /// Keeps only hits present in the local compatibility index and caches their
+    /// Keeps only hits present in the local show ID mapping and caches their
     /// TVMaze ids for row stars / later resolve.
     private func filterActionable(_ results: [TVDBSearchResult]) async -> [TVDBSearchResult] {
         var actionable: [TVDBSearchResult] = []
         actionable.reserveCapacity(results.count)
 
         for result in results {
-            guard let mappedID = await compatibilityIndex.tvMazeID(forTVDBID: result.id) else {
+            guard let mappedID = await showIDMapping.tvMazeID(forTVDBID: result.id) else {
                 continue
             }
             resolvedTVMazeIDsByTVDBID[result.id] = mappedID
@@ -330,7 +330,7 @@ final class SearchViewModel {
         if let cached = resolvedTVMazeIDsByTVDBID[result.id] {
             mappedID = cached
         } else {
-            mappedID = await compatibilityIndex.tvMazeID(forTVDBID: result.id)
+            mappedID = await showIDMapping.tvMazeID(forTVDBID: result.id)
         }
 
         if let mappedID {

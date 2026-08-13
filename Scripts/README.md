@@ -158,12 +158,12 @@ Normally invoked automatically by `run-profile-flows-uninstrumented.sh`.
 
 ---
 
-## Compatibility index
+## Show ID mapping
 
-### `generate-tvdb-tvmaze-compatibility-db.py`
+### `generate-tvdb-tvmaze-show-id-mapping-db.py`
 
 Walks TVMaze’s paginated show index and regenerates the bundled
-`NextSeason/Resources/Compatibility/tvdb_tvmaze_compatibility.sqlite` mapping
+`NextSeason/Resources/ShowIDMapping/tvdb_tvmaze_show_id_mapping.sqlite` mapping
 (TheTVDB id → TVMaze id).
 
 **When to run:** manually before an App Store release (or whenever the catalog
@@ -173,12 +173,12 @@ Safe to invoke from future CI.
 **Usage:**
 
 ```bash
-./Scripts/generate-tvdb-tvmaze-compatibility-db.py
-./Scripts/generate-tvdb-tvmaze-compatibility-db.py --output /tmp/out.sqlite
+./Scripts/generate-tvdb-tvmaze-show-id-mapping-db.py
+./Scripts/generate-tvdb-tvmaze-show-id-mapping-db.py --output /tmp/out.sqlite
 ```
 
 Respects TVMaze rate limits with polite pacing. The generated file is
-TVMaze-derived (CC BY-SA); see `NextSeason/Resources/Compatibility/ATTRIBUTION.md`.
+TVMaze-derived (CC BY-SA); see `NextSeason/Resources/ShowIDMapping/ATTRIBUTION.md`.
 
 ---
 

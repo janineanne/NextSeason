@@ -1,5 +1,5 @@
 //
-//  CompatibilityIndexRefreshServiceTests.swift
+//  ShowIDMappingRefreshServiceTests.swift
 //  NextSeasonTests
 //
 
@@ -8,12 +8,12 @@ import Testing
 
 @testable import NextSeason
 
-struct CompatibilityIndexRefreshServiceTests {
-    private func makeDatabase() async throws -> (CompatibilityIndexDatabase, URL) {
+struct ShowIDMappingRefreshServiceTests {
+    private func makeDatabase() async throws -> (ShowIDMappingDatabase, URL) {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("compat-refresh-\(UUID().uuidString).sqlite")
-        try CompatibilityIndexDatabase.createEmptyDatabase(at: url)
-        let database = try CompatibilityIndexDatabase(preparedFileURL: url)
+            .appendingPathComponent("mapping-refresh-\(UUID().uuidString).sqlite")
+        try ShowIDMappingDatabase.createEmptyDatabase(at: url)
+        let database = try ShowIDMappingDatabase(preparedFileURL: url)
         return (database, url)
     }
 
@@ -27,7 +27,7 @@ struct CompatibilityIndexRefreshServiceTests {
             100: newer,
         ]
 
-        let pending = CompatibilityIndexRefreshService.pendingUpdates(
+        let pending = ShowIDMappingRefreshService.pendingUpdates(
             from: updates,
             updatedAfter: nil,
             horizonAt: newer,
@@ -49,7 +49,7 @@ struct CompatibilityIndexRefreshServiceTests {
             3: after,
         ]
 
-        let pending = CompatibilityIndexRefreshService.pendingUpdates(
+        let pending = ShowIDMappingRefreshService.pendingUpdates(
             from: updates,
             updatedAfter: nil,
             horizonAt: horizon,
@@ -69,9 +69,9 @@ struct CompatibilityIndexRefreshServiceTests {
             2: t2,
             3: t3,
         ]
-        let cursor = CompatibilityIndexUpdatesResumeCursor(updatedAt: t3, showID: 3)
+        let cursor = ShowIDMappingResumeCursor(updatedAt: t3, showID: 3)
 
-        let pending = CompatibilityIndexRefreshService.pendingUpdates(
+        let pending = ShowIDMappingRefreshService.pendingUpdates(
             from: updates,
             updatedAfter: nil,
             horizonAt: t3,
@@ -92,7 +92,7 @@ struct CompatibilityIndexRefreshServiceTests {
             3: after,
         ]
 
-        let pending = CompatibilityIndexRefreshService.pendingUpdates(
+        let pending = ShowIDMappingRefreshService.pendingUpdates(
             from: updates,
             updatedAfter: watermark,
             horizonAt: after,
@@ -125,7 +125,7 @@ struct CompatibilityIndexRefreshServiceTests {
             ]
         )
 
-        let refresh = CompatibilityIndexRefreshService(
+        let refresh = ShowIDMappingRefreshService(
             database: database,
             tvMaze: tvMaze,
             now: { now },
@@ -176,7 +176,7 @@ struct CompatibilityIndexRefreshServiceTests {
             ]
         )
 
-        let refresh = CompatibilityIndexRefreshService(
+        let refresh = ShowIDMappingRefreshService(
             database: database,
             tvMaze: tvMaze,
             now: { horizon },
@@ -219,7 +219,7 @@ struct CompatibilityIndexRefreshServiceTests {
             ]
         )
 
-        let refresh = CompatibilityIndexRefreshService(
+        let refresh = ShowIDMappingRefreshService(
             database: database,
             tvMaze: tvMaze,
             now: { syncStart },
@@ -259,7 +259,7 @@ struct CompatibilityIndexRefreshServiceTests {
         let syncStart = Date(timeIntervalSince1970: 1_700_000_000)
         let nextSyncNow = Date(
             timeIntervalSince1970: 1_700_000_000
-                + CompatibilityIndexRefreshService.refreshInterval + 1
+                + ShowIDMappingRefreshService.refreshInterval + 1
         )
 
         let tNewer = Date(timeIntervalSince1970: 3_000)
@@ -282,7 +282,7 @@ struct CompatibilityIndexRefreshServiceTests {
             ]
         )
 
-        let refresh = CompatibilityIndexRefreshService(
+        let refresh = ShowIDMappingRefreshService(
             database: database,
             tvMaze: tvMaze,
             now: { clock.next() },

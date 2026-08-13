@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Generate the bundled TheTVDB ↔ TVMaze compatibility SQLite database.
+Generate the bundled TheTVDB ↔ TVMaze show ID mapping SQLite database.
 
 Walks TVMaze's paginated show index (`GET /shows?page=`), extracts shows with a
 usable `externals.thetvdb` id, and writes:
 
-  NextSeason/Resources/Compatibility/tvdb_tvmaze_compatibility.sqlite
+  NextSeason/Resources/ShowIDMapping/tvdb_tvmaze_show_id_mapping.sqlite
 
 Run manually before an App Store release (not part of normal Xcode builds).
 The same entry point is suitable for future CI invocation.
 
 Usage:
-  ./Scripts/generate-tvdb-tvmaze-compatibility-db.py
-  ./Scripts/generate-tvdb-tvmaze-compatibility-db.py --output /path/to/out.sqlite
+  ./Scripts/generate-tvdb-tvmaze-show-id-mapping-db.py
+  ./Scripts/generate-tvdb-tvmaze-show-id-mapping-db.py --output /path/to/out.sqlite
 
 Respects TVMaze rate limits with polite pacing and 429 back-off.
-Derived from TVMaze data (CC BY-SA); see Resources/Compatibility/ATTRIBUTION.md.
+Derived from TVMaze data (CC BY-SA); see Resources/ShowIDMapping/ATTRIBUTION.md.
 """
 
 from __future__ import annotations
@@ -37,12 +37,12 @@ DEFAULT_OUTPUT = (
     REPO_ROOT
     / "NextSeason"
     / "Resources"
-    / "Compatibility"
-    / "tvdb_tvmaze_compatibility.sqlite"
+    / "ShowIDMapping"
+    / "tvdb_tvmaze_show_id_mapping.sqlite"
 )
 
 TVMAZE_BASE = "https://api.tvmaze.com"
-USER_AGENT = "NextSeason/compatibility-db-generator (manual; local-dev)"
+USER_AGENT = "NextSeason/show-id-mapping-db-generator (manual; local-dev)"
 SCHEMA_VERSION = "1"
 PAGE_SIZE = 250  # TVMaze show-index ID slice
 REQUEST_PAUSE_SECONDS = 0.35  # stay comfortably under ≥20 calls / 10s
@@ -201,7 +201,7 @@ def generate(output_path: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Generate the bundled TVDB↔TVMaze compatibility SQLite database."
+        description="Generate the bundled TVDB↔TVMaze show ID mapping SQLite database."
     )
     parser.add_argument(
         "--output",

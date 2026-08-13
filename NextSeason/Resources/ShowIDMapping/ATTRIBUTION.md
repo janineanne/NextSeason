@@ -1,6 +1,6 @@
-# TVMaze-derived compatibility index
+# TVMaze-derived show ID mapping
 
-`tvdb_tvmaze_compatibility.sqlite` maps TheTVDB series ids to TVMaze show ids.
+`tvdb_tvmaze_show_id_mapping.sqlite` maps TheTVDB series ids to TVMaze show ids.
 
 ## Source and license
 
@@ -16,7 +16,7 @@ This is **not** a TheTVDB catalog dump. Do not ship TheTVDB’s database.
 ## Purpose
 
 Offline filtering for Search so the UI only lists shows NextSeason can open and
-track via TVMaze. The index is not the source of truth for titles, seasons, or
+track via TVMaze. The mapping is not the source of truth for titles, seasons, or
 status — TVMaze remains canonical after the user selects a result.
 
 ## Regenerating
@@ -24,7 +24,7 @@ status — TVMaze remains canonical after the user selects a result.
 From the repository root (manual, pre-release — not part of normal Xcode builds):
 
 ```bash
-./Scripts/generate-tvdb-tvmaze-compatibility-db.py
+./Scripts/generate-tvdb-tvmaze-show-id-mapping-db.py
 ```
 
 See `Scripts/README.md` for details. Commit the updated SQLite file so the change

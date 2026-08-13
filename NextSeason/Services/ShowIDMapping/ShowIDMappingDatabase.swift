@@ -1,19 +1,19 @@
 //
-//  CompatibilityIndexDatabase.swift
+//  ShowIDMappingDatabase.swift
 //  NextSeason
 //
 
 import Foundation
 import SQLite3
 
-/// Direct SQLite store for TheTVDB → TVMaze compatibility mappings.
+/// Direct SQLite store for TheTVDB → TVMaze show ID mappings.
 ///
 /// Intentionally not SwiftData: the data is relational, tiny, and updated
 /// incrementally outside the watchlist persistence stack.
-actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
-    nonisolated static let bundledResourceName = "tvdb_tvmaze_compatibility"
+actor ShowIDMappingDatabase: ShowIDMapping {
+    nonisolated static let bundledResourceName = "tvdb_tvmaze_show_id_mapping"
     nonisolated static let bundledResourceExtension = "sqlite"
-    nonisolated static let writableFileName = "tvdb_tvmaze_compatibility.sqlite"
+    nonisolated static let writableFileName = "tvdb_tvmaze_show_id_mapping.sqlite"
 
     /// SQLite handle; `nonisolated(unsafe)` because `OpaquePointer` is not Sendable
     /// and actor `deinit` must close it without hopping.
@@ -97,7 +97,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         )
     }
 
-    /// Reconciles one TVMaze show's external TheTVDB id into the index.
+    /// Reconciles one TVMaze show's external TheTVDB id into the mapping.
     ///
     /// A show can change or lose its TheTVDB external; clear prior rows for
     /// this TVMaze id, then write the current mapping when present.
@@ -109,10 +109,10 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
     }
 
     /// Reads sync / generation meta keys into a single value type.
-    func metadata() throws -> CompatibilityIndexMetadata {
-        CompatibilityIndexMetadata(
+    func metadata() throws -> ShowIDMappingMetadata {
+        ShowIDMappingMetadata(
             schemaVersion: Int(metaValue("schema_version") ?? "")
-                ?? CompatibilityIndexMetadata.currentSchemaVersion,
+                ?? ShowIDMappingMetadata.currentSchemaVersion,
             generatedAt: Self.parseDate(metaValue("generated_at")),
             highestTVMazeID: Int(metaValue("highest_tvmaze_id") ?? "") ?? 0,
             lastSuccessfulSyncAt: Self.parseDate(metaValue("last_successful_sync_at")),
@@ -147,7 +147,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
     }
 
     /// Persists where a rate-limited updates drain should resume next opportunity.
-    func setUpdatesResumeCursor(_ cursor: CompatibilityIndexUpdatesResumeCursor) throws {
+    func setUpdatesResumeCursor(_ cursor: ShowIDMappingResumeCursor) throws {
         try setMeta(key: "updates_resume_at", value: Self.formatDate(cursor.updatedAt))
         try setMeta(key: "updates_resume_show_id", value: String(cursor.showID))
     }
@@ -164,13 +164,13 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         try clearSyncHorizonAt()
     }
 
-    private func updatesResumeCursor() -> CompatibilityIndexUpdatesResumeCursor? {
+    private func updatesResumeCursor() -> ShowIDMappingResumeCursor? {
         guard let updatedAt = Self.parseDate(metaValue("updates_resume_at")),
             let showID = Int(metaValue("updates_resume_show_id") ?? "")
         else {
             return nil
         }
-        return CompatibilityIndexUpdatesResumeCursor(updatedAt: updatedAt, showID: showID)
+        return ShowIDMappingResumeCursor(updatedAt: updatedAt, showID: showID)
     }
 
     /// Closes the SQLite handle. Used by tests before replacing files on disk.
@@ -199,7 +199,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
 
     // MARK: - File bootstrap
 
-    /// Application Support path for the mutable on-device copy of the index.
+    /// Application Support path for the mutable on-device copy of the mapping.
     nonisolated static func defaultWritableURL(
         fileManager: FileManager = .default
     ) throws -> URL {
@@ -209,7 +209,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
             appropriateFor: nil,
             create: true
         )
-        .appendingPathComponent("Compatibility", isDirectory: true)
+        .appendingPathComponent("ShowIDMapping", isDirectory: true)
         try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
         return folder.appendingPathComponent(writableFileName)
     }
@@ -222,12 +222,12 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         bundle.url(
             forResource: bundledResourceName,
             withExtension: bundledResourceExtension,
-            subdirectory: "Resources/Compatibility"
+            subdirectory: "Resources/ShowIDMapping"
         )
             ?? bundle.url(
                 forResource: bundledResourceName,
                 withExtension: bundledResourceExtension,
-                subdirectory: "Compatibility"
+                subdirectory: "ShowIDMapping"
             )
             ?? bundle.url(
                 forResource: bundledResourceName,
@@ -273,12 +273,12 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         )
     }
 
-    /// Creates a minimal empty index (schema + default meta) when no bundled
+    /// Creates a minimal empty mapping database (schema + default meta) when no bundled
     /// baseline is available — Search simply finds no actionable hits until refresh.
     nonisolated static func createEmptyDatabase(at fileURL: URL) throws {
         var db: OpaquePointer?
         guard sqlite3_open(fileURL.path, &db) == SQLITE_OK, let db else {
-            throw CompatibilityIndexError.sqlite("Unable to create empty compatibility database")
+            throw ShowIDMappingError.sqlite("Unable to create empty show ID mapping database")
         }
         defer { sqlite3_close(db) }
         try exec(
@@ -329,7 +329,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         var db: OpaquePointer?
         let flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
         guard sqlite3_open_v2(fileURL.path, &db, flags, nil) == SQLITE_OK, let db else {
-            throw CompatibilityIndexError.sqlite("Unable to open compatibility database")
+            throw ShowIDMappingError.sqlite("Unable to open show ID mapping database")
         }
         return db
     }
@@ -356,7 +356,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
             try writeMetaValue(
                 db,
                 key: "schema_version",
-                value: String(CompatibilityIndexMetadata.currentSchemaVersion)
+                value: String(ShowIDMappingMetadata.currentSchemaVersion)
             )
         }
     }
@@ -385,7 +385,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
             + "ON CONFLICT(key) DO UPDATE SET value = excluded.value;"
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
-            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+            throw ShowIDMappingError.sqlite(String(cString: sqlite3_errmsg(db)))
         }
         defer { sqlite3_finalize(statement) }
         sqlite3_bind_text(
@@ -393,7 +393,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         sqlite3_bind_text(
             statement, 2, value, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
         guard sqlite3_step(statement) == SQLITE_DONE else {
-            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+            throw ShowIDMappingError.sqlite(String(cString: sqlite3_errmsg(db)))
         }
     }
 
@@ -403,7 +403,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
     }
 
     private func setMeta(key: String, value: String) throws {
-        guard let db else { throw CompatibilityIndexError.sqlite("Database is closed") }
+        guard let db else { throw ShowIDMappingError.sqlite("Database is closed") }
         try Self.writeMetaValue(db, key: key, value: value)
     }
 
@@ -411,17 +411,17 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         _ sql: String,
         bind: ((OpaquePointer?) -> Void)? = nil
     ) throws {
-        guard let db else { throw CompatibilityIndexError.sqlite("Database is closed") }
+        guard let db else { throw ShowIDMappingError.sqlite("Database is closed") }
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
-            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+            throw ShowIDMappingError.sqlite(String(cString: sqlite3_errmsg(db)))
         }
         defer { sqlite3_finalize(statement) }
         bind?(statement)
         let step = sqlite3_step(statement)
         // Multi-statement scripts use exec instead; single statements end at DONE.
         guard step == SQLITE_DONE || step == SQLITE_ROW else {
-            throw CompatibilityIndexError.sqlite(String(cString: sqlite3_errmsg(db)))
+            throw ShowIDMappingError.sqlite(String(cString: sqlite3_errmsg(db)))
         }
     }
 
@@ -431,7 +431,7 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
         if result != SQLITE_OK {
             let message = errorMessage.map { String(cString: $0) } ?? "SQLite error"
             sqlite3_free(errorMessage)
-            throw CompatibilityIndexError.sqlite(message)
+            throw ShowIDMappingError.sqlite(message)
         }
     }
 
@@ -445,11 +445,11 @@ actor CompatibilityIndexDatabase: TVDBTVMazeCompatibilityIndex {
     }
 }
 
-/// Failures opening, preparing, or mutating the compatibility SQLite store.
+/// Failures opening, preparing, or mutating the show ID mapping SQLite store.
 ///
 /// Surfaced to composition-root recovery and tests; Search treats a missing
 /// mapping as “not actionable” rather than throwing these errors.
-enum CompatibilityIndexError: Error, LocalizedError {
+enum ShowIDMappingError: Error, LocalizedError {
     /// Low-level SQLite prepare / step / exec failure (message from `sqlite3_errmsg`).
     case sqlite(String)
     /// Bundled baseline resource could not be located in the app bundle.
@@ -460,7 +460,7 @@ enum CompatibilityIndexError: Error, LocalizedError {
         case .sqlite(let message):
             return message
         case .missingBundledDatabase:
-            return "Bundled compatibility database is missing."
+            return "Bundled show ID mapping database is missing."
         }
     }
 }

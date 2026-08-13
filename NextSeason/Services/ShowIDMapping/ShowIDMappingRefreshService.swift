@@ -1,16 +1,16 @@
 //
-//  CompatibilityIndexRefreshService.swift
+//  ShowIDMappingRefreshService.swift
 //  NextSeason
 //
 
 import Foundation
 import os
 
-/// Opportunistic on-device refresh of the TVDB↔TVMaze compatibility index.
+/// Opportunistic on-device refresh of the TVDB↔TVMaze show ID mapping.
 ///
 /// Never blocks Search or launch. Failures leave the existing writable database
 /// untouched aside from whatever partial writes already committed — the bundled
-/// baseline remains a recovery path via `CompatibilityIndexDatabase`.
+/// baseline remains a recovery path via `ShowIDMappingDatabase`.
 ///
 /// Update passes are newest-first and **resumable**. Each sync captures a fixed
 /// upper watermark (`syncHorizonAt`) when it begins. Only updates at or before
@@ -21,7 +21,7 @@ import os
 /// The updates lower watermark is `lastSuccessfulSyncAt ?? generatedAt`, so a
 /// freshly installed bundled database does not re-fetch a week of mappings that
 /// were already baked into the snapshot.
-actor CompatibilityIndexRefreshService {
+actor ShowIDMappingRefreshService {
     /// Roughly weekly refreshes are enough for search filtering freshness.
     static let refreshInterval: TimeInterval = 7 * 24 * 60 * 60
 
@@ -31,7 +31,7 @@ actor CompatibilityIndexRefreshService {
     /// Delay between TVMaze calls during refresh (stay under ≥20 / 10s).
     static let defaultRequestPause: Duration = .milliseconds(400)
 
-    private let database: CompatibilityIndexDatabase
+    private let database: ShowIDMappingDatabase
     private let tvMaze: any TVMazeService
     private let now: @Sendable () -> Date
     private let maxShowDetailFetchesPerRefresh: Int
@@ -39,12 +39,12 @@ actor CompatibilityIndexRefreshService {
     private var isRunning = false
 
     init(
-        database: CompatibilityIndexDatabase,
+        database: ShowIDMappingDatabase,
         tvMaze: any TVMazeService,
         now: @escaping @Sendable () -> Date = { Date() },
-        maxShowDetailFetchesPerRefresh: Int = CompatibilityIndexRefreshService
+        maxShowDetailFetchesPerRefresh: Int = ShowIDMappingRefreshService
             .defaultMaxShowDetailFetchesPerRefresh,
-        requestPause: Duration = CompatibilityIndexRefreshService.defaultRequestPause
+        requestPause: Duration = ShowIDMappingRefreshService.defaultRequestPause
     ) {
         self.database = database
         self.tvMaze = tvMaze
@@ -77,8 +77,8 @@ actor CompatibilityIndexRefreshService {
             }
 
             AppDiagnosticsLogger.logger(for: .network)
-                .notice("compatibility_index_refresh_start")
-            AppDiagnosticsLogger.breadcrumb("compatibility_index_refresh")
+                .notice("show_id_mapping_refresh_start")
+            AppDiagnosticsLogger.breadcrumb("show_id_mapping_refresh")
 
             try await refreshTail(fromHighestID: metadata.highestTVMazeID)
             // Prefer the last completed sync; on first launch fall back to the
@@ -96,19 +96,19 @@ actor CompatibilityIndexRefreshService {
                 try await database.setLastSuccessfulSyncAt(horizonAt)
                 try await database.clearInProgressSyncState()
                 AppDiagnosticsLogger.logger(for: .network)
-                    .notice("compatibility_index_refresh_complete")
+                    .notice("show_id_mapping_refresh_complete")
             } else {
                 AppDiagnosticsLogger.logger(for: .network)
-                    .notice("compatibility_index_refresh_paused")
-                AppDiagnosticsLogger.breadcrumb("compatibility_index_refresh_paused")
+                    .notice("show_id_mapping_refresh_paused")
+                AppDiagnosticsLogger.breadcrumb("show_id_mapping_refresh_paused")
             }
         } catch {
             // Non-fatal: keep serving the existing map.
             AppDiagnosticsLogger.logger(for: .network)
                 .error(
-                    "compatibility_index_refresh_failed error=\(error.localizedDescription, privacy: .public)"
+                    "show_id_mapping_refresh_failed error=\(error.localizedDescription, privacy: .public)"
                 )
-            AppDiagnosticsLogger.breadcrumb("compatibility_index_refresh_failed")
+            AppDiagnosticsLogger.breadcrumb("show_id_mapping_refresh_failed")
         }
     }
 
@@ -155,7 +155,7 @@ actor CompatibilityIndexRefreshService {
     private func refreshUpdatedShows(
         since lastSync: Date?,
         horizonAt: Date,
-        resumeCursor: CompatibilityIndexUpdatesResumeCursor?
+        resumeCursor: ShowIDMappingResumeCursor?
     ) async throws -> Bool {
         let updates = try await fetchUpdates(since: lastSync, horizonAt: horizonAt)
         let pending = Self.pendingUpdates(
@@ -167,7 +167,7 @@ actor CompatibilityIndexRefreshService {
         guard !pending.isEmpty else { return true }
 
         var fetched = 0
-        var lastProcessed: CompatibilityIndexUpdatesResumeCursor?
+        var lastProcessed: ShowIDMappingResumeCursor?
         for item in pending {
             guard fetched < maxShowDetailFetchesPerRefresh else { break }
             do {
@@ -198,28 +198,33 @@ actor CompatibilityIndexRefreshService {
 
     /// Loads the TVMaze update map for this sync window.
     ///
-    /// When the last sync is older than TVMaze's `since=month` filter can cover,
-    /// fetches the unfiltered map and relies on local watermark filtering.
+    /// TVMaze can only filter updates as far back as one month.
+    /// For older sync points, fetch the complete show-update map and
+    /// locally discard entries whose last-updated timestamp is at or
+    /// before our saved sync watermark.
     private func fetchUpdates(
         since lastSync: Date?,
         horizonAt: Date
     ) async throws -> [Int: Date] {
-        if let lastSync,
-            TVMazeUpdatePeriod.requiresUnfilteredUpdateMap(since: lastSync, at: horizonAt)
-        {
-            AppDiagnosticsLogger.breadcrumb("compatibility_index_updates_unfiltered")
+        guard let lastSync else {
+            // No trustworthy baseline exists.
             return try await tvMaze.allUpdatedShows()
         }
 
-        let period: TVMazeUpdatePeriod
-        if let lastSync {
-            // Cover from the updates watermark through the fixed horizon, not
-            // wall-clock now — keeps the window stable across resume passes.
-            period = TVMazeUpdatePeriod.covering(since: lastSync, at: horizonAt)
-        } else {
-            // No sync history and no bundled generation timestamp: bounded fallback.
-            period = .week
+        if TVMazeUpdatePeriod.requiresUnfilteredUpdateMap(
+            since: lastSync,
+            at: horizonAt
+        ) {
+            return try await tvMaze.allUpdatedShows()
         }
+
+        // Cover from the updates watermark through the fixed horizon, not
+        // wall-clock now — keeps the window stable across resume passes.
+        let period = TVMazeUpdatePeriod.covering(
+            since: lastSync,
+            at: horizonAt
+        )
+
         return try await tvMaze.updatedShows(since: period)
     }
 
@@ -232,15 +237,15 @@ actor CompatibilityIndexRefreshService {
         from updates: [Int: Date],
         updatedAfter: Date?,
         horizonAt: Date,
-        resumeCursor: CompatibilityIndexUpdatesResumeCursor?
-    ) -> [CompatibilityIndexUpdatesResumeCursor] {
+        resumeCursor: ShowIDMappingResumeCursor?
+    ) -> [ShowIDMappingResumeCursor] {
         let items = updates.compactMap {
-            showID, updatedAt -> CompatibilityIndexUpdatesResumeCursor? in
+            showID, updatedAt -> ShowIDMappingResumeCursor? in
             if let updatedAfter, updatedAt <= updatedAfter { return nil }
             guard updatedAt <= horizonAt else { return nil }
-            return CompatibilityIndexUpdatesResumeCursor(updatedAt: updatedAt, showID: showID)
+            return ShowIDMappingResumeCursor(updatedAt: updatedAt, showID: showID)
         }
-        let filtered: [CompatibilityIndexUpdatesResumeCursor]
+        let filtered: [ShowIDMappingResumeCursor]
         if let resumeCursor {
             filtered = items.filter { Self.isOlderThanCursor($0, resumeCursor) }
         } else {
@@ -255,8 +260,8 @@ actor CompatibilityIndexRefreshService {
     }
 
     nonisolated private static func isOlderThanCursor(
-        _ item: CompatibilityIndexUpdatesResumeCursor,
-        _ cursor: CompatibilityIndexUpdatesResumeCursor
+        _ item: ShowIDMappingResumeCursor,
+        _ cursor: ShowIDMappingResumeCursor
     ) -> Bool {
         if item.updatedAt != cursor.updatedAt {
             return item.updatedAt < cursor.updatedAt
