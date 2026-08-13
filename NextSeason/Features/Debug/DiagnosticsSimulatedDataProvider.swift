@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Synchronization
 
 /// Reserved show identity helpers for beta-only simulated update scenarios.
 /// Never written to the real watchlist repository.
@@ -42,10 +43,10 @@ nonisolated enum DiagnosticsSimulatedData {
 /// Fake `TVMazeService` for beta validation: a two-phase machine that returns
 /// baseline (undated next season) data first, then updated (dated) season data.
 ///
-/// Phase mutations are guarded by `NSLock` because refresh may call into this
+/// Phase mutations are guarded by `Mutex` because refresh may call into this
 /// provider off the main actor while the diagnostics runner advances phase on
-/// the main actor (`@unchecked Sendable` + lock, not actor isolation).
-final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable {
+/// the main actor.
+final class DiagnosticsSimulatedDataProvider: TVMazeService, Sendable {
     /// Which fake payload `show(id:)` should return until the runner advances.
     enum Phase: Sendable {
         case baseline
@@ -55,8 +56,7 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
     let showID: Int
     let showName: String
 
-    private let lock = NSLock()
-    private nonisolated(unsafe) var phase: Phase = .baseline
+    private let phase = Mutex<Phase>(.baseline)
     private let clock: @Sendable () -> Date
 
     init(
@@ -71,9 +71,7 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
 
     /// Which fake payload the next `show(id:)` call will return.
     var currentPhase: Phase {
-        lock.lock()
-        defer { lock.unlock() }
-        return phase
+        phase.withLock { $0 }
     }
 
     /// Localized label for the diagnostics UI (baseline vs updated payload).
@@ -88,23 +86,17 @@ final class DiagnosticsSimulatedDataProvider: TVMazeService, @unchecked Sendable
 
     /// Returns the machine to the undated baseline payload.
     func reset() {
-        lock.lock()
-        phase = .baseline
-        lock.unlock()
+        phase.withLock { $0 = .baseline }
     }
 
     /// Jumps to a specific phase without waiting for `advanceAfterRun`.
     func forcePhase(_ newPhase: Phase) {
-        lock.lock()
-        phase = newPhase
-        lock.unlock()
+        phase.withLock { $0 = newPhase }
     }
 
     /// Flips baseline ↔ updated after each simulated refresh step.
     func advanceAfterRun() {
-        lock.lock()
-        phase = phase == .baseline ? .updated : .baseline
-        lock.unlock()
+        phase.withLock { $0 = $0 == .baseline ? .updated : .baseline }
     }
 
     func searchShows(matching query: String) async throws -> [Show] { [] }

@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Synchronization
 import Testing
 
 @testable import NextSeason
@@ -39,14 +40,15 @@ struct SearchViewModelTests {
     }
 
     /// Tracks TVMaze lookup traffic without mutating struct copies.
-    private final class LookupCounter: @unchecked Sendable {
-        private let lock = NSLock()
-        private(set) var theTVDBLookups = 0
+    private final class LookupCounter: Sendable {
+        private let count = Mutex(0)
 
         func recordTheTVDB() {
-            lock.lock()
-            theTVDBLookups += 1
-            lock.unlock()
+            count.withLock { $0 += 1 }
+        }
+
+        var theTVDBLookups: Int {
+            count.withLock { $0 }
         }
     }
 
@@ -474,14 +476,15 @@ struct SearchViewModelTests {
         var value = 0
     }
 
-    private final class OffsetRecorder: @unchecked Sendable {
-        private let lock = NSLock()
-        private(set) var values: [Int] = []
+    private final class OffsetRecorder: Sendable {
+        private let stored = Mutex<[Int]>([])
 
         func append(_ value: Int) {
-            lock.lock()
-            values.append(value)
-            lock.unlock()
+            stored.withLock { $0.append(value) }
+        }
+
+        var values: [Int] {
+            stored.withLock { $0 }
         }
     }
 }

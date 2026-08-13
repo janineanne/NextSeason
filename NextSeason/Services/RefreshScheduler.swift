@@ -5,6 +5,7 @@
 
 import BackgroundTasks
 import Foundation
+import Synchronization
 import os
 
 /// Registers and runs the app’s best-effort background watchlist refresh
@@ -119,9 +120,9 @@ enum RefreshScheduler {
 ///
 /// Needed because normal completion and the expiration handler can race; calling
 /// `setTaskCompleted` twice is undefined / logged as an error by the system.
+/// `@unchecked Sendable` remains because `BGAppRefreshTask` is not Sendable.
 private final class BackgroundRefreshCompletion: @unchecked Sendable {
-    private let lock = NSLock()
-    private var finished = false
+    private let finished = Mutex(false)
     private let refreshTask: BGAppRefreshTask
 
     init(refreshTask: BGAppRefreshTask) {
@@ -129,10 +130,12 @@ private final class BackgroundRefreshCompletion: @unchecked Sendable {
     }
 
     func finish(success: Bool) {
-        lock.lock()
-        defer { lock.unlock() }
-        guard !finished else { return }
-        finished = true
+        let shouldComplete = finished.withLock { finished in
+            guard !finished else { return false }
+            finished = true
+            return true
+        }
+        guard shouldComplete else { return }
         refreshTask.setTaskCompleted(success: success)
     }
 }
