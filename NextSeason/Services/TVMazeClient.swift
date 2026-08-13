@@ -68,7 +68,7 @@ actor TVMazeClient: TVMazeService {
     ///
     /// TVMaze responds with HTTP 301 to the canonical `/shows/:id` URL;
     /// `URLSession` follows the redirect and we decode the final show body.
-    /// Used when Search's local compatibility mapping is missing or stale.
+    /// Used when Search's local show ID mapping is missing or stale.
     func lookupShow(theTVDBID: Int) async throws -> Show {
         AppDiagnosticsLogger.logger(for: .network)
             .notice("lookup_thetvdb_start tvdb_id=\(theTVDBID, privacy: .public)")
@@ -144,7 +144,7 @@ actor TVMazeClient: TVMazeService {
     }
 
     /// `GET /shows?page=` — paginated catalog used to build/refresh the
-    /// TheTVDB↔TVMaze compatibility index. Index pages are cached up to 24h by
+    /// TheTVDB↔TVMaze show ID mapping. Index pages are cached up to 24h by
     /// TVMaze; we still send a normal UA and honor 429 back-off via `perform`.
     func showsIndex(page: Int) async throws -> [ShowIndexEntryData] {
         AppDiagnosticsLogger.logger(for: .network)
@@ -156,7 +156,7 @@ actor TVMazeClient: TVMazeService {
         return try await get(components)
     }
 
-    /// `GET /shows/:id` decoded as id + externals for compatibility refresh.
+    /// `GET /shows/:id` decoded as id + externals for show ID mapping refresh.
     func showIndexEntry(id: Int) async throws -> ShowIndexEntryData {
         AppDiagnosticsLogger.logger(for: .network)
             .notice("show_index_entry_start show_id=\(id, privacy: .public)")

@@ -22,15 +22,15 @@ struct AppCompositionRoot {
     /// Guest search provider (paginated series search only).
     let theTVDB: any TheTVDBService
     /// Offline TheTVDB → TVMaze filter for Search results.
-    let compatibilityIndex: any TVDBTVMazeCompatibilityIndex
-    /// Opportunistic on-device index refresh; `nil` under UI tests.
-    let compatibilityIndexRefresh: CompatibilityIndexRefreshService?
+    let showIDMapping: any ShowIDMapping
+    /// Opportunistic on-device mapping refresh; `nil` under UI tests.
+    let showIDMappingRefresh: ShowIDMappingRefreshService?
 
     init() throws {
         analyticsService = AnalyticsService()
         notificationService = NotificationService(analytics: analyticsService)
         betaRefreshDiagnostics = BetaRefreshDiagnostics()
-        let liveTVMaze = TVMazeClient()
+        let liveTVMaze = TVMazeClient()  // needed later in this function
         tvMaze = liveTVMaze
         theTVDB = TheTVDBClient()
 
@@ -45,35 +45,35 @@ struct AppCompositionRoot {
             )
             repository = InMemoryWatchlistRepository()
             // Severance preview ids used by UI tests / PreviewTheTVDBService.
-            compatibilityIndex = InMemoryCompatibilityIndex(map: [371980: 44933])
-            compatibilityIndexRefresh = nil
+            showIDMapping = InMemoryShowIDMapping(map: [371980: 44933])
+            showIDMappingRefresh = nil
         } else {
             let container = try ModelContainer(for: TrackedShowEntity.self)
             modelContainer = container
             repository = SwiftDataWatchlistRepository(context: ModelContext(container))
-            let writableURL = try CompatibilityIndexDatabase.defaultWritableURL()
-            let bundledURL = CompatibilityIndexDatabase.bundledDatabaseURL()
-            let database: CompatibilityIndexDatabase
+            let writableURL = try ShowIDMappingDatabase.defaultWritableURL()
+            let bundledURL = ShowIDMappingDatabase.bundledDatabaseURL()
+            let database: ShowIDMappingDatabase
             do {
-                database = try CompatibilityIndexDatabase(
+                database = try ShowIDMappingDatabase(
                     fileURL: writableURL,
                     bundledURL: bundledURL
                 )
             } catch {
                 // Corrupt / unreadable writable copy — force-replace from the
                 // bundled baseline (or empty schema) and reopen once.
-                try CompatibilityIndexDatabase.prepareWritableDatabase(
+                try ShowIDMappingDatabase.prepareWritableDatabase(
                     at: writableURL,
                     bundledURL: bundledURL,
                     forceReplace: true
                 )
-                database = try CompatibilityIndexDatabase(
+                database = try ShowIDMappingDatabase(
                     fileURL: writableURL,
                     bundledURL: bundledURL
                 )
             }
-            compatibilityIndex = database
-            compatibilityIndexRefresh = CompatibilityIndexRefreshService(
+            showIDMapping = database
+            showIDMappingRefresh = ShowIDMappingRefreshService(
                 database: database,
                 tvMaze: liveTVMaze
             )
@@ -112,13 +112,13 @@ struct AppCompositionRoot {
         analyticsService.track(.appLaunched)
     }
 
-    /// Opportunistic compatibility-index refresh; never blocks launch or Search.
-    func refreshCompatibilityIndexIfNeeded() async {
-        await compatibilityIndexRefresh?.refreshIfNeeded()
+    /// Opportunistic show ID mapping refresh; never blocks launch or Search.
+    func refreshShowIDMappingIfNeeded() async {
+        await showIDMappingRefresh?.refreshIfNeeded()
     }
 
     /// Registers the ~12h background watchlist refresh task and schedules the
-    /// next run. Compatibility-index refresh stays foreground-only.
+    /// next run. Show ID mapping refresh stays foreground-only.
     private func configureBackgroundRefresh() {
         RefreshScheduler.registerBackgroundTask()
         let refreshServiceForBackground = refreshService

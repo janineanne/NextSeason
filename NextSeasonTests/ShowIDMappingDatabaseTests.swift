@@ -1,5 +1,5 @@
 //
-//  CompatibilityIndexDatabaseTests.swift
+//  ShowIDMappingDatabaseTests.swift
 //  NextSeasonTests
 //
 
@@ -8,14 +8,14 @@ import Testing
 
 @testable import NextSeason
 
-struct CompatibilityIndexDatabaseTests {
+struct ShowIDMappingDatabaseTests {
     private func makeDatabase(
         seed: [(tvdb: Int, tvmaze: Int)] = []
-    ) async throws -> (CompatibilityIndexDatabase, URL) {
+    ) async throws -> (ShowIDMappingDatabase, URL) {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("compat-\(UUID().uuidString).sqlite")
-        try CompatibilityIndexDatabase.createEmptyDatabase(at: url)
-        let database = try CompatibilityIndexDatabase(preparedFileURL: url)
+            .appendingPathComponent("mapping-\(UUID().uuidString).sqlite")
+        try ShowIDMappingDatabase.createEmptyDatabase(at: url)
+        let database = try ShowIDMappingDatabase(preparedFileURL: url)
         for pair in seed {
             try await database.upsert(tvdbID: pair.tvdb, tvMazeID: pair.tvmaze)
         }
@@ -67,7 +67,7 @@ struct CompatibilityIndexDatabaseTests {
         let (database, url) = try await makeDatabase(seed: [(371980, 44933)])
         defer { try? FileManager.default.removeItem(at: url) }
 
-        let refresh = CompatibilityIndexRefreshService(
+        let refresh = ShowIDMappingRefreshService(
             database: database,
             tvMaze: FailingIndexTVMazeService(),
             now: { Date(timeIntervalSince1970: 1_700_000_000) }
@@ -90,12 +90,12 @@ struct CompatibilityIndexDatabaseTests {
             try? FileManager.default.removeItem(at: writableURL)
         }
 
-        try CompatibilityIndexDatabase.createEmptyDatabase(at: bundledURL)
-        let bundled = try CompatibilityIndexDatabase(preparedFileURL: bundledURL)
+        try ShowIDMappingDatabase.createEmptyDatabase(at: bundledURL)
+        let bundled = try ShowIDMappingDatabase(preparedFileURL: bundledURL)
         try await bundled.upsert(tvdbID: 371980, tvMazeID: 44933)
         await bundled.close()
 
-        let database = try CompatibilityIndexDatabase(
+        let database = try ShowIDMappingDatabase(
             fileURL: writableURL,
             bundledURL: bundledURL
         )

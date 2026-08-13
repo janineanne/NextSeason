@@ -43,9 +43,9 @@ struct NextSeasonApp: App {
                 refreshService: composition.refreshService,
                 searchService: composition.theTVDB,
                 tvMaze: composition.tvMaze,
-                compatibilityIndex: composition.compatibilityIndex,
-                onForegroundCompatibilityRefresh: {
-                    await composition.refreshCompatibilityIndexIfNeeded()
+                showIDMapping: composition.showIDMapping,
+                onForegroundShowIDMappingRefresh: {
+                    await composition.refreshShowIDMappingIfNeeded()
                 }
             )
             .environment(\.watchlistRepository, composition.watchlistRepository)
@@ -82,15 +82,15 @@ private struct AppRootView: View {
     let refreshService: WatchlistRefreshService
     let searchService: any TheTVDBService
     let tvMaze: any TVMazeService
-    let compatibilityIndex: any TVDBTVMazeCompatibilityIndex
-    let onForegroundCompatibilityRefresh: @MainActor () async -> Void
+    let showIDMapping: any ShowIDMapping
+    let onForegroundShowIDMappingRefresh: @MainActor () async -> Void
 
     var body: some View {
         ContentView(
             coordinator: navigationCoordinator,
             searchService: theTVDBService(testing: UITestingConfiguration.isEnabled),
             tvMaze: tvMazeService(testing: UITestingConfiguration.isEnabled),
-            compatibilityIndex: compatibilityIndex
+            showIDMapping: showIDMapping
         )
         .appAccentTint()
         .watchlistUndoToast(
@@ -139,7 +139,7 @@ private struct AppRootView: View {
                 AppDiagnosticsLogger.logTaskComplete("foreground_watchlist_refresh")
             }
             Task {
-                await onForegroundCompatibilityRefresh()
+                await onForegroundShowIDMappingRefresh()
             }
         }
     }

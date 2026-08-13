@@ -83,10 +83,10 @@ struct SearchViewModelTests {
         posterURL: nil
     )
 
-    private func compatibleIndex(
+    private func showIDMapping(
         map: [Int: Int] = [371980: 44933]
-    ) -> InMemoryCompatibilityIndex {
-        InMemoryCompatibilityIndex(map: map)
+    ) -> InMemoryShowIDMapping {
+        InMemoryShowIDMapping(map: map)
     }
 
     /// Mock page helper: when `rawCount` is omitted, advances by `results.count`
@@ -107,12 +107,12 @@ struct SearchViewModelTests {
     private func makeViewModel(
         search: MockSearchService,
         tvMaze: some TVMazeService = MockTVMazeService(),
-        index: InMemoryCompatibilityIndex? = nil
+        mapping: InMemoryShowIDMapping? = nil
     ) -> SearchViewModel {
         SearchViewModel(
             searchService: search,
             tvMaze: tvMaze,
-            compatibilityIndex: index ?? compatibleIndex(),
+            showIDMapping: mapping ?? showIDMapping(),
             analytics: RecordingAnalyticsService(),
             debounce: .zero
         )
@@ -131,7 +131,7 @@ struct SearchViewModelTests {
         #expect(viewModel.state == .idle)
     }
 
-    @Test("Matching compatible shows populate the results state")
+    @Test("Matching mapped shows populate the results state")
     func resultsPopulateState() async {
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
@@ -147,9 +147,9 @@ struct SearchViewModelTests {
         #expect(viewModel.resolvedTVMazeID(for: sampleResult.id) == 44933)
     }
 
-    @Test("Filtering removes incompatible results")
-    func filteringRemovesIncompatibleResults() async {
-        let incompatible = TVDBSearchResult(
+    @Test("Filtering removes unmapped results")
+    func filteringRemovesUnmappedResults() async {
+        let unmapped = TVDBSearchResult(
             id: 1,
             name: "Only On TheTVDB",
             year: "2020",
@@ -160,10 +160,10 @@ struct SearchViewModelTests {
         let counter = LookupCounter()
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
-                Self.page([sampleResult, incompatible], hasMore: false, offset: offset)
+                Self.page([sampleResult, unmapped], hasMore: false, offset: offset)
             },
             tvMaze: CountingTVMazeService(counter: counter),
-            index: compatibleIndex(map: [371980: 44933])
+            mapping: showIDMapping(map: [371980: 44933])
         )
         viewModel.query = "show"
         await viewModel.search()
@@ -201,7 +201,7 @@ struct SearchViewModelTests {
                 }
                 return Self.page([page2Mapped], hasMore: false, offset: offset)
             },
-            index: compatibleIndex(map: [2: 99])
+            mapping: showIDMapping(map: [2: 99])
         )
         viewModel.query = "thin"
         await viewModel.search()
@@ -241,7 +241,7 @@ struct SearchViewModelTests {
                 #expect(offset == 10)
                 return Self.page([mapped], hasMore: false, offset: offset)
             },
-            index: compatibleIndex(map: [2: 99])
+            mapping: showIDMapping(map: [2: 99])
         )
         viewModel.query = "sparse-page"
         await viewModel.search()
@@ -269,7 +269,7 @@ struct SearchViewModelTests {
                 #expect(offset == 0)
                 return Self.page([unmapped], hasMore: false, offset: offset)
             },
-            index: compatibleIndex(map: [:])
+            mapping: showIDMapping(map: [:])
         )
         viewModel.query = "gone"
         await viewModel.search()
@@ -307,7 +307,7 @@ struct SearchViewModelTests {
                 }
                 return Self.page([mapped], hasMore: false, offset: offset)
             },
-            index: compatibleIndex(map: [99: 44933])
+            mapping: showIDMapping(map: [99: 44933])
         )
         viewModel.query = "sparse"
         await viewModel.search()
@@ -343,7 +343,7 @@ struct SearchViewModelTests {
                 }
                 return Self.page([unmapped], hasMore: false, offset: offset)
             },
-            index: compatibleIndex(map: [:])
+            mapping: showIDMapping(map: [:])
         )
         viewModel.query = "never"
         await viewModel.search()
@@ -430,7 +430,7 @@ struct SearchViewModelTests {
                 }
                 return Self.page([second], hasMore: false, offset: offset)
             },
-            index: compatibleIndex(map: [371980: 44933, 2: 82])
+            mapping: showIDMapping(map: [371980: 44933, 2: 82])
         )
         viewModel.query = "severance"
         await viewModel.search()
@@ -443,7 +443,7 @@ struct SearchViewModelTests {
         )
     }
 
-    @Test("Resolve maps a TheTVDB hit to a TVMaze show via compatibility id")
+    @Test("Resolve maps a TheTVDB hit to a TVMaze show via mapped id")
     func resolveMapsToTVMazeShow() async throws {
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
@@ -455,7 +455,7 @@ struct SearchViewModelTests {
         #expect(viewModel.resolvedTVMazeID(for: sampleResult.id) == Show.preview.id)
     }
 
-    @Test("Search does not prefetch TheTVDB lookups for compatible results")
+    @Test("Search does not prefetch TheTVDB lookups for mapped results")
     func searchDoesNotPrefetchTheTVDBLookups() async {
         let counter = LookupCounter()
         let viewModel = makeViewModel(
@@ -463,7 +463,7 @@ struct SearchViewModelTests {
                 Self.page([sampleResult], hasMore: false, offset: offset)
             },
             tvMaze: CountingTVMazeService(counter: counter),
-            index: compatibleIndex(map: [371980: 44933])
+            mapping: showIDMapping(map: [371980: 44933])
         )
         viewModel.query = "severance"
         await viewModel.search()

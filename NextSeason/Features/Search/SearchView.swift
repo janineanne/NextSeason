@@ -8,7 +8,7 @@ import SwiftUI
 /// Guest search: type a title, browse matching shows, and track from the results list.
 ///
 /// Search hits come from TheTVDB (paginated), then are filtered through the local
-/// TVDB↔TVMaze compatibility index so only actionable shows are listed. Selecting
+/// TVDB↔TVMaze show ID mapping so only actionable shows are listed. Selecting
 /// or tracking a row still resolves through TVMaze before the existing show-detail
 /// / watchlist flow runs.
 ///
@@ -49,7 +49,7 @@ struct SearchView: View {
         navigationPath: Binding<NavigationPath>,
         searchService: any TheTVDBService,
         tvMaze: any TVMazeService,
-        compatibilityIndex: any TVDBTVMazeCompatibilityIndex,
+        showIDMapping: any ShowIDMapping,
         analytics: any AnalyticsTracking,
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
@@ -61,7 +61,7 @@ struct SearchView: View {
             initialValue: SearchViewModel(
                 searchService: searchService,
                 tvMaze: tvMaze,
-                compatibilityIndex: compatibilityIndex,
+                showIDMapping: showIDMapping,
                 analytics: analytics
             )
         )
@@ -428,7 +428,7 @@ private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
             navigationPath: $path,
             searchService: PreviewTheTVDBService(stub: .previewSearchResult),
             tvMaze: PreviewTVMazeService(stub: .preview),
-            compatibilityIndex: InMemoryCompatibilityIndex(
+            showIDMapping: InMemoryShowIDMapping(
                 map: [TVDBSearchResult.previewSearchResult.id: Show.preview.id]
             ),
             analytics: RecordingAnalyticsService()

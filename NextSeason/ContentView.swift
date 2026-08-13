@@ -15,18 +15,18 @@ struct ContentView: View {
 
     private let searchService: any TheTVDBService
     private let tvMaze: any TVMazeService
-    private let compatibilityIndex: any TVDBTVMazeCompatibilityIndex
+    private let showIDMapping: any ShowIDMapping
 
     init(
         coordinator: AppNavigationCoordinator,
         searchService: any TheTVDBService,
         tvMaze: any TVMazeService,
-        compatibilityIndex: any TVDBTVMazeCompatibilityIndex
+        showIDMapping: any ShowIDMapping
     ) {
         _coordinator = Bindable(coordinator)
         self.searchService = searchService
         self.tvMaze = tvMaze
-        self.compatibilityIndex = compatibilityIndex
+        self.showIDMapping = showIDMapping
     }
 
     var body: some View {
@@ -35,7 +35,7 @@ struct ContentView: View {
                 navigationPath: $coordinator.searchPath,
                 searchService: searchService,
                 tvMaze: tvMaze,
-                compatibilityIndex: compatibilityIndex,
+                showIDMapping: showIDMapping,
                 analytics: analytics,
                 onWatchlistChanged: { coordinator.notifyWatchlistDataChanged() }
             )
@@ -152,7 +152,7 @@ struct ContentView: View {
             coordinator: AppNavigationCoordinator(),
             searchService: PreviewTheTVDBService(stub: .previewSearchResult),
             tvMaze: PreviewTVMazeService(stub: .preview),
-            compatibilityIndex: InMemoryCompatibilityIndex(
+            showIDMapping: InMemoryShowIDMapping(
                 map: [TVDBSearchResult.previewSearchResult.id: Show.preview.id]
             )
         )

@@ -1,19 +1,19 @@
 //
-//  InMemoryCompatibilityIndex.swift
+//  InMemoryShowIDMapping.swift
 //  NextSeason
 //
 
 import Foundation
 
-/// Mutable in-memory compatibility map for unit tests and UI-test stubs.
-actor InMemoryCompatibilityIndex: TVDBTVMazeCompatibilityIndex {
+/// Mutable in-memory show ID map for unit tests and UI-test stubs.
+actor InMemoryShowIDMapping: ShowIDMapping {
     private var map: [Int: Int]
-    private(set) var metadata: CompatibilityIndexMetadata
+    private(set) var metadata: ShowIDMappingMetadata
 
     init(
         map: [Int: Int] = [:],
-        metadata: CompatibilityIndexMetadata = CompatibilityIndexMetadata(
-            schemaVersion: CompatibilityIndexMetadata.currentSchemaVersion,
+        metadata: ShowIDMappingMetadata = ShowIDMappingMetadata(
+            schemaVersion: ShowIDMappingMetadata.currentSchemaVersion,
             generatedAt: nil,
             highestTVMazeID: 0,
             lastSuccessfulSyncAt: nil,
@@ -45,7 +45,7 @@ actor InMemoryCompatibilityIndex: TVDBTVMazeCompatibilityIndex {
         map = map.filter { $0.value != tvMazeID }
     }
 
-    /// Same clear-then-upsert semantics as `CompatibilityIndexDatabase.applyMapping`.
+    /// Same clear-then-upsert semantics as `ShowIDMappingDatabase.applyMapping`.
     func applyMapping(tvMazeID: Int, tvdbID: Int?) {
         removeMappings(forTVMazeID: tvMazeID)
         if let tvdbID, tvdbID > 0 {

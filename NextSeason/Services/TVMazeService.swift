@@ -17,7 +17,7 @@ nonisolated protocol TVMazeService: Sendable {
     ///
     /// Bridge used after guest search: Search lists TheTVDB hits, then this
     /// maps the selected id into the TVMaze-keyed detail / watchlist world when
-    /// a local compatibility mapping is missing or stale.
+    /// a local show ID mapping is missing or stale.
     func lookupShow(theTVDBID: Int) async throws -> Show
 
     /// Full show info including embedded seasons and next episode.
@@ -36,10 +36,10 @@ nonisolated protocol TVMazeService: Sendable {
     /// One page of the TVMaze show index (`GET /shows?page=`).
     ///
     /// Throws `TVMazeError.notFound` when the page is past the end of the index.
-    /// Used only by the compatibility-index generator/refresh path — not Search.
+    /// Used only by the show ID mapping generator/refresh path — not Search.
     func showsIndex(page: Int) async throws -> [ShowIndexEntryData]
 
-    /// Lightweight show fetch for compatibility refresh (`id` + `externals`).
+    /// Lightweight show fetch for show ID mapping refresh (`id` + `externals`).
     func showIndexEntry(id: Int) async throws -> ShowIndexEntryData
 }
 

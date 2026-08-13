@@ -8,7 +8,7 @@ import Foundation
 /// A series hit from TheTVDB search.
 ///
 /// Identity is TheTVDB's series id — not a TVMaze id. Search filters hits through
-/// the local TVDB↔TVMaze compatibility index before display. Open/track resolves
+/// the local TVDB↔TVMaze show ID mapping before display. Open/track resolves
 /// via the mapped TVMaze id (`show(id:)`), falling back to
 /// `lookupShow(theTVDBID:)` when a mapping is stale.
 nonisolated struct TVDBSearchResult: Identifiable, Sendable, Hashable {
