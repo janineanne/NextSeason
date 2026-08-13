@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Synchronization
 import Testing
 
 @testable import NextSeason
@@ -321,21 +322,24 @@ struct ShowIDMappingRefreshServiceTests {
         #expect(afterThird.syncHorizonAt == nil)
     }
 
-    private final class SyncClock: @unchecked Sendable {
-        private let lock = NSLock()
-        private var dates: [Date]
-        private var index = 0
+    private final class SyncClock: Sendable {
+        private struct State {
+            var dates: [Date]
+            var index = 0
+        }
+
+        private let state: Mutex<State>
 
         init(dates: [Date]) {
-            self.dates = dates
+            state = Mutex(State(dates: dates))
         }
 
         func next() -> Date {
-            lock.lock()
-            defer { lock.unlock() }
-            let date = dates[min(index, dates.count - 1)]
-            index += 1
-            return date
+            state.withLock { state in
+                let date = state.dates[min(state.index, state.dates.count - 1)]
+                state.index += 1
+                return date
+            }
         }
     }
 

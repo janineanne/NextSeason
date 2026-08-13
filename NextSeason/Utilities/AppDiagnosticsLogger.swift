@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Synchronization
 import os
 
 /// Snapshot of launch and abrupt-termination signals for diagnostics export.
@@ -231,22 +232,19 @@ enum AppDiagnosticsLogger: Sendable {
 
 // MARK: - Breadcrumb store
 
-private final class BreadcrumbStore: @unchecked Sendable {
-    private let lock = NSLock()
-    nonisolated(unsafe) private var entries: [String] = []
+private final class BreadcrumbStore: Sendable {
+    private let entries = Mutex<[String]>([])
 
-    nonisolated func append(_ entry: String, limit: Int) {
-        lock.lock()
-        defer { lock.unlock() }
-        entries.append(entry)
-        if entries.count > limit {
-            entries.removeFirst(entries.count - limit)
+    func append(_ entry: String, limit: Int) {
+        entries.withLock { entries in
+            entries.append(entry)
+            if entries.count > limit {
+                entries.removeFirst(entries.count - limit)
+            }
         }
     }
 
-    nonisolated func snapshot(limit: Int) -> [String] {
-        lock.lock()
-        defer { lock.unlock() }
-        return Array(entries.suffix(limit))
+    func snapshot(limit: Int) -> [String] {
+        entries.withLock { Array($0.suffix(limit)) }
     }
 }
