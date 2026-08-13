@@ -199,6 +199,32 @@ actor ShowIDMappingDatabase: ShowIDMapping {
 
     // MARK: - File bootstrap
 
+    /// Opens the on-device mapping database at the default Application Support
+    /// location, copying the bundled baseline if needed.
+    ///
+    /// If the first open fails, replaces the writable file from the bundled
+    /// baseline (or empty schema) and retries once. A second failure is thrown.
+    nonisolated static func openDefault() throws -> ShowIDMappingDatabase {
+        let writableURL = try defaultWritableURL()
+        let bundledURL = bundledDatabaseURL()
+        do {
+            return try ShowIDMappingDatabase(
+                fileURL: writableURL,
+                bundledURL: bundledURL
+            )
+        } catch {
+            try prepareWritableDatabase(
+                at: writableURL,
+                bundledURL: bundledURL,
+                forceReplace: true
+            )
+            return try ShowIDMappingDatabase(
+                fileURL: writableURL,
+                bundledURL: bundledURL
+            )
+        }
+    }
+
     /// Application Support path for the mutable on-device copy of the mapping.
     nonisolated static func defaultWritableURL(
         fileManager: FileManager = .default
@@ -447,7 +473,7 @@ actor ShowIDMappingDatabase: ShowIDMapping {
 
 /// Failures opening, preparing, or mutating the show ID mapping SQLite store.
 ///
-/// Surfaced to composition-root recovery and tests; Search treats a missing
+/// Surfaced to launch-time recovery and tests; Search treats a missing
 /// mapping as “not actionable” rather than throwing these errors.
 enum ShowIDMappingError: Error, LocalizedError {
     /// Low-level SQLite prepare / step / exec failure (message from `sqlite3_errmsg`).

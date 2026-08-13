@@ -51,27 +51,7 @@ struct AppCompositionRoot {
             let container = try ModelContainer(for: TrackedShowEntity.self)
             modelContainer = container
             repository = SwiftDataWatchlistRepository(context: ModelContext(container))
-            let writableURL = try ShowIDMappingDatabase.defaultWritableURL()
-            let bundledURL = ShowIDMappingDatabase.bundledDatabaseURL()
-            let database: ShowIDMappingDatabase
-            do {
-                database = try ShowIDMappingDatabase(
-                    fileURL: writableURL,
-                    bundledURL: bundledURL
-                )
-            } catch {
-                // Corrupt / unreadable writable copy — force-replace from the
-                // bundled baseline (or empty schema) and reopen once.
-                try ShowIDMappingDatabase.prepareWritableDatabase(
-                    at: writableURL,
-                    bundledURL: bundledURL,
-                    forceReplace: true
-                )
-                database = try ShowIDMappingDatabase(
-                    fileURL: writableURL,
-                    bundledURL: bundledURL
-                )
-            }
+            let database = try ShowIDMappingDatabase.openDefault()
             showIDMapping = database
             showIDMappingRefresh = ShowIDMappingRefreshService(
                 database: database,
