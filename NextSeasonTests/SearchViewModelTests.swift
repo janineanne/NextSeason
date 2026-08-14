@@ -197,7 +197,7 @@ struct SearchViewModelTests {
         let offsets = CallCounter()
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
-                offsets.value += 1
+                offsets.increment()
                 if offset == 0 {
                     return Self.page([page1Only], hasMore: true, offset: offset)
                 }
@@ -267,7 +267,7 @@ struct SearchViewModelTests {
         let offsets = CallCounter()
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
-                offsets.value += 1
+                offsets.increment()
                 #expect(offset == 0)
                 return Self.page([unmapped], hasMore: false, offset: offset)
             },
@@ -301,7 +301,7 @@ struct SearchViewModelTests {
         let offsets = CallCounter()
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
-                offsets.value += 1
+                offsets.increment()
                 // Fill advances via nextOffset (1 per mock page), so the first
                 // burst uses offsets 0..<maxPages before Load More.
                 if offset < maxPages {
@@ -403,7 +403,7 @@ struct SearchViewModelTests {
         let counter = CallCounter()
         let viewModel = makeViewModel(
             search: MockSearchService { _, offset in
-                counter.value += 1
+                counter.increment()
                 return Self.page([sampleResult], hasMore: false, offset: offset)
             }
         )
@@ -472,8 +472,16 @@ struct SearchViewModelTests {
         #expect(counter.theTVDBLookups == 0)
     }
 
-    private final class CallCounter: @unchecked Sendable {
-        var value = 0
+    private final class CallCounter: Sendable {
+        private let count = Mutex(0)
+
+        func increment() {
+            count.withLock { $0 += 1 }
+        }
+
+        var value: Int {
+            count.withLock { $0 }
+        }
     }
 
     private final class OffsetRecorder: Sendable {

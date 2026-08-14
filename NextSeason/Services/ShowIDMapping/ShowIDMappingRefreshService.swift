@@ -19,8 +19,8 @@ import os
 /// picked up on the next sync instead of being skipped forever.
 ///
 /// The updates lower watermark is `lastSuccessfulSyncAt ?? generatedAt`, so a
-/// freshly installed bundled database does not re-fetch a week of mappings that
-/// were already baked into the snapshot.
+/// freshly installed bundled database only processes changes newer than the
+/// bundled snapshot.
 actor ShowIDMappingRefreshService {
     /// Roughly weekly refreshes are enough for search filtering freshness.
     static let refreshInterval: TimeInterval = 7 * 24 * 60 * 60
@@ -215,6 +215,7 @@ actor ShowIDMappingRefreshService {
             since: lastSync,
             at: horizonAt
         ) {
+            AppDiagnosticsLogger.breadcrumb("show_id_mapping_updates_unfiltered")
             return try await tvMaze.allUpdatedShows()
         }
 

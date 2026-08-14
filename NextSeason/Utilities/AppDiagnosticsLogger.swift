@@ -232,7 +232,10 @@ enum AppDiagnosticsLogger: Sendable {
 
 // MARK: - Breadcrumb store
 
-private final class BreadcrumbStore: Sendable {
+/// Thread-safe breadcrumb buffer. Marked `nonisolated` so diagnostics can record
+/// from any isolation under the app's default MainActor isolation; `Mutex`
+/// protects the array.
+private nonisolated final class BreadcrumbStore: Sendable {
     private let entries = Mutex<[String]>([])
 
     func append(_ entry: String, limit: Int) {

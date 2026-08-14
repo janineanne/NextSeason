@@ -205,21 +205,30 @@ actor ShowIDMappingDatabase: ShowIDMapping {
     /// If the first open fails, replaces the writable file from the bundled
     /// baseline (or empty schema) and retries once. A second failure is thrown.
     nonisolated static func openDefault() throws -> ShowIDMappingDatabase {
-        let writableURL = try defaultWritableURL()
-        let bundledURL = bundledDatabaseURL()
+        try open(fileURL: defaultWritableURL(), bundledURL: bundledDatabaseURL())
+    }
+
+    /// Opens a mapping database at `fileURL`, copying from `bundledURL` if needed.
+    ///
+    /// If the first open fails, replaces the writable file from the bundled
+    /// baseline (or empty schema) and retries once. A second failure is thrown.
+    nonisolated static func open(
+        fileURL: URL,
+        bundledURL: URL?
+    ) throws -> ShowIDMappingDatabase {
         do {
             return try ShowIDMappingDatabase(
-                fileURL: writableURL,
+                fileURL: fileURL,
                 bundledURL: bundledURL
             )
         } catch {
             try prepareWritableDatabase(
-                at: writableURL,
+                at: fileURL,
                 bundledURL: bundledURL,
                 forceReplace: true
             )
             return try ShowIDMappingDatabase(
-                fileURL: writableURL,
+                fileURL: fileURL,
                 bundledURL: bundledURL
             )
         }
