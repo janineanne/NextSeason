@@ -156,7 +156,7 @@ actor TVMazeClient: TVMazeService {
         return try await get(components)
     }
 
-    /// `GET /shows/:id` decoded as id + externals for show ID mapping refresh.
+    /// `GET /shows/:id` decoded as id, name, image, and externals for mapping refresh.
     func showIndexEntry(id: Int) async throws -> ShowIndexEntryData {
         AppDiagnosticsLogger.logger(for: .network)
             .notice("show_index_entry_start show_id=\(id, privacy: .public)")

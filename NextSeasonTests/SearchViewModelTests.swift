@@ -149,6 +149,82 @@ struct SearchViewModelTests {
         #expect(viewModel.resolvedTVMazeID(for: sampleResult.id) == 44933)
     }
 
+    @Test("Search rows overlay TVMaze title and poster from the mapping")
+    func overlaysTVMazeTitleAndPoster() async throws {
+        let nativeTitle = TVDBSearchResult(
+            id: 371980,
+            name: "Ablösung",
+            year: "2022",
+            network: "Apple TV",
+            status: "Continuing",
+            posterURL: URL(string: "https://example.com/tvdb.jpg")
+        )
+        let poster = URL(
+            string: "https://static.tvmaze.com/uploads/images/medium_portrait/1/1.jpg"
+        )
+        let mapping = InMemoryShowIDMapping(
+            records: [
+                371980: ShowIDMappingRecord(
+                    tvMazeID: 44933,
+                    name: "Severance",
+                    posterMediumURL: poster
+                )
+            ]
+        )
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, offset in
+                Self.page([nativeTitle], hasMore: false, offset: offset)
+            },
+            mapping: mapping
+        )
+        viewModel.query = "severance"
+        await viewModel.search()
+        guard case .results(let page) = viewModel.state else {
+            Issue.record("expected results")
+            return
+        }
+        let item = try #require(page.items.first)
+        #expect(item.id == 371980)
+        #expect(item.name == "Severance")
+        #expect(item.posterURL == poster)
+    }
+
+    @Test("Search drops TheTVDB poster when the mapping has no TVMaze artwork")
+    func doesNotFallBackToTVDBPoster() async throws {
+        let withTVDBPoster = TVDBSearchResult(
+            id: 371980,
+            name: "Ablösung",
+            year: "2022",
+            network: "Apple TV",
+            status: "Continuing",
+            posterURL: URL(string: "https://example.com/tvdb.jpg")
+        )
+        let mapping = InMemoryShowIDMapping(
+            records: [
+                371980: ShowIDMappingRecord(
+                    tvMazeID: 44933,
+                    name: "Severance",
+                    posterMediumURL: nil
+                )
+            ]
+        )
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, offset in
+                Self.page([withTVDBPoster], hasMore: false, offset: offset)
+            },
+            mapping: mapping
+        )
+        viewModel.query = "severance"
+        await viewModel.search()
+        guard case .results(let page) = viewModel.state else {
+            Issue.record("expected results")
+            return
+        }
+        let item = try #require(page.items.first)
+        #expect(item.name == "Severance")
+        #expect(item.posterURL == nil)
+    }
+
     @Test("Filtering removes unmapped results")
     func filteringRemovesUnmappedResults() async {
         let unmapped = TVDBSearchResult(

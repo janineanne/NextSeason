@@ -30,6 +30,7 @@ You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and relat
 - TVMaze API — canonical show/season provider for detail, watchlist, and refresh
  (resolve TheTVDB hits to TVMaze before entering those flows)
 - Bundled TVDB↔TVMaze show ID mapping SQLite database — offline Search filtering
+ and TVMaze title/poster overlay on search rows
  (regenerate with `Scripts/generate-tvdb-tvmaze-show-id-mapping-db.py` before release;
  see `NextSeason/Resources/ShowIDMapping/ATTRIBUTION.md`)
 

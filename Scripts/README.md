@@ -164,7 +164,12 @@ Normally invoked automatically by `run-profile-flows-uninstrumented.sh`.
 
 Walks TVMaze’s paginated show index and regenerates the bundled
 `NextSeason/Resources/ShowIDMapping/tvdb_tvmaze_show_id_mapping.sqlite` mapping
-(TheTVDB id → TVMaze id).
+(TheTVDB id → TVMaze id, title, and medium poster URL). Schema version 2.
+
+**When to run:** manually before an App Store release (or whenever the catalog
+should be refreshed in source control). Not hooked into normal Xcode builds.
+Safe to invoke from future CI. On-device copies with an older schema are
+replaced from this bundled snapshot on launch.
 
 **When to run:** manually before an App Store release (or whenever the catalog
 should be refreshed in source control). Not hooked into normal Xcode builds.

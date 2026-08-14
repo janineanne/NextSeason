@@ -42,7 +42,7 @@ struct ShowRowLabel: View {
     }
 
     /// TheTVDB search hit: year/status as subtitle, network as the detail line.
-    /// (Unlike `Show`, these rows are not yet TVMaze-resolved.)
+    /// Name and poster are TVMaze fields overlaid from the local mapping.
     init(result: TVDBSearchResult) {
         self.init(
             name: result.name,

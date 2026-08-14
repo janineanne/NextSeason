@@ -8,9 +8,10 @@ import SwiftUI
 /// Guest search: type a title, browse matching shows, and track from the results list.
 ///
 /// Search hits come from TheTVDB (paginated), then are filtered through the local
-/// TVDB↔TVMaze show ID mapping so only actionable shows are listed. Selecting
-/// or tracking a row still resolves through TVMaze before the existing show-detail
-/// / watchlist flow runs.
+/// TVDB↔TVMaze show ID mapping so only actionable shows are listed. Title and
+/// poster on each row come from that TVMaze snapshot. Selecting or tracking a
+/// row still resolves through live TVMaze before the existing show-detail /
+/// watchlist flow runs.
 ///
 /// Lifecycle / refresh matrix:
 /// - `.task(id: query)` drives `SearchViewModel.search()` (debounce + cancel on edit).

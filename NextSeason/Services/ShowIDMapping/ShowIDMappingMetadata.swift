@@ -35,5 +35,5 @@ nonisolated struct ShowIDMappingMetadata: Equatable, Sendable {
         syncHorizonAt != nil || updatesResumeCursor != nil
     }
 
-    static let currentSchemaVersion = 1
+    static let currentSchemaVersion = 2
 }

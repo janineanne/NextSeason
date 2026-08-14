@@ -145,6 +145,49 @@ struct ShowIDMappingRefreshServiceTests {
         #expect(metadata.lastSuccessfulSyncAt == now)
     }
 
+    @Test("Refresh persists TVMaze title and poster on the mapping")
+    func refreshPersistsDisplayFields() async throws {
+        let (database, url) = try await makeDatabase()
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let generatedAt = Date(timeIntervalSince1970: 1_700_000_000)
+        let now = Date(timeIntervalSince1970: 1_700_000_000 + 3_600)
+        try await database.setGeneratedAt(generatedAt)
+
+        let poster = URL(
+            string: "https://static.tvmaze.com/uploads/images/medium_portrait/9/9.jpg"
+        )!
+        let tvMaze = RecordingIndexTVMazeService(
+            updates: [
+                20: Date(timeIntervalSince1970: 1_700_000_500)
+            ],
+            externalsByShowID: [
+                20: 1_020
+            ],
+            namesByShowID: [
+                20: "Severance"
+            ],
+            posterURLsByShowID: [
+                20: poster
+            ]
+        )
+
+        let refresh = ShowIDMappingRefreshService(
+            database: database,
+            tvMaze: tvMaze,
+            now: { now },
+            maxShowDetailFetchesPerRefresh: 10,
+            requestPause: .zero
+        )
+
+        await refresh.refreshIfNeeded()
+
+        let record = try #require(await database.record(forTVDBID: 1_020))
+        #expect(record.tvMazeID == 20)
+        #expect(record.name == "Severance")
+        #expect(record.posterMediumURL == poster)
+    }
+
     @Test("No lastSuccessfulSyncAt and no generatedAt uses allUpdatedShows()")
     func missingWatermarksUseUnfilteredUpdates() async throws {
         let (database, url) = try await makeDatabase()
@@ -390,13 +433,22 @@ struct ShowIDMappingRefreshServiceTests {
     private actor RecordingIndexTVMazeService: TVMazeService {
         private var updates: [Int: Date]
         let externalsByShowID: [Int: Int]
+        let namesByShowID: [Int: String]
+        let posterURLsByShowID: [Int: URL]
         private(set) var fetchedShowIDs: [Int] = []
         private(set) var didFetchAllUpdatedShows = false
         private(set) var lastFilteredPeriod: TVMazeUpdatePeriod?
 
-        init(updates: [Int: Date], externalsByShowID: [Int: Int]) {
+        init(
+            updates: [Int: Date],
+            externalsByShowID: [Int: Int],
+            namesByShowID: [Int: String] = [:],
+            posterURLsByShowID: [Int: URL] = [:]
+        ) {
             self.updates = updates
             self.externalsByShowID = externalsByShowID
+            self.namesByShowID = namesByShowID
+            self.posterURLsByShowID = posterURLsByShowID
         }
 
         func setUpdates(_ updates: [Int: Date]) {
@@ -423,8 +475,11 @@ struct ShowIDMappingRefreshServiceTests {
 
         func showIndexEntry(id: Int) async throws -> ShowIndexEntryData {
             fetchedShowIDs.append(id)
+            let posterURL = posterURLsByShowID[id]
             return ShowIndexEntryData(
                 id: id,
+                name: namesByShowID[id],
+                image: posterURL.map { ImageData(medium: $0.absoluteString, original: nil) },
                 externals: ShowExternalsData(thetvdb: externalsByShowID[id])
             )
         }

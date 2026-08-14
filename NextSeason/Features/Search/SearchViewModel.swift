@@ -15,7 +15,8 @@ import Foundation
 /// Provider split:
 /// - **Search list** — TheTVDB hits (`TVDBSearchResult`), paginated, then filtered
 ///   through the local TVDB↔TVMaze show ID mapping (not a TVMaze network
-///   lookup per hit). Pages are advanced until a reasonable actionable batch is
+///   lookup per hit). Mapped rows overlay TVMaze title and poster from the
+///   snapshot. Pages are advanced until a reasonable actionable batch is
 ///   collected or TheTVDB results are exhausted.
 /// - **Open / track** — resolve to a TVMaze `Show` first, then use the existing
 ///   detail and watchlist flows unchanged (those still key off TVMaze ids).
@@ -306,18 +307,18 @@ final class SearchViewModel {
         return ActionableFill(items: collected, nextOffset: offset, hasMore: tvdbHasMore)
     }
 
-    /// Keeps only hits present in the local show ID mapping and caches their
-    /// TVMaze ids for row stars / later resolve.
+    /// Keeps only hits present in the local show ID mapping, overlays TVMaze
+    /// title/poster, and caches TVMaze ids for row stars / later resolve.
     private func filterActionable(_ results: [TVDBSearchResult]) async -> [TVDBSearchResult] {
         var actionable: [TVDBSearchResult] = []
         actionable.reserveCapacity(results.count)
 
         for result in results {
-            guard let mappedID = await showIDMapping.tvMazeID(forTVDBID: result.id) else {
+            guard let record = await showIDMapping.record(forTVDBID: result.id) else {
                 continue
             }
-            resolvedTVMazeIDsByTVDBID[result.id] = mappedID
-            actionable.append(result)
+            resolvedTVMazeIDsByTVDBID[result.id] = record.tvMazeID
+            actionable.append(result.overlayingTVMazeDisplayFields(record))
         }
 
         return actionable

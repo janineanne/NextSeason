@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SQLite3
 import Testing
 
 @testable import NextSeason
@@ -29,6 +30,98 @@ struct ShowIDMappingDatabaseTests {
 
         let mapped = await database.tvMazeID(forTVDBID: 371980)
         #expect(mapped == 44933)
+    }
+
+    @Test("Mapping stores TVMaze title and poster")
+    func storesTitleAndPoster() async throws {
+        let (database, url) = try await makeDatabase()
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let poster = URL(string: "https://static.tvmaze.com/uploads/images/medium_portrait/1/1.jpg")
+        try await database.upsert(
+            tvdbID: 371980,
+            tvMazeID: 44933,
+            name: "Severance",
+            posterMediumURL: poster
+        )
+
+        let record = try #require(await database.record(forTVDBID: 371980))
+        #expect(record.tvMazeID == 44933)
+        #expect(record.name == "Severance")
+        #expect(record.posterMediumURL == poster)
+    }
+
+    @Test("ID-only upsert keeps existing title and poster")
+    func idOnlyUpsertPreservesDisplayFields() async throws {
+        let (database, url) = try await makeDatabase()
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let poster = URL(string: "https://static.tvmaze.com/uploads/images/medium_portrait/1/1.jpg")
+        try await database.upsert(
+            tvdbID: 371980,
+            tvMazeID: 44933,
+            name: "Severance",
+            posterMediumURL: poster
+        )
+        try await database.upsert(tvdbID: 371980, tvMazeID: 44933)
+
+        let record = try #require(await database.record(forTVDBID: 371980))
+        #expect(record.name == "Severance")
+        #expect(record.posterMediumURL == poster)
+    }
+
+    @Test("Schema 1 prepared database gains display columns without dropping IDs")
+    func migratesSchema1PreparedDatabase() async throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("mapping-schema1-\(UUID().uuidString).sqlite")
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        try createSchema1Database(at: url, seed: [(371980, 44933)])
+        let database = try ShowIDMappingDatabase(preparedFileURL: url)
+
+        #expect(await database.tvMazeID(forTVDBID: 371980) == 44933)
+        #expect(await database.record(forTVDBID: 371980)?.name == nil)
+
+        try await database.upsert(
+            tvdbID: 371980,
+            tvMazeID: 44933,
+            name: "Severance"
+        )
+        #expect(await database.record(forTVDBID: 371980)?.name == "Severance")
+        let metadata = try await database.metadata()
+        #expect(metadata.schemaVersion == ShowIDMappingMetadata.currentSchemaVersion)
+    }
+
+    @Test("Older writable schema is replaced from the bundled snapshot")
+    func openReplacesMismatchedSchemaFromBundledBaseline() async throws {
+        let bundledURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bundled-\(UUID().uuidString).sqlite")
+        let writableURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("writable-\(UUID().uuidString).sqlite")
+        defer {
+            try? FileManager.default.removeItem(at: bundledURL)
+            try? FileManager.default.removeItem(at: writableURL)
+        }
+
+        try ShowIDMappingDatabase.createEmptyDatabase(at: bundledURL)
+        let bundled = try ShowIDMappingDatabase(preparedFileURL: bundledURL)
+        try await bundled.upsert(
+            tvdbID: 371980,
+            tvMazeID: 44933,
+            name: "Severance"
+        )
+        await bundled.close()
+
+        try createSchema1Database(at: writableURL, seed: [(1, 2)])
+
+        let database = try ShowIDMappingDatabase.open(
+            fileURL: writableURL,
+            bundledURL: bundledURL
+        )
+        #expect(await database.tvMazeID(forTVDBID: 1) == nil)
+        let record = try #require(await database.record(forTVDBID: 371980))
+        #expect(record.tvMazeID == 44933)
+        #expect(record.name == "Severance")
     }
 
     @Test("Unknown TVDB ID returns no mapping")
@@ -174,6 +267,42 @@ struct ShowIDMappingDatabaseTests {
         }
         func showIndexEntry(id: Int) async throws -> ShowIndexEntryData {
             throw TVMazeError.network(URLError(.notConnectedToInternet))
+        }
+    }
+
+    private func createSchema1Database(at url: URL, seed: [(Int, Int)]) throws {
+        var db: OpaquePointer?
+        guard sqlite3_open(url.path, &db) == SQLITE_OK, let db else {
+            throw ShowIDMappingError.sqlite("Unable to create schema 1 database")
+        }
+        defer { sqlite3_close(db) }
+
+        var errorMessage: UnsafeMutablePointer<CChar>?
+        let schema = """
+            CREATE TABLE meta (
+                key TEXT PRIMARY KEY NOT NULL,
+                value TEXT NOT NULL
+            );
+            CREATE TABLE mappings (
+                tvdb_id INTEGER PRIMARY KEY NOT NULL,
+                tvmaze_id INTEGER NOT NULL
+            );
+            CREATE INDEX idx_mappings_tvmaze_id ON mappings(tvmaze_id);
+            INSERT INTO meta(key, value) VALUES('schema_version', '1');
+            """
+        let result = sqlite3_exec(db, schema, nil, nil, &errorMessage)
+        if result != SQLITE_OK {
+            let message = errorMessage.map { String(cString: $0) } ?? "SQLite error"
+            sqlite3_free(errorMessage)
+            throw ShowIDMappingError.sqlite(message)
+        }
+
+        for pair in seed {
+            let insert =
+                "INSERT INTO mappings(tvdb_id, tvmaze_id) VALUES(\(pair.0), \(pair.1));"
+            guard sqlite3_exec(db, insert, nil, nil, nil) == SQLITE_OK else {
+                throw ShowIDMappingError.sqlite("Unable to seed schema 1 database")
+            }
         }
     }
 }

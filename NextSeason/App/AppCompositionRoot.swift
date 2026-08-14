@@ -21,7 +21,7 @@ struct AppCompositionRoot {
     let tvMaze: any TVMazeService
     /// Guest search provider (paginated series search only).
     let theTVDB: any TheTVDBService
-    /// Offline TheTVDB → TVMaze filter for Search results.
+    /// Offline TheTVDB → TVMaze filter and TVMaze title/poster overlay for Search.
     let showIDMapping: any ShowIDMapping
     /// Opportunistic on-device mapping refresh; `nil` under UI tests.
     let showIDMappingRefresh: ShowIDMappingRefreshService?

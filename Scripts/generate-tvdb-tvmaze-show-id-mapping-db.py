@@ -3,7 +3,7 @@
 Generate the bundled TheTVDB ↔ TVMaze show ID mapping SQLite database.
 
 Walks TVMaze's paginated show index (`GET /shows?page=`), extracts shows with a
-usable `externals.thetvdb` id, and writes:
+usable `externals.thetvdb` id plus TVMaze `name` / `image.medium`, and writes:
 
   NextSeason/Resources/ShowIDMapping/tvdb_tvmaze_show_id_mapping.sqlite
 
@@ -43,7 +43,7 @@ DEFAULT_OUTPUT = (
 
 TVMAZE_BASE = "https://api.tvmaze.com"
 USER_AGENT = "NextSeason/show-id-mapping-db-generator (manual; local-dev)"
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"
 PAGE_SIZE = 250  # TVMaze show-index ID slice
 REQUEST_PAUSE_SECONDS = 0.35  # stay comfortably under ≥20 calls / 10s
 MAX_RETRIES = 5
@@ -102,7 +102,9 @@ def create_schema(connection: sqlite3.Connection) -> None:
 
         CREATE TABLE mappings (
             tvdb_id INTEGER PRIMARY KEY NOT NULL,
-            tvmaze_id INTEGER NOT NULL
+            tvmaze_id INTEGER NOT NULL,
+            name TEXT,
+            poster_medium_url TEXT
         );
 
         CREATE INDEX idx_mappings_tvmaze_id ON mappings(tvmaze_id);
@@ -126,7 +128,8 @@ def generate(output_path: Path) -> None:
     if temp_path.exists():
         temp_path.unlink()
 
-    mappings: dict[int, int] = {}
+    # tvdb_id → (tvmaze_id, name, poster_medium_url)
+    mappings: dict[int, tuple[int, str | None, str | None]] = {}
     highest_tvmaze_id = 0
     shows_seen = 0
     page = 0
@@ -158,8 +161,18 @@ def generate(output_path: Path) -> None:
                     continue
                 # Deterministic: lowest TVMaze id wins on rare conflicts.
                 existing = mappings.get(tvdb_id)
-                if existing is None or tvmaze_id < existing:
-                    mappings[tvdb_id] = tvmaze_id
+                if existing is None or tvmaze_id < existing[0]:
+                    raw_name = show.get("name")
+                    name = raw_name.strip() if isinstance(raw_name, str) else None
+                    if name == "":
+                        name = None
+                    image = show.get("image") or {}
+                    poster = image.get("medium") if isinstance(image, dict) else None
+                    if isinstance(poster, str):
+                        poster = poster.strip() or None
+                    else:
+                        poster = None
+                    mappings[tvdb_id] = (tvmaze_id, name, poster)
 
             if page % 25 == 0:
                 print(
@@ -173,8 +186,12 @@ def generate(output_path: Path) -> None:
 
         rows = sorted(mappings.items(), key=lambda pair: pair[0])
         connection.executemany(
-            "INSERT INTO mappings(tvdb_id, tvmaze_id) VALUES(?, ?)",
-            rows,
+            "INSERT INTO mappings(tvdb_id, tvmaze_id, name, poster_medium_url) "
+            "VALUES(?, ?, ?, ?)",
+            [
+                (tvdb_id, tvmaze_id, name, poster)
+                for tvdb_id, (tvmaze_id, name, poster) in rows
+            ],
         )
 
         generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()

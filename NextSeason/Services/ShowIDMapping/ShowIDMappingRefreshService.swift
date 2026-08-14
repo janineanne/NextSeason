@@ -136,7 +136,9 @@ actor ShowIDMappingRefreshService {
                     if entry.id > highest { highest = entry.id }
                     try await database.applyMapping(
                         tvMazeID: entry.id,
-                        tvdbID: entry.externals?.thetvdb
+                        tvdbID: entry.externals?.thetvdb,
+                        name: entry.name,
+                        posterMediumURL: entry.posterMediumURL
                     )
                 }
                 try await database.setHighestTVMazeID(highest)
@@ -174,7 +176,9 @@ actor ShowIDMappingRefreshService {
                 let entry = try await tvMaze.showIndexEntry(id: item.showID)
                 try await database.applyMapping(
                     tvMazeID: entry.id,
-                    tvdbID: entry.externals?.thetvdb
+                    tvdbID: entry.externals?.thetvdb,
+                    name: entry.name,
+                    posterMediumURL: entry.posterMediumURL
                 )
             } catch TVMazeError.notFound {
                 // Show removed from TVMaze — drop any local mapping.

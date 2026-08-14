@@ -39,7 +39,7 @@ nonisolated protocol TVMazeService: Sendable {
     /// Used only by the show ID mapping generator/refresh path — not Search.
     func showsIndex(page: Int) async throws -> [ShowIndexEntryData]
 
-    /// Lightweight show fetch for show ID mapping refresh (`id` + `externals`).
+    /// Lightweight show fetch for mapping refresh (`id`, name, image, externals).
     func showIndexEntry(id: Int) async throws -> ShowIndexEntryData
 }
 

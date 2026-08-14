@@ -17,27 +17,21 @@ struct TheTVDBClientTests {
                 name: "Valid",
                 year: "2024",
                 network: nil,
-                status: nil,
-                imageURL: nil,
-                thumbnail: nil
+                status: nil
             ),
             TheTVDBSearchResultData(
                 tvdbID: nil,
                 name: "Missing ID",
                 year: nil,
                 network: nil,
-                status: nil,
-                imageURL: nil,
-                thumbnail: nil
+                status: nil
             ),
             TheTVDBSearchResultData(
                 tvdbID: "3",
                 name: "   ",
                 year: nil,
                 network: nil,
-                status: nil,
-                imageURL: nil,
-                thumbnail: nil
+                status: nil
             ),
         ]
 
@@ -61,9 +55,7 @@ struct TheTVDBClientTests {
                 name: "Sparse \(index)",
                 year: nil,
                 network: nil,
-                status: nil,
-                imageURL: nil,
-                thumbnail: nil
+                status: nil
             )
         }
 
@@ -87,18 +79,14 @@ struct TheTVDBClientTests {
                 name: "Valid",
                 year: nil,
                 network: nil,
-                status: nil,
-                imageURL: nil,
-                thumbnail: nil
+                status: nil
             ),
             TheTVDBSearchResultData(
                 tvdbID: nil,
                 name: "Sparse",
                 year: nil,
                 network: nil,
-                status: nil,
-                imageURL: nil,
-                thumbnail: nil
+                status: nil
             ),
         ]
         let links = TheTVDBLinksData(next: nil, totalItems: 30, pageSize: 10)

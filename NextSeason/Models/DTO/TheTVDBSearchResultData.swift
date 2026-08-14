@@ -42,21 +42,20 @@ nonisolated struct TheTVDBLoginTokenData: Decodable, Sendable {
 }
 
 /// Mirrors a TheTVDB `/search` hit. Only fields NextSeason uses are decoded;
-/// unknown keys (translations, overviews, remote ids, etc.) are ignored.
+/// unknown keys (translations, overviews, remote ids, artwork, etc.) are ignored.
 ///
 /// `tvdb_id` arrives as a string in JSON even though it is numeric.
+/// Artwork is intentionally not decoded — Search overlays TVMaze posters from
+/// the local mapping instead.
 nonisolated struct TheTVDBSearchResultData: Codable, Sendable {
     let tvdbID: String?
     let name: String?
     let year: String?
     let network: String?
     let status: String?
-    let imageURL: String?
-    let thumbnail: String?
 
     enum CodingKeys: String, CodingKey {
         case tvdbID = "tvdb_id"
-        case name, year, network, status, thumbnail
-        case imageURL = "image_url"
+        case name, year, network, status
     }
 }

@@ -46,15 +46,16 @@ actor ShowIDMappingDatabase: ShowIDMapping {
     }
 
     /// Protocol entry point — hops onto the actor, then uses the sync lookup.
-    func tvMazeID(forTVDBID id: Int) async -> Int? {
-        lookupTVMazeID(forTVDBID: id)
+    func record(forTVDBID id: Int) async -> ShowIDMappingRecord? {
+        lookupRecord(forTVDBID: id)
     }
 
     /// Synchronous TheTVDB → TVMaze lookup for callers already on this actor
-    /// (refresh writes, recovery). Prefer `tvMazeID(forTVDBID:)` from outside.
-    func lookupTVMazeID(forTVDBID id: Int) -> Int? {
+    /// (refresh writes, recovery). Prefer `record(forTVDBID:)` from outside.
+    func lookupRecord(forTVDBID id: Int) -> ShowIDMappingRecord? {
         guard let db else { return nil }
-        let sql = "SELECT tvmaze_id FROM mappings WHERE tvdb_id = ? LIMIT 1;"
+        let sql =
+            "SELECT tvmaze_id, name, poster_medium_url FROM mappings WHERE tvdb_id = ? LIMIT 1;"
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
             return nil
@@ -62,17 +63,38 @@ actor ShowIDMappingDatabase: ShowIDMapping {
         defer { sqlite3_finalize(statement) }
         sqlite3_bind_int64(statement, 1, sqlite3_int64(id))
         guard sqlite3_step(statement) == SQLITE_ROW else { return nil }
-        return Int(sqlite3_column_int64(statement, 0))
+        let tvMazeID = Int(sqlite3_column_int64(statement, 0))
+        let name = Self.columnText(statement, index: 1)
+        let poster = Self.columnText(statement, index: 2).flatMap(URL.init(string:))
+        return ShowIDMappingRecord(tvMazeID: tvMazeID, name: name, posterMediumURL: poster)
     }
 
     /// Inserts or replaces the mapping keyed by TheTVDB id.
-    func upsert(tvdbID: Int, tvMazeID: Int) throws {
+    /// Nil display fields keep any values already stored for this TheTVDB id.
+    func upsert(
+        tvdbID: Int,
+        tvMazeID: Int,
+        name: String? = nil,
+        posterMediumURL: URL? = nil
+    ) throws {
+        let trimmedName = name?.trimmingCharacters(in: .whitespacesAndNewlines)
         try execute(
-            "INSERT INTO mappings(tvdb_id, tvmaze_id) VALUES(?, ?) "
-                + "ON CONFLICT(tvdb_id) DO UPDATE SET tvmaze_id = excluded.tvmaze_id;",
+            """
+            INSERT INTO mappings(tvdb_id, tvmaze_id, name, poster_medium_url) VALUES(?, ?, ?, ?)
+            ON CONFLICT(tvdb_id) DO UPDATE SET
+                tvmaze_id = excluded.tvmaze_id,
+                name = COALESCE(excluded.name, mappings.name),
+                poster_medium_url = COALESCE(excluded.poster_medium_url, mappings.poster_medium_url);
+            """,
             bind: { statement in
                 sqlite3_bind_int64(statement, 1, sqlite3_int64(tvdbID))
                 sqlite3_bind_int64(statement, 2, sqlite3_int64(tvMazeID))
+                Self.bindText(
+                    statement,
+                    index: 3,
+                    (trimmedName?.isEmpty == false) ? trimmedName : nil
+                )
+                Self.bindText(statement, index: 4, posterMediumURL?.absoluteString)
             }
         )
     }
@@ -101,10 +123,20 @@ actor ShowIDMappingDatabase: ShowIDMapping {
     ///
     /// A show can change or lose its TheTVDB external; clear prior rows for
     /// this TVMaze id, then write the current mapping when present.
-    func applyMapping(tvMazeID: Int, tvdbID: Int?) throws {
+    func applyMapping(
+        tvMazeID: Int,
+        tvdbID: Int?,
+        name: String? = nil,
+        posterMediumURL: URL? = nil
+    ) throws {
         try removeMappings(forTVMazeID: tvMazeID)
         if let tvdbID, tvdbID > 0 {
-            try upsert(tvdbID: tvdbID, tvMazeID: tvMazeID)
+            try upsert(
+                tvdbID: tvdbID,
+                tvMazeID: tvMazeID,
+                name: name,
+                posterMediumURL: posterMediumURL
+            )
         }
     }
 
@@ -289,9 +321,22 @@ actor ShowIDMappingDatabase: ShowIDMapping {
         }
 
         if fileManager.fileExists(atPath: fileURL.path), !forceReplace {
-            if isReadableDatabase(at: fileURL) { return }
-            // Unreadable / truncated file — drop it and fall through to copy/create.
-            try fileManager.removeItem(at: fileURL)
+            if isReadableDatabase(at: fileURL) {
+                if bundledURL != nil {
+                    let version = storedSchemaVersion(at: fileURL) ?? 0
+                    if version == ShowIDMappingMetadata.currentSchemaVersion {
+                        return
+                    }
+                    // Schema bump — replace from the bundled snapshot so Search
+                    // gets TVMaze titles/posters instead of empty new columns.
+                    try fileManager.removeItem(at: fileURL)
+                } else {
+                    return
+                }
+            } else {
+                // Unreadable / truncated file — drop it and fall through to copy/create.
+                try fileManager.removeItem(at: fileURL)
+            }
         }
 
         guard let bundledURL else {
@@ -325,7 +370,9 @@ actor ShowIDMappingDatabase: ShowIDMapping {
             );
             CREATE TABLE IF NOT EXISTS mappings (
                 tvdb_id INTEGER PRIMARY KEY NOT NULL,
-                tvmaze_id INTEGER NOT NULL
+                tvmaze_id INTEGER NOT NULL,
+                name TEXT,
+                poster_medium_url TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_mappings_tvmaze_id ON mappings(tvmaze_id);
             """
@@ -333,7 +380,7 @@ actor ShowIDMappingDatabase: ShowIDMapping {
         try exec(
             db,
             """
-            INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '1');
+            INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '\(ShowIDMappingMetadata.currentSchemaVersion)');
             INSERT OR REPLACE INTO meta(key, value) VALUES('generated_at', '');
             INSERT OR REPLACE INTO meta(key, value) VALUES('highest_tvmaze_id', '0');
             INSERT OR REPLACE INTO meta(key, value) VALUES('last_successful_sync_at', '');
@@ -371,7 +418,8 @@ actor ShowIDMappingDatabase: ShowIDMapping {
 
     // MARK: - Internals
 
-    /// Ensures `meta` / `mappings` exist and seeds `schema_version` when missing.
+    /// Ensures `meta` / `mappings` exist, adds display columns on older files,
+    /// and records the current schema version.
     nonisolated private static func migrateIfNeeded(_ db: OpaquePointer) throws {
         try exec(
             db,
@@ -382,18 +430,72 @@ actor ShowIDMappingDatabase: ShowIDMapping {
             );
             CREATE TABLE IF NOT EXISTS mappings (
                 tvdb_id INTEGER PRIMARY KEY NOT NULL,
-                tvmaze_id INTEGER NOT NULL
+                tvmaze_id INTEGER NOT NULL,
+                name TEXT,
+                poster_medium_url TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_mappings_tvmaze_id ON mappings(tvmaze_id);
             """
         )
-        if readMetaValue(db, key: "schema_version") == nil {
-            try writeMetaValue(
-                db,
-                key: "schema_version",
-                value: String(ShowIDMappingMetadata.currentSchemaVersion)
-            )
+        if !mappingsHasColumn(db, "name") {
+            try exec(db, "ALTER TABLE mappings ADD COLUMN name TEXT;")
         }
+        if !mappingsHasColumn(db, "poster_medium_url") {
+            try exec(db, "ALTER TABLE mappings ADD COLUMN poster_medium_url TEXT;")
+        }
+        try writeMetaValue(
+            db,
+            key: "schema_version",
+            value: String(ShowIDMappingMetadata.currentSchemaVersion)
+        )
+    }
+
+    nonisolated private static func storedSchemaVersion(at fileURL: URL) -> Int? {
+        var db: OpaquePointer?
+        guard sqlite3_open_v2(fileURL.path, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK,
+            let db
+        else {
+            return nil
+        }
+        defer { sqlite3_close(db) }
+        guard let raw = readMetaValue(db, key: "schema_version") else { return nil }
+        return Int(raw)
+    }
+
+    nonisolated private static func mappingsHasColumn(_ db: OpaquePointer, _ name: String) -> Bool {
+        var statement: OpaquePointer?
+        guard
+            sqlite3_prepare_v2(db, "PRAGMA table_info(mappings);", -1, &statement, nil)
+                == SQLITE_OK
+        else {
+            return false
+        }
+        defer { sqlite3_finalize(statement) }
+        while sqlite3_step(statement) == SQLITE_ROW {
+            guard let cString = sqlite3_column_text(statement, 1) else { continue }
+            if String(cString: cString) == name { return true }
+        }
+        return false
+    }
+
+    nonisolated private static func bindText(
+        _ statement: OpaquePointer?,
+        index: Int32,
+        _ value: String?
+    ) {
+        guard let value else {
+            sqlite3_bind_null(statement, index)
+            return
+        }
+        sqlite3_bind_text(
+            statement, index, value, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+    }
+
+    nonisolated private static func columnText(_ statement: OpaquePointer?, index: Int32) -> String?
+    {
+        guard let cString = sqlite3_column_text(statement, index) else { return nil }
+        let value = String(cString: cString)
+        return value.isEmpty ? nil : value
     }
 
     nonisolated private static func readMetaValue(_ db: OpaquePointer, key: String) -> String? {
