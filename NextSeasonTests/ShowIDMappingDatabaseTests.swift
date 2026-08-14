@@ -107,8 +107,8 @@ struct ShowIDMappingDatabaseTests {
         #expect(await database.tvMazeID(forTVDBID: 371980) == 44933)
     }
 
-    @Test("Unopenable writable database is replaced from the bundled baseline")
-    func openRecoversUnopenableWritableFromBundledBaseline() async throws {
+    @Test("Corrupt writable database is replaced from the bundled baseline")
+    func openRecoversCorruptWritableFromBundledBaseline() async throws {
         let bundledURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("bundled-\(UUID().uuidString).sqlite")
         let writableURL = FileManager.default.temporaryDirectory
@@ -123,13 +123,8 @@ struct ShowIDMappingDatabaseTests {
         try await bundled.upsert(tvdbID: 371980, tvMazeID: 44933)
         await bundled.close()
 
-        // Readable enough for the prepare-time check, but not writable so the
-        // first open throws and recovery force-replaces from the baseline.
-        try ShowIDMappingDatabase.createEmptyDatabase(at: writableURL)
-        try FileManager.default.setAttributes(
-            [.posixPermissions: 0o444],
-            ofItemAtPath: writableURL.path
-        )
+        // Not a SQLite file — prepare drops it and copies the bundled baseline.
+        try Data("not a sqlite database".utf8).write(to: writableURL)
 
         let database = try ShowIDMappingDatabase.open(
             fileURL: writableURL,
