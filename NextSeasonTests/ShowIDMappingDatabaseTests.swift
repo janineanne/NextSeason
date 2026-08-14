@@ -107,6 +107,66 @@ struct ShowIDMappingDatabaseTests {
         #expect(await database.tvMazeID(forTVDBID: 371980) == 44933)
     }
 
+    @Test("Unopenable writable database is replaced from the bundled baseline")
+    func openRecoversUnopenableWritableFromBundledBaseline() async throws {
+        let bundledURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bundled-\(UUID().uuidString).sqlite")
+        let writableURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("writable-\(UUID().uuidString).sqlite")
+        defer {
+            try? FileManager.default.removeItem(at: bundledURL)
+            try? FileManager.default.removeItem(at: writableURL)
+        }
+
+        try ShowIDMappingDatabase.createEmptyDatabase(at: bundledURL)
+        let bundled = try ShowIDMappingDatabase(preparedFileURL: bundledURL)
+        try await bundled.upsert(tvdbID: 371980, tvMazeID: 44933)
+        await bundled.close()
+
+        // Readable enough for the prepare-time check, but not writable so the
+        // first open throws and recovery force-replaces from the baseline.
+        try ShowIDMappingDatabase.createEmptyDatabase(at: writableURL)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o444],
+            ofItemAtPath: writableURL.path
+        )
+
+        let database = try ShowIDMappingDatabase.open(
+            fileURL: writableURL,
+            bundledURL: bundledURL
+        )
+        #expect(await database.tvMazeID(forTVDBID: 371980) == 44933)
+    }
+
+    @Test("Valid writable database opens without being replaced")
+    func openKeepsValidWritableDatabase() async throws {
+        let bundledURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bundled-\(UUID().uuidString).sqlite")
+        let writableURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("writable-\(UUID().uuidString).sqlite")
+        defer {
+            try? FileManager.default.removeItem(at: bundledURL)
+            try? FileManager.default.removeItem(at: writableURL)
+        }
+
+        try ShowIDMappingDatabase.createEmptyDatabase(at: bundledURL)
+        let bundled = try ShowIDMappingDatabase(preparedFileURL: bundledURL)
+        try await bundled.upsert(tvdbID: 371980, tvMazeID: 44933)
+        await bundled.close()
+
+        try ShowIDMappingDatabase.createEmptyDatabase(at: writableURL)
+        let existing = try ShowIDMappingDatabase(preparedFileURL: writableURL)
+        try await existing.upsert(tvdbID: 1, tvMazeID: 2)
+        await existing.close()
+
+        let database = try ShowIDMappingDatabase.open(
+            fileURL: writableURL,
+            bundledURL: bundledURL
+        )
+        #expect(await database.tvMazeID(forTVDBID: 1) == 2)
+        #expect(await database.tvMazeID(forTVDBID: 371980) == nil)
+    }
+
     private struct FailingIndexTVMazeService: TVMazeService {
         func searchShows(matching query: String) async throws -> [Show] { [] }
         func lookupShow(theTVDBID: Int) async throws -> Show { throw TVMazeError.notFound }

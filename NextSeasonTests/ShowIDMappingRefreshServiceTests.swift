@@ -145,6 +145,50 @@ struct ShowIDMappingRefreshServiceTests {
         #expect(metadata.lastSuccessfulSyncAt == now)
     }
 
+    @Test("No lastSuccessfulSyncAt and no generatedAt uses allUpdatedShows()")
+    func missingWatermarksUseUnfilteredUpdates() async throws {
+        let (database, url) = try await makeDatabase()
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let before = try await database.metadata()
+        #expect(before.lastSuccessfulSyncAt == nil)
+        #expect(before.generatedAt == nil)
+
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let beforeHorizon = Date(timeIntervalSince1970: 1_699_999_000)
+        let afterHorizon = Date(timeIntervalSince1970: 1_700_000_100)
+
+        let tvMaze = RecordingIndexTVMazeService(
+            updates: [
+                10: beforeHorizon,
+                20: afterHorizon,
+            ],
+            externalsByShowID: [
+                10: 1_010,
+                20: 1_020,
+            ]
+        )
+
+        let refresh = ShowIDMappingRefreshService(
+            database: database,
+            tvMaze: tvMaze,
+            now: { now },
+            maxShowDetailFetchesPerRefresh: 10,
+            requestPause: .zero
+        )
+
+        await refresh.refreshIfNeeded()
+
+        #expect(await tvMaze.didFetchAllUpdatedShows)
+        #expect(await tvMaze.lastFilteredPeriod == nil)
+        #expect(await tvMaze.fetchedShowIDs == [10])
+        #expect(await database.tvMazeID(forTVDBID: 1_010) == 10)
+        #expect(await database.tvMazeID(forTVDBID: 1_020) == nil)
+
+        let metadata = try await database.metadata()
+        #expect(metadata.lastSuccessfulSyncAt == now)
+    }
+
     @Test("Long absence uses the unfiltered updates map and still applies local watermark")
     func longAbsenceUsesUnfilteredUpdates() async throws {
         let (database, url) = try await makeDatabase()
