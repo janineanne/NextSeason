@@ -44,8 +44,7 @@ The watchlist currently uses `List` with `Section`. Native pinned section header
 
 - Add and test a SwiftData migration plan before changing persistent models.
 - Verify that upgrades preserve user data.
-- Include migration testing in release validation.
-- Keep representative stores from older builds for testing.
+- Project should be structured to support fixture-based migration testing in the future.
 
 ## Persistence Recovery
 
@@ -147,6 +146,8 @@ These tasks are listed in approximately sequential order.
 - Verify offline and poor-network behavior.
 - Run Instruments one final time for leaks, memory growth, and performance problems.
 - Review all user-facing error messages and recovery paths.
+- Include SwiftData migration testing in release validation whenever a schema change is introduced.
+- Maintain representative persistent stores from previously shipped schema versions for upgrade testing.
 
 ## TestFlight Release Candidate
 

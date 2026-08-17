@@ -160,6 +160,11 @@
 		E197F42F2FF47B1700D34A28 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E197F4302FF48AA200D34A28 /* 6-30-2026 Improve Theme Switcher.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-30-2026 Improve Theme Switcher.md"; sourceTree = "<group>"; };
 		E197F5E72FF48E4100D34A28 /* 6-30-2026 Add Notification Options to Diagnostics Menu.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-30-2026 Add Notification Options to Diagnostics Menu.md"; sourceTree = "<group>"; };
+		E1AB76CA3033D0740045498C /* MVP-Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.png"; sourceTree = "<group>"; };
+		E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Show-Detail.png"; sourceTree = "<group>"; };
+		E1AB76CC3033D0740045498C /* MVP-Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Watchlist.png"; sourceTree = "<group>"; };
+		E1AB79793033D2680045498C /* 8-17-2026 Discuss and Review SwiftData Migration Plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-17-2026 Discuss and Review SwiftData Migration Plan.md"; sourceTree = "<group>"; };
+		E1AB797A3033D2C30045498C /* 8-17-2026 Implement SwiftData Migration Plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-17-2026 Implement SwiftData Migration Plan.md"; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
@@ -181,9 +186,6 @@
 		E1E24C242FF84A2300E5FD11 /* 7-3-2026 Add to Diagnostics View.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-3-2026 Add to Diagnostics View.md"; sourceTree = "<group>"; };
 		E1E24DF42FF86FEB00E5FD11 /* 7-3-2026 Implement Search Change.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-3-2026 Implement Search Change.md"; sourceTree = "<group>"; };
 		E1E24FD42FFC30DA00E5FD11 /* 7-6-2026 Improve VoiceOver.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Improve VoiceOver.md"; sourceTree = "<group>"; };
-		E1E24FD52FFC323300E5FD11 /* MVP-Search-Results.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "MVP-Search-Results.jpeg"; sourceTree = "<group>"; };
-		E1E24FD62FFC331F00E5FD11 /* MVP-Show-Detail.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "MVP-Show-Detail.jpeg"; sourceTree = "<group>"; };
-		E1E24FD72FFC332F00E5FD11 /* MVP-Watchlist.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "MVP-Watchlist.jpeg"; sourceTree = "<group>"; };
 		E1F0A0012FE200000076FCDD /* App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App-Info.plist"; sourceTree = "<group>"; };
 		E1F2592C2FECA491006D0E58 /* 6-24-2026 Implement Visual and UI Polish.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-24-2026 Implement Visual and UI Polish.md"; sourceTree = "<group>"; };
 		E1F25DCF2FEDB3D8006D0E58 /* 6-24-2026 Implement First Run Experience.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "6-24-2026 Implement First Run Experience.md"; sourceTree = "<group>"; };
@@ -329,6 +331,8 @@
 				E1672FE0302FA60B007F7098 /* 8-13-2026 Implement Review Items.md */,
 				E16732A7302FD9CD007F7098 /* 8-14-2026 Implement Search Improvements.md */,
 				E16732A8302FDAEC007F7098 /* 8-14-2026 Review Search Improvements.md */,
+				E1AB79793033D2680045498C /* 8-17-2026 Discuss and Review SwiftData Migration Plan.md */,
+				E1AB797A3033D2C30045498C /* 8-17-2026 Implement SwiftData Migration Plan.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
@@ -364,9 +368,9 @@
 		E197FEB02FF7134F00D34A28 /* Screenshots */ = {
 			isa = PBXGroup;
 			children = (
-				E1E24FD52FFC323300E5FD11 /* MVP-Search-Results.jpeg */,
-				E1E24FD62FFC331F00E5FD11 /* MVP-Show-Detail.jpeg */,
-				E1E24FD72FFC332F00E5FD11 /* MVP-Watchlist.jpeg */,
+				E1AB76CA3033D0740045498C /* MVP-Search-Results.png */,
+				E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */,
+				E1AB76CC3033D0740045498C /* MVP-Watchlist.png */,
 			);
 			path = Screenshots;
 			sourceTree = "<group>";

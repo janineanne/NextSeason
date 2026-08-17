@@ -36,7 +36,7 @@ This project was developed using an AI-assisted workflow. I directed the enginee
 
 Search Results
 
-<img src="Documentation/MVP/Screenshots/MVP-Search-Results.jpeg" width="220">
+<img src="Documentation/MVP/Screenshots/MVP-Search-Results.png" width="220">
 
 </td>
 
@@ -44,7 +44,7 @@ Search Results
 
 Show Details
 
-<img src="Documentation/MVP/Screenshots/MVP-Show-Detail.jpeg" width="220">
+<img src="Documentation/MVP/Screenshots/MVP-Show-Detail.png" width="220">
 
 </td>
 
@@ -52,7 +52,7 @@ Show Details
 
 Watchlist
 
-<img src="Documentation/MVP/Screenshots/MVP-Watchlist.jpeg" width="220">
+<img src="Documentation/MVP/Screenshots/MVP-Watchlist.png" width="220">
 
 </td>
 

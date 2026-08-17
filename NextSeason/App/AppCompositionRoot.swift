@@ -38,19 +38,16 @@ struct AppCompositionRoot {
         if UITestingConfiguration.isEnabled {
             // XCUITest: in-memory store + repository so runs stay isolated and don't
             // touch the developer's on-device watchlist.
-            let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-            modelContainer = try ModelContainer(
-                for: TrackedShowEntity.self,
-                configurations: configuration
+            modelContainer = try NextSeasonModelContainer.make(
+                configuration: ModelConfiguration(isStoredInMemoryOnly: true)
             )
             repository = InMemoryWatchlistRepository()
             // Severance preview ids used by UI tests / PreviewTheTVDBService.
             showIDMapping = InMemoryShowIDMapping(map: [371980: 44933])
             showIDMappingRefresh = nil
         } else {
-            let container = try ModelContainer(for: TrackedShowEntity.self)
-            modelContainer = container
-            repository = SwiftDataWatchlistRepository(context: ModelContext(container))
+            modelContainer = try NextSeasonModelContainer.make()
+            repository = SwiftDataWatchlistRepository(context: ModelContext(modelContainer))
             let database = try ShowIDMappingDatabase.openDefault()
             showIDMapping = database
             showIDMappingRefresh = ShowIDMappingRefreshService(
