@@ -83,11 +83,12 @@ struct AppCompositionRoot {
         )
     }
 
-    /// Production-only launch wiring: diagnostics, MetricKit, notification
-    /// routing, background refresh registration, and the launch analytics event.
+    /// Production-only launch wiring: MetricKit, notification routing,
+    /// background refresh registration, and the launch analytics event.
     /// Skipped under `-UITesting` so XCUITests stay deterministic.
+    /// Launch-attempt recording lives in `AppLaunchState.bootstrap` so crash
+    /// loops can be detected before composition.
     func configureNonUITestRuntime() {
-        AppDiagnosticsLogger.recordAppLaunch()
         MetricKitDiagnosticsSubscriber.installIfNeeded()
 
         // The coordinator that handles notification taps is attached from the view

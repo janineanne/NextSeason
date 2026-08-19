@@ -7,8 +7,9 @@ import SwiftData
 import SwiftUI
 
 /// App entry: bootstraps `AppCompositionRoot` when the watchlist store opens,
-/// or shows `PersistenceRecoveryView` so a damaged store can be reset instead
-/// of crashing. Hosts `AppRootView` for scene-phase refresh and watchlist undo.
+/// or shows `PersistenceRecoveryView` so a damaged store or crash loop can be
+/// recovered instead of crashing. Hosts `AppRootView` for scene-phase refresh
+/// and watchlist undo.
 @main
 struct NextSeasonApp: App {
     @State private var launchState: AppLaunchState
@@ -52,9 +53,15 @@ struct NextSeasonApp: App {
                     ).run()
                 }
             case .recovery(let context):
-                PersistenceRecoveryView(context: context) {
-                    launchState.resetLocalData()
-                }
+                PersistenceRecoveryView(
+                    context: context,
+                    onResetLocalData: {
+                        launchState.resetLocalData()
+                    },
+                    onRetryLaunch: {
+                        launchState.retryLaunch()
+                    }
+                )
             }
         }
     }
@@ -132,6 +139,13 @@ private struct AppRootView: View {
             Task {
                 await onForegroundShowIDMappingRefresh()
             }
+        }
+        // Cancelled when leaving `.active` so backgrounding during startup
+        // is neither a healthy launch nor a crash.
+        .task(id: scenePhase) {
+            guard !UITestingConfiguration.isEnabled else { return }
+            guard scenePhase == .active else { return }
+            await LaunchStabilization.waitUntilStable()
         }
     }
 

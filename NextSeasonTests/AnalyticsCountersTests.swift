@@ -137,4 +137,30 @@ struct AnalyticsDiagnosticsReportTests {
         #expect(report.contains("still failing"))
         #expect(report.contains("original failure"))
     }
+
+    @Test("Report includes consecutive unexpected launches and crash-loop skip")
+    func formattedReportIncludesCrashLoopDiagnostics() {
+        let launch = AppLaunchDiagnostics(
+            currentLaunchStartedAt: nil,
+            lastGracefulExitAt: nil,
+            previousLaunchEndedUnexpectedly: true,
+            previousLaunchStartedAt: nil,
+            unexpectedTerminationDetectedAt: nil,
+            priorBreadcrumbs: [],
+            consecutiveUnexpectedLaunchCount: 2
+        )
+        let report = AnalyticsDiagnosticsReport.formatted(
+            counters: AnalyticsCounters(),
+            notificationsEnabled: false,
+            launchDiagnostics: launch,
+            persistenceFailure: "Repeated launch failure (consecutive unexpected launches: 2)",
+            consecutiveLaunchFailures: 2,
+            compositionSkippedDueToCrashLoop: true
+        )
+
+        #expect(report.contains("Consecutive unexpected launches: 2"))
+        #expect(report.contains("Crash-loop recovery: composition skipped"))
+        #expect(report.contains("Repeated launch failure"))
+        #expect(report.contains("Previous launch status: Ended unexpectedly"))
+    }
 }

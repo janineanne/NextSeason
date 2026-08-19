@@ -79,6 +79,14 @@ struct DiagnosticsView: View {
                     LabeledContent("Last graceful background") {
                         formattedDateLabel(launchDiagnostics.lastGracefulExitAt)
                     }
+                    LabeledContent("Consecutive unexpected launches") {
+                        Text("\(launchDiagnostics.consecutiveUnexpectedLaunchCount)")
+                            .foregroundStyle(
+                                launchDiagnostics.consecutiveUnexpectedLaunchCount
+                                    >= LaunchFailureTracker.consecutiveFailureThreshold
+                                    ? .orange : .secondary
+                            )
+                    }
                     if launchDiagnostics.previousLaunchEndedUnexpectedly {
                         LabeledContent("Prior launch started") {
                             formattedDateLabel(launchDiagnostics.previousLaunchStartedAt)

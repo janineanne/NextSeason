@@ -29,9 +29,10 @@ enum AppVersionInfo {
 /// - **Persisted breadcrumbs:** last session's trail (survives relaunch when the
 ///   prior process wrote them before exit).
 /// - **Launch diagnostics:** whether the previous run looked like an unexpected
-///   termination, when the current / prior launches started, last graceful
-///   background, and breadcrumbs captured from that unexpected launch — enough
-///   to correlate a crash-like exit with the last known app steps.
+///   termination, consecutive unexpected launches (crash-loop signal), when the
+///   current / prior launches started, last graceful background, and breadcrumbs
+///   captured from that unexpected launch — enough to correlate a crash-like
+///   exit with the last known app steps.
 /// - **Beta validation:** last foreground/background refresh outcomes and
 ///   simulated-scenario summaries when beta tooling is available.
 /// - **Persistence failure:** included when the watchlist store could not be
@@ -49,7 +50,9 @@ enum AnalyticsDiagnosticsReport {
         persistenceFailure: String? = nil,
         originalPersistenceFailure: String? = nil,
         persistenceResetFailure: String? = nil,
-        localStoreWasReset: Bool = false
+        localStoreWasReset: Bool = false,
+        consecutiveLaunchFailures: Int? = nil,
+        compositionSkippedDueToCrashLoop: Bool = false
     ) -> String {
         let breadcrumbLines =
             recentBreadcrumbs.isEmpty
@@ -84,6 +87,12 @@ enum AnalyticsDiagnosticsReport {
             launchDiagnostics.priorBreadcrumbs.isEmpty
             ? String(localized: "  (none captured)")
             : launchDiagnostics.priorBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
+        let consecutiveUnexpectedLaunches =
+            consecutiveLaunchFailures ?? launchDiagnostics.consecutiveUnexpectedLaunchCount
+        let crashLoopRecoveryLine =
+            compositionSkippedDueToCrashLoop
+            ? "Crash-loop recovery: composition skipped"
+            : "Crash-loop recovery: not presented"
 
         let notificationsEnabledLabel =
             notificationsEnabled.map { String($0) }
@@ -186,6 +195,8 @@ enum AnalyticsDiagnosticsReport {
             Previous unexpected launch started: \(previousLaunchStarted)
             Unexpected termination detected: \(detectedAt)
             Last graceful background/exit: \(lastGracefulExit)
+            Consecutive unexpected launches: \(consecutiveUnexpectedLaunches)
+            \(crashLoopRecoveryLine)
 
             Breadcrumbs from previous unexpected launch:
             \(unexpectedBreadcrumbLines)

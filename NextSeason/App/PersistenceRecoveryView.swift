@@ -5,15 +5,18 @@
 
 import SwiftUI
 
-/// Blocking launch screen when the watchlist store cannot be opened.
+/// Blocking launch screen when the watchlist store cannot be opened or a
+/// crash loop was detected.
 ///
-/// Explains that reset deletes local watchlist data, lets the user export
-/// diagnostics first, and requires confirmation before **Reset Local Data**.
+/// Crash-loop recovery offers Export Diagnostics and Try Again only.
+/// Persistence-open failures also offer **Reset Local Data**, with
+/// confirmation, after explaining that reset deletes the local watchlist.
 /// After a successful reset that still cannot initialize storage, the copy
 /// no longer implies the original watchlist can be preserved.
 struct PersistenceRecoveryView: View {
     let context: AppLaunchState.RecoveryContext
     let onResetLocalData: () -> Void
+    let onRetryLaunch: () -> Void
 
     @State private var isConfirmingReset = false
 
@@ -37,11 +40,13 @@ struct PersistenceRecoveryView: View {
                 .buttonStyle(.bordered)
                 .accessibilityIdentifier(AccessibilityID.PersistenceRecovery.exportDiagnostics)
 
-                if context.didResetStore {
-                    Button("Try Again", action: onResetLocalData)
+                if context.allowsRetry {
+                    Button("Try Again", action: onRetryLaunch)
                         .buttonStyle(.bordered)
                         .accessibilityIdentifier(AccessibilityID.PersistenceRecovery.tryAgain)
-                } else {
+                }
+
+                if context.allowsPersistenceReset {
                     Button(
                         "Reset Local Data",
                         role: .destructive,
@@ -69,33 +74,37 @@ struct PersistenceRecoveryView: View {
     }
 
     private var titleText: String {
-        if context.didResetStore {
+        switch context.kind {
+        case .persistenceFailureAfterReset:
             String(localized: "Couldn't Set Up Local Data")
-        } else {
+        case .crashLoop:
+            String(localized: "NextSeason Closed Repeatedly")
+        case .persistenceFailure:
             String(localized: "Couldn't Open Your Watchlist")
         }
     }
 
     private var descriptionText: String {
-        if context.didResetStore {
-            var text = String(
+        let base: String
+        switch context.kind {
+        case .persistenceFailureAfterReset:
+            base = String(
                 localized:
                     "Your local watchlist was reset successfully, but NextSeason still couldn't initialize its local data store. The previous watchlist can no longer be restored. You can export diagnostics for troubleshooting."
             )
-            if context.resetError != nil {
-                text += "\n\n\(genericResetFailureText)"
-            }
-            return text
+        case .crashLoop:
+            base = String(
+                localized:
+                    "NextSeason closed unexpectedly several times before it could finish launching. You can export diagnostics for troubleshooting and try launching again."
+            )
+        case .persistenceFailure:
+            base = String(
+                localized:
+                    "NextSeason couldn't read the shows saved on this device. You can export diagnostics for troubleshooting. Resetting local data permanently deletes your watchlist and any scheduled next-season reminders on this device. You can search for shows and add them again afterward."
+            )
         }
-
-        var text = String(
-            localized:
-                "NextSeason couldn't read the shows saved on this device. You can export diagnostics for troubleshooting. Resetting local data permanently deletes your watchlist and any scheduled next-season reminders on this device. You can search for shows and add them again afterward."
-        )
-        if context.resetError != nil {
-            text += "\n\n\(genericResetFailureText)"
-        }
-        return text
+        guard context.resetError != nil else { return base }
+        return base + "\n\n\(genericResetFailureText)"
     }
 
     private var genericResetFailureText: String {
@@ -126,19 +135,36 @@ struct PersistenceRecoveryView: View {
 
     #Preview("Initial failure") {
         PersistenceRecoveryView(
-            context: AppLaunchState.RecoveryContext(error: PreviewPersistenceError()),
-            onResetLocalData: {}
+            context: AppLaunchState.RecoveryContext(
+                kind: .persistenceFailure,
+                error: PreviewPersistenceError()
+            ),
+            onResetLocalData: {},
+            onRetryLaunch: {}
+        )
+    }
+
+    #Preview("Crash loop") {
+        PersistenceRecoveryView(
+            context: AppLaunchState.RecoveryContext(
+                kind: .crashLoop,
+                error: RepeatedLaunchFailure(consecutiveCount: 2),
+                consecutiveLaunchFailures: 2
+            ),
+            onResetLocalData: {},
+            onRetryLaunch: {}
         )
     }
 
     #Preview("After successful reset") {
         PersistenceRecoveryView(
             context: AppLaunchState.RecoveryContext(
+                kind: .persistenceFailureAfterReset,
                 error: PreviewPersistenceError(),
-                originalError: PreviewPersistenceError(),
-                didResetStore: true
+                originalError: PreviewPersistenceError()
             ),
-            onResetLocalData: {}
+            onResetLocalData: {},
+            onRetryLaunch: {}
         )
     }
 #endif

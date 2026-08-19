@@ -10,7 +10,8 @@ import os
 /// Snapshot of launch and abrupt-termination signals for diagnostics export.
 ///
 /// `previousLaunchEndedUnexpectedly` is true when the prior session never called
-/// `recordEnterBackground` (still marked active at next `recordAppLaunch`).
+/// `recordEnterBackground` or `noteReachedSafePath` (still marked active at
+/// next `recordAppLaunch`).
 struct AppLaunchDiagnostics: Sendable, Hashable {
     let currentLaunchStartedAt: Date?
     let lastGracefulExitAt: Date?
@@ -18,6 +19,7 @@ struct AppLaunchDiagnostics: Sendable, Hashable {
     let previousLaunchStartedAt: Date?
     let unexpectedTerminationDetectedAt: Date?
     let priorBreadcrumbs: [String]
+    let consecutiveUnexpectedLaunchCount: Int
 }
 
 /// Structured OSLog output and breadcrumb trail for intermittent crash investigation.
@@ -60,10 +62,11 @@ enum AppDiagnosticsLogger: Sendable {
 
     // MARK: - Session lifecycle
 
-    /// Call once during app initialization before other work runs.
-    nonisolated static func recordAppLaunch() {
-        let defaults = UserDefaults.standard
-        let now = Date.now
+    /// Call once at the start of a process launch, before composition.
+    nonisolated static func recordAppLaunch(
+        defaults: UserDefaults = .standard,
+        now: Date = Date.now
+    ) {
         let hadActiveSession = defaults.bool(forKey: sessionActiveDefaultsKey)
         let priorLaunchStartedAt =
             defaults.object(forKey: currentLaunchStartedAtDefaultsKey) as? Date
@@ -81,7 +84,8 @@ enum AppDiagnosticsLogger: Sendable {
             "app_launch version=\(version, privacy: .public) build=\(build, privacy: .public)")
 
         // Still-active session flag means the last run never reached
-        // `recordEnterBackground` — treat as a possible abrupt termination.
+        // `recordEnterBackground` or `noteReachedSafePath` — treat as a
+        // possible abrupt termination.
         if hadActiveSession {
             defaults.set(true, forKey: previousUnexpectedDefaultsKey)
             defaults.set(now, forKey: unexpectedTerminationDetectedAtDefaultsKey)
@@ -108,18 +112,36 @@ enum AppDiagnosticsLogger: Sendable {
     }
 
     /// Marks a graceful background transition so the next launch is not flagged as abrupt.
-    nonisolated static func recordEnterBackground() {
-        let now = Date.now
-        persistBreadcrumbs()
-        UserDefaults.standard.set(false, forKey: sessionActiveDefaultsKey)
-        UserDefaults.standard.set(now, forKey: lastGracefulExitAtDefaultsKey)
+    nonisolated static func recordEnterBackground(
+        defaults: UserDefaults = .standard,
+        now: Date = Date.now
+    ) {
         logger(for: .scene).notice("enter_background")
         breadcrumb("enter_background")
+        persistBreadcrumbs()
+        defaults.set(false, forKey: sessionActiveDefaultsKey)
+        defaults.set(now, forKey: lastGracefulExitAtDefaultsKey)
+    }
+
+    /// Clears the in-progress session flag after the recovery UI is showing
+    /// so killing this process is not counted as another launch crash.
+    /// Does not clear consecutive-failure state.
+    nonisolated static func noteReachedSafePath(defaults: UserDefaults = .standard) {
+        breadcrumb("safe_recovery_path_reached")
+        persistBreadcrumbs()
+        defaults.set(false, forKey: sessionActiveDefaultsKey)
+    }
+
+    /// Marks that this process is running a usable session again (composition
+    /// succeeded after recovery). Does not record a new process launch.
+    nonisolated static func noteSessionActive(defaults: UserDefaults = .standard) {
+        defaults.set(true, forKey: sessionActiveDefaultsKey)
     }
 
     /// Reads persisted launch markers set by `recordAppLaunch` / `recordEnterBackground`.
-    nonisolated static func launchDiagnostics() -> AppLaunchDiagnostics {
-        let defaults = UserDefaults.standard
+    nonisolated static func launchDiagnostics(defaults: UserDefaults = .standard)
+        -> AppLaunchDiagnostics
+    {
         return AppLaunchDiagnostics(
             currentLaunchStartedAt: defaults.object(forKey: currentLaunchStartedAtDefaultsKey)
                 as? Date,
@@ -130,7 +152,9 @@ enum AppDiagnosticsLogger: Sendable {
             unexpectedTerminationDetectedAt: defaults.object(
                 forKey: unexpectedTerminationDetectedAtDefaultsKey) as? Date,
             priorBreadcrumbs: defaults.stringArray(forKey: previousUnexpectedBreadcrumbsDefaultsKey)
-                ?? []
+                ?? [],
+            consecutiveUnexpectedLaunchCount: defaults.integer(
+                forKey: LaunchFailureTracker.consecutiveCountDefaultsKey)
         )
     }
 

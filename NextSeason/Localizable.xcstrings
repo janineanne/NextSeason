@@ -64,6 +64,9 @@
         }
       }
     },
+    "%lld" : {
+
+    },
     "About" : {
       "localizations" : {
         "en" : {
@@ -225,6 +228,9 @@
         }
       }
     },
+    "Cancel" : {
+
+    },
     "Checking next season…" : {
       "localizations" : {
         "en" : {
@@ -288,6 +294,9 @@
         }
       }
     },
+    "Consecutive unexpected launches" : {
+
+    },
     "Copy Report" : {
       "localizations" : {
         "en" : {
@@ -297,6 +306,9 @@
           }
         }
       }
+    },
+    "Couldn't Open Your Watchlist" : {
+
     },
     "Couldn't reach TheTVDB. Check your connection and try again." : {
 
@@ -310,6 +322,9 @@
           }
         }
       }
+    },
+    "Couldn't Set Up Local Data" : {
+
     },
     "Couldn't Update Watchlist" : {
       "localizations" : {
@@ -693,6 +708,9 @@
         }
       }
     },
+    "Export Diagnostics" : {
+
+    },
     "Failed to fetch TVMaze updates" : {
       "localizations" : {
         "en" : {
@@ -984,6 +1002,18 @@
           }
         }
       }
+    },
+    "NextSeason Closed Repeatedly" : {
+
+    },
+    "NextSeason closed unexpectedly several times before it could finish launching. You can export diagnostics for troubleshooting and try launching again." : {
+
+    },
+    "NextSeason couldn't read the shows saved on this device. You can export diagnostics for troubleshooting. Resetting local data permanently deletes your watchlist and any scheduled next-season reminders on this device. You can search for shows and add them again afterward." : {
+
+    },
+    "NextSeason couldn't reset its local data. You can export diagnostics for troubleshooting and try again." : {
+
     },
     "NextSeason couldn't update your Watchlist. Please try again." : {
       "localizations" : {
@@ -1432,6 +1462,12 @@
         }
       }
     },
+    "Reset Local Data" : {
+
+    },
+    "Reset Local Data?" : {
+
+    },
     "Restores the show to your watchlist" : {
       "localizations" : {
         "en" : {
@@ -1874,6 +1910,9 @@
     "TheTVDB is having trouble right now. Please try again later." : {
 
     },
+    "This permanently deletes your saved watchlist and scheduled reminders on this device. You can search for shows and add them again afterward. This cannot be undone." : {
+
+    },
     "This series has ended." : {
       "localizations" : {
         "en" : {
@@ -1980,6 +2019,9 @@
           }
         }
       }
+    },
+    "Unavailable" : {
+
     },
     "Undo" : {
       "localizations" : {
@@ -2160,6 +2202,9 @@
           }
         }
       }
+    },
+    "Your local watchlist was reset successfully, but NextSeason still couldn't initialize its local data store. The previous watchlist can no longer be restored. You can export diagnostics for troubleshooting." : {
+
     }
   },
   "version" : "1.0"
