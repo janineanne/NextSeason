@@ -11,6 +11,7 @@ import SwiftUI
 /// paginated (`limit=10`), so guests can keep loading matches instead of being
 /// steered to an external site.
 struct SearchLoadMoreFooterView: View {
+    /// True while the next TheTVDB page is in flight; disables the button.
     let isLoading: Bool
     let action: () -> Void
 

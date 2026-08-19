@@ -13,6 +13,7 @@ struct WatchlistRefreshServiceTests {
     private let fixedNow = TVMazeDate.dateOnly("2026-06-14")!
     private let showID = 44933
 
+    /// Captures delivered season notifications for assertions.
     private final class RecordingNotificationService: NotificationDelivering {
         private(set) var delivered: [SeasonNotificationContent] = []
 
@@ -21,6 +22,7 @@ struct WatchlistRefreshServiceTests {
         }
     }
 
+    /// Stub TVMaze that records fetched show ids, cache bypass, and update period.
     private final class MockTVMazeService: TVMazeService, @unchecked Sendable {
         var updates: [Int: Date] = [:]
         var shows: [Int: Show] = [:]
@@ -83,6 +85,7 @@ struct WatchlistRefreshServiceTests {
         )
     }
 
+    /// Refresh service wired to the suite's fixed clock.
     private func makeService(
         repository: InMemoryWatchlistRepository,
         tvMaze: MockTVMazeService,
@@ -96,6 +99,7 @@ struct WatchlistRefreshServiceTests {
         )
     }
 
+    /// Refresh service with an injectable clock (stale / cooldown tests).
     private func makeService(
         repository: InMemoryWatchlistRepository,
         tvMaze: MockTVMazeService,

@@ -38,6 +38,7 @@ nonisolated struct TheTVDBLoginResponseData: Decodable, Sendable {
 }
 
 nonisolated struct TheTVDBLoginTokenData: Decodable, Sendable {
+    /// JWT used as `Authorization: Bearer` on subsequent v4 calls.
     let token: String
 }
 

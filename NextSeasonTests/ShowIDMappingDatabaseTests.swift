@@ -10,6 +10,7 @@ import Testing
 @testable import NextSeason
 
 struct ShowIDMappingDatabaseTests {
+    /// Temporary on-disk mapping database, optionally pre-seeded with id pairs.
     private func makeDatabase(
         seed: [(tvdb: Int, tvmaze: Int)] = []
     ) async throws -> (ShowIDMappingDatabase, URL) {
@@ -255,6 +256,7 @@ struct ShowIDMappingDatabaseTests {
         #expect(await database.tvMazeID(forTVDBID: 371980) == nil)
     }
 
+    /// TVMaze stub whose index/update calls fail so a refresh cannot rewrite mappings.
     private struct FailingIndexTVMazeService: TVMazeService {
         func searchShows(matching query: String) async throws -> [Show] { [] }
         func lookupShow(theTVDBID: Int) async throws -> Show { throw TVMazeError.notFound }
@@ -270,6 +272,7 @@ struct ShowIDMappingDatabaseTests {
         }
     }
 
+    /// Writes a schema-1 (id-only, no display columns) SQLite file for migration tests.
     private func createSchema1Database(at url: URL, seed: [(Int, Int)]) throws {
         var db: OpaquePointer?
         guard sqlite3_open(url.path, &db) == SQLITE_OK, let db else {

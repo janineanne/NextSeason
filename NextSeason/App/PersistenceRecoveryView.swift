@@ -14,8 +14,11 @@ import SwiftUI
 /// After a successful reset that still cannot initialize storage, the copy
 /// no longer implies the original watchlist can be preserved.
 struct PersistenceRecoveryView: View {
+    /// Which recovery copy and actions to show (`RecoveryKind`).
     let context: AppLaunchState.RecoveryContext
+    /// Confirmed destructive reset of the on-disk watchlist store.
     let onResetLocalData: () -> Void
+    /// Non-destructive composition retry in this already-running process.
     let onRetryLaunch: () -> Void
 
     @State private var isConfirmingReset = false
@@ -73,6 +76,7 @@ struct PersistenceRecoveryView: View {
         }
     }
 
+    /// Title keyed off `RecoveryKind` (crash loop vs store-open vs post-reset).
     private var titleText: String {
         switch context.kind {
         case .persistenceFailureAfterReset:
@@ -84,6 +88,8 @@ struct PersistenceRecoveryView: View {
         }
     }
 
+    /// Body copy for the current kind. Reset failures append generic follow-up
+    /// text; technical `localizedDescription` stays in diagnostics export only.
     private var descriptionText: String {
         let base: String
         switch context.kind {

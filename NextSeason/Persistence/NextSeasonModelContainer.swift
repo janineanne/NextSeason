@@ -14,6 +14,8 @@ import SwiftData
 /// Application Support `default.store` files remain the store that is opened.
 /// Recovery deletes that same URL via `PersistentStoreReset`.
 enum NextSeasonModelContainer {
+    /// Opens the versioned watchlist store. Production callers must omit a
+    /// custom URL so SwiftData keeps using Application Support `default.store`.
     static func make(configuration: ModelConfiguration = ModelConfiguration()) throws
         -> ModelContainer
     {

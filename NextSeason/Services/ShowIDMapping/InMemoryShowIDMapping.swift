@@ -10,6 +10,7 @@ actor InMemoryShowIDMapping: ShowIDMapping {
     private var records: [Int: ShowIDMappingRecord]
     private(set) var metadata: ShowIDMappingMetadata
 
+    /// Id-only map; display fields start empty (typical UI-test stub).
     init(
         map: [Int: Int] = [:],
         metadata: ShowIDMappingMetadata = ShowIDMappingMetadata(
@@ -27,6 +28,7 @@ actor InMemoryShowIDMapping: ShowIDMapping {
         self.metadata = metadata
     }
 
+    /// Pre-seeded records including TVMaze title/poster (overlay tests).
     init(
         records: [Int: ShowIDMappingRecord],
         metadata: ShowIDMappingMetadata = ShowIDMappingMetadata(

@@ -25,6 +25,7 @@ enum AccessibilityID {
     }
 
     enum PersistenceRecovery {
+        /// Blocking launch recovery screen (`PersistenceRecoveryView`).
         static let screen = "persistenceRecovery.screen"
         static let exportDiagnostics = "persistenceRecovery.exportDiagnostics"
         static let resetLocalData = "persistenceRecovery.resetLocalData"

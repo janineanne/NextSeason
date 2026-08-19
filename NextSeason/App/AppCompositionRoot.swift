@@ -7,16 +7,32 @@ import SwiftData
 import SwiftUI
 import os
 
-/// Extracted from `NextSeasonApp` to handle the building of long-lived app services and persistence so
-/// `NextSeasonApp` stays readable.
+/// Owns long-lived app services and persistence so `NextSeasonApp` stays a thin
+/// scene host.
+///
+/// Builds the SwiftData watchlist store, wires Search (TheTVDB + show ID
+/// mapping) separately from detail/watchlist/refresh (TVMaze), and exposes
+/// those dependencies for the SwiftUI environment. UI tests get an in-memory
+/// store and mapping stub so they never touch the on-device watchlist.
+///
+/// Launch-attempt / crash-loop recording happens in `AppLaunchState.bootstrap`
+/// *before* this type is created. `configureNonUITestRuntime()` is production
+/// wiring only (MetricKit, notification routing, background refresh, analytics).
 @MainActor
 struct AppCompositionRoot {
+    /// Watchlist SwiftData store (in-memory under `-UITesting`).
     let modelContainer: ModelContainer
+    /// Persistence boundary injected into the SwiftUI environment.
     let watchlistRepository: any WatchlistRepository
+    /// Foreground and background watchlist refresh.
     let refreshService: WatchlistRefreshService
+    /// Shared undoable-removal coordinator for the root toast.
     let watchlistPendingRemoval: WatchlistPendingRemoval
+    /// Local analytics and usage counters (no remote crash reporting).
     let analyticsService: AnalyticsService
+    /// Notification permission and season-change delivery.
     let notificationService: NotificationService
+    /// Beta/TestFlight refresh outcome samples for the Diagnostics screen.
     let betaRefreshDiagnostics: BetaRefreshDiagnostics
     /// Canonical show / season provider (detail, watchlist, refresh).
     let tvMaze: any TVMazeService
@@ -31,7 +47,7 @@ struct AppCompositionRoot {
         analyticsService = AnalyticsService()
         notificationService = NotificationService(analytics: analyticsService)
         betaRefreshDiagnostics = BetaRefreshDiagnostics()
-        let liveTVMaze = TVMazeClient()  // needed later in this function
+        let liveTVMaze = TVMazeClient()  // same instance is passed into mapping refresh below
         tvMaze = liveTVMaze
         theTVDB = TheTVDBClient()
 

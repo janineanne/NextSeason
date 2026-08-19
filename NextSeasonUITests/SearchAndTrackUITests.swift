@@ -5,6 +5,9 @@
 
 import XCTest
 
+/// XCUITest coverage for Search, tracking, Watchlist undo, and related empty/error
+/// paths. Uses `NextSeasonUITesting` so launches pass `-UITesting` and never hit
+/// the live network.
 @MainActor
 final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
     var app: XCUIApplication!
@@ -330,6 +333,7 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
 
     // MARK: - Helpers
 
+    /// Search → row star → wait until the row shows Stop tracking (no detail push).
     private func trackShowFromSearchRow() {
         search(for: previewShowName)
 
@@ -346,6 +350,7 @@ final class SearchAndTrackUITests: XCTestCase, NextSeasonUITesting {
         )
     }
 
+    /// Search → open detail → star → wait until the detail button shows Stop tracking.
     private func trackShowFromDetail() {
         search(for: previewShowName)
 
