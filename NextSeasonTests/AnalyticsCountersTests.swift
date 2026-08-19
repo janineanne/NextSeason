@@ -78,4 +78,63 @@ struct AnalyticsDiagnosticsReportTests {
         #expect(report.contains("Searches: 52"))
         #expect(report.contains("Notifications enabled: true"))
     }
+
+    @Test("Report marks notification status unavailable when it was not queried")
+    func formattedReportMarksNotificationsUnavailable() {
+        let report = AnalyticsDiagnosticsReport.formatted(
+            counters: AnalyticsCounters(),
+            notificationsEnabled: nil
+        )
+
+        #expect(report.contains("Notifications enabled: Unavailable"))
+        #expect(report.contains("Notifications enabled: false") == false)
+        #expect(report.contains("Notifications enabled: true") == false)
+    }
+
+    @Test("Report includes persistence failure when provided")
+    func formattedReportIncludesPersistenceFailure() {
+        let report = AnalyticsDiagnosticsReport.formatted(
+            counters: AnalyticsCounters(),
+            notificationsEnabled: false,
+            persistenceFailure: "store is corrupt"
+        )
+
+        #expect(report.contains("Persistence failure:"))
+        #expect(report.contains("store is corrupt"))
+    }
+
+    @Test("Report includes original and reset persistence failures when provided")
+    func formattedReportIncludesOriginalAndResetFailures() {
+        let report = AnalyticsDiagnosticsReport.formatted(
+            counters: AnalyticsCounters(),
+            notificationsEnabled: false,
+            persistenceFailure: "new container error",
+            originalPersistenceFailure: "original container error",
+            persistenceResetFailure: "disk full",
+            localStoreWasReset: false
+        )
+
+        #expect(report.contains("Original persistence failure:"))
+        #expect(report.contains("original container error"))
+        #expect(report.contains("Persistence failure:"))
+        #expect(report.contains("new container error"))
+        #expect(report.contains("Persistence reset failure:"))
+        #expect(report.contains("disk full"))
+        #expect(report.contains("Local watchlist store reset: succeeded") == false)
+    }
+
+    @Test("Report notes a successful local store reset")
+    func formattedReportIncludesSuccessfulStoreReset() {
+        let report = AnalyticsDiagnosticsReport.formatted(
+            counters: AnalyticsCounters(),
+            notificationsEnabled: false,
+            persistenceFailure: "still failing",
+            originalPersistenceFailure: "original failure",
+            localStoreWasReset: true
+        )
+
+        #expect(report.contains("Local watchlist store reset: succeeded"))
+        #expect(report.contains("still failing"))
+        #expect(report.contains("original failure"))
+    }
 }

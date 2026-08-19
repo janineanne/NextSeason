@@ -34,15 +34,22 @@ enum AppVersionInfo {
 ///   to correlate a crash-like exit with the last known app steps.
 /// - **Beta validation:** last foreground/background refresh outcomes and
 ///   simulated-scenario summaries when beta tooling is available.
+/// - **Persistence failure:** included when the watchlist store could not be
+///   opened at launch, so a recovery-screen export still has the SwiftData error.
+///   A later reset failure and the original init error are included when present.
 enum AnalyticsDiagnosticsReport {
     @MainActor
     static func formatted(
         counters: AnalyticsCounters,
-        notificationsEnabled: Bool,
+        notificationsEnabled: Bool?,
         recentBreadcrumbs: [String] = AppDiagnosticsLogger.recentBreadcrumbs(),
         persistedBreadcrumbs: [String] = AppDiagnosticsLogger.persistedBreadcrumbsForExport(),
         launchDiagnostics: AppLaunchDiagnostics = AppDiagnosticsLogger.launchDiagnostics(),
-        betaRefreshDiagnostics: BetaRefreshDiagnostics? = nil
+        betaRefreshDiagnostics: BetaRefreshDiagnostics? = nil,
+        persistenceFailure: String? = nil,
+        originalPersistenceFailure: String? = nil,
+        persistenceResetFailure: String? = nil,
+        localStoreWasReset: Bool = false
     ) -> String {
         let breadcrumbLines =
             recentBreadcrumbs.isEmpty
@@ -77,6 +84,42 @@ enum AnalyticsDiagnosticsReport {
             launchDiagnostics.priorBreadcrumbs.isEmpty
             ? String(localized: "  (none captured)")
             : launchDiagnostics.priorBreadcrumbs.map { "  \($0)" }.joined(separator: "\n")
+
+        let notificationsEnabledLabel =
+            notificationsEnabled.map { String($0) }
+            ?? String(localized: "Unavailable")
+
+        var persistenceSection = ""
+        if persistenceFailure != nil || originalPersistenceFailure != nil
+            || persistenceResetFailure != nil || localStoreWasReset
+        {
+            var parts: [String] = []
+            if let originalPersistenceFailure {
+                parts.append(
+                    """
+                    Original persistence failure:
+                    \(originalPersistenceFailure)
+                    """)
+            }
+            if let persistenceFailure {
+                parts.append(
+                    """
+                    Persistence failure:
+                    \(persistenceFailure)
+                    """)
+            }
+            if let persistenceResetFailure {
+                parts.append(
+                    """
+                    Persistence reset failure:
+                    \(persistenceResetFailure)
+                    """)
+            }
+            if localStoreWasReset {
+                parts.append("Local watchlist store reset: succeeded")
+            }
+            persistenceSection = "\n\n" + parts.joined(separator: "\n\n")
+        }
 
         var betaSection = ""
         if BetaBuildConfiguration.isAvailable, let betaRefreshDiagnostics {
@@ -115,6 +158,7 @@ enum AnalyticsDiagnosticsReport {
             \(String(localized: "NextSeason Diagnostics"))
 
             Version: \(AppVersionInfo.displayString)
+            \(persistenceSection)
             \(betaSection)
 
             App launches: \(counters.appLaunches)
@@ -128,7 +172,7 @@ enum AnalyticsDiagnosticsReport {
             Notification permission requests: \(counters.notificationPermissionRequests)
             Notification permission grants: \(counters.notificationPermissionGrants)
             Notification reminders scheduled: \(counters.notificationRemindersScheduled)
-            Notifications enabled: \(notificationsEnabled)
+            Notifications enabled: \(notificationsEnabledLabel)
 
             Recent breadcrumbs (this session):
             \(breadcrumbLines)

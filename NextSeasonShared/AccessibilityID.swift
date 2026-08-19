@@ -24,6 +24,13 @@ enum AccessibilityID {
         static let aboutFooter = "app.aboutFooter"
     }
 
+    enum PersistenceRecovery {
+        static let screen = "persistenceRecovery.screen"
+        static let exportDiagnostics = "persistenceRecovery.exportDiagnostics"
+        static let resetLocalData = "persistenceRecovery.resetLocalData"
+        static let tryAgain = "persistenceRecovery.tryAgain"
+    }
+
     enum Tab {
         static let search = "tab.search"
         static let watchlist = "tab.watchlist"

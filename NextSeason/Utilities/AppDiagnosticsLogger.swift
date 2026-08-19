@@ -205,7 +205,7 @@ enum AppDiagnosticsLogger: Sendable {
 
     // MARK: - Persistence failures
 
-    /// Logs a fatal startup failure before `ModelContainer` initialization aborts the process.
+    /// Logs a startup `ModelContainer` failure before the recovery UI is shown.
     nonisolated static func logModelContainerInitFailure(_ error: Error) {
         breadcrumb("model_container_init_failed")
         persistBreadcrumbsNow()

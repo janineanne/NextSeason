@@ -6,66 +6,57 @@
 import SwiftData
 import SwiftUI
 
-/// App entry: builds `AppCompositionRoot`, injects services into the environment,
-/// and hosts `AppRootView` for scene-phase refresh and watchlist undo.
+/// App entry: bootstraps `AppCompositionRoot` when the watchlist store opens,
+/// or shows `PersistenceRecoveryView` so a damaged store can be reset instead
+/// of crashing. Hosts `AppRootView` for scene-phase refresh and watchlist undo.
 @main
 struct NextSeasonApp: App {
-    private let composition: AppCompositionRoot
-    @State private var navigationCoordinator = AppNavigationCoordinator()
+    @State private var launchState: AppLaunchState
+    @State private var navigationCoordinator: AppNavigationCoordinator
 
     init() {
-        let coordinator = AppNavigationCoordinator()
-        _navigationCoordinator = State(initialValue: coordinator)
-
-        do {
-            let root = try AppCompositionRoot()
-            composition = root
-
-            if !UITestingConfiguration.isEnabled {
-                root.configureNonUITestRuntime()
-            } else {
-                #if DEBUG
-                    FirstRunPreferences.resetSearchResultsHintForTesting()
-                    FirstRunPreferences.resetFirstSearchCompletedForTesting()
-                #endif
-            }
-        } catch {
-            AppDiagnosticsLogger.logModelContainerInitFailure(error)
-            fatalError("Failed to create ModelContainer: \(error)")
-        }
+        _navigationCoordinator = State(initialValue: AppNavigationCoordinator())
+        _launchState = State(initialValue: AppLaunchState.bootstrap())
     }
 
     var body: some Scene {
         WindowGroup {
-            AppRootView(
-                navigationCoordinator: navigationCoordinator,
-                removalCoordinator: composition.watchlistPendingRemoval,
-                refreshService: composition.refreshService,
-                searchService: composition.theTVDB,
-                tvMaze: composition.tvMaze,
-                showIDMapping: composition.showIDMapping,
-                onForegroundShowIDMappingRefresh: {
-                    await composition.refreshShowIDMappingIfNeeded()
-                }
-            )
-            .environment(\.watchlistRepository, composition.watchlistRepository)
-            .environment(\.watchlistRefreshService, composition.refreshService)
-            .environment(\.watchlistPendingRemoval, composition.watchlistPendingRemoval)
-            .environment(\.notificationService, composition.notificationService)
-            .environment(\.analytics, composition.analyticsService)
-            .environment(\.betaRefreshDiagnostics, composition.betaRefreshDiagnostics)
-            .task {
-                guard let flow = ProfileFlowConfiguration.activeFlow else { return }
-                await ProfileFlowRunner(
-                    flow: flow,
-                    coordinator: navigationCoordinator,
-                    repository: composition.watchlistRepository,
+            switch launchState {
+            case .ready(let composition):
+                AppRootView(
+                    navigationCoordinator: navigationCoordinator,
+                    removalCoordinator: composition.watchlistPendingRemoval,
+                    refreshService: composition.refreshService,
+                    searchService: composition.theTVDB,
                     tvMaze: composition.tvMaze,
-                    analytics: composition.analyticsService
-                ).run()
+                    showIDMapping: composition.showIDMapping,
+                    onForegroundShowIDMappingRefresh: {
+                        await composition.refreshShowIDMappingIfNeeded()
+                    }
+                )
+                .environment(\.watchlistRepository, composition.watchlistRepository)
+                .environment(\.watchlistRefreshService, composition.refreshService)
+                .environment(\.watchlistPendingRemoval, composition.watchlistPendingRemoval)
+                .environment(\.notificationService, composition.notificationService)
+                .environment(\.analytics, composition.analyticsService)
+                .environment(\.betaRefreshDiagnostics, composition.betaRefreshDiagnostics)
+                .modelContainer(composition.modelContainer)
+                .task {
+                    guard let flow = ProfileFlowConfiguration.activeFlow else { return }
+                    await ProfileFlowRunner(
+                        flow: flow,
+                        coordinator: navigationCoordinator,
+                        repository: composition.watchlistRepository,
+                        tvMaze: composition.tvMaze,
+                        analytics: composition.analyticsService
+                    ).run()
+                }
+            case .recovery(let context):
+                PersistenceRecoveryView(context: context) {
+                    launchState.resetLocalData()
+                }
             }
         }
-        .modelContainer(composition.modelContainer)
     }
 }
 

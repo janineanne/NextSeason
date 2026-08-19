@@ -5,6 +5,7 @@
 
 import SwiftData
 import SwiftUI
+import os
 
 /// Extracted from `NextSeasonApp` to handle the building of long-lived app services and persistence so
 /// `NextSeasonApp` stays readable.
@@ -48,12 +49,24 @@ struct AppCompositionRoot {
         } else {
             modelContainer = try NextSeasonModelContainer.make()
             repository = SwiftDataWatchlistRepository(context: ModelContext(modelContainer))
-            let database = try ShowIDMappingDatabase.openDefault()
-            showIDMapping = database
-            showIDMappingRefresh = ShowIDMappingRefreshService(
-                database: database,
-                tvMaze: liveTVMaze
-            )
+            // Mapping already retries from the bundled baseline. If that still
+            // fails, degrade to an empty in-memory map so Search still works
+            // and we never send the user through watchlist-destroying recovery.
+            do {
+                let database = try ShowIDMappingDatabase.openDefault()
+                showIDMapping = database
+                showIDMappingRefresh = ShowIDMappingRefreshService(
+                    database: database,
+                    tvMaze: liveTVMaze
+                )
+            } catch {
+                AppDiagnosticsLogger.breadcrumb("show_id_mapping_open_failed_using_empty_map")
+                AppDiagnosticsLogger.logger(for: .cache).error(
+                    "show_id_mapping_open_failed_using_empty_map error=\(String(describing: error), privacy: .public)"
+                )
+                showIDMapping = InMemoryShowIDMapping(map: [:])
+                showIDMappingRefresh = nil
+            }
         }
 
         watchlistRepository = repository

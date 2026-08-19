@@ -12,6 +12,7 @@ import SwiftData
 /// Always opens `NextSeasonSchemaV1` with `NextSeasonMigrationPlan`.
 /// Production must keep SwiftData's default store URL so existing
 /// Application Support `default.store` files remain the store that is opened.
+/// Recovery deletes that same URL via `PersistentStoreReset`.
 enum NextSeasonModelContainer {
     static func make(configuration: ModelConfiguration = ModelConfiguration()) throws
         -> ModelContainer
