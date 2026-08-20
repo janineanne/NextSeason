@@ -77,6 +77,16 @@ Complete a final accessibility pass and address everything that can reasonably b
 - Verify that state is not communicated by color alone.
 - Test empty, loading, error, and recovery states.
 
+## StoreKit
+
+See [NextSeason Monetization Strategy](NextSeason%20-%20Monetization%20Strategy%20Roadmap.md) for the proposed pricing and purchase structure.
+
+- Make and Implement a plan to charge users through the App Store.
+- Implement RequestReviewAction to arrive a few seconds after the first show notification (per version) has been delivered.
+- Implement a Tip Jar for the About page using consumable IAPs.
+- Add a link to the App Store's "write a review" page to the About page. 
+
+
 # Documentation Readiness
 
 ## AI-Assisted Development Workflow
@@ -107,6 +117,7 @@ These tasks are listed in approximately sequential order.
 
 - Receive the D-U-N-S Number for Trial by Fyre, LLC.
 - Convert the Apple Developer account to an Organization account.
+- Sign up for the Small Business Program.
 - Verify company information in App Store Connect.
 - Complete tax and banking information.
 - Confirm the support email address.
