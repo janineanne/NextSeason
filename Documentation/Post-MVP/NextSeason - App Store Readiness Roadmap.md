@@ -8,7 +8,7 @@ Completed MVP work is documented elsewhere and is not repeated here.
 
 # Product and Engineering Readiness
 
-## Search Coverage
+## Search Coverage (Complete)
 
 TVMaze already provides fuzzy matching, alternate-title support, partial-title matching, punctuation tolerance, and relevance ordering. However, the current ten-result limit must be eliminated before the first App Store release.
 
@@ -19,7 +19,7 @@ TVMaze already provides fuzzy matching, alternate-title support, partial-title m
 - Keep the search layer provider-independent so that providers can be added or replaced with minimal user impact.
 - Validate common searches, ambiguous titles, alternate titles, punctuation differences, and older or less-popular shows.
 
-### Search Analytics
+### Search Analytics (Complete)
 
 Add only the analytics needed to evaluate search quality while preserving the app’s privacy approach.
 
@@ -31,7 +31,7 @@ Recommended events and properties:
 - Whether a result was selected
 - Whether the selected show was already on the watchlist
 
-## Watchlist Section Scrolling
+## Watchlist Section Scrolling (Complete)
 
 The watchlist currently uses `List` with `Section`. Native pinned section headers allow rows to scroll beneath the header, which creates an unattractive text-over-text effect in the current design.
 
@@ -40,13 +40,17 @@ The watchlist currently uses `List` with `Section`. Native pinned section header
 - Verify that section headers scroll normally rather than remaining pinned.
 - Re-test the tab bar, search field, empty state, and VoiceOver order after the change.
 
-## SwiftData Migration Strategy
+## Watchlist Management (Complete)
+
+- Support swipe-to-delete in the Watchlist, in addition to tapping the star.
+
+## SwiftData Migration Strategy (Complete)
 
 - Add and test a SwiftData migration plan before changing persistent models.
 - Verify that upgrades preserve user data.
 - Project should be structured to support fixture-based migration testing in the future.
 
-## Persistence Recovery
+## Persistence Recovery (Complete)
 
 Replace the startup `fatalError` with a user-facing recovery flow before release.
 
@@ -55,7 +59,7 @@ Replace the startup `fatalError` with a user-facing recovery flow before release
 - Allow the user to export diagnostics before resetting.
 - Provide a clear **Reset Local Data** action when recovery is not possible.
 
-## Crash-Loop Prevention
+## Crash-Loop Prevention (Complete)
 
 - Detect repeated launch failures where practical.
 - Offer a safe recovery path rather than repeatedly crashing.

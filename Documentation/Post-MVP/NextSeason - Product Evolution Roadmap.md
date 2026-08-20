@@ -15,8 +15,8 @@ This document captures enhancements planned after the initial App Store release.
 
 ## Watchlist Management
 
-- Support swipe-to-delete in the Watchlist, in addition to tapping the star.
 - User-selectable sorting.
+- Support marking which shows the user has fully caught up on.
 
 Continue to favor fast, predictable title matching over discovery-oriented fuzzy search.
 
