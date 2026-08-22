@@ -1,7 +1,5 @@
 # NextSeason -- Product Evolution Roadmap
 
-This document captures enhancements planned after the initial App Store release. Features are grouped by area rather than priority, and will be implemented based on user feedback, technical dependencies, and product direction.
-
 ## Purpose
 
 This document captures enhancements planned after the initial App Store release. Content has been preserved from the original roadmap and reorganized by release timing rather than topic.
@@ -19,6 +17,48 @@ This document captures enhancements planned after the initial App Store release.
 - Support marking which shows the user has fully caught up on.
 
 Continue to favor fast, predictable title matching over discovery-oriented fuzzy search.
+
+## Intelligent Monitoring Experience
+
+The long-term vision for NextSeason is to quietly monitor the TV shows users care about and let them know when there is something worth knowing. Future enhancements should reinforce user confidence that the app is actively monitoring on their behalf without encouraging unnecessary engagement.
+
+### Monitoring Confidence
+
+- Display a monitoring summary at the top of the watchlist (for example: "Monitoring 18 shows").
+- Show the last successful background refresh time.
+- Clearly indicate when everything is up to date.
+- Surface when background refresh has not run recently so users understand why updates may be delayed.
+
+### Immediate Value
+
+After adding a show to the watchlist, present a richer status summary instead of a simple confirmation.
+
+Examples:
+
+- Current status (Running, Returning, Ended, etc.).
+- Latest known season and premiere information.
+- A brief explanation that NextSeason will monitor the show and notify the user when its status changes.
+
+### Update Awareness
+
+- Display a "Since your last visit" summary when tracked shows have changed.
+- Maintain unread update indicators until the user has acknowledged the changes.
+- Consider an update history so users can review previously announced changes.
+
+These features should complement notifications rather than replace them, ensuring users can easily see what changed even if they missed a notification.
+
+### Apple Platform Integration
+
+Investigate deeper integration with App Intents, Siri, Apple Intelligence, and widgets.
+
+Potential features:
+
+- Siri/App Intents to add or remove shows from the watchlist.
+- Siri queries about the status of tracked shows.
+- Siri summaries describing what has changed since the user's last visit.
+- Home Screen widgets that display monitoring status or recent updates.
+
+These capabilities should operate on the user's watchlist and application data rather than attempting to become a general entertainment news assistant.
 
 ## Notification Enhancements
 
@@ -77,18 +117,22 @@ Implementation principles:
 
 # Platform Features
 
-## Cross-Device Sync
+## iCloud / CloudKit Sync
 
--   Cloud sync.
--   Cross-device watchlists.
--   Backup and restore.
--   Device migration.
+Use Apple’s cloud infrastructure to synchronize the watchlist and related state across a user’s Apple devices.
+
+-   Synchronize watchlists automatically across devices signed into the user's iCloud account.
+-   Synchronize related user-managed state needed for a consistent experience across devices.
+-   Support backup and restore.
+-   Support device migration.
+-   Preserve offline use and reconcile changes when connectivity returns.
+-   Prefer CloudKit/iCloud over introducing a separate NextSeason account when Apple’s infrastructure can satisfy the product requirements.
 
 ## Apple Platform Expansion
 
 Potential platforms:
 
-Planned after Cloud Sync is implemented:
+Planned after iCloud / CloudKit Sync is implemented:
 
 - iPad
 - Mac
@@ -99,26 +143,21 @@ Vision Pro is not currently planned.
 ## Monitoring & Notifications
 
 - Move season monitoring to a backend service.
-- Deliver reliable push notifications even when the app is not running.
+- Monitor each relevant show centrally rather than independently polling the same show for every user who tracks it.
+- Detect meaningful season and release-date changes on the server and fan notifications out to users who track the affected show.
+- Deliver reliable push notifications through Apple Push Notification service (APNs), even when the app is not running.
 - Reduce dependence on background app refresh.
-- Keep notification delivery consistent across all of a user’s devices.
+- Keep notification delivery consistent across all of a user’s devices and avoid confusing duplicate notifications.
 - Minimize battery impact by performing monitoring on the server whenever possible.
+- Design backend monitoring and cloud sync together so the server can determine which users should receive notifications without unnecessarily duplicating or exposing user data.
 
 ## Identity & Accounts
 
-Introduce user accounts only if they become necessary to support Cloud Sync or backend monitoring.
+Avoid requiring a separate NextSeason account unless it becomes necessary to support iCloud / CloudKit Sync, backend monitoring, or another future feature. Prefer the user's existing Apple/iCloud identity when it can satisfy the product requirements.
 
 # Product Analytics
 
 Transition Diagnostics into a production support feature while retaining diagnostic report generation. Continue using lightweight, privacy-preserving analytics to guide future product decisions.
-
-# Business Options
-
--   One-time purchase.
--   Premium upgrade.
--   Subscription.
--   Affiliate revenue.
--   Delay monetization decisions until the core product demonstrates sustained user engagement and retention.
 
 # Product Principles
 

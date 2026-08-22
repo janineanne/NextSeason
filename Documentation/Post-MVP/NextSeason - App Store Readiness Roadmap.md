@@ -136,6 +136,19 @@ These tasks are listed in approximately sequential order.
 - Select primary and secondary categories.
 - Prepare copyright information.
 
+### App Store search/ASO research
+
+Test natural-language searches a prospective user would use to find NextSeason, including “tv show next season,” “tv show upcoming season,” “new season reminder,” and related variations. Use the results to choose the App Store subtitle and keyword field.
+
+Starting queries:
+* tv show next season
+* tv show upcoming season
+* upcoming tv seasons
+* new season reminder
+* track tv show new seasons
+* when is the next season
+* when does my show come back
+
 ## Privacy and Compliance
 
 - Complete the App Privacy questionnaire and Privacy Nutrition Label.
