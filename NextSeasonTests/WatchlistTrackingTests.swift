@@ -62,14 +62,22 @@ struct WatchlistTrackingTests {
         )
     }
 
-    private func season(_ number: Int, premiere: String?, end: String? = nil) -> Season {
+    private func season(_ number: Int, premiere: Date?, end: Date? = nil) -> Season {
         Season(
             id: number,
             number: number,
-            premiereDate: TVMazeDate.dateOnly(premiere),
-            endDate: TVMazeDate.dateOnly(end),
+            premiereDate: premiere,
+            endDate: end,
             episodeOrder: nil
         )
+    }
+
+    /// UTC calendar-day offset so fixtures stay aligned with `TVMazeDate` comparisons
+    /// and with `TrackedShow(from:)` which evaluates status at `Date.now`.
+    private func utcDayOffset(_ days: Int, from date: Date = .now) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .gmt
+        return calendar.date(byAdding: .day, value: days, to: date) ?? date
     }
 
     @Test("Toggle with a missing undo coordinator returns ignored without mutating persistence")
@@ -149,7 +157,7 @@ struct WatchlistTrackingTests {
         let repository = InMemoryWatchlistRepository()
         let analytics = RecordingAnalyticsService()
         let tvMaze = MockTVMazeService()
-        let now = TVMazeDate.dateOnly("2026-07-22")!
+        let now = Date.now
 
         let fullShow = Show(
             id: sampleShow.id,
@@ -165,12 +173,14 @@ struct WatchlistTrackingTests {
             genres: [],
             averageRuntime: nil,
             seasons: [
-                season(16, premiere: "2025-03-09", end: "2025-07-27"),
-                season(17, premiere: "2026-04-05", end: "2026-08-23"),
+                season(
+                    16, premiere: utcDayOffset(-400, from: now), end: utcDayOffset(-250, from: now)),
+                season(
+                    17, premiere: utcDayOffset(-120, from: now), end: utcDayOffset(120, from: now)),
             ],
             nextEpisode: NextEpisode(
                 season: 17,
-                airdate: TVMazeDate.dateOnly("2026-07-26")
+                airdate: utcDayOffset(4, from: now)
             ),
             updatedAt: now
         )
@@ -206,7 +216,7 @@ struct WatchlistTrackingTests {
         let repository = InMemoryWatchlistRepository()
         let analytics = RecordingAnalyticsService()
         let tvMaze = MockTVMazeService()
-        let now = TVMazeDate.dateOnly("2026-07-22")!
+        let now = Date.now
 
         let detailedShow = Show(
             id: sampleShow.id,
@@ -222,7 +232,8 @@ struct WatchlistTrackingTests {
             genres: [],
             averageRuntime: nil,
             seasons: [
-                season(17, premiere: "2026-04-05", end: "2026-08-23")
+                season(
+                    17, premiere: utcDayOffset(-120, from: now), end: utcDayOffset(120, from: now))
             ],
             nextEpisode: nil,
             updatedAt: now
