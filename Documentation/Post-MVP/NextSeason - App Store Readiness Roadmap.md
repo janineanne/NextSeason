@@ -77,6 +77,25 @@ Complete a final accessibility pass and address everything that can reasonably b
 - Verify that state is not communicated by color alone.
 - Test empty, loading, error, and recovery states.
 
+## Watchlist Export
+
+Give users a way to export their watchlist so that their data is not locked into NextSeason.
+
+### Requirements
+
+- Add an **Export Watchlist** action in an appropriate location in the app.
+- Export the complete watchlist as a CSV file using the standard iOS share sheet.
+- Include enough information to identify each show independently of NextSeason, including:
+  - Show name
+  - TVMaze ID
+  - TVDB ID, when available
+- Consider including other useful human-readable information already stored by the app, such as show status or next-season information.
+- Export must include **all shows in the watchlist**, including shows above the free-tier limit after a Plus subscription has expired.
+- Export must be available to both free and Plus users and must not require an active subscription.
+- Ensure the resulting CSV can be opened successfully in common spreadsheet applications such as Numbers and Excel.
+
+Import and restoration from an exported watchlist are not required for the initial App Store release; see the Product Evolution Roadmap.
+
 ## StoreKit
 
 See [NextSeason Monetization Strategy](NextSeason%20-%20Monetization%20Strategy%20Roadmap.md) for the proposed pricing and purchase structure.

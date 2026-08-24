@@ -18,6 +18,25 @@ This document captures enhancements planned after the initial App Store release.
 
 Continue to favor fast, predictable title matching over discovery-oriented fuzzy search.
 
+## Watchlist Import and Restore
+
+Allow users to import a previously exported NextSeason watchlist, providing a straightforward way to restore or transfer their data.
+
+### Considerations
+
+- Support importing the watchlist format produced by NextSeason's export feature.
+- Use stable show identifiers where possible to match imported shows to current show data.
+- Define behavior for:
+  - Shows already present in the watchlist
+  - Shows that can no longer be found or matched
+  - Older export formats
+  - Invalid or malformed files
+  - Imports that would exceed the current free-tier watchlist limit
+- Provide a clear summary of the import result, including shows that could not be restored.
+- Preserve compatibility with exports created by earlier versions of NextSeason where practical.
+
+Before implementation, determine whether import is intended primarily as a user-controlled backup/restore mechanism, a way to move data between devices, or both. Reevaluate the appropriate export/import format at that time; CSV may remain sufficient, or a versioned structured format such as JSON may be preferable for reliable restoration.
+
 ## Intelligent Monitoring Experience
 
 The long-term vision for NextSeason is to quietly monitor the TV shows users care about and let them know when there is something worth knowing. Future enhancements should reinforce user confidence that the app is actively monitoring on their behalf without encouraging unnecessary engagement.
