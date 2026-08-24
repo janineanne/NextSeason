@@ -109,13 +109,14 @@ struct SearchViewModelTests {
     private func makeViewModel(
         search: MockSearchService,
         tvMaze: some TVMazeService = MockTVMazeService(),
-        mapping: InMemoryShowIDMapping? = nil
+        mapping: InMemoryShowIDMapping? = nil,
+        analytics: any AnalyticsTracking = RecordingAnalyticsService()
     ) -> SearchViewModel {
         SearchViewModel(
             searchService: search,
             tvMaze: tvMaze,
             showIDMapping: mapping ?? showIDMapping(),
-            analytics: RecordingAnalyticsService(),
+            analytics: analytics,
             debounce: .zero
         )
     }
@@ -546,6 +547,85 @@ struct SearchViewModelTests {
         viewModel.query = "severance"
         await viewModel.search()
         #expect(counter.theTVDBLookups == 0)
+    }
+
+    @Test("Successful search records search_performed immediately")
+    func successfulSearchRecordsImmediately() async {
+        let analytics = RecordingAnalyticsService()
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, offset in
+                Self.page([sampleResult], hasMore: false, offset: offset)
+            },
+            analytics: analytics
+        )
+        viewModel.query = "severance"
+        await viewModel.search()
+
+        guard
+            case .searchPerformed(let queryLength, let resultCount, _, let outcome) =
+                analytics.events.first
+        else {
+            Issue.record("expected search_performed")
+            return
+        }
+        #expect(queryLength == 9)
+        #expect(resultCount == 1)
+        #expect(outcome == .results)
+        #expect(
+            analytics.events.contains { event in
+                if case .searchResultSelected = event { return true }
+                return false
+            } == false)
+    }
+
+    @Test("Empty search records search_performed immediately")
+    func emptySearchRecordsImmediately() async {
+        let analytics = RecordingAnalyticsService()
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, offset in
+                Self.page([], hasMore: false, offset: offset)
+            },
+            mapping: showIDMapping(map: [:]),
+            analytics: analytics
+        )
+        viewModel.query = "xyzzy"
+        await viewModel.search()
+
+        #expect(
+            analytics.events.contains { event in
+                if case .searchPerformed(let queryLength, let resultCount, _, let outcome) = event {
+                    return queryLength == 5 && resultCount == 0 && outcome == .empty
+                }
+                return false
+            })
+        #expect(analytics.events.contains { $0 == .emptySearchResultsShown })
+    }
+
+    @Test("Failed search records search_performed with outcome failed")
+    func failedSearchRecordsFailedOutcome() async {
+        let analytics = RecordingAnalyticsService()
+        let viewModel = makeViewModel(
+            search: MockSearchService { _, _ in throw TestError() },
+            analytics: analytics
+        )
+        viewModel.query = "severance"
+        await viewModel.search()
+
+        #expect(
+            analytics.events.contains { event in
+                if case .searchPerformed(let queryLength, let resultCount, _, let outcome) = event {
+                    return queryLength == 9 && resultCount == 0 && outcome == .failed
+                }
+                return false
+            })
+        #expect(
+            analytics.events.contains { event in
+                if case .nonFatalError(_, let context) = event {
+                    return context == "search"
+                }
+                return false
+            }
+        )
     }
 
     private final class CallCounter: Sendable {

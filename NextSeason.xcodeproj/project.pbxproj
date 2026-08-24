@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E1A7ABA5E0000000000001 /* Aptabase in Frameworks */ = {isa = PBXBuildFile; productRef = E1A7ABA5E0000000000002 /* Aptabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E1DAC55D2FDF5A4B00BD81E5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -81,6 +85,8 @@
 		E1672FE0302FA60B007F7098 /* 8-13-2026 Implement Review Items.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-13-2026 Implement Review Items.md"; sourceTree = "<group>"; };
 		E16732A7302FD9CD007F7098 /* 8-14-2026 Implement Search Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-14-2026 Implement Search Improvements.md"; sourceTree = "<group>"; };
 		E16732A8302FDAEC007F7098 /* 8-14-2026 Review Search Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-14-2026 Review Search Improvements.md"; sourceTree = "<group>"; };
+		E1673693302FF5F2007F7098 /* 8-14-2026 Discuss and Review Aptabase Integration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-14-2026 Discuss and Review Aptabase Integration.md"; sourceTree = "<group>"; };
+		E1673694302FF63F007F7098 /* 8-14-2026 Implement Aptabase Integration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-14-2026 Implement Aptabase Integration.md"; sourceTree = "<group>"; };
 		E1678D3C2FFC5604007F7098 /* 7-6-2026 Add Notification Settings to About.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Add Notification Settings to About.md"; sourceTree = "<group>"; };
 		E1678D412FFC650E007F7098 /* 7-6-2026 Refresh Time and Notification Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "7-6-2026 Refresh Time and Notification Improvements.md"; sourceTree = "<group>"; };
 		E16792EC2FFC77BB007F7098 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -255,6 +261,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1A7ABA5E0000000000001 /* Aptabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +346,8 @@
 				E1672FE0302FA60B007F7098 /* 8-13-2026 Implement Review Items.md */,
 				E16732A7302FD9CD007F7098 /* 8-14-2026 Implement Search Improvements.md */,
 				E16732A8302FDAEC007F7098 /* 8-14-2026 Review Search Improvements.md */,
+				E1673693302FF5F2007F7098 /* 8-14-2026 Discuss and Review Aptabase Integration.md */,
+				E1673694302FF63F007F7098 /* 8-14-2026 Implement Aptabase Integration.md */,
 				E1AB8180303628370045498C /* 8-14-2026 Improving App Icon 1.md */,
 				E1AB8181303628420045498C /* 8-16-2026 Improving App Icon 2.md */,
 				E1AB81823036284D0045498C /* 8-16-2026 Improving App Icon 3.md */,
@@ -562,6 +571,7 @@
 			);
 			name = NextSeason;
 			packageProductDependencies = (
+				E1A7ABA5E0000000000002 /* Aptabase */,
 			);
 			productName = NextSeason;
 			productReference = E13811CD2FDB795C009C141B /* NextSeason.app */;
@@ -646,6 +656,9 @@
 			);
 			mainGroup = E13811C42FDB795C009C141B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E1A7ABA5E0000000000003 /* XCRemoteSwiftPackageReference "aptabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E13811CE2FDB795C009C141B /* Products */;
 			projectDirPath = "";
@@ -1217,6 +1230,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E1A7ABA5E0000000000003 /* XCRemoteSwiftPackageReference "aptabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aptabase/aptabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.11;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E1A7ABA5E0000000000002 /* Aptabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1A7ABA5E0000000000003 /* XCRemoteSwiftPackageReference "aptabase-swift" */;
+			productName = Aptabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E13811C52FDB795C009C141B /* Project object */;
 }

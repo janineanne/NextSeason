@@ -138,7 +138,8 @@ final class SearchViewModel {
                     .searchPerformed(
                         queryLength: trimmed.count,
                         resultCount: 0,
-                        durationMs: max(durationMs, 0)
+                        durationMs: max(durationMs, 0),
+                        outcome: .empty
                     )
                 )
                 analytics.track(.emptySearchResultsShown)
@@ -150,7 +151,8 @@ final class SearchViewModel {
                     .searchPerformed(
                         queryLength: trimmed.count,
                         resultCount: fill.items.count,
-                        durationMs: max(durationMs, 0)
+                        durationMs: max(durationMs, 0),
+                        outcome: fill.items.isEmpty ? .empty : .results
                     )
                 )
             }
@@ -170,7 +172,8 @@ final class SearchViewModel {
                 .searchPerformed(
                     queryLength: trimmed.count,
                     resultCount: 0,
-                    durationMs: max(durationMs, 0)
+                    durationMs: max(durationMs, 0),
+                    outcome: .failed
                 )
             )
             analytics.trackNonFatalError(error, context: "search")

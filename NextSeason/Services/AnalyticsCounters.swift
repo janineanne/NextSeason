@@ -35,7 +35,7 @@ extension AnalyticsCounters {
         switch event {
         case .appLaunched:
             appLaunches += 1
-        case .searchPerformed(_, let resultCount, _):
+        case .searchPerformed(_, let resultCount, _, _):
             searchesPerformed += 1
             if resultCount > 0 {
                 successfulSearches += 1
@@ -57,7 +57,7 @@ extension AnalyticsCounters {
             }
         case .notificationReminderScheduled:
             notificationRemindersScheduled += 1
-        case .searchResultOpened, .watchlistViewed, .watchlistItemOpened,
+        case .searchResultSelected, .searchResultOpened, .watchlistViewed, .watchlistItemOpened,
             .notificationTapped, .appOpenedFromNotification, .emptyWatchlistShown,
             .nonFatalError:
             break

@@ -361,6 +361,11 @@ struct SearchView: View {
     private func openAndPresent(_ result: TVDBSearchResult) async {
         do {
             let show = try await viewModel.resolveShow(for: result)
+            analytics.track(
+                .searchResultSelected(
+                    alreadyOnWatchlist: watchlistTracking.trackedShowIDs.contains(show.id)
+                )
+            )
             navigationPath.append(show)
         } catch is CancellationError {
             return

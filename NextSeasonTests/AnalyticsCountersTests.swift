@@ -15,7 +15,9 @@ struct AnalyticsCountersTests {
         var counters = AnalyticsCounters()
 
         counters.record(.appLaunched)
-        counters.record(.searchPerformed(queryLength: 9, resultCount: 3, durationMs: 120))
+        counters.record(
+            .searchPerformed(queryLength: 9, resultCount: 3, durationMs: 120, outcome: .results)
+        )
         counters.record(.emptySearchResultsShown)
         counters.record(.exampleSearchUsed)
         counters.record(.watchlistAdded(source: .search, showID: 1))
@@ -36,7 +38,9 @@ struct AnalyticsCountersTests {
     @Test("Failed searches do not count as successful")
     func failedSearchNotSuccessful() {
         var counters = AnalyticsCounters()
-        counters.record(.searchPerformed(queryLength: 4, resultCount: 0, durationMs: 50))
+        counters.record(
+            .searchPerformed(queryLength: 4, resultCount: 0, durationMs: 50, outcome: .failed)
+        )
         #expect(counters.searchesPerformed == 1)
         #expect(counters.successfulSearches == 0)
     }
