@@ -54,6 +54,16 @@
     ". Please consider adding missing information or subscribing." : {
 
     },
+    "%@ (%lld)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (%lld)"
+          }
+        }
+      }
+    },
     "%@ — 12 h (production cadence)" : {
       "localizations" : {
         "en" : {

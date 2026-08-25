@@ -47,7 +47,8 @@ struct WatchlistView: View {
     /// `.onAppear` only refreshes on later tab returns — not during first load.
     @State private var hasCompletedInitialLoad = false
     /// Sections the user has collapsed. Missing IDs are treated as expanded.
-    @State private var collapsedSections: Set<WatchlistSection> = []
+    /// Restored from UserDefaults on first appearance; saved whenever it changes.
+    @State private var collapsedSections: Set<WatchlistSection>
     /// Global frames for watchlist rows, used to anchor the swipe-delete toast
     /// near the deleted row instead of the bottom of the screen.
     @State private var rowFrames: [Int: CGRect] = [:]
@@ -72,6 +73,7 @@ struct WatchlistView: View {
         self.onApplyPendingDetail = onApplyPendingDetail
         self.onFindShow = onFindShow
         self.onWatchlistChanged = onWatchlistChanged
+        _collapsedSections = State(initialValue: WatchlistPreferences().collapsedSections)
     }
 
     var body: some View {
@@ -113,6 +115,9 @@ struct WatchlistView: View {
                 if !isPresented {
                     viewModel?.searchText = ""
                 }
+            }
+            .onChange(of: collapsedSections) { _, sections in
+                WatchlistPreferences().collapsedSections = sections
             }
             .navigationDestination(for: TrackedShow.self) { tracked in
                 ShowDetailView(
@@ -336,7 +341,7 @@ struct WatchlistView: View {
                 }
                 ForEach(viewModel.filteredSectionGroups) { group in
                     WatchlistCollapsibleSection(
-                        title: group.section.title,
+                        section: group.section,
                         shows: group.shows,
                         isExpanded: expansionBinding(for: group.section),
                         onDelete: { offsets in
@@ -492,11 +497,15 @@ private struct WatchlistSearchPresentationModifier: ViewModifier {
 
 /// A status section the user can collapse.
 private struct WatchlistCollapsibleSection<Row: View>: View {
-    let title: String
+    let section: WatchlistSection
     let shows: [TrackedShow]
     @Binding var isExpanded: Bool
     var onDelete: ((IndexSet) -> Void)?
     @ViewBuilder let row: (TrackedShow) -> Row
+
+    private var displayedTitle: String {
+        section.headerTitle(showCount: shows.count, isExpanded: isExpanded)
+    }
 
     var body: some View {
         Section(isExpanded: $isExpanded) {
@@ -511,7 +520,7 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
                 }
             } label: {
                 HStack(spacing: AppSpacing.tight) {
-                    Text(title)
+                    Text(displayedTitle)
                         .font(.headline)
                         .appPrimaryText()
                     Spacer()
@@ -526,7 +535,8 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(title)
+            .accessibilityLabel(displayedTitle)
+            .accessibilityInputLabels([section.title])
             .accessibilityHint(
                 isExpanded
                     ? String(localized: "Collapse section")

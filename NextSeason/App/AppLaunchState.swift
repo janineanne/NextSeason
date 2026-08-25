@@ -266,6 +266,7 @@ enum AppLaunchState {
             #if DEBUG
                 FirstRunPreferences.resetSearchResultsHintForTesting()
                 FirstRunPreferences.resetFirstSearchCompletedForTesting()
+                WatchlistPreferences.resetCollapsedSectionsForTesting()
             #endif
         }
     }
