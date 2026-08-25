@@ -20,42 +20,27 @@ extension EnvironmentValues {
 }
 
 extension View {
-    /// Pins a subtle About footer above the tab bar when an About entry point is
-    /// available (beta / DEBUG). Kept off show detail so content screens stay clean.
-    func appAboutFooter() -> some View {
-        modifier(AppAboutFooterModifier())
+    /// Leading ellipsis that presents the About sheet when an About entry point
+    /// is available (beta / DEBUG).
+    func appAboutToolbarButton() -> some View {
+        modifier(AppAboutToolbarButtonModifier())
     }
 }
 
-private struct AppAboutFooterModifier: ViewModifier {
+private struct AppAboutToolbarButtonModifier: ViewModifier {
     @Environment(\.openAppAbout) private var openAppAbout
 
     func body(content: Content) -> some View {
-        content.safeAreaInset(edge: .bottom, spacing: 0) {
-            if openAppAbout != nil {
-                AppAboutFooterButton()
+        content.toolbar {
+            if let openAppAbout {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("About NextSeason", systemImage: "ellipsis", action: openAppAbout)
+                        .labelStyle(.iconOnly)
+                        .accessibilityHint("Shows version and beta diagnostics")
+                        .accessibilityIdentifier(AccessibilityID.App.aboutButton)
+                }
             }
         }
-    }
-}
-
-/// Quiet version line used as the beta About entry point on Search and Watchlist.
-private struct AppAboutFooterButton: View {
-    @Environment(\.openAppAbout) private var openAppAbout
-
-    var body: some View {
-        Button {
-            openAppAbout?()
-        } label: {
-            Text("About NextSeason")
-                .font(.footnote)
-                .appSecondaryText()
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, AppSpacing.tight)
-        }
-        .buttonStyle(.plain)
-        .accessibilityHint("Shows version and beta diagnostics")
-        .accessibilityIdentifier(AccessibilityID.App.aboutFooter)
     }
 }
 

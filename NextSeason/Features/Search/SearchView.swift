@@ -74,7 +74,7 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .appScreenBackground()
                 .navigationTitle("NextSeason")
-                .appAboutFooter()
+                .appAboutToolbarButton()
                 .navigationDestination(for: Show.self) { show in
                     ShowDetailView(
                         show: show,

@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// Confirmation toast shown after removing a show from the watchlist (Undo / OK).
 struct UndoToast: View {
@@ -109,17 +110,15 @@ enum UndoToastFocus: Hashable {
 }
 
 extension View {
-    /// Presents an undo toast anchored below (or above) the view that triggered removal.
+    /// Presents an undo toast above the tab bar after a watchlist removal.
     func watchlistUndoToast(
         isPresented: Bool,
-        anchor: CGRect?,
         undoAction: @escaping () -> Void,
         confirmAction: @escaping () -> Void
     ) -> some View {
         modifier(
             WatchlistUndoToastModifier(
                 isPresented: isPresented,
-                anchor: anchor,
                 undoAction: undoAction,
                 confirmAction: confirmAction
             )
@@ -127,29 +126,27 @@ extension View {
     }
 }
 
-/// Presents the undo toast either bottom-centered (VoiceOver) or position-anchored
-/// near the track button that started the removal (sighted layout).
+/// Presents the undo toast above the tab bar. VoiceOver focus and timing stay
+/// VoiceOver-specific in `onChange`; layout is the same with VoiceOver off.
 private struct WatchlistUndoToastModifier: ViewModifier {
     let isPresented: Bool
-    let anchor: CGRect?
     let undoAction: () -> Void
     let confirmAction: () -> Void
 
     @Environment(\.accessibilityVoiceOverEnabled) private var isVoiceOverRunning
     @AccessibilityFocusState private var toastFocus: UndoToastFocus?
+    /// Distance from the home-indicator-safe bottom to the top of the tab bar.
+    @State private var tabBarClearance: CGFloat = 49
 
     func body(content: Content) -> some View {
         content
             .overlay {
                 if isPresented {
-                    // VoiceOver: fixed bottom placement is more reliable than
-                    // GeometryReader + `.position` near a disappearing row.
-                    if isVoiceOverRunning {
-                        voiceOverToast
-                    } else {
-                        anchoredToast
-                    }
+                    aboveTabBarToast
                 }
+            }
+            .background {
+                TabBarClearanceReader(clearance: $tabBarClearance)
             }
             .animation(.easeOut(duration: 0.2), value: isPresented)
             .onChange(of: isPresented) { _, presented in
@@ -175,37 +172,23 @@ private struct WatchlistUndoToastModifier: ViewModifier {
             }
     }
 
-    /// Bottom-centered layout; pass-through overlay so the list stays reachable.
-    private var voiceOverToast: some View {
-        Color.clear
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
-            .overlay(alignment: .bottom) {
-                toastContent
-                    .frame(maxWidth: 320)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 24)
-            }
-            .zIndex(1)
-            .transition(.undoToastEntrance)
-    }
-
-    private var anchoredToast: some View {
-        GeometryReader { proxy in
-            let containerFrame = proxy.frame(in: .global)
-            let resolvedAnchor = anchor ?? .zero
+    /// Bottom-centered, just above the tab bar. Full-screen overlay has no
+    /// background and is not itself an accessibility element, so empty space
+    /// stays pass-through for touch and VoiceOver. Do not apply
+    /// `.accessibilityHidden(true)` on this container — that hides the toast.
+    private var aboveTabBarToast: some View {
+        VStack {
+            Spacer()
             toastContent
-                .frame(maxWidth: min(320, proxy.size.width - 32))
-                .fixedSize(horizontal: false, vertical: true)
-                .position(
-                    toastPosition(
-                        in: proxy,
-                        containerFrame: containerFrame,
-                        anchor: resolvedAnchor
-                    )
-                )
+                .frame(maxWidth: 320)
+                .padding(.horizontal, AppSpacing.screen)
+            Color.clear
+                .frame(height: tabBarClearance + AppSpacing.tight)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilitySortPriority(1)
         .zIndex(1)
         .transition(.undoToastEntrance)
     }
@@ -220,43 +203,34 @@ private struct WatchlistUndoToastModifier: ViewModifier {
     }
 }
 
-/// Centers the toast under (or above) `anchor` in the overlay's local coordinates.
-///
-/// Converts the button's global frame into the `GeometryReader`'s space, prefers
-/// placement below the button when there is room, otherwise flips above, and
-/// clamps X so a ~320pt-wide toast stays inset from the edges.
-private func toastPosition(
-    in proxy: GeometryProxy,
-    containerFrame: CGRect,
-    anchor: CGRect
-) -> CGPoint {
-    let toastHeightEstimate: CGFloat = 48
-    let spacing: CGFloat = 8
+/// Reads how far the tab bar extends above the home-indicator safe area so the
+/// toast can sit just above it from an overlay on the tab root.
+private struct TabBarClearanceReader: UIViewControllerRepresentable {
+    @Binding var clearance: CGFloat
 
-    // Fall back when the trigger has not reported a frame yet. Prefer mid-screen
-    // over the bottom edge so the toast does not pull a near-bottom List row
-    // into a scroll jump when it appears.
-    if anchor.width < 1 || anchor.height < 1 {
-        return CGPoint(x: proxy.size.width / 2, y: proxy.size.height * 0.55)
+    func makeUIViewController(context: Context) -> UIViewController {
+        let controller = UIViewController()
+        controller.view.isHidden = true
+        return controller
     }
 
-    // Global → local: subtract the overlay container's global origin.
-    let localMidX = anchor.midX - containerFrame.minX
-    let belowY = anchor.maxY + spacing + toastHeightEstimate / 2 - containerFrame.minY
-    let aboveY = anchor.minY - spacing - toastHeightEstimate / 2 - containerFrame.minY
-
-    let y: CGFloat
-    // Prefer below the button; flip above when the toast would clip the bottom.
-    if belowY + toastHeightEstimate / 2 <= proxy.size.height - 8 {
-        y = belowY
-    } else {
-        y = max(toastHeightEstimate / 2 + 8, aboveY)
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // Hop out of the representable update so measuring the tab bar does not
+        // publish `@State` during the current view pass.
+        Task { @MainActor in
+            await Task.yield()
+            guard let measured = Self.measuredClearance(from: uiViewController) else { return }
+            guard abs(measured - clearance) > 0.5 else { return }
+            clearance = measured
+        }
     }
 
-    // Keep the toast's horizontal center within [176, width-176] for a 320pt max width.
-    let clampedX = min(
-        max(localMidX, 16 + 160),
-        proxy.size.width - 16 - 160
-    )
-    return CGPoint(x: clampedX, y: y)
+    private static func measuredClearance(from controller: UIViewController) -> CGFloat? {
+        guard let tabBar = controller.tabBarController?.tabBar else { return nil }
+        let window = tabBar.window ?? controller.view.window
+        guard let window else { return nil }
+        let tabBarFrame = tabBar.convert(tabBar.bounds, to: window)
+        let safeAreaBottomY = window.bounds.maxY - window.safeAreaInsets.bottom
+        return max(0, safeAreaBottomY - tabBarFrame.minY)
+    }
 }

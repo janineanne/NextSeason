@@ -93,7 +93,6 @@ private struct AppRootView: View {
         .appAccentTint()
         .watchlistUndoToast(
             isPresented: removalCoordinator.pendingRemoval != nil,
-            anchor: removalCoordinator.toastAnchor,
             undoAction: {
                 Task { _ = await removalCoordinator.undoRemoval() }
             },

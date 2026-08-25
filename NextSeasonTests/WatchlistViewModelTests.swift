@@ -289,6 +289,35 @@ struct WatchlistViewModelTests {
         #expect(try await repository.contains(showID: tracked.id) == false)
     }
 
+    @Test("VoiceOver-equivalent immediate delete uses the same path as swipe")
+    func deleteImmediatelyTrackedShowRemovesRowAndPersists() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let removalCoordinator = WatchlistPendingRemoval(
+            repository: repository, analytics: RecordingAnalyticsService())
+        let viewModel = WatchlistViewModel(
+            repository: repository,
+            removalCoordinator: removalCoordinator,
+            analytics: RecordingAnalyticsService()
+        )
+        try await repository.add(sampleShow)
+        await viewModel.reload()
+        let tracked = try #require((try await repository.all()).first)
+        let anchor = CGRect(x: 0, y: 120, width: 300, height: 60)
+
+        viewModel.deleteImmediately(tracked, rowAnchor: anchor)
+
+        #expect(viewModel.shows.isEmpty)
+        #expect(removalCoordinator.pendingRemoval?.id == tracked.id)
+        #expect(removalCoordinator.toastAnchor == anchor)
+
+        let deadline = Date().addingTimeInterval(1)
+        while Date() < deadline, try await repository.contains(showID: tracked.id) {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+
+        #expect(try await repository.contains(showID: tracked.id) == false)
+    }
+
     @Test("Undo clears the pending removal flag")
     func undoPendingRemovalClearsPendingState() async throws {
         let repository = InMemoryWatchlistRepository()

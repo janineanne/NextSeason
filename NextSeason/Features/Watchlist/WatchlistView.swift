@@ -92,7 +92,7 @@ struct WatchlistView: View {
                     watchlistSearchToolbarButton
                 }
             }
-            .appAboutFooter()
+            .appAboutToolbarButton()
             .modifier(
                 WatchlistSearchPresentationModifier(
                     isPresented: $isSearchPresented,
@@ -254,7 +254,19 @@ struct WatchlistView: View {
                     .buttonStyle(.plain)
                     .showDetailLinkAccessibility()
                     .accessibilityIdentifier(
-                        "\(AccessibilityID.Watchlist.row).\(tracked.id)")
+                        "\(AccessibilityID.Watchlist.row).\(tracked.id)"
+                    )
+                    // VoiceOver cannot use the list swipe gesture, so expose the
+                    // same immediate-delete path as `.onDelete` as a rotor action.
+                    .accessibilityAction(named: String(localized: "Remove from watchlist")) {
+                        withAnimation(.easeInOut(duration: 0.35)) {
+                            viewModel.deleteImmediately(
+                                tracked,
+                                rowAnchor: rowFrames[tracked.id] ?? .zero
+                            )
+                        }
+                        rowFrames[tracked.id] = nil
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

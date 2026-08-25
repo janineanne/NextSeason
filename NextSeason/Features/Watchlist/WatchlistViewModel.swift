@@ -155,20 +155,21 @@ final class WatchlistViewModel {
         let targets = offsets.compactMap { index -> TrackedShow? in
             sectionShows.indices.contains(index) ? sectionShows[index] : nil
         }
-        guard !targets.isEmpty else { return }
-
         for tracked in targets {
-            removeShow(showID: tracked.id)
+            deleteImmediately(tracked, rowAnchor: rowAnchors[tracked.id] ?? .zero)
         }
+    }
 
-        for tracked in targets {
-            let anchor = rowAnchors[tracked.id] ?? .zero
-            removalCoordinator.requestImmediateRemoval(
-                tracked,
-                anchor: anchor,
-                source: .watchlist
-            )
-        }
+    /// Immediate delete shared by swipe-to-delete and the VoiceOver row action.
+    /// Drops the row from the list synchronously, then persists and shows an
+    /// informational undo toast. Distinct from star-button `requestRemoval`.
+    func deleteImmediately(_ tracked: TrackedShow, rowAnchor: CGRect) {
+        removeShow(showID: tracked.id)
+        removalCoordinator.requestImmediateRemoval(
+            tracked,
+            anchor: rowAnchor,
+            source: .watchlist
+        )
     }
 
     func undoPendingRemoval() async {

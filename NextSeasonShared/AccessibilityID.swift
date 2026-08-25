@@ -21,7 +21,7 @@ enum UITestingSearchQuery {
 /// Stable accessibility identifiers for UI tests.
 enum AccessibilityID {
     enum App {
-        static let aboutFooter = "app.aboutFooter"
+        static let aboutButton = "app.aboutButton"
     }
 
     enum PersistenceRecovery {
