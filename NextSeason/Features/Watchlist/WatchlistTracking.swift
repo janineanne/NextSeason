@@ -21,6 +21,8 @@ enum WatchlistTracking {
         case removalRequested
         /// The show was persisted and analytics / notification prompt ran.
         case added
+        /// The free watchlist is full; the caller should present NextSeason Plus.
+        case paywallRequired
         /// No-op (e.g. missing undo coordinator, or show already gone from the repo).
         case ignored
     }
@@ -36,14 +38,20 @@ enum WatchlistTracking {
         tvMaze: any TVMazeService,
         analytics: any AnalyticsTracking,
         notifications: any NotificationManaging,
-        prompt: WatchlistNotificationPromptState
-    ) async throws {
+        prompt: WatchlistNotificationPromptState,
+        purchases: PurchaseService
+    ) async throws -> ToggleOutcome {
+        let currentCount = try await repository.trackedShowIDs().count
+        guard purchases.canAddToWatchlist(currentCount: currentCount) else {
+            return .paywallRequired
+        }
         let showToStore = try await resolvedShowForTracking(show, tvMaze: tvMaze)
         try await repository.add(showToStore)
         analytics.track(.watchlistAdded(source: source, showID: showToStore.id))
         if await notifications.needsAuthorizationPrompt() {
             prompt.shouldPromptForNotifications = true
         }
+        return .added
     }
 
     /// Full track/untrack flow: undo a pending removal, request undoable untrack, or add.
@@ -57,7 +65,8 @@ enum WatchlistTracking {
         removalCoordinator: WatchlistPendingRemoval?,
         analytics: any AnalyticsTracking,
         notifications: any NotificationManaging,
-        prompt: WatchlistNotificationPromptState
+        prompt: WatchlistNotificationPromptState,
+        purchases: PurchaseService
     ) async throws -> ToggleOutcome {
         if removalCoordinator?.pendingRemoval?.id == show.id {
             _ = await removalCoordinator?.undoRemoval()
@@ -77,16 +86,16 @@ enum WatchlistTracking {
             return .removalRequested
         }
 
-        try await add(
+        return try await add(
             show,
             source: source,
             repository: repository,
             tvMaze: tvMaze,
             analytics: analytics,
             notifications: notifications,
-            prompt: prompt
+            prompt: prompt,
+            purchases: purchases
         )
-        return .added
     }
 
     /// Uses the caller's show when it already has season data; otherwise fetches detail.

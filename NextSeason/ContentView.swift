@@ -100,7 +100,7 @@ struct ContentView: View {
                 coordinator.popSearchToRoot()
             }
         }
-        .modifier(BetaDiagnosticsPresentationModifier())
+        .modifier(AppAboutPresentationModifier())
         .onChange(of: coordinator.selectedTab) { oldTab, tab in
             // Commit before other tab-side effects so a Search-stack detail screen
             // reappearing during the switch cannot cancel the removal first.
@@ -157,6 +157,7 @@ struct ContentView: View {
             )
         )
         .environment(\.watchlistRepository, repository)
+        .environment(PurchaseService.preview)
         .environment(
             \.watchlistPendingRemoval,
             WatchlistPendingRemoval(

@@ -97,7 +97,8 @@ struct WatchlistTrackingTests {
             removalCoordinator: nil,
             analytics: analytics,
             notifications: makeNotificationService(analytics: analytics),
-            prompt: WatchlistNotificationPromptState()
+            prompt: WatchlistNotificationPromptState(),
+            purchases: .stub()
         )
 
         #expect(outcome == .ignored)
@@ -127,7 +128,8 @@ struct WatchlistTrackingTests {
             removalCoordinator: removalCoordinator,
             analytics: analytics,
             notifications: notifications,
-            prompt: prompt
+            prompt: prompt,
+            purchases: .stub()
         )
         #expect(first == .removalRequested)
         #expect(removalCoordinator.pendingRemoval?.id == sampleShow.id)
@@ -143,7 +145,8 @@ struct WatchlistTrackingTests {
             removalCoordinator: removalCoordinator,
             analytics: analytics,
             notifications: notifications,
-            prompt: prompt
+            prompt: prompt,
+            purchases: .stub()
         )
 
         #expect(second == .undidPendingRemoval)
@@ -201,7 +204,8 @@ struct WatchlistTrackingTests {
             removalCoordinator: nil,
             analytics: analytics,
             notifications: makeNotificationService(analytics: analytics),
-            prompt: WatchlistNotificationPromptState()
+            prompt: WatchlistNotificationPromptState(),
+            purchases: .stub()
         )
 
         #expect(outcome == .added)
@@ -249,7 +253,8 @@ struct WatchlistTrackingTests {
             removalCoordinator: nil,
             analytics: analytics,
             notifications: makeNotificationService(analytics: analytics),
-            prompt: WatchlistNotificationPromptState()
+            prompt: WatchlistNotificationPromptState(),
+            purchases: .stub()
         )
 
         #expect(outcome == .added)
@@ -257,5 +262,111 @@ struct WatchlistTrackingTests {
 
         let tracked = try #require(await repository.trackedShow(showID: sampleShow.id))
         #expect(tracked.nextSeason == .airing(season: 17))
+    }
+
+    @Test("Adding a fourth show without Plus returns paywallRequired and does not persist")
+    func fourthShowRequiresPlus() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        let tvMaze = MockTVMazeService()
+        try await repository.add(show(id: 1))
+        try await repository.add(show(id: 2))
+        try await repository.add(show(id: 3))
+
+        let outcome = try await WatchlistTracking.toggle(
+            sampleShow,
+            isTracked: false,
+            anchor: .zero,
+            source: .search,
+            repository: repository,
+            tvMaze: tvMaze,
+            removalCoordinator: nil,
+            analytics: analytics,
+            notifications: makeNotificationService(analytics: analytics),
+            prompt: WatchlistNotificationPromptState(),
+            purchases: .stub()
+        )
+
+        #expect(outcome == .paywallRequired)
+        #expect(try await repository.contains(showID: sampleShow.id) == false)
+        #expect(tvMaze.fetchedShowIDs.isEmpty)
+        #expect(analytics.events.isEmpty)
+    }
+
+    @Test("Plus entitlement allows adding past the free limit")
+    func plusAllowsUnlimitedAdds() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        try await repository.add(show(id: 1))
+        try await repository.add(show(id: 2))
+        try await repository.add(show(id: 3))
+
+        let detailed = Show(
+            id: sampleShow.id,
+            name: sampleShow.name,
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [season(1, premiere: utcDayOffset(-10))],
+            nextEpisode: nil,
+            updatedAt: .now
+        )
+
+        let outcome = try await WatchlistTracking.toggle(
+            detailed,
+            isTracked: false,
+            anchor: .zero,
+            source: .detail,
+            repository: repository,
+            tvMaze: MockTVMazeService(),
+            removalCoordinator: nil,
+            analytics: analytics,
+            notifications: makeNotificationService(analytics: analytics),
+            prompt: WatchlistNotificationPromptState(),
+            purchases: .stub(isStoreEntitled: true)
+        )
+
+        #expect(outcome == .added)
+        #expect(try await repository.contains(showID: sampleShow.id))
+    }
+
+    @Test("A lapsed user with more than three shows can still track existing shows")
+    func lapsedUserKeepsExistingShows() async throws {
+        let repository = InMemoryWatchlistRepository()
+        try await repository.add(show(id: 1))
+        try await repository.add(show(id: 2))
+        try await repository.add(show(id: 3))
+        try await repository.add(show(id: 4))
+
+        #expect(try await repository.trackedShowIDs().count == 4)
+        #expect(PurchaseService.stub().canAddToWatchlist(currentCount: 4) == false)
+        #expect(PurchaseService.stub().canAddToWatchlist(currentCount: 2))
+    }
+
+    private func show(id: Int) -> Show {
+        Show(
+            id: id,
+            name: "Show \(id)",
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [season(1, premiere: utcDayOffset(-10))],
+            nextEpisode: nil,
+            updatedAt: .now
+        )
     }
 }

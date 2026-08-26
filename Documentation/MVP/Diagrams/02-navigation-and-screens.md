@@ -25,8 +25,8 @@ flowchart TD
     UndoToast -->|Undo| RestoreShow[WatchlistPendingRemoval.undoRemoval]
     UndoToast -->|Confirm/timeout| CommitRemoval[commitPendingRemovalIfNeeded]
 
-    Tabs --> BetaModifier[BetaDiagnosticsPresentationModifier]
-    BetaModifier --> AboutEntry[Version/About entry]
+    Tabs --> AboutModifier[AppAboutPresentationModifier]
+    AboutModifier --> AboutEntry[Version/About entry]
     AboutEntry --> AboutSheet[AppAboutView]
     AboutSheet --> DiagnosticsButton[Diagnostics button]
     DiagnosticsButton --> DiagnosticsSheet[DiagnosticsView]

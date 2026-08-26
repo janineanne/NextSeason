@@ -15,6 +15,7 @@ import SwiftUI
 struct ShowDetailView: View {
     @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.onAutomationDetailLoaded) private var onAutomationDetailLoaded
+    @Environment(\.presentPlusStore) private var presentPlusStore
 
     @State private var viewModel: ShowDetailViewModel
 
@@ -27,6 +28,7 @@ struct ShowDetailView: View {
         repository: any WatchlistRepository,
         notifications: any NotificationManaging,
         analytics: any AnalyticsTracking,
+        purchases: PurchaseService,
         isTracked: Bool = false,
         onWatchlistChanged: @escaping () -> Void = {}
     ) {
@@ -37,6 +39,7 @@ struct ShowDetailView: View {
                 repository: repository,
                 notifications: notifications,
                 analytics: analytics,
+                purchases: purchases,
                 initialIsTracked: isTracked
             )
         )
@@ -159,7 +162,8 @@ struct ShowDetailView: View {
         await viewModel.handleTrackButton(
             anchor: anchor,
             removalCoordinator: removalCoordinator,
-            onWatchlistChanged: onWatchlistChanged
+            onWatchlistChanged: onWatchlistChanged,
+            onPaywallRequired: { presentPlusStore?() }
         )
     }
 
@@ -286,7 +290,8 @@ struct ShowDetailView: View {
                 service: PreviewTVMazeService(stub: .preview),
                 repository: InMemoryWatchlistRepository(),
                 notifications: NotificationService(analytics: RecordingAnalyticsService()),
-                analytics: RecordingAnalyticsService()
+                analytics: RecordingAnalyticsService(),
+                purchases: .preview
             )
         }
     }
@@ -298,7 +303,8 @@ struct ShowDetailView: View {
                 service: PreviewTVMazeService(stub: .previewMissingSummary),
                 repository: InMemoryWatchlistRepository(),
                 notifications: NotificationService(analytics: RecordingAnalyticsService()),
-                analytics: RecordingAnalyticsService()
+                analytics: RecordingAnalyticsService(),
+                purchases: .preview
             )
         }
     }

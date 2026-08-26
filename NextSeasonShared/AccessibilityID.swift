@@ -61,4 +61,14 @@ enum AccessibilityID {
         static let undoButton = "watchlist.undo"
         static let confirmButton = "watchlist.confirm"
     }
+
+    enum Store {
+        static let plusUnlock = "store.plusUnlock"
+        static let plusAnnual = "store.plusAnnual"
+        static let plusLifetime = "store.plusLifetime"
+        static let restore = "store.restore"
+        static let tipTrailer = "store.tipTrailer"
+        static let tipPilot = "store.tipPilot"
+        static let tipHitShow = "store.tipHitShow"
+    }
 }

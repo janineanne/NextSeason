@@ -27,8 +27,10 @@ final class SearchWatchlistTracking {
         let notificationService: any NotificationManaging
         let notificationPrompt: WatchlistNotificationPromptState
         let analytics: any AnalyticsTracking
+        let purchases: PurchaseService
         let onWatchlistChanged: () -> Void
         let onSearchResultsHintDismissed: () -> Void
+        let onPaywallRequired: () -> Void
     }
 
     /// IDs shown as tracked on search rows (excludes pending removals).
@@ -88,7 +90,8 @@ final class SearchWatchlistTracking {
                 removalCoordinator: context.removalCoordinator,
                 analytics: context.analytics,
                 notifications: context.notificationService,
-                prompt: context.notificationPrompt
+                prompt: context.notificationPrompt,
+                purchases: context.purchases
             )
             switch outcome {
             case .ignored:
@@ -98,6 +101,8 @@ final class SearchWatchlistTracking {
                     excludingPendingRemovalFrom: context.removalCoordinator,
                     analytics: context.analytics
                 )
+            case .paywallRequired:
+                context.onPaywallRequired()
             default:
                 apply(outcome, for: show.id, context: context)
             }
@@ -133,7 +138,7 @@ final class SearchWatchlistTracking {
             trackedShowIDs.insert(showID)
             context.onSearchResultsHintDismissed()
             context.onWatchlistChanged()
-        case .ignored:
+        case .paywallRequired, .ignored:
             break
         }
     }

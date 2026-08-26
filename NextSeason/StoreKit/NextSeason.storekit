@@ -1,0 +1,111 @@
+{
+  "identifier" : "A7C3E91F",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "20.00",
+      "familyShareable" : false,
+      "internalID" : "B1D84E27",
+      "localizations" : [
+        {
+          "description" : "Unlimited watchlist, one-time purchase.",
+          "displayName" : "NextSeason Plus Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.TrialByFyre.NextSeason.plus.lifetime",
+      "referenceName" : "Plus Lifetime",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.00",
+      "familyShareable" : false,
+      "internalID" : "C92F0A14",
+      "localizations" : [
+        {
+          "description" : "Optional support for NextSeason. Does not unlock features.",
+          "displayName" : "Trailer",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.TrialByFyre.NextSeason.tip.small",
+      "referenceName" : "Trailer",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "3.00",
+      "familyShareable" : false,
+      "internalID" : "D4E61B08",
+      "localizations" : [
+        {
+          "description" : "Optional support for NextSeason. Does not unlock features.",
+          "displayName" : "Pilot",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.TrialByFyre.NextSeason.tip.medium",
+      "referenceName" : "Pilot",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5.00",
+      "familyShareable" : false,
+      "internalID" : "E8A73C55",
+      "localizations" : [
+        {
+          "description" : "Optional support for NextSeason. Does not unlock features.",
+          "displayName" : "Hit Show",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.TrialByFyre.NextSeason.tip.large",
+      "referenceName" : "Hit Show",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "F6B29D40",
+      "localizations" : [
+
+      ],
+      "name" : "NextSeason Plus",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "10.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "A0C15E88",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited watchlist for one year, renews annually.",
+              "displayName" : "NextSeason Plus Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.TrialByFyre.NextSeason.plus.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Plus Annual",
+          "subscriptionGroupID" : "F6B29D40",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

@@ -30,6 +30,8 @@ struct SearchView: View {
     @Environment(\.notificationService) private var notificationService
     @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.dismissSearch) private var dismissSearch
+    @Environment(\.presentPlusStore) private var presentPlusStore
+    @Environment(PurchaseService.self) private var purchases
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
@@ -82,6 +84,7 @@ struct SearchView: View {
                         repository: repository,
                         notifications: notificationService,
                         analytics: analytics,
+                        purchases: purchases,
                         isTracked: watchlistTracking.trackedShowIDs.contains(show.id),
                         onWatchlistChanged: onWatchlistChanged
                     )
@@ -164,8 +167,10 @@ struct SearchView: View {
             notificationService: notificationService,
             notificationPrompt: notificationPrompt,
             analytics: analytics,
+            purchases: purchases,
             onWatchlistChanged: onWatchlistChanged,
-            onSearchResultsHintDismissed: dismissSearchResultsHintIfNeeded
+            onSearchResultsHintDismissed: dismissSearchResultsHintIfNeeded,
+            onPaywallRequired: { presentPlusStore?() }
         )
     }
 
@@ -440,6 +445,7 @@ private struct ReturnToSearchResultsOnActivateModifier: ViewModifier {
             analytics: RecordingAnalyticsService()
         )
         .environment(\.watchlistRepository, repository)
+        .environment(PurchaseService.preview)
         .environment(
             \.watchlistPendingRemoval,
             WatchlistPendingRemoval(

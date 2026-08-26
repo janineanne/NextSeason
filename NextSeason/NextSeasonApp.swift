@@ -41,7 +41,13 @@ struct NextSeasonApp: App {
                 .environment(\.notificationService, composition.notificationService)
                 .environment(\.analytics, composition.analyticsService)
                 .environment(\.betaRefreshDiagnostics, composition.betaRefreshDiagnostics)
+                .environment(composition.purchaseService)
                 .modelContainer(composition.modelContainer)
+                .task {
+                    let count =
+                        (try? await composition.watchlistRepository.trackedShowIDs().count) ?? 0
+                    await composition.purchaseService.start(watchlistCount: count)
+                }
                 .task {
                     guard let flow = ProfileFlowConfiguration.activeFlow else { return }
                     await ProfileFlowRunner(

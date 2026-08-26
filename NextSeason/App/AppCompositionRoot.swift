@@ -42,6 +42,8 @@ struct AppCompositionRoot {
     let showIDMapping: any ShowIDMapping
     /// Opportunistic on-device mapping refresh; `nil` under UI tests.
     let showIDMappingRefresh: ShowIDMappingRefreshService?
+    /// StoreKit purchases, Plus entitlement, and the free watchlist cap.
+    let purchaseService: PurchaseService
 
     init() throws {
         analyticsService = AnalyticsService()
@@ -54,7 +56,8 @@ struct AppCompositionRoot {
         let repository: any WatchlistRepository
         if UITestingConfiguration.isEnabled {
             // XCUITest: in-memory store + repository so runs stay isolated and don't
-            // touch the developer's on-device watchlist.
+            // touch the developer's on-device watchlist. Purchases are stubbed as
+            // unlimited so existing tests are not gated by the free-tier cap.
             modelContainer = try NextSeasonModelContainer.make(
                 configuration: ModelConfiguration(isStoredInMemoryOnly: true)
             )
@@ -62,6 +65,7 @@ struct AppCompositionRoot {
             // Severance preview ids used by UI tests / PreviewTheTVDBService.
             showIDMapping = InMemoryShowIDMapping(map: [371980: 44933])
             showIDMappingRefresh = nil
+            purchaseService = .stub(isStoreEntitled: true)
         } else {
             modelContainer = try NextSeasonModelContainer.make()
             repository = SwiftDataWatchlistRepository(context: ModelContext(modelContainer))
@@ -83,6 +87,7 @@ struct AppCompositionRoot {
                 showIDMapping = InMemoryShowIDMapping(map: [:])
                 showIDMappingRefresh = nil
             }
+            purchaseService = PurchaseService()
         }
 
         watchlistRepository = repository

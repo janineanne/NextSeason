@@ -54,6 +54,16 @@
     ". Please consider adding missing information or subscribing." : {
 
     },
+    "%@ — 12 h (production cadence)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — 12 h (production cadence)"
+          }
+        }
+      }
+    },
     "%@ (%lld)" : {
       "localizations" : {
         "en" : {
@@ -64,12 +74,15 @@
         }
       }
     },
-    "%@ — 12 h (production cadence)" : {
+    "%@ per year" : {
+
+    },
+    "%@, %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ — 12 h (production cadence)"
+            "state" : "new",
+            "value" : "%1$@, %2$@"
           }
         }
       }
@@ -116,6 +129,9 @@
           }
         }
       }
+    },
+    "Annual" : {
+
     },
     "App" : {
       "localizations" : {
@@ -317,6 +333,12 @@
         }
       }
     },
+    "Couldn't Complete Purchase" : {
+
+    },
+    "Couldn't load purchase options. Please try again." : {
+
+    },
     "Couldn't Open Your Watchlist" : {
 
     },
@@ -332,6 +354,9 @@
           }
         }
       }
+    },
+    "Couldn't restore purchases. Please try again." : {
+
     },
     "Couldn't Set Up Local Data" : {
 
@@ -781,6 +806,9 @@
         }
       }
     },
+    "Hit Show" : {
+
+    },
     "How notifications work" : {
       "localizations" : {
         "en" : {
@@ -901,6 +929,9 @@
         }
       }
     },
+    "Lifetime" : {
+
+    },
     "Load More Results" : {
 
     },
@@ -1019,6 +1050,9 @@
     "NextSeason closed unexpectedly several times before it could finish launching. You can export diagnostics for troubleshooting and try launching again." : {
 
     },
+    "NextSeason couldn't load purchase options right now." : {
+
+    },
     "NextSeason couldn't read the shows saved on this device. You can export diagnostics for troubleshooting. Resetting local data permanently deletes your watchlist and any scheduled next-season reminders on this device. You can search for shows and add them again afterward." : {
 
     },
@@ -1034,6 +1068,9 @@
           }
         }
       }
+    },
+    "NextSeason couldn't verify this purchase. Please try again." : {
+
     },
     "NextSeason Diagnostics" : {
       "localizations" : {
@@ -1054,6 +1091,21 @@
           }
         }
       }
+    },
+    "NextSeason Plus" : {
+
+    },
+    "NextSeason Plus Annual" : {
+
+    },
+    "NextSeason Plus Annual is an auto-renewing subscription. Payment is charged to your Apple ID account at confirmation of purchase. The subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel in Settings. The lifetime purchase is a one-time non-consumable that permanently unlocks an unlimited watchlist." : {
+
+    },
+    "NextSeason Plus Lifetime" : {
+
+    },
+    "NextSeason Plus removes the watchlist limit." : {
+
     },
     "No" : {
       "localizations" : {
@@ -1391,6 +1443,9 @@
     "Opens TheTVDB.com" : {
 
     },
+    "Optional support for NextSeason. Does not unlock features." : {
+
+    },
     "Pending debounce for %@" : {
       "localizations" : {
         "en" : {
@@ -1400,6 +1455,9 @@
           }
         }
       }
+    },
+    "Pilot" : {
+
     },
     "Previous launch" : {
       "localizations" : {
@@ -1421,6 +1479,9 @@
         }
       }
     },
+    "Privacy Policy" : {
+
+    },
     "Production" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1431,6 +1492,9 @@
           }
         }
       }
+    },
+    "Purchase Options Unavailable" : {
+
     },
     "Refresh did not complete" : {
       "localizations" : {
@@ -1479,6 +1543,9 @@
 
     },
     "Reset Local Data?" : {
+
+    },
+    "Restore Purchases" : {
 
     },
     "Restores the show to your watchlist" : {
@@ -1746,6 +1813,7 @@
       }
     },
     "Shows version and beta diagnostics" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1754,6 +1822,9 @@
           }
         }
       }
+    },
+    "Shows version, purchases, and app information" : {
+
     },
     "Simulated scenarios are unavailable in production builds." : {
       "localizations" : {
@@ -1838,6 +1909,9 @@
         }
       }
     },
+    "Support NextSeason" : {
+
+    },
     "Suppressed for %@ (interactive refresh): %@" : {
       "localizations" : {
         "en" : {
@@ -1857,6 +1931,9 @@
           }
         }
       }
+    },
+    "Terms of Use" : {
+
     },
     "Test notification scheduled for %@: %@" : {
       "localizations" : {
@@ -1890,6 +1967,15 @@
         }
       }
     },
+    "Thank You" : {
+
+    },
+    "Thank you for supporting NextSeason." : {
+
+    },
+    "That purchase option is not available right now." : {
+
+    },
     "That show couldn't be found." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1902,6 +1988,12 @@
       }
     },
     "That show isn't available in NextSeason yet." : {
+
+    },
+    "The free watchlist holds %lld shows. NextSeason Plus removes that limit. Shows you already track keep the same updates and notifications." : {
+
+    },
+    "The purchase could not be completed. Please try again." : {
 
     },
     "There's a next season update." : {
@@ -1935,6 +2027,9 @@
           }
         }
       }
+    },
+    "Tips are optional and do not unlock features. Thank you for helping keep NextSeason going." : {
+
     },
     "To Be Determined" : {
       "localizations" : {
@@ -1976,6 +2071,9 @@
         }
       }
     },
+    "Track every show you care about" : {
+
+    },
     "Track shows you care about — tap the star on any search result." : {
       "localizations" : {
         "en" : {
@@ -1985,6 +2083,9 @@
           }
         }
       }
+    },
+    "Trailer" : {
+
     },
     "Try a more specific title — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”)." : {
 
@@ -2061,6 +2162,21 @@
           }
         }
       }
+    },
+    "Unlimited" : {
+
+    },
+    "Unlimited watchlist for one year, renews annually." : {
+
+    },
+    "Unlimited watchlist, one-time purchase." : {
+
+    },
+    "Unlock NextSeason Plus" : {
+
+    },
+    "Up to %lld shows" : {
+
     },
     "Updated (dated next season)" : {
       "localizations" : {
@@ -2216,7 +2332,13 @@
         }
       }
     },
+    "You have NextSeason Plus." : {
+
+    },
     "Your local watchlist was reset successfully, but NextSeason still couldn't initialize its local data store. The previous watchlist can no longer be restored. You can export diagnostics for troubleshooting." : {
+
+    },
+    "Your watchlist is unlimited because you were tracking more than %lld shows before this limit was added." : {
 
     }
   },

@@ -36,7 +36,7 @@ private struct AppAboutToolbarButtonModifier: ViewModifier {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("About NextSeason", systemImage: "ellipsis", action: openAppAbout)
                         .labelStyle(.iconOnly)
-                        .accessibilityHint("Shows version and beta diagnostics")
+                        .accessibilityHint("Shows version, purchases, and app information")
                         .accessibilityIdentifier(AccessibilityID.App.aboutButton)
                 }
             }
@@ -44,13 +44,16 @@ private struct AppAboutToolbarButtonModifier: ViewModifier {
     }
 }
 
-/// Lightweight beta-only About sheet used as the Diagnostics entry point.
+/// About sheet: version, notifications, NextSeason Plus, optional tips, and
+/// (in Debug / TestFlight) the Diagnostics entry point.
 @MainActor
 struct AppAboutView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.notificationService) private var notificationService
+    @Environment(PurchaseService.self) private var purchases
     @State private var betaBuildAvailability = BetaBuildAvailability.shared
     @State private var notificationStatus = NotificationStatusModel()
+    @State private var isShowingPlusStore = false
 
     let openDiagnostics: () -> Void
 
@@ -58,6 +61,10 @@ struct AppAboutView: View {
         NavigationStack {
             List {
                 BetaAppInfoSection(channelDisplayName: betaBuildAvailability.channelDisplayName)
+
+                PlusAccountSection(isShowingPlusStore: $isShowingPlusStore)
+
+                TipJarSection()
 
                 Section {
                     Button {
@@ -120,7 +127,45 @@ struct AppAboutView: View {
                 await notificationStatus.refresh(using: notificationService)
             }
             .refreshNotificationStatus(notificationStatus)
+            .sheet(isPresented: $isShowingPlusStore) {
+                PlusStoreView()
+                    .environment(purchases)
+            }
+            .alert(
+                "Couldn't Complete Purchase",
+                isPresented: errorAlertPresented
+            ) {
+                Button("OK", role: .cancel) {
+                    purchases.clearMessages()
+                }
+            } message: {
+                Text(purchases.lastErrorMessage ?? "")
+            }
+            .alert(
+                "Thank You",
+                isPresented: thankYouAlertPresented
+            ) {
+                Button("OK", role: .cancel) {
+                    purchases.clearMessages()
+                }
+            } message: {
+                Text(purchases.thankYouMessage ?? "")
+            }
         }
+    }
+
+    private var errorAlertPresented: Binding<Bool> {
+        Binding(
+            get: { purchases.lastErrorMessage != nil && !isShowingPlusStore },
+            set: { if !$0 { purchases.clearMessages() } }
+        )
+    }
+
+    private var thankYouAlertPresented: Binding<Bool> {
+        Binding(
+            get: { purchases.thankYouMessage != nil },
+            set: { if !$0 { purchases.clearMessages() } }
+        )
     }
 
     private let notificationsExplanation = String(
@@ -154,6 +199,8 @@ struct AppAboutView: View {
     #Preview {
         AppAboutView(openDiagnostics: {})
             .environment(
-                \.notificationService, NotificationService(analytics: RecordingAnalyticsService()))
+                \.notificationService, NotificationService(analytics: RecordingAnalyticsService())
+            )
+            .environment(PurchaseService.preview)
     }
 #endif

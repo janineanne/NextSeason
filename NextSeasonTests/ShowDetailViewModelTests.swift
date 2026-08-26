@@ -141,13 +141,15 @@ struct ShowDetailViewModelTests {
             repository: repository,
             notifications: makeNotificationService(analytics: analytics),
             analytics: analytics,
+            purchases: .stub(),
             initialIsTracked: true
         )
 
         await viewModel.handleTrackButton(
             anchor: .zero,
             removalCoordinator: removalCoordinator,
-            onWatchlistChanged: {}
+            onWatchlistChanged: {},
+            onPaywallRequired: {}
         )
 
         #expect(viewModel.isTracked == false)
@@ -166,13 +168,15 @@ struct ShowDetailViewModelTests {
             repository: repository,
             notifications: makeNotificationService(analytics: analytics),
             analytics: analytics,
+            purchases: .stub(),
             initialIsTracked: true
         )
 
         await viewModel.handleTrackButton(
             anchor: .zero,
             removalCoordinator: removalCoordinator,
-            onWatchlistChanged: {}
+            onWatchlistChanged: {},
+            onPaywallRequired: {}
         )
 
         #expect(
@@ -199,13 +203,15 @@ struct ShowDetailViewModelTests {
             repository: repository,
             notifications: makeNotificationService(analytics: analytics),
             analytics: analytics,
+            purchases: .stub(),
             initialIsTracked: true
         )
 
         await viewModel.handleTrackButton(
             anchor: .zero,
             removalCoordinator: removalCoordinator,
-            onWatchlistChanged: {}
+            onWatchlistChanged: {},
+            onPaywallRequired: {}
         )
 
         #expect(viewModel.isTracked)
@@ -230,6 +236,7 @@ struct ShowDetailViewModelTests {
             repository: repository,
             notifications: makeNotificationService(analytics: analytics),
             analytics: analytics,
+            purchases: .stub(),
             initialIsTracked: false
         )
 
@@ -239,7 +246,8 @@ struct ShowDetailViewModelTests {
         await viewModel.handleTrackButton(
             anchor: .zero,
             removalCoordinator: nil,
-            onWatchlistChanged: {}
+            onWatchlistChanged: {},
+            onPaywallRequired: {}
         )
 
         #expect(viewModel.loadState == .loaded)
@@ -252,6 +260,58 @@ struct ShowDetailViewModelTests {
                 }
                 return false
             }
+        )
+    }
+
+    @Test("A fourth-show add presents Plus instead of failing")
+    func fourthShowAddPresentsPaywall() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        try await repository.add(show(id: 1, name: "One"))
+        try await repository.add(show(id: 2, name: "Two"))
+        try await repository.add(show(id: 3, name: "Three"))
+
+        var didPresentPaywall = false
+        let viewModel = ShowDetailViewModel(
+            show: sampleShow,
+            service: StubTVMazeService(showToReturn: sampleShow),
+            repository: repository,
+            notifications: makeNotificationService(analytics: analytics),
+            analytics: analytics,
+            purchases: .stub(),
+            initialIsTracked: false
+        )
+
+        await viewModel.handleTrackButton(
+            anchor: .zero,
+            removalCoordinator: nil,
+            onWatchlistChanged: {},
+            onPaywallRequired: { didPresentPaywall = true }
+        )
+
+        #expect(didPresentPaywall)
+        #expect(viewModel.isTracked == false)
+        #expect(viewModel.watchlistActionErrorMessage == nil)
+        #expect(try await repository.contains(showID: sampleShow.id) == false)
+    }
+
+    private func show(id: Int, name: String) -> Show {
+        Show(
+            id: id,
+            name: name,
+            tvMazeURL: nil,
+            summaryHTML: nil,
+            posterMediumURL: nil,
+            posterOriginalURL: nil,
+            status: .running,
+            premiered: nil,
+            ended: nil,
+            network: nil,
+            genres: [],
+            averageRuntime: nil,
+            seasons: [],
+            nextEpisode: nil,
+            updatedAt: .now
         )
     }
 }

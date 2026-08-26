@@ -23,6 +23,7 @@ struct WatchlistView: View {
     @Environment(\.watchlistPendingRemoval) private var removalCoordinator
     @Environment(\.analytics) private var analytics
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(PurchaseService.self) private var purchases
 
     @Binding var navigationPath: NavigationPath
     private let tvMaze: any TVMazeService
@@ -126,6 +127,7 @@ struct WatchlistView: View {
                     repository: repository,
                     notifications: notificationService,
                     analytics: analytics,
+                    purchases: purchases,
                     isTracked: true,
                     onWatchlistChanged: onWatchlistChanged
                 )
@@ -556,6 +558,7 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
             .environment(\.watchlistRepository, repository)
             .environment(\.analytics, analytics)
             .environment(\.notificationService, NotificationService(analytics: analytics))
+            .environment(PurchaseService.preview)
             .environment(
                 \.watchlistPendingRemoval,
                 WatchlistPendingRemoval(

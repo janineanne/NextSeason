@@ -34,6 +34,7 @@ final class ShowDetailViewModel {
     private let repository: any WatchlistRepository
     private let notifications: any NotificationManaging
     private let analytics: any AnalyticsTracking
+    private let purchases: PurchaseService
 
     /// Notification service used by the shared prompt alerts modifier.
     var notificationService: any NotificationManaging { notifications }
@@ -44,6 +45,7 @@ final class ShowDetailViewModel {
         repository: any WatchlistRepository,
         notifications: any NotificationManaging,
         analytics: any AnalyticsTracking,
+        purchases: PurchaseService,
         initialIsTracked: Bool = false
     ) {
         self.initialShow = show
@@ -51,6 +53,7 @@ final class ShowDetailViewModel {
         self.repository = repository
         self.notifications = notifications
         self.analytics = analytics
+        self.purchases = purchases
         self.isTracked = initialIsTracked
     }
 
@@ -125,7 +128,8 @@ final class ShowDetailViewModel {
     func handleTrackButton(
         anchor: CGRect,
         removalCoordinator: WatchlistPendingRemoval?,
-        onWatchlistChanged: @escaping () -> Void
+        onWatchlistChanged: @escaping () -> Void,
+        onPaywallRequired: @escaping () -> Void
     ) async {
         guard !isUpdatingWatchlist else { return }
 
@@ -157,7 +161,8 @@ final class ShowDetailViewModel {
                 removalCoordinator: removalCoordinator,
                 analytics: analytics,
                 notifications: notifications,
-                prompt: notificationPrompt
+                prompt: notificationPrompt,
+                purchases: purchases
             )
             switch outcome {
             case .undidPendingRemoval:
@@ -167,6 +172,8 @@ final class ShowDetailViewModel {
             case .added:
                 isTracked = true
                 onWatchlistChanged()
+            case .paywallRequired:
+                onPaywallRequired()
             case .ignored:
                 // Repo/UI mismatch (e.g. show already gone) — reconcile the star.
                 await refreshTrackedState(removalCoordinator: removalCoordinator)

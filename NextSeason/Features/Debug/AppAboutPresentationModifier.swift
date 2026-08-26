@@ -1,25 +1,34 @@
 //
-//  BetaDiagnosticsPresentationModifier.swift
+//  AppAboutPresentationModifier.swift
 //  NextSeason
 //
 
 import SwiftUI
 
-/// Presents beta diagnostics only in DEBUG or TestFlight builds.
+/// Presents About (always) and Diagnostics (Debug / TestFlight only).
+///
+/// About is the Restore Purchases and tip-jar surface, so it ships in
+/// production. The footer and sheets are omitted during UI tests so layout
+/// and existing XCUITests stay stable.
 @MainActor
-struct BetaDiagnosticsPresentationModifier: ViewModifier {
-    @State private var activeSheet: BetaDiagnosticsSheet?
+struct AppAboutPresentationModifier: ViewModifier {
+    @Environment(PurchaseService.self) private var purchases
+    @State private var activeSheet: AppInfoSheet?
     @State private var betaBuildAvailability = BetaBuildAvailability.shared
 
     func body(content: Content) -> some View {
-        if betaBuildAvailability.isAvailable {
+        if UITestingConfiguration.isEnabled {
+            content
+        } else {
             content
                 .environment(\.openAppAbout) {
-                    guard !UITestingConfiguration.isEnabled else { return }
                     activeSheet = .about
                 }
+                .environment(\.presentPlusStore) {
+                    activeSheet = .plusStore
+                }
                 .environment(\.openDiagnostics) {
-                    guard !UITestingConfiguration.isEnabled else { return }
+                    guard betaBuildAvailability.isAvailable else { return }
                     activeSheet = .diagnostics
                 }
                 .sheet(item: $activeSheet) { sheet in
@@ -28,15 +37,14 @@ struct BetaDiagnosticsPresentationModifier: ViewModifier {
                         AppAboutView {
                             activeSheet = .diagnostics
                         }
+                        .environment(purchases)
                     case .diagnostics:
                         DiagnosticsView()
+                    case .plusStore:
+                        PlusStoreView()
+                            .environment(purchases)
                     }
                 }
-                .task {
-                    await betaBuildAvailability.refresh()
-                }
-        } else {
-            content
                 .task {
                     await betaBuildAvailability.refresh()
                 }
@@ -44,9 +52,10 @@ struct BetaDiagnosticsPresentationModifier: ViewModifier {
     }
 }
 
-private enum BetaDiagnosticsSheet: Identifiable {
+private enum AppInfoSheet: Identifiable {
     case about
     case diagnostics
+    case plusStore
 
     var id: String {
         switch self {
@@ -54,6 +63,8 @@ private enum BetaDiagnosticsSheet: Identifiable {
             return "about"
         case .diagnostics:
             return "diagnostics"
+        case .plusStore:
+            return "plusStore"
         }
     }
 }
