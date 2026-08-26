@@ -13,7 +13,7 @@ struct PlusStoreView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.section) {
+                VStack(alignment: .leading, spacing: AppSpacing.screen + 10) {
                     header
                     purchaseButtons
                     restoreButton
@@ -63,12 +63,12 @@ struct PlusStoreView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.tight) {
-            Text("Track every show you care about")
+        VStack(alignment: .leading, spacing: AppSpacing.screen) {
+            Text("Track every show you care about:")
                 .font(.title2.bold())
                 .appAccentText()
             Text(
-                "The free watchlist holds \(WatchlistLimitPolicy.freeShowLimit) shows. NextSeason Plus removes that limit. Shows you already track keep the same updates and notifications."
+                "The free watchlist holds \(WatchlistLimitPolicy.freeShowLimit) shows. With NextSeason Plus you can track unlimited shows, starting with the shows already on your list."
             )
             .font(.body)
             .appSecondaryText()
@@ -129,7 +129,7 @@ struct PlusStoreView: View {
     }
 
     private var legalFooter: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.tight) {
+        VStack(alignment: .leading, spacing: AppSpacing.row) {
             Text(subscriptionDisclosure)
                 .font(.footnote)
                 .appSecondaryText()
@@ -150,7 +150,7 @@ struct PlusStoreView: View {
     private var subscriptionDisclosure: String {
         String(
             localized:
-                "NextSeason Plus Annual is an auto-renewing subscription. Payment is charged to your Apple ID account at confirmation of purchase. The subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel in Settings. The lifetime purchase is a one-time non-consumable that permanently unlocks an unlimited watchlist."
+                "NextSeason Plus Annual is an auto-renewing subscription. Payment is charged to your Apple ID account at confirmation of purchase. The subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel any time. The Lifetime membership is a one-time purchase that permanently unlocks an unlimited watchlist."
         )
     }
 
@@ -177,7 +177,7 @@ struct PlusStoreView: View {
                     .font(.subheadline)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, AppSpacing.tight)
+            .padding(.vertical, AppSpacing.tiny)
         }
         .buttonStyle(.borderedProminent)
         .accessibilityIdentifier(identifier)
