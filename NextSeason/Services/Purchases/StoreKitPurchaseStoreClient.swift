@@ -83,6 +83,10 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         updatesTask = nil
     }
 
+    isolated deinit {
+        stopObservingTransactionUpdates()
+    }
+
     /// Application processing runs to completion before StoreKit is told the
     /// transaction can be finished. Always finish after a verified delivery so
     /// StoreKit does not redeliver in a loop.

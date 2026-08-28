@@ -25,6 +25,15 @@ final class StubPurchaseStoreClient: PurchaseStoreClient {
     private(set) var finishedTransactionIDs: [UInt64] = []
     private(set) var lastPurchasedTransaction: StoreTransaction?
     private(set) var entitlementWaiterCount = 0
+    private(set) var observeTransactionUpdatesCallCount = 0
+    private(set) var stopObservingTransactionUpdatesCallCount = 0
+    private(set) var recordedCalls: [RecordedCall] = []
+
+    enum RecordedCall: Equatable, Sendable {
+        case observeTransactionUpdates
+        case hasActivePlusEntitlement
+        case stopObservingTransactionUpdates
+    }
 
     private var nextTransactionID: UInt64 = 1
     private var entitlementWaiters: [CheckedContinuation<Void, Never>] = []
@@ -71,6 +80,7 @@ final class StubPurchaseStoreClient: PurchaseStoreClient {
     }
 
     func hasActivePlusEntitlement() async -> Bool {
+        recordedCalls.append(.hasActivePlusEntitlement)
         if delayEntitlementResolution {
             await withCheckedContinuation { continuation in
                 entitlementWaiters.append(continuation)
@@ -87,11 +97,19 @@ final class StubPurchaseStoreClient: PurchaseStoreClient {
     func observeTransactionUpdates(
         _ onVerified: @escaping @MainActor (StoreTransaction) async -> Void
     ) {
+        observeTransactionUpdatesCallCount += 1
+        recordedCalls.append(.observeTransactionUpdates)
         transactionObserver = onVerified
     }
 
     func stopObservingTransactionUpdates() {
+        stopObservingTransactionUpdatesCallCount += 1
+        recordedCalls.append(.stopObservingTransactionUpdates)
         transactionObserver = nil
+    }
+
+    var isObservingTransactionUpdates: Bool {
+        transactionObserver != nil
     }
 
     /// Completes any in-flight `hasActivePlusEntitlement()` waits.

@@ -34,7 +34,7 @@ final class PurchaseService {
 
     private let store: any PurchaseStoreClient
     private let entitlementStore: PlusEntitlementStore
-    private var didStart = false
+    private var didStartObserving = false
     private var entitlementWaiters: [CheckedContinuation<Void, Never>] = []
     private var processedTransactionIDs: Set<UInt64> = []
 
@@ -70,6 +70,10 @@ final class PurchaseService {
         self.storeEntitlement = initialStoreEntitlement
     }
 
+    isolated deinit {
+        store.stopObservingTransactionUpdates()
+    }
+
     /// Production StoreKit-backed service.
     convenience init() {
         self.init(store: StoreKitPurchaseStoreClient())
@@ -77,20 +81,28 @@ final class PurchaseService {
 
     /// Loads products, applies one-time grandfathering, and starts listening
     /// for StoreKit transaction updates.
+    ///
+    /// `Transaction.updates` is observed before the first entitlement read so
+    /// unfinished or delayed transactions are not missed during startup.
     func start(watchlistCount: Int) async {
+        startObservingTransactionsIfNeeded()
         entitlementStore.evaluateGrandfatheringIfNeeded(
             watchlistCount: watchlistCount,
             freeLimit: WatchlistLimitPolicy.freeShowLimit
         )
         await refreshEntitlements()
-
-        if !didStart {
-            didStart = true
-            store.observeTransactionUpdates { [weak self] transaction in
-                await self?.handleVerifiedTransaction(transaction)
-            }
-        }
         await loadProducts()
+    }
+
+    /// Re-reads StoreKit entitlements when the scene becomes active.
+    ///
+    /// Subscription expiration is not guaranteed to arrive through
+    /// `Transaction.updates`. Skips while the initial `start()` refresh is
+    /// still in flight so launch does not issue two entitlement queries
+    /// back-to-back.
+    func handleSceneBecameActive() async {
+        guard hasResolvedStoreEntitlement else { return }
+        await refreshEntitlements()
     }
 
     /// Waits until the first StoreKit entitlement read has completed.
@@ -209,6 +221,16 @@ final class PurchaseService {
     func clearMessages() {
         lastErrorMessage = nil
         thankYouMessage = nil
+    }
+
+    /// Starts the StoreKit transaction observer once for this service instance.
+    /// `deinit` stops it; the live client also cancels its task on deallocation.
+    private func startObservingTransactionsIfNeeded() {
+        guard !didStartObserving else { return }
+        didStartObserving = true
+        store.observeTransactionUpdates { [weak self] transaction in
+            await self?.handleVerifiedTransaction(transaction)
+        }
     }
 
     /// Incorporates a verified StoreKit transaction, then the client finishes it.

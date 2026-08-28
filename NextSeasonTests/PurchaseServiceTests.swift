@@ -268,7 +268,71 @@ struct PurchaseServiceTests {
         #expect(purchases.isStoreEntitled == false)
     }
 
-    @Test("Entitlement can be lost while the app is running")
+    @Test("Start observes transaction updates before refreshing entitlements")
+    func startObservesTransactionsBeforeRefreshingEntitlements() async throws {
+        let store = StubPurchaseStoreClient(isStoreEntitled: true)
+        store.delayEntitlementResolution = true
+        let purchases = makePurchases(store: store)
+
+        let startTask = Task { await purchases.start(watchlistCount: 0) }
+        await waitUntilEntitlementIsHeld(store)
+
+        #expect(store.observeTransactionUpdatesCallCount == 1)
+        #expect(store.recordedCalls.first == .observeTransactionUpdates)
+        let observeIndex = try #require(
+            store.recordedCalls.firstIndex(of: .observeTransactionUpdates)
+        )
+        let entitlementIndex = try #require(
+            store.recordedCalls.firstIndex(of: .hasActivePlusEntitlement)
+        )
+        #expect(observeIndex < entitlementIndex)
+        #expect(purchases.storeEntitlement == .loading)
+
+        await store.emitVerifiedTransaction(
+            StoreTransaction(id: 1, productID: StoreProductID.tipTrailer.rawValue)
+        )
+        #expect(purchases.thankYouMessage != nil)
+        #expect(store.finishedTransactionIDs.contains(1))
+
+        store.releaseEntitlementResolution()
+        await startTask.value
+        #expect(purchases.isStoreEntitled)
+        #expect(store.observeTransactionUpdatesCallCount == 1)
+    }
+
+    @Test("Repeated start does not install a second transaction observer")
+    func repeatedStartDoesNotCreateDuplicateObservers() async {
+        let store = StubPurchaseStoreClient()
+        let purchases = makePurchases(store: store, initial: .resolved(isEntitled: false))
+
+        await purchases.start(watchlistCount: 0)
+        await purchases.start(watchlistCount: 0)
+
+        #expect(store.observeTransactionUpdatesCallCount == 1)
+        #expect(
+            store.recordedCalls.filter { $0 == .observeTransactionUpdates }.count == 1
+        )
+    }
+
+    @Test("Releasing PurchaseService stops transaction observation")
+    func releasingPurchaseServiceStopsObservation() async {
+        let store = StubPurchaseStoreClient()
+        var purchases: PurchaseService? = makePurchases(
+            store: store,
+            initial: .resolved(isEntitled: false)
+        )
+        await purchases?.start(watchlistCount: 0)
+        #expect(store.isObservingTransactionUpdates)
+        #expect(store.stopObservingTransactionUpdatesCallCount == 0)
+
+        purchases = nil
+        await waitUntilObservationStops(store)
+
+        #expect(store.isObservingTransactionUpdates == false)
+        #expect(store.stopObservingTransactionUpdatesCallCount == 1)
+    }
+
+    @Test("Entitlement can be lost when the app becomes active")
     func entitlementLossWhileRunning() async {
         let store = StubPurchaseStoreClient(isStoreEntitled: true)
         let purchases = makePurchases(store: store, initial: .resolved(isEntitled: true))
@@ -276,13 +340,34 @@ struct PurchaseServiceTests {
         #expect(await purchases.canAddToWatchlist(currentCount: 5))
 
         store.isStoreEntitled = false
-        await store.emitVerifiedTransaction(
-            StoreTransaction(id: 99, productID: StoreProductID.plusAnnual.rawValue)
-        )
+        await purchases.handleSceneBecameActive()
 
         #expect(purchases.isStoreEntitled == false)
         #expect(await purchases.canAddToWatchlist(currentCount: 5) == false)
         #expect(await purchases.canAddToWatchlist(currentCount: 2))
+    }
+
+    @Test("Becoming active does not start a second entitlement refresh during startup")
+    func sceneActivationSkipsRefreshWhileEntitlementIsStillLoading() async {
+        let store = StubPurchaseStoreClient(isStoreEntitled: true)
+        store.delayEntitlementResolution = true
+        let purchases = makePurchases(store: store)
+
+        let startTask = Task { await purchases.start(watchlistCount: 0) }
+        await waitUntilEntitlementIsHeld(store)
+        #expect(store.entitlementWaiterCount == 1)
+
+        await purchases.handleSceneBecameActive()
+
+        #expect(store.entitlementWaiterCount == 1)
+        #expect(purchases.storeEntitlement == .loading)
+        #expect(
+            store.recordedCalls.filter { $0 == .hasActivePlusEntitlement }.count == 1
+        )
+
+        store.releaseEntitlementResolution()
+        await startTask.value
+        #expect(purchases.isStoreEntitled)
     }
 
     @Test("Verified Plus purchases are incorporated before the transaction is finished")
@@ -342,6 +427,14 @@ struct PurchaseServiceTests {
             await Task.yield()
         }
         Issue.record("StoreKit entitlement resolution did not suspend")
+    }
+
+    private func waitUntilObservationStops(_ store: StubPurchaseStoreClient) async {
+        for _ in 0..<200 {
+            if store.stopObservingTransactionUpdatesCallCount > 0 { return }
+            await Task.yield()
+        }
+        Issue.record("PurchaseService deinit did not stop transaction observation")
     }
 }
 

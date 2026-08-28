@@ -28,6 +28,7 @@ struct NextSeasonApp: App {
                     navigationCoordinator: navigationCoordinator,
                     removalCoordinator: composition.watchlistPendingRemoval,
                     refreshService: composition.refreshService,
+                    purchaseService: composition.purchaseService,
                     searchService: composition.theTVDB,
                     tvMaze: composition.tvMaze,
                     showIDMapping: composition.showIDMapping,
@@ -73,8 +74,8 @@ struct NextSeasonApp: App {
     }
 }
 
-/// Root content host: scene-phase watchlist refresh, undo toast for deferred
-/// watchlist removals, and UITest network stubbing.
+/// Root content host: scene-phase watchlist and StoreKit entitlement refresh,
+/// undo toast for deferred watchlist removals, and UITest network stubbing.
 ///
 /// Undo lives here (not inside Watchlist) so the toast remains visible across
 /// tab switches while a removal is still pending confirmation.
@@ -84,6 +85,7 @@ private struct AppRootView: View {
     @Bindable var navigationCoordinator: AppNavigationCoordinator
     @Bindable var removalCoordinator: WatchlistPendingRemoval
     let refreshService: WatchlistRefreshService
+    let purchaseService: PurchaseService
     let searchService: any TheTVDBService
     let tvMaze: any TVMazeService
     let showIDMapping: any ShowIDMapping
@@ -143,6 +145,11 @@ private struct AppRootView: View {
             }
             Task {
                 await onForegroundShowIDMappingRefresh()
+            }
+            // Subscription expiration is not reliably delivered through
+            // Transaction.updates; re-read current entitlements on foreground.
+            Task {
+                await purchaseService.handleSceneBecameActive()
             }
         }
         // Cancelled when leaving `.active` so backgrounding during startup
