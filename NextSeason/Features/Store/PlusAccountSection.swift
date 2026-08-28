@@ -18,7 +18,7 @@ struct PlusAccountSection: View {
                 Label("Watchlist", systemImage: "star")
             }
 
-            if !purchases.isUnlimitedWatchlist {
+            if purchases.hasResolvedStoreEntitlement && !purchases.isUnlimitedWatchlist {
                 Button {
                     isShowingPlusStore = true
                 } label: {
@@ -42,11 +42,11 @@ struct PlusAccountSection: View {
     }
 
     private var statusValue: String {
-        if purchases.isStoreEntitled {
+        if purchases.isStoreEntitled || purchases.isGrandfathered {
             return String(localized: "Unlimited")
         }
-        if purchases.isGrandfathered {
-            return String(localized: "Unlimited")
+        if !purchases.hasResolvedStoreEntitlement {
+            return String(localized: "Checking…")
         }
         return String(
             localized: "Up to \(WatchlistLimitPolicy.freeShowLimit) shows"
@@ -62,6 +62,9 @@ struct PlusAccountSection: View {
                 localized:
                     "Your watchlist is unlimited because you were tracking more than \(WatchlistLimitPolicy.freeShowLimit) shows before this limit was added."
             )
+        }
+        if !purchases.hasResolvedStoreEntitlement {
+            return String(localized: "Confirming your NextSeason Plus status.")
         }
         return String(
             localized: "NextSeason Plus removes the watchlist limit."

@@ -21,7 +21,10 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         return products.compactMap(Self.storeProduct(from:))
     }
 
-    func purchase(productID: String) async throws -> PurchaseOutcome {
+    func purchase(
+        productID: String,
+        onVerified: @escaping @MainActor (StoreTransaction) async -> Void
+    ) async throws -> PurchaseOutcome {
         guard let product = productsByID[productID] else {
             throw PurchaseError.productUnavailable
         }
@@ -30,7 +33,7 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         switch result {
         case .success(let verification):
             let transaction = try checkVerified(verification)
-            await transaction.finish()
+            await deliverThenFinish(transaction, onVerified: onVerified)
             return .success
         case .userCancelled:
             return .cancelled
@@ -61,15 +64,16 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         try await AppStore.sync()
     }
 
-    func observeTransactionUpdates(_ onChange: @escaping @MainActor () async -> Void) {
+    func observeTransactionUpdates(
+        _ onVerified: @escaping @MainActor (StoreTransaction) async -> Void
+    ) {
         stopObservingTransactionUpdates()
         updatesTask = Task { [weak self] in
             for await result in Transaction.updates {
                 guard let self, !Task.isCancelled else { return }
                 if let transaction = try? self.checkVerified(result) {
-                    await transaction.finish()
+                    await self.deliverThenFinish(transaction, onVerified: onVerified)
                 }
-                await onChange()
             }
         }
     }
@@ -79,6 +83,17 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         updatesTask = nil
     }
 
+    /// Application processing runs to completion before StoreKit is told the
+    /// transaction can be finished. Always finish after a verified delivery so
+    /// StoreKit does not redeliver in a loop.
+    private func deliverThenFinish(
+        _ transaction: Transaction,
+        onVerified: @MainActor (StoreTransaction) async -> Void
+    ) async {
+        await onVerified(storeTransaction(from: transaction))
+        await transaction.finish()
+    }
+
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case .unverified(_, let error):
@@ -86,6 +101,10 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         case .verified(let value):
             return value
         }
+    }
+
+    private func storeTransaction(from transaction: Transaction) -> StoreTransaction {
+        StoreTransaction(id: transaction.id, productID: transaction.productID)
     }
 
     private static func storeProduct(from product: Product) -> StoreProduct? {

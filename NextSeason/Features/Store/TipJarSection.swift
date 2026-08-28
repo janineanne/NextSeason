@@ -6,43 +6,56 @@
 import SwiftUI
 
 /// Optional consumable tips. Shown to free and Plus users; never unlocks features.
+///
+/// Purchase buttons are created only from products StoreKit actually loaded.
 struct TipJarSection: View {
     @Environment(PurchaseService.self) private var purchases
 
     var body: some View {
         Section {
-            ForEach(displayedTips) { product in
-                Button {
-                    Task { _ = await purchases.purchase(product) }
-                } label: {
-                    LabeledContent {
-                        Text(product.displayPrice)
+            if !purchases.tipProducts.isEmpty {
+                ForEach(purchases.tipProducts) { product in
+                    Button {
+                        Task { _ = await purchases.purchase(product) }
                     } label: {
-                        Text(product.displayName)
+                        LabeledContent {
+                            Text(product.displayPrice)
+                        } label: {
+                            Text(product.displayName)
+                        }
                     }
+                    .accessibilityIdentifier(tipIdentifier(for: product.productID))
+                    .accessibilityLabel("\(product.displayName), \(product.displayPrice)")
+                    .disabled(purchases.isPurchasing)
                 }
-                .accessibilityIdentifier(tipIdentifier(for: product.productID))
-                .accessibilityLabel("\(product.displayName), \(product.displayPrice)")
-                .disabled(purchases.isPurchasing)
+            } else if isWaitingForTips {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .accessibilityLabel("Loading tip options")
+            } else {
+                Text("NextSeason couldn't load tip options right now.")
+                    .appSecondaryText()
+                Button("Try Again") {
+                    Task { await purchases.loadProducts() }
+                }
+                .disabled(purchases.isLoadingProducts || purchases.isPurchasing)
             }
         } header: {
             Text("Support NextSeason")
         } footer: {
             Text(
-                "Tips are optional and do not unlock features. Thank you for helping keep NextSeason going."
+                "Tips are optional and do not unlock features. Thank you for helping keep NextSeason running for years to come."
             )
+        }
+        .task {
+            if purchases.tipProducts.isEmpty {
+                await purchases.loadProducts()
+            }
         }
     }
 
-    private var displayedTips: [StoreProduct] {
-        if purchases.tipProducts.isEmpty {
-            return [
-                StoreProduct(.tipTrailer),
-                StoreProduct(.tipPilot),
-                StoreProduct(.tipHitShow),
-            ]
-        }
-        return purchases.tipProducts
+    private var isWaitingForTips: Bool {
+        purchases.isLoadingProducts || !purchases.hasCompletedProductLoad
     }
 
     private func tipIdentifier(for productID: String) -> String {

@@ -346,8 +346,106 @@ struct WatchlistTrackingTests {
         try await repository.add(show(id: 4))
 
         #expect(try await repository.trackedShowIDs().count == 4)
-        #expect(PurchaseService.stub().canAddToWatchlist(currentCount: 4) == false)
-        #expect(PurchaseService.stub().canAddToWatchlist(currentCount: 2))
+        #expect(await PurchaseService.stub().canAddToWatchlist(currentCount: 4) == false)
+        #expect(await PurchaseService.stub().canAddToWatchlist(currentCount: 2))
+    }
+
+    @Test("A Plus customer is not paywalled while StoreKit entitlement is still resolving")
+    func delayedPlusEntitlementDoesNotPaywallAdd() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        try await repository.add(show(id: 1))
+        try await repository.add(show(id: 2))
+        try await repository.add(show(id: 3))
+
+        let store = StubPurchaseStoreClient(isStoreEntitled: true)
+        store.delayEntitlementResolution = true
+        let suiteName = "WatchlistTrackingTests.plusDelay.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        let purchases = PurchaseService(
+            store: store,
+            entitlementStore: PlusEntitlementStore(userDefaults: defaults),
+            initialStoreEntitlement: .loading
+        )
+
+        let startTask = Task { await purchases.start(watchlistCount: 3) }
+        await waitUntilEntitlementIsHeld(store)
+
+        var outcome: WatchlistTracking.ToggleOutcome?
+        let addTask = Task {
+            outcome = try await WatchlistTracking.add(
+                show(id: sampleShow.id),
+                source: .search,
+                repository: repository,
+                tvMaze: MockTVMazeService(),
+                analytics: analytics,
+                notifications: makeNotificationService(analytics: analytics),
+                prompt: WatchlistNotificationPromptState(),
+                purchases: purchases
+            )
+        }
+        for _ in 0..<50 { await Task.yield() }
+        #expect(outcome == nil)
+        #expect(purchases.storeEntitlement == .loading)
+
+        store.releaseEntitlementResolution()
+        await startTask.value
+        try await addTask.value
+
+        #expect(outcome == .added)
+        #expect(try await repository.contains(showID: sampleShow.id))
+        #expect(purchases.isStoreEntitled)
+    }
+
+    @Test("After Plus lapses, existing shows remain but adding another is blocked")
+    func lapsedPlusBlocksNewAddsWithoutRemovingShows() async throws {
+        let repository = InMemoryWatchlistRepository()
+        let analytics = RecordingAnalyticsService()
+        let store = StubPurchaseStoreClient(isStoreEntitled: true)
+        let suiteName = "WatchlistTrackingTests.lapse.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        let entitlementStore = PlusEntitlementStore(userDefaults: defaults)
+        entitlementStore.evaluateGrandfatheringIfNeeded(watchlistCount: 0, freeLimit: 3)
+        let purchases = PurchaseService(
+            store: store,
+            entitlementStore: entitlementStore,
+            initialStoreEntitlement: .resolved(isEntitled: true)
+        )
+        await purchases.start(watchlistCount: 0)
+
+        try await repository.add(show(id: 1))
+        try await repository.add(show(id: 2))
+        try await repository.add(show(id: 3))
+        try await repository.add(show(id: 4))
+
+        store.isStoreEntitled = false
+        await purchases.refreshEntitlements()
+
+        let outcome = try await WatchlistTracking.add(
+            sampleShow,
+            source: .search,
+            repository: repository,
+            tvMaze: MockTVMazeService(),
+            analytics: analytics,
+            notifications: makeNotificationService(analytics: analytics),
+            prompt: WatchlistNotificationPromptState(),
+            purchases: purchases
+        )
+
+        #expect(outcome == .paywallRequired)
+        #expect(try await repository.trackedShowIDs().count == 4)
+        #expect(try await repository.contains(showID: sampleShow.id) == false)
+        #expect(purchases.isGrandfathered == false)
+    }
+
+    private func waitUntilEntitlementIsHeld(_ store: StubPurchaseStoreClient) async {
+        for _ in 0..<200 {
+            if store.entitlementWaiterCount > 0 { return }
+            await Task.yield()
+        }
+        Issue.record("StoreKit entitlement resolution did not suspend")
     }
 
     private func show(id: Int) -> Show {

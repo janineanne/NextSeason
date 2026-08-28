@@ -14,6 +14,22 @@ final class StubPurchaseStoreClient: PurchaseStoreClient {
     var restoreError: (any Error)?
     var loadError: (any Error)?
 
+    /// When true, `hasActivePlusEntitlement()` suspends until
+    /// `releaseEntitlementResolution()`.
+    var delayEntitlementResolution = false
+
+    /// Invoked after a verified transaction has been delivered to the app and
+    /// immediately before the stub records it as finished.
+    var onFinish: (@MainActor () -> Void)?
+
+    private(set) var finishedTransactionIDs: [UInt64] = []
+    private(set) var lastPurchasedTransaction: StoreTransaction?
+    private(set) var entitlementWaiterCount = 0
+
+    private var nextTransactionID: UInt64 = 1
+    private var entitlementWaiters: [CheckedContinuation<Void, Never>] = []
+    private var transactionObserver: (@MainActor (StoreTransaction) async -> Void)?
+
     init(
         products: [StoreProduct] = StoreProductID.allCases.map { StoreProduct($0) },
         isStoreEntitled: Bool = false,
@@ -30,33 +46,77 @@ final class StubPurchaseStoreClient: PurchaseStoreClient {
         return products.filter { requested.contains($0.productID) }
     }
 
-    func purchase(productID: String) async throws -> PurchaseOutcome {
+    func purchase(
+        productID: String,
+        onVerified: @escaping @MainActor (StoreTransaction) async -> Void
+    ) async throws -> PurchaseOutcome {
         guard products.contains(where: { $0.productID == productID }) else {
             throw PurchaseError.productUnavailable
         }
-        if purchaseOutcome == .success, let id = StoreProductID(rawValue: productID) {
-            switch id {
-            case .plusAnnual, .plusLifetime:
-                isStoreEntitled = true
-            case .tipTrailer, .tipPilot, .tipHitShow:
-                break
+        if purchaseOutcome == .success {
+            let transaction = StoreTransaction(id: nextTransactionID, productID: productID)
+            nextTransactionID += 1
+            lastPurchasedTransaction = transaction
+            if let id = StoreProductID(rawValue: productID) {
+                switch id {
+                case .plusAnnual, .plusLifetime:
+                    isStoreEntitled = true
+                case .tipTrailer, .tipPilot, .tipHitShow:
+                    break
+                }
             }
+            await deliverThenFinish(transaction, onVerified: onVerified)
         }
         return purchaseOutcome
     }
 
     func hasActivePlusEntitlement() async -> Bool {
-        isStoreEntitled
+        if delayEntitlementResolution {
+            await withCheckedContinuation { continuation in
+                entitlementWaiters.append(continuation)
+                entitlementWaiterCount = entitlementWaiters.count
+            }
+        }
+        return isStoreEntitled
     }
 
     func restorePurchases() async throws {
         if let restoreError { throw restoreError }
     }
 
-    func observeTransactionUpdates(_ onChange: @escaping @MainActor () async -> Void) {
-        // Stub entitlements change only through `purchase`; nothing to observe.
-        _ = onChange
+    func observeTransactionUpdates(
+        _ onVerified: @escaping @MainActor (StoreTransaction) async -> Void
+    ) {
+        transactionObserver = onVerified
     }
 
-    func stopObservingTransactionUpdates() {}
+    func stopObservingTransactionUpdates() {
+        transactionObserver = nil
+    }
+
+    /// Completes any in-flight `hasActivePlusEntitlement()` waits.
+    func releaseEntitlementResolution() {
+        delayEntitlementResolution = false
+        let waiters = entitlementWaiters
+        entitlementWaiters.removeAll()
+        entitlementWaiterCount = 0
+        for waiter in waiters {
+            waiter.resume()
+        }
+    }
+
+    /// Delivers a later StoreKit update (Ask to Buy, restore, entitlement change).
+    func emitVerifiedTransaction(_ transaction: StoreTransaction) async {
+        guard let transactionObserver else { return }
+        await deliverThenFinish(transaction, onVerified: transactionObserver)
+    }
+
+    private func deliverThenFinish(
+        _ transaction: StoreTransaction,
+        onVerified: @MainActor (StoreTransaction) async -> Void
+    ) async {
+        await onVerified(transaction)
+        onFinish?()
+        finishedTransactionIDs.append(transaction.id)
+    }
 }

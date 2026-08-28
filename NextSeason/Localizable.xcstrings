@@ -267,6 +267,9 @@
         }
       }
     },
+    "Checking…" : {
+
+    },
     "Clean or not detected" : {
       "localizations" : {
         "en" : {
@@ -309,6 +312,9 @@
           }
         }
       }
+    },
+    "Confirming your NextSeason Plus status." : {
+
     },
     "Confirms removal from your watchlist" : {
       "localizations" : {
@@ -935,6 +941,9 @@
     "Load More Results" : {
 
     },
+    "Loading tip options" : {
+
+    },
     "Loading watchlist…" : {
       "localizations" : {
         "en" : {
@@ -1051,6 +1060,9 @@
 
     },
     "NextSeason couldn't load purchase options right now." : {
+
+    },
+    "NextSeason couldn't load tip options right now." : {
 
     },
     "NextSeason couldn't read the shows saved on this device. You can export diagnostics for troubleshooting. Resetting local data permanently deletes your watchlist and any scheduled next-season reminders on this device. You can search for shows and add them again afterward." : {
@@ -1990,7 +2002,7 @@
     "That show isn't available in NextSeason yet." : {
 
     },
-    "The free watchlist holds  %lld shows. With NextSeason Plus you can track unlimited shows, starting with the shows already on your list." : {
+    "The free watchlist holds %lld shows. With NextSeason Plus you can track unlimited shows, starting with the shows already on your list." : {
 
     },
     "The purchase could not be completed. Please try again." : {
@@ -2028,7 +2040,7 @@
         }
       }
     },
-    "Tips are optional and do not unlock features. Thank you for helping keep NextSeason going." : {
+    "Tips are optional and do not unlock features. Thank you for helping keep NextSeason running for years to come." : {
 
     },
     "To Be Determined" : {

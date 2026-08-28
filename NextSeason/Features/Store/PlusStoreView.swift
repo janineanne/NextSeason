@@ -13,7 +13,7 @@ struct PlusStoreView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.screen + 10) {
+                VStack(alignment: .leading, spacing: AppSpacing.bigSection) {
                     header
                     purchaseButtons
                     restoreButton
@@ -34,7 +34,9 @@ struct PlusStoreView: View {
             }
             .disabled(purchases.isPurchasing)
             .overlay {
-                if purchases.isPurchasing || purchases.isLoadingProducts {
+                if purchases.isPurchasing || purchases.isLoadingProducts
+                    || !purchases.hasCompletedProductLoad
+                {
                     ProgressView()
                         .controlSize(.large)
                 }
@@ -102,7 +104,7 @@ struct PlusStoreView: View {
             }
 
             if purchases.annualProduct == nil && purchases.lifetimeProduct == nil
-                && !purchases.isLoadingProducts
+                && !purchases.isLoadingProducts && purchases.hasCompletedProductLoad
             {
                 ContentUnavailableView {
                     Label("Purchase Options Unavailable", systemImage: "cart")

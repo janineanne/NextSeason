@@ -12,5 +12,5 @@ enum AppSpacing {
     static let row: CGFloat = 12
     static let screen: CGFloat = 16
     static let section: CGFloat = 20
-    static let bigSection: CGFloat = 28
+    static let bigSection: CGFloat = 26
 }

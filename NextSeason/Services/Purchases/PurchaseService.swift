@@ -5,6 +5,16 @@
 
 import Foundation
 
+/// StoreKit Plus entitlement, distinct from local grandfathering.
+///
+/// `loading` means `Transaction.currentEntitlements` has not been read yet.
+/// It is not the same as free: callers that need a real answer wait until
+/// the state is `resolved`.
+nonisolated enum StoreEntitlementState: Equatable, Sendable {
+    case loading
+    case resolved(isEntitled: Bool)
+}
+
 /// Observable purchasing and Plus entitlement state for the SwiftUI environment.
 ///
 /// Unlimited watchlist access comes from an active annual subscription, a
@@ -12,11 +22,12 @@ import Foundation
 @Observable
 @MainActor
 final class PurchaseService {
-    private(set) var isStoreEntitled = false
+    private(set) var storeEntitlement: StoreEntitlementState
     private(set) var annualProduct: StoreProduct?
     private(set) var lifetimeProduct: StoreProduct?
     private(set) var tipProducts: [StoreProduct] = []
     private(set) var isLoadingProducts = false
+    private(set) var hasCompletedProductLoad = false
     private(set) var isPurchasing = false
     private(set) var lastErrorMessage: String?
     private(set) var thankYouMessage: String?
@@ -24,6 +35,21 @@ final class PurchaseService {
     private let store: any PurchaseStoreClient
     private let entitlementStore: PlusEntitlementStore
     private var didStart = false
+    private var entitlementWaiters: [CheckedContinuation<Void, Never>] = []
+    private var processedTransactionIDs: Set<UInt64> = []
+
+    /// True when StoreKit has reported an active Plus subscription or lifetime purchase.
+    var isStoreEntitled: Bool {
+        if case .resolved(let isEntitled) = storeEntitlement {
+            return isEntitled
+        }
+        return false
+    }
+
+    var hasResolvedStoreEntitlement: Bool {
+        if case .resolved = storeEntitlement { return true }
+        return false
+    }
 
     /// True when StoreKit Plus is active or the user was grandfathered.
     var isUnlimitedWatchlist: Bool {
@@ -37,11 +63,11 @@ final class PurchaseService {
     init(
         store: any PurchaseStoreClient,
         entitlementStore: PlusEntitlementStore = PlusEntitlementStore(),
-        initialStoreEntitled: Bool = false
+        initialStoreEntitlement: StoreEntitlementState = .loading
     ) {
         self.store = store
         self.entitlementStore = entitlementStore
-        self.isStoreEntitled = initialStoreEntitled
+        self.storeEntitlement = initialStoreEntitlement
     }
 
     /// Production StoreKit-backed service.
@@ -60,15 +86,35 @@ final class PurchaseService {
 
         if !didStart {
             didStart = true
-            store.observeTransactionUpdates { [weak self] in
-                await self?.refreshEntitlements()
+            store.observeTransactionUpdates { [weak self] transaction in
+                await self?.handleVerifiedTransaction(transaction)
             }
         }
         await loadProducts()
     }
 
-    func canAddToWatchlist(currentCount: Int) -> Bool {
-        WatchlistLimitPolicy.canAddShow(
+    /// Waits until the first StoreKit entitlement read has completed.
+    ///
+    /// Watchlist adds use this so a Plus customer is not treated as free
+    /// during cold launch. Pre-resolved stubs (tests, previews, UI tests)
+    /// return immediately.
+    func waitForInitialEntitlementResolution() async {
+        if case .resolved = storeEntitlement { return }
+        if entitlementStore.isGrandfathered { return }
+        await withCheckedContinuation { continuation in
+            if case .resolved = storeEntitlement {
+                continuation.resume()
+            } else if entitlementStore.isGrandfathered {
+                continuation.resume()
+            } else {
+                entitlementWaiters.append(continuation)
+            }
+        }
+    }
+
+    func canAddToWatchlist(currentCount: Int) async -> Bool {
+        await waitForInitialEntitlementResolution()
+        return WatchlistLimitPolicy.canAddShow(
             currentCount: currentCount,
             isUnlimited: isUnlimitedWatchlist
         )
@@ -89,12 +135,14 @@ final class PurchaseService {
                 .sorted { lhs, rhs in
                     tipSortIndex(lhs.productID) < tipSortIndex(rhs.productID)
                 }
+            hasCompletedProductLoad = true
             if annualProduct == nil && lifetimeProduct == nil {
                 AppDiagnosticsLogger.breadcrumb("purchase_products_empty")
             }
         } catch is CancellationError {
             return
         } catch {
+            hasCompletedProductLoad = true
             lastErrorMessage = String(
                 localized: "Couldn't load purchase options. Please try again."
             )
@@ -110,14 +158,12 @@ final class PurchaseService {
         defer { isPurchasing = false }
 
         do {
-            let outcome = try await store.purchase(productID: product.productID)
+            let outcome = try await store.purchase(productID: product.productID) {
+                [weak self] transaction in
+                await self?.handleVerifiedTransaction(transaction)
+            }
             switch outcome {
-            case .success:
-                await refreshEntitlements()
-                if product.kind == .tip {
-                    thankYouMessage = String(localized: "Thank you for supporting NextSeason.")
-                }
-            case .cancelled, .pending:
+            case .success, .cancelled, .pending:
                 break
             case .failed(let message):
                 lastErrorMessage = message
@@ -154,12 +200,38 @@ final class PurchaseService {
     }
 
     func refreshEntitlements() async {
-        isStoreEntitled = await store.hasActivePlusEntitlement()
+        let entitled = await store.hasActivePlusEntitlement()
+        if Task.isCancelled { return }
+        storeEntitlement = .resolved(isEntitled: entitled)
+        resumeEntitlementWaiters()
     }
 
     func clearMessages() {
         lastErrorMessage = nil
         thankYouMessage = nil
+    }
+
+    /// Incorporates a verified StoreKit transaction, then the client finishes it.
+    private func handleVerifiedTransaction(_ transaction: StoreTransaction) async {
+        let isNew = processedTransactionIDs.insert(transaction.id).inserted
+        switch transaction.kind {
+        case .plusAnnual, .plusLifetime:
+            await refreshEntitlements()
+        case .tip:
+            if isNew {
+                thankYouMessage = String(localized: "Thank you for supporting NextSeason.")
+            }
+        case nil:
+            break
+        }
+    }
+
+    private func resumeEntitlementWaiters() {
+        let waiters = entitlementWaiters
+        entitlementWaiters.removeAll()
+        for waiter in waiters {
+            waiter.resume()
+        }
     }
 
     private func tipSortIndex(_ productID: String) -> Int {
@@ -195,7 +267,7 @@ extension PurchaseService {
                 purchaseOutcome: purchaseOutcome
             ),
             entitlementStore: PlusEntitlementStore(userDefaults: defaults),
-            initialStoreEntitled: isStoreEntitled
+            initialStoreEntitlement: .resolved(isEntitled: isStoreEntitled)
         )
     }
 

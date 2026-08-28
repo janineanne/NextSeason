@@ -42,9 +42,10 @@ enum WatchlistTracking {
         purchases: PurchaseService
     ) async throws -> ToggleOutcome {
         let currentCount = try await repository.trackedShowIDs().count
-        guard purchases.canAddToWatchlist(currentCount: currentCount) else {
+        guard await purchases.canAddToWatchlist(currentCount: currentCount) else {
             return .paywallRequired
         }
+        try Task.checkCancellation()
         let showToStore = try await resolvedShowForTracking(show, tvMaze: tvMaze)
         try await repository.add(showToStore)
         analytics.track(.watchlistAdded(source: source, showID: showToStore.id))

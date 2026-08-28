@@ -27,7 +27,7 @@ nonisolated enum StoreProductID: String, CaseIterable, Sendable {
         }
     }
 
-    /// Fallback name when StoreKit products have not loaded yet.
+    /// Name used by previews, tests, and stubs. Production UI uses StoreKit.
     var fallbackDisplayName: String {
         switch self {
         case .plusAnnual:
@@ -43,7 +43,7 @@ nonisolated enum StoreProductID: String, CaseIterable, Sendable {
         }
     }
 
-    /// Provisional US prices used only before StoreKit returns a localized price.
+    /// Provisional US prices for previews and stubs only — never shown as live prices.
     var fallbackPriceText: String {
         switch self {
         case .plusAnnual: "$10.00"
@@ -95,6 +95,7 @@ nonisolated struct StoreProduct: Identifiable, Equatable, Sendable {
         self.kind = kind
     }
 
+    /// Preview and test catalog. Production purchase UI uses StoreKit-loaded products.
     init(_ id: StoreProductID) {
         self.init(
             productID: id.rawValue,
