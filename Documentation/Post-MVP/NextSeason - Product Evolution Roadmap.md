@@ -81,11 +81,26 @@ These capabilities should operate on the user's watchlist and application data r
 
 ## Notification Enhancements
 
--   Global notification preferences.
--   Per-show preferences.
--   Quiet hours.
--   Notification history.
--   Additional notification categories.
+- Global notification preferences.
+- Per-show preferences.
+- Quiet hours.
+- Notification history.
+- Additional notification categories.
+- Allow users to request a reminder from a show notification when they cannot act on it immediately.
+  - Offer convenient intervals such as later today, tomorrow, or this weekend.
+  - Consider custom and/or recurring reminder options if useful.
+- Support email as an optional notification channel.
+  - Allow users to choose push notifications, email, or both.
+  - Allow users to opt into email as a fallback when push notification delivery is known to be unavailable.
+- Offer optional periodic watchlist status reports.
+  - Summarize the current status of tracked shows.
+  - Support an appropriate cadence such as weekly or monthly.
+  - Deliver useful information directly in the notification or email rather than requiring an app launch.
+  - Keep periodic reports opt-in; users should be able to hear from NextSeason only when something changes.
+
+These features should help users remember information they asked NextSeason to track without creating artificial reasons to reopen the app.
+
+Consider adding a dedicated Settings screen as notification, email, and other global preferences become substantial enough to warrant one.
 
 ## Streaming Availability
 
@@ -169,7 +184,12 @@ Vision Pro is not currently planned.
 - Keep notification delivery consistent across all of a user’s devices and avoid confusing duplicate notifications.
 - Minimize battery impact by performing monitoring on the server whenever possible.
 - Design backend monitoring and cloud sync together so the server can determine which users should receive notifications without unnecessarily duplicating or exposing user data.
-
+- Design monitoring to remain useful during long periods when the user does not launch the app.
+- Account for iOS potentially offloading NextSeason when Offload Unused Apps is enabled.
+  - Do not depend on detecting whether the app has been offloaded; iOS does not provide a reliable offload-state signal.
+  - Test remote notification behavior explicitly with NextSeason in the offloaded state.
+  - Where the user has opted into email fallback, use email when push delivery is definitively known to be unavailable rather than attempting to infer that the app was offloaded.
+  
 ## Identity & Accounts
 
 Avoid requiring a separate NextSeason account unless it becomes necessary to support iCloud / CloudKit Sync, backend monitoring, or another future feature. Prefer the user's existing Apple/iCloud identity when it can satisfy the product requirements.
