@@ -75,7 +75,7 @@ private struct UndoToastChromeModifier: ViewModifier {
             content
                 .background {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(AppColor.accent.opacity(0.1))
+                        .fill(AppColor.background.opacity(0.1))
                 }
                 .glassEffect(.regular, in: .rect(cornerRadius: 16))
         } else {
