@@ -96,7 +96,7 @@ Give users a way to export their watchlist so that their data is not locked into
 
 Import and restoration from an exported watchlist are not required for the initial App Store release; see the Product Evolution Roadmap.
 
-## StoreKit
+## StoreKit (Complete for testing)
 
 See [NextSeason Monetization Strategy](NextSeason%20-%20Monetization%20Strategy%20Roadmap.md) for the proposed pricing and purchase structure.
 

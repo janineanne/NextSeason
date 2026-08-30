@@ -6,6 +6,10 @@
 import Foundation
 import os
 
+#if DEBUG
+    import Darwin
+#endif
+
 /// Detects repeated unexpected process launches so bootstrap can skip opening
 /// the watchlist store and show a safe recovery UI instead of crashing again.
 ///
@@ -29,8 +33,21 @@ import os
 /// previous build is still recorded in launch diagnostics, but it does
 /// not count as a failure of the new build. Repeated failures *within*
 /// the same build still trip the guard.
+///
+/// In DEBUG, an unexpected previous termination is not counted toward
+/// the streak when a debugger is attached (Xcode Stop), unless
+/// `--enable-crash-loop-detection` is passed. Diagnostics still record
+/// the termination. Release, TestFlight, and App Store builds always
+/// count. Simulator launches without a debugger also count, so the
+/// real recovery flow can still be exercised there.
 struct LaunchFailureTracker: Sendable {
     static let consecutiveFailureThreshold = 2
+    #if DEBUG
+        /// Counts unexpected terminations even when a debugger is attached,
+        /// so crash-loop recovery can be tested from Xcode.
+        nonisolated static let enableCrashLoopDetectionArgument =
+            "--enable-crash-loop-detection"
+    #endif
     nonisolated static let consecutiveCountDefaultsKey =
         "LaunchFailureTracker.consecutiveUnexpectedLaunchCount"
     nonisolated static let lastRecordedBuildDefaultsKey =
@@ -39,15 +56,20 @@ struct LaunchFailureTracker: Sendable {
     private let defaults: UserDefaults
     private let now: @Sendable () -> Date
     private let buildIdentifier: String
+    private let countsPreviousUnexpectedTermination: Bool
 
     init(
         defaults: UserDefaults = .standard,
         now: @escaping @Sendable () -> Date = { Date.now },
-        buildIdentifier: String = AppVersionInfo.buildNumber
+        buildIdentifier: String = AppVersionInfo.buildNumber,
+        countsPreviousUnexpectedTermination: Bool =
+            Self.defaultCountsPreviousUnexpectedTermination
     ) {
         self.defaults = defaults
         self.now = now
         self.buildIdentifier = buildIdentifier
+        self.countsPreviousUnexpectedTermination =
+            countsPreviousUnexpectedTermination
     }
 
     var consecutiveUnexpectedLaunchCount: Int {
@@ -64,7 +86,8 @@ struct LaunchFailureTracker: Sendable {
     /// older build's unexpected exit is still visible), then a new build
     /// starts a zero streak without counting that older exit. Only an
     /// unexpected exit that belongs to the current build increments the
-    /// consecutive-failure count.
+    /// consecutive-failure count, and only when crash-loop counting is
+    /// enabled for this process (see `countsPreviousUnexpectedTermination`).
     func beginLaunchAttempt() -> LaunchAttemptResult {
         AppDiagnosticsLogger.recordAppLaunch(defaults: defaults, now: now())
         let previousEndedUnexpectedly = AppDiagnosticsLogger.launchDiagnostics(
@@ -73,7 +96,9 @@ struct LaunchFailureTracker: Sendable {
 
         if isLaunchOfADifferentBuild {
             startFreshStreakForCurrentBuild()
-        } else if previousEndedUnexpectedly {
+        } else if previousEndedUnexpectedly
+            && countsPreviousUnexpectedTermination
+        {
             defaults.set(
                 consecutiveUnexpectedLaunchCount + 1,
                 forKey: Self.consecutiveCountDefaultsKey
@@ -125,6 +150,53 @@ struct LaunchFailureTracker: Sendable {
         defaults.set(0, forKey: Self.consecutiveCountDefaultsKey)
         defaults.set(buildIdentifier, forKey: Self.lastRecordedBuildDefaultsKey)
     }
+
+    #if DEBUG
+        /// Whether an unexpected previous termination should increment the
+        /// crash-loop streak. Does not affect launch diagnostics.
+        ///
+        /// Pass explicit inputs from tests. Production uses
+        /// `defaultCountsPreviousUnexpectedTermination`.
+        static func shouldCountPreviousUnexpectedTermination(
+            isDebuggerAttached: Bool,
+            arguments: [String],
+            isDebugBuild: Bool
+        ) -> Bool {
+            if isDebugBuild && isDebuggerAttached
+                && arguments.contains(enableCrashLoopDetectionArgument)
+                    == false
+            {
+                return false
+            }
+            return true
+        }
+    #endif
+
+    private static var defaultCountsPreviousUnexpectedTermination: Bool {
+        #if DEBUG
+            shouldCountPreviousUnexpectedTermination(
+                isDebuggerAttached: isDebuggerAttachedToCurrentProcess(),
+                arguments: ProcessInfo.processInfo.arguments,
+                isDebugBuild: true
+            )
+        #else
+            true
+        #endif
+    }
+
+    #if DEBUG
+        /// True when this process has a debugger attached (`P_TRACED`).
+        /// Used only to exclude Xcode Stop from crash-loop counting.
+        private static func isDebuggerAttachedToCurrentProcess() -> Bool {
+            var info = kinfo_proc()
+            info.kp_proc.p_flag = 0
+            var size = MemoryLayout<kinfo_proc>.size
+            var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()]
+            let result = sysctl(&mib, u_int(mib.count), &info, &size, nil, 0)
+            guard result == 0 else { return false }
+            return (info.kp_proc.p_flag & P_TRACED) != 0
+        }
+    #endif
 }
 
 /// Snapshot returned by `LaunchFailureTracker.beginLaunchAttempt()`.

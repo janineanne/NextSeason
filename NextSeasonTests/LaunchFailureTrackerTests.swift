@@ -75,7 +75,10 @@ struct LaunchFailureTrackerTests {
     @Test("A graceful background does not count as an unexpected launch")
     func gracefulBackgroundDoesNotIncrement() {
         let defaults = makeDefaults()
-        let tracker = LaunchFailureTracker(defaults: defaults)
+        let tracker = LaunchFailureTracker(
+            defaults: defaults,
+            countsPreviousUnexpectedTermination: true
+        )
         _ = tracker.beginLaunchAttempt()
         AppDiagnosticsLogger.recordEnterBackground(defaults: defaults)
 
@@ -101,7 +104,11 @@ struct LaunchFailureTrackerTests {
     @Test("Repeated failures within the same build still trip the guard")
     func sameBuildStillProtects() {
         let defaults = makeDefaults()
-        let tracker = LaunchFailureTracker(defaults: defaults, buildIdentifier: "1")
+        let tracker = LaunchFailureTracker(
+            defaults: defaults,
+            buildIdentifier: "1",
+            countsPreviousUnexpectedTermination: true
+        )
         seedCrashLoop(tracker)
 
         let result = tracker.beginLaunchAttempt()
@@ -113,13 +120,21 @@ struct LaunchFailureTrackerTests {
     @Test("A newly installed build starts at zero and only counts its own unexpected terminations")
     func newBuildStartsAtZeroThenCountsItsOwnFailures() {
         let defaults = makeDefaults()
-        let buildA = LaunchFailureTracker(defaults: defaults, buildIdentifier: "100")
+        let buildA = LaunchFailureTracker(
+            defaults: defaults,
+            buildIdentifier: "100",
+            countsPreviousUnexpectedTermination: true
+        )
         seedCrashLoop(buildA)
         let looping = buildA.beginLaunchAttempt()
         #expect(looping.shouldSkipComposition)
         #expect(looping.consecutiveUnexpectedLaunchCount == 2)
 
-        let buildB = LaunchFailureTracker(defaults: defaults, buildIdentifier: "101")
+        let buildB = LaunchFailureTracker(
+            defaults: defaults,
+            buildIdentifier: "101",
+            countsPreviousUnexpectedTermination: true
+        )
         let firstLaunch = buildB.beginLaunchAttempt()
         let diagnostics = AppDiagnosticsLogger.launchDiagnostics(defaults: defaults)
         #expect(diagnostics.previousLaunchEndedUnexpectedly)
@@ -180,6 +195,93 @@ struct LaunchFailureTrackerTests {
         #expect(tracker.beginLaunchAttempt().shouldSkipComposition == false)
     }
 
+    @Test("A debugger-attached DEBUG launch does not count an unexpected termination")
+    func debuggerAttachedWithoutOverrideDoesNotCount() {
+        #expect(
+            LaunchFailureTracker.shouldCountPreviousUnexpectedTermination(
+                isDebuggerAttached: true,
+                arguments: [],
+                isDebugBuild: true
+            ) == false
+        )
+
+        let defaults = makeDefaults()
+        let tracker = LaunchFailureTracker(
+            defaults: defaults,
+            buildIdentifier: "test-build",
+            countsPreviousUnexpectedTermination: false
+        )
+        _ = tracker.beginLaunchAttempt()
+
+        let result = tracker.beginLaunchAttempt()
+
+        #expect(result.consecutiveUnexpectedLaunchCount == 0)
+        #expect(result.shouldSkipComposition == false)
+        #expect(
+            AppDiagnosticsLogger.launchDiagnostics(defaults: defaults)
+                .previousLaunchEndedUnexpectedly
+        )
+    }
+
+    @Test("A debugger-attached DEBUG launch counts when the override is present")
+    func debuggerAttachedWithOverrideCounts() {
+        #expect(
+            LaunchFailureTracker.shouldCountPreviousUnexpectedTermination(
+                isDebuggerAttached: true,
+                arguments: [LaunchFailureTracker.enableCrashLoopDetectionArgument],
+                isDebugBuild: true
+            )
+        )
+
+        let tracker = LaunchFailureTracker(
+            defaults: makeDefaults(),
+            buildIdentifier: "test-build",
+            countsPreviousUnexpectedTermination: true
+        )
+        _ = tracker.beginLaunchAttempt()
+
+        let result = tracker.beginLaunchAttempt()
+
+        #expect(result.consecutiveUnexpectedLaunchCount == 1)
+        #expect(result.shouldSkipComposition == false)
+    }
+
+    @Test("A DEBUG launch without a debugger counts unexpected terminations")
+    func debuggerNotAttachedCounts() {
+        #expect(
+            LaunchFailureTracker.shouldCountPreviousUnexpectedTermination(
+                isDebuggerAttached: false,
+                arguments: [],
+                isDebugBuild: true
+            )
+        )
+    }
+
+    @Test("Release builds count unexpected terminations even if a debugger is attached")
+    func releaseBuildAlwaysCounts() {
+        #expect(
+            LaunchFailureTracker.shouldCountPreviousUnexpectedTermination(
+                isDebuggerAttached: true,
+                arguments: [],
+                isDebugBuild: false
+            )
+        )
+        #expect(
+            LaunchFailureTracker.shouldCountPreviousUnexpectedTermination(
+                isDebuggerAttached: true,
+                arguments: [LaunchFailureTracker.enableCrashLoopDetectionArgument],
+                isDebugBuild: false
+            )
+        )
+        #expect(
+            LaunchFailureTracker.shouldCountPreviousUnexpectedTermination(
+                isDebuggerAttached: false,
+                arguments: [],
+                isDebugBuild: false
+            )
+        )
+    }
+
     private func makeDefaults() -> UserDefaults {
         let suiteName = "LaunchFailureTrackerTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -188,7 +290,11 @@ struct LaunchFailureTrackerTests {
     }
 
     private func makeTracker() -> LaunchFailureTracker {
-        LaunchFailureTracker(defaults: makeDefaults(), buildIdentifier: "test-build")
+        LaunchFailureTracker(
+            defaults: makeDefaults(),
+            buildIdentifier: "test-build",
+            countsPreviousUnexpectedTermination: true
+        )
     }
 
     /// Leaves session-active so the next `beginLaunchAttempt` is the second

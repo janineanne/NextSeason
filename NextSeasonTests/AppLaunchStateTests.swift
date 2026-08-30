@@ -274,7 +274,8 @@ struct AppLaunchStateTests {
         let tracker = LaunchFailureTracker(
             defaults: defaults,
             now: { clock.date },
-            buildIdentifier: "test-build"
+            buildIdentifier: "test-build",
+            countsPreviousUnexpectedTermination: true
         )
         seedCrashLoop(tracker)
         var state = AppLaunchState.bootstrap(
@@ -304,7 +305,8 @@ struct AppLaunchStateTests {
         let tracker = LaunchFailureTracker(
             defaults: defaults,
             now: { clock.date },
-            buildIdentifier: "test-build"
+            buildIdentifier: "test-build",
+            countsPreviousUnexpectedTermination: true
         )
         var state = AppLaunchState.bootstrap(
             makeRoot: { throw StubLaunchError(message: "container failed") },
@@ -382,7 +384,11 @@ struct AppLaunchStateTests {
     }
 
     private func makeTracker() -> LaunchFailureTracker {
-        LaunchFailureTracker(defaults: makeDefaults(), buildIdentifier: "test-build")
+        LaunchFailureTracker(
+            defaults: makeDefaults(),
+            buildIdentifier: "test-build",
+            countsPreviousUnexpectedTermination: true
+        )
     }
 
     /// Leaves session-active so the next bootstrap is the second consecutive
