@@ -317,6 +317,7 @@ struct SearchView: View {
                 Button("Try Again") {
                     Task { await viewModel.search() }
                 }
+                .buttonStyle(.borderedProminent)
             }
         }
     }

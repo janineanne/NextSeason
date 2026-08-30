@@ -272,6 +272,8 @@ struct ShowDetailView: View {
                 if let url = viewModel.displayShow.tvMazeURL {
                     Link(destination: url) {
                         Label("View on TVMaze", systemImage: "arrow.up.right.square")
+                            .frame(minHeight: 44, alignment: .leading)
+                            .contentShape(Rectangle())
                     }
                     .font(.subheadline)
                     .padding(.top, AppSpacing.tight / 2)

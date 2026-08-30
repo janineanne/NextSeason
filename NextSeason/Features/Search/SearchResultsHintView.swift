@@ -9,13 +9,15 @@ import SwiftUI
 struct SearchResultsHintView: View {
     var body: some View {
         Text(FirstRunCopy.searchResultsHint)
-            .font(.footnote)
+            .font(.subheadline)
             .multilineTextAlignment(.center)
-            .appSecondaryText()
+            .foregroundStyle(Color.primary)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, AppSpacing.screen)
-            .padding(.vertical, AppSpacing.tight)
-            .background(AppColor.background)
+            .padding(.vertical, AppSpacing.row)
+            .appSurfaceCard()
+            .padding(.horizontal, AppSpacing.screen)
+            .padding(.bottom, AppSpacing.tight)
             .accessibilityAddTraits(.isStaticText)
             .accessibilityIdentifier(AccessibilityID.Search.resultsHint)
     }

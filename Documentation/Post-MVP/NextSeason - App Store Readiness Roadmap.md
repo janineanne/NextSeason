@@ -66,7 +66,7 @@ Replace the startup `fatalError` with a user-facing recovery flow before release
 - Preserve useful diagnostics for troubleshooting.
 - Verify that recovery does not create a new launch loop.
 
-## Accessibility Review
+## Accessibility Review (Complete)
 
 Complete a final accessibility pass and address everything that can reasonably be corrected before release.
 

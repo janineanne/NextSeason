@@ -405,6 +405,7 @@ struct WatchlistView: View {
                 Button("Try Again") {
                     Task { await viewModel.reload() }
                 }
+                .buttonStyle(.borderedProminent)
             }
         }
     }
