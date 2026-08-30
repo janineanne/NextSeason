@@ -7,9 +7,10 @@ import Foundation
 
 /// Decides when StoreKit's `RequestReviewAction` may be called.
 ///
-/// Eligible after the first show notification of the current marketing version
-/// has been delivered to the user (banner while foregrounded, or a tap). The
-/// SwiftUI modifier then waits `promptDelay` so the update is visible first.
+/// Eligible after the first production show notification of the current
+/// marketing version is accepted by the system (including background local
+/// delivery). Foreground banners and taps remain a fallback. The SwiftUI
+/// modifier then waits `promptDelay` so the user is active before asking.
 @MainActor
 @Observable
 final class ReviewPromptCoordinator {
@@ -36,9 +37,9 @@ final class ReviewPromptCoordinator {
 
     var isEligibleToRequest: Bool { store.isEligibleToRequest }
 
-    /// Call when a production show notification is presented or opened.
+    /// Call when a production show notification is scheduled, presented, or opened.
     func noteShowNotificationDelivered() {
-        store.markNotificationDelivered()
+        store.markNotificationReceived()
         guard store.isEligibleToRequest else { return }
         deliveryGeneration += 1
     }

@@ -50,7 +50,7 @@ struct ReviewPromptStore: Sendable {
     /// Records that the user experienced a show notification in this version.
     /// Returns `false` when this version was already marked.
     @discardableResult
-    func markNotificationDelivered() -> Bool {
+    func markNotificationReceived() -> Bool {
         guard !hasDeliveredNotificationThisVersion else { return false }
         defaults.set(currentVersion, forKey: Self.deliveredVersionKey)
         return true

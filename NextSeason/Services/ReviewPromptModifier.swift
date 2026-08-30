@@ -7,8 +7,8 @@ import StoreKit
 import SwiftUI
 
 /// Calls `RequestReviewAction` a few seconds after the first show notification
-/// of this version, while the scene is active. StoreKit decides whether to show
-/// the system prompt.
+/// of this version once the scene is active. That covers background delivery
+/// the user never taps. StoreKit decides whether to show the system prompt.
 struct ReviewPromptModifier: ViewModifier {
     @Environment(\.requestReview) private var requestReview
     @Environment(\.scenePhase) private var scenePhase

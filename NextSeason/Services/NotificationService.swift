@@ -262,6 +262,13 @@ final class NotificationService: NotificationManaging {
         do {
             try await center.add(request)
             analytics.track(.notificationReminderScheduled)
+            // Background delivery never hits `willPresent` / `didReceive` unless
+            // the user taps. Record eligibility here so the next foreground can
+            // request a review after the system accepted the notification.
+            NotificationRouting.noteShowNotificationExperience(
+                userInfo: notification.userInfo,
+                requestIdentifier: identifier
+            )
         } catch {
             analytics.trackNonFatalError(error, context: "notification_schedule")
             #if DEBUG

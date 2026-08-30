@@ -69,6 +69,18 @@ struct ReviewPromptCoordinatorTests {
         #expect(await versionTwo.prepareReviewRequestIfEligible())
     }
 
+    @Test("Persisted delivery is enough for the next foreground request")
+    func persistedDeliveryMakesNextCoordinatorEligible() async {
+        let defaults = makeDefaults()
+        let background = makeCoordinator(userDefaults: defaults, version: "1.0") { _ in }
+        background.noteShowNotificationDelivered()
+
+        let foreground = makeCoordinator(userDefaults: defaults, version: "1.0") { _ in }
+        #expect(foreground.isEligibleToRequest)
+        #expect(foreground.deliveryGeneration == 0)
+        #expect(await foreground.prepareReviewRequestIfEligible())
+    }
+
     private func makeCoordinator(
         userDefaults: UserDefaults? = nil,
         version: String = "1.0",

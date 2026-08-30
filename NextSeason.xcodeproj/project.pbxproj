@@ -172,7 +172,9 @@
 		E19A223330424FCB00CC7190 /* 8-25-2026 Review StoreKit Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-25-2026 Review StoreKit Implementation.md"; sourceTree = "<group>"; };
 		E19A22343042503000CC7190 /* 8-25-2026 Implement StoreKit Review Items 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-25-2026 Implement StoreKit Review Items 1.md"; sourceTree = "<group>"; };
 		E19A22353042521700CC7190 /* 8-28-2026 Re-Review StoreKit Implementation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-28-2026 Re-Review StoreKit Implementation.md"; sourceTree = "<group>"; };
-		E19A2237304255F500CC7190 /* 8-25-2026 Implement StoreKit Review Items 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-25-2026 Implement StoreKit Review Items 2.md"; sourceTree = "<group>"; };
+		E19A2237304255F500CC7190 /* 8-28-2026 Implement StoreKit Review Items 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-28-2026 Implement StoreKit Review Items 2.md"; sourceTree = "<group>"; };
+		E19A25643044D17E00CC7190 /* 8-30-2026 Implement App Review Request.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-30-2026 Implement App Review Request.md"; sourceTree = "<group>"; };
+		E19A25653044D1DD00CC7190 /* 8-30-2026 Review App Review Request.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-30-2026 Review App Review Request.md"; sourceTree = "<group>"; };
 		E1AB76CA3033D0740045498C /* MVP-Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.png"; sourceTree = "<group>"; };
 		E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Show-Detail.png"; sourceTree = "<group>"; };
 		E1AB76CC3033D0740045498C /* MVP-Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Watchlist.png"; sourceTree = "<group>"; };
@@ -384,7 +386,9 @@
 				E19A223330424FCB00CC7190 /* 8-25-2026 Review StoreKit Implementation.md */,
 				E19A22343042503000CC7190 /* 8-25-2026 Implement StoreKit Review Items 1.md */,
 				E19A22353042521700CC7190 /* 8-28-2026 Re-Review StoreKit Implementation.md */,
-				E19A2237304255F500CC7190 /* 8-25-2026 Implement StoreKit Review Items 2.md */,
+				E19A2237304255F500CC7190 /* 8-28-2026 Implement StoreKit Review Items 2.md */,
+				E19A25643044D17E00CC7190 /* 8-30-2026 Implement App Review Request.md */,
+				E19A25653044D1DD00CC7190 /* 8-30-2026 Review App Review Request.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

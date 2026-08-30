@@ -85,6 +85,30 @@ struct AppNavigationCoordinatorTests {
         #expect(prompt.deliveryGeneration == 1)
     }
 
+    @Test("Unattached review prompt still persists a background schedule")
+    func persistsShowNotificationWhenCoordinatorIsMissing() {
+        NotificationRouting.resetForTesting()
+        defer { NotificationRouting.resetForTesting() }
+
+        let store = ReviewPromptStore(
+            defaults: isolatedDefaults(),
+            marketingVersion: "1.0"
+        )
+        NotificationRouting.unattachedReviewPromptStoreForTesting = store
+
+        NotificationRouting.noteShowNotificationExperience(
+            userInfo: ["showID": 44933],
+            requestIdentifier: "debug-test-1"
+        )
+        #expect(store.isEligibleToRequest == false)
+
+        NotificationRouting.noteShowNotificationExperience(
+            userInfo: ["showID": 44933],
+            requestIdentifier: "show-44933-airing:2"
+        )
+        #expect(store.isEligibleToRequest)
+    }
+
     @Test("Buffered notification routing flushes when the coordinator is attached")
     func buffersShowNavigationUntilCoordinatorIsReady() {
         NotificationRouting.resetForTesting()

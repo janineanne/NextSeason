@@ -49,7 +49,13 @@ enum NotificationRouting {
                 requestIdentifier: requestIdentifier
             )
         else { return }
-        reviewPrompt?.noteShowNotificationDelivered()
+        if let reviewPrompt {
+            reviewPrompt.noteShowNotificationDelivered()
+            return
+        }
+        // Persist even when the coordinator is not attached (for example a
+        // background launch) so the next foreground can still request a review.
+        unattachedReviewPromptStore.markNotificationReceived()
     }
 
     static func installDelegate(center: UNUserNotificationCenter = .current()) {
@@ -84,14 +90,27 @@ enum NotificationRouting {
     }
 
     #if DEBUG
+        /// Isolated store used when `reviewPrompt` is unset in unit tests.
+        static var unattachedReviewPromptStoreForTesting: ReviewPromptStore?
+
         /// Clears routing state between unit tests.
         static func resetForTesting() {
             coordinator = nil
             analytics = nil
             reviewPrompt = nil
+            unattachedReviewPromptStoreForTesting = nil
             bufferedShowID = nil
         }
     #endif
+
+    private static var unattachedReviewPromptStore: ReviewPromptStore {
+        #if DEBUG
+            if let unattachedReviewPromptStoreForTesting {
+                return unattachedReviewPromptStoreForTesting
+            }
+        #endif
+        return ReviewPromptStore()
+    }
 }
 
 /// `UNUserNotificationCenter` delegate that presents banners while foregrounded

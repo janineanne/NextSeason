@@ -16,8 +16,8 @@ struct ReviewPromptStoreTests {
         let store = ReviewPromptStore(defaults: defaults, marketingVersion: "1.0")
 
         #expect(store.isEligibleToRequest == false)
-        #expect(store.markNotificationDelivered())
-        #expect(store.markNotificationDelivered() == false)
+        #expect(store.markNotificationReceived())
+        #expect(store.markNotificationReceived() == false)
         #expect(store.isEligibleToRequest)
         #expect(store.deliveredVersion == "1.0")
 
@@ -27,7 +27,7 @@ struct ReviewPromptStoreTests {
 
         let nextVersion = ReviewPromptStore(defaults: defaults, marketingVersion: "1.1")
         #expect(nextVersion.isEligibleToRequest == false)
-        #expect(nextVersion.markNotificationDelivered())
+        #expect(nextVersion.markNotificationReceived())
         #expect(nextVersion.isEligibleToRequest)
     }
 
