@@ -22,6 +22,7 @@ enum UITestingSearchQuery {
 enum AccessibilityID {
     enum App {
         static let aboutButton = "app.aboutButton"
+        static let rateOnAppStore = "app.rateOnAppStore"
     }
 
     enum PersistenceRecovery {

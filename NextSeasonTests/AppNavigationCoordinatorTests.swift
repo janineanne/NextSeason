@@ -37,6 +37,54 @@ struct AppNavigationCoordinatorTests {
         #expect(NotificationRouting.showID(from: ["showID": "44933"]) == nil)
     }
 
+    @Test("Production show notifications are counted for review prompts")
+    func productionShowNotificationsAreCounted() {
+        #expect(
+            NotificationRouting.isProductionShowNotification(
+                userInfo: ["showID": 44933],
+                requestIdentifier: "show-44933-scheduled:3:1"
+            )
+        )
+        #expect(
+            NotificationRouting.isProductionShowNotification(
+                userInfo: ["showID": 44933],
+                requestIdentifier: "debug-test-1"
+            ) == false
+        )
+        #expect(
+            NotificationRouting.isProductionShowNotification(
+                userInfo: [:],
+                requestIdentifier: "show-44933-airing:2"
+            ) == false
+        )
+    }
+
+    @Test("Review prompt records a production show notification experience")
+    func notesProductionShowNotificationExperience() {
+        NotificationRouting.resetForTesting()
+        defer { NotificationRouting.resetForTesting() }
+
+        let prompt = ReviewPromptCoordinator(
+            userDefaults: isolatedDefaults(),
+            marketingVersion: "1.0",
+            sleep: { _ in }
+        )
+        NotificationRouting.setReviewPrompt(prompt)
+
+        NotificationRouting.noteShowNotificationExperience(
+            userInfo: ["showID": 44933],
+            requestIdentifier: "debug-pipeline-44933"
+        )
+        #expect(prompt.isEligibleToRequest == false)
+
+        NotificationRouting.noteShowNotificationExperience(
+            userInfo: ["showID": 44933],
+            requestIdentifier: "show-44933-airing:2"
+        )
+        #expect(prompt.isEligibleToRequest)
+        #expect(prompt.deliveryGeneration == 1)
+    }
+
     @Test("Buffered notification routing flushes when the coordinator is attached")
     func buffersShowNavigationUntilCoordinatorIsReady() {
         NotificationRouting.resetForTesting()
@@ -195,5 +243,12 @@ struct AppNavigationCoordinatorTests {
         #expect(coordinator.pendingShowID == nil)
         #expect(tvMaze.fetchedIDs == [82])
         #expect(analytics.events.contains(.appOpenedFromNotification(showID: show.id)))
+    }
+
+    private func isolatedDefaults() -> UserDefaults {
+        let suiteName = "AppNavigationCoordinatorTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        return defaults
     }
 }

@@ -34,7 +34,8 @@ struct NextSeasonApp: App {
                     showIDMapping: composition.showIDMapping,
                     onForegroundShowIDMappingRefresh: {
                         await composition.refreshShowIDMappingIfNeeded()
-                    }
+                    },
+                    reviewPromptCoordinator: composition.reviewPromptCoordinator
                 )
                 .environment(\.watchlistRepository, composition.watchlistRepository)
                 .environment(\.watchlistRefreshService, composition.refreshService)
@@ -90,6 +91,7 @@ private struct AppRootView: View {
     let tvMaze: any TVMazeService
     let showIDMapping: any ShowIDMapping
     let onForegroundShowIDMappingRefresh: @MainActor () async -> Void
+    let reviewPromptCoordinator: ReviewPromptCoordinator
 
     var body: some View {
         ContentView(
@@ -99,6 +101,7 @@ private struct AppRootView: View {
             showIDMapping: showIDMapping
         )
         .appAccentTint()
+        .requestReviewAfterShowNotification(coordinator: reviewPromptCoordinator)
         .watchlistUndoToast(
             isPresented: removalCoordinator.pendingRemoval != nil,
             undoAction: {

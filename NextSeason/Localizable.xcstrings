@@ -1452,6 +1452,9 @@
         }
       }
     },
+    "Opens the App Store so you can write a review." : {
+
+    },
     "Opens TheTVDB.com" : {
 
     },
@@ -1506,6 +1509,9 @@
       }
     },
     "Purchase Options Unavailable" : {
+
+    },
+    "Rate NextSeason" : {
 
     },
     "Refresh did not complete" : {

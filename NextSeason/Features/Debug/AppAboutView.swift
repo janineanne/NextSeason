@@ -44,11 +44,12 @@ private struct AppAboutToolbarButtonModifier: ViewModifier {
     }
 }
 
-/// About sheet: version, notifications, NextSeason Plus, optional tips, and
-/// (in Debug / TestFlight) the Diagnostics entry point.
+/// About sheet: version, notifications, NextSeason Plus, optional tips,
+/// Rate NextSeason, and (in Debug / TestFlight) the Diagnostics entry point.
 @MainActor
 struct AppAboutView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @Environment(\.notificationService) private var notificationService
     @Environment(PurchaseService.self) private var purchases
     @State private var betaBuildAvailability = BetaBuildAvailability.shared
@@ -65,6 +66,16 @@ struct AppAboutView: View {
                 PlusAccountSection(isShowingPlusStore: $isShowingPlusStore)
 
                 TipJarSection()
+
+                Section {
+                    Button("Rate NextSeason", systemImage: "star.bubble") {
+                        openURL(AppStoreLinks.writeReview)
+                    }
+                    .accessibilityHint(
+                        String(localized: "Opens the App Store so you can write a review.")
+                    )
+                    .accessibilityIdentifier(AccessibilityID.App.rateOnAppStore)
+                }
 
                 Section {
                     Button {

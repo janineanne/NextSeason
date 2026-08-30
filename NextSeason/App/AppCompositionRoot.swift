@@ -44,6 +44,8 @@ struct AppCompositionRoot {
     let showIDMappingRefresh: ShowIDMappingRefreshService?
     /// StoreKit purchases, Plus entitlement, and the free watchlist cap.
     let purchaseService: PurchaseService
+    /// Per-version review request after the first show notification.
+    let reviewPromptCoordinator: ReviewPromptCoordinator
 
     init() throws {
         analyticsService = AnalyticsService()
@@ -102,6 +104,7 @@ struct AppCompositionRoot {
             repository: repository,
             analytics: analyticsService
         )
+        reviewPromptCoordinator = ReviewPromptCoordinator()
     }
 
     /// Production-only launch wiring: MetricKit, notification routing,
@@ -118,6 +121,7 @@ struct AppCompositionRoot {
         // the delegate here lets a launch-from-notification tap buffer until the
         // coordinator attaches.
         NotificationRouting.setAnalytics(analyticsService)
+        NotificationRouting.setReviewPrompt(reviewPromptCoordinator)
         NotificationRouting.installDelegate()
 
         configureBackgroundRefresh()

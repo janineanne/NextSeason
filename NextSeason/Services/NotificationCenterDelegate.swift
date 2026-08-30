@@ -12,6 +12,7 @@ import UserNotifications
 enum NotificationRouting {
     static weak var coordinator: AppNavigationCoordinator?
     static var analytics: (any AnalyticsTracking)?
+    static weak var reviewPrompt: ReviewPromptCoordinator?
     private static var bufferedShowID: Int?
     private static var bufferedAnimated = false
 
@@ -22,6 +23,33 @@ enum NotificationRouting {
 
     static func setAnalytics(_ analytics: any AnalyticsTracking) {
         self.analytics = analytics
+    }
+
+    static func setReviewPrompt(_ coordinator: ReviewPromptCoordinator?) {
+        reviewPrompt = coordinator
+    }
+
+    /// True for production season-change alerts. Diagnostics identifiers are
+    /// excluded so TestFlight tooling does not consume the per-version request.
+    static func isProductionShowNotification(
+        userInfo: [AnyHashable: Any],
+        requestIdentifier: String
+    ) -> Bool {
+        guard showID(from: userInfo) != nil else { return false }
+        return !requestIdentifier.hasPrefix("debug-")
+    }
+
+    static func noteShowNotificationExperience(
+        userInfo: [AnyHashable: Any],
+        requestIdentifier: String
+    ) {
+        guard
+            isProductionShowNotification(
+                userInfo: userInfo,
+                requestIdentifier: requestIdentifier
+            )
+        else { return }
+        reviewPrompt?.noteShowNotificationDelivered()
     }
 
     static func installDelegate(center: UNUserNotificationCenter = .current()) {
@@ -60,6 +88,7 @@ enum NotificationRouting {
         static func resetForTesting() {
             coordinator = nil
             analytics = nil
+            reviewPrompt = nil
             bufferedShowID = nil
         }
     #endif
@@ -74,14 +103,24 @@ final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelega
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        [.banner, .list, .sound]
+        let request = notification.request
+        NotificationRouting.noteShowNotificationExperience(
+            userInfo: request.content.userInfo,
+            requestIdentifier: request.identifier
+        )
+        return [.banner, .list, .sound]
     }
 
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
-        let userInfo = response.notification.request.content.userInfo
+        let request = response.notification.request
+        let userInfo = request.content.userInfo
+        NotificationRouting.noteShowNotificationExperience(
+            userInfo: userInfo,
+            requestIdentifier: request.identifier
+        )
         guard let showID = NotificationRouting.showID(from: userInfo) else { return }
         // A tap while the app is already foreground-active is an in-app navigation
         // (animate); a tap that brings the app forward from background/launch is not.
