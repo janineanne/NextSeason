@@ -70,6 +70,57 @@ final class AccessibilityAuditUITests: XCTestCase, NextSeasonUITesting {
     }
 
     func testPopulatedWatchlistPassesAccessibilityAudit() {
+        trackPreviewShowAndOpenWatchlist()
+        auditCurrentScreen("Watchlist populated")
+    }
+
+    func testWatchlistPendingRemovalPassesAccessibilityAudit() {
+        trackPreviewShowAndOpenWatchlist()
+
+        watchlistTrackButton().tap()
+        assertExists(
+            watchlistUndoButton,
+            "Removing a show should offer Undo."
+        )
+        XCTAssertTrue(
+            waitForPendingUntrackTrackButton(
+                "\(AccessibilityID.Watchlist.trackButton).\(UITestPreviewShow.id)"
+            ),
+            "The watchlist star should reflect the pending untrack state."
+        )
+        auditCurrentScreen("Watchlist pending removal")
+    }
+
+    func testWatchlistSearchNoResultsPassAccessibilityAudit() {
+        trackPreviewShowAndOpenWatchlist()
+        searchWatchlist(for: "zzzznomatch")
+        assertExists(
+            watchlistNoResults,
+            "A non-matching query should surface the no-matches state."
+        )
+        auditCurrentScreen("Watchlist search no results")
+    }
+
+    func testWatchlistSearchMatchPassesAccessibilityAudit() {
+        trackPreviewShowAndOpenWatchlist()
+        searchWatchlist(for: UITestPreviewShow.name)
+        XCTAssertTrue(
+            watchlistRow(named: UITestPreviewShow.name).waitForExistence(
+                timeout: UITestTimeout.standard
+            ),
+            "A matching query should keep the tracked show visible."
+        )
+        assertNotExists(
+            watchlistNoResults,
+            "A matching query should not show the no-matches state."
+        )
+        auditCurrentScreen("Watchlist search match")
+    }
+
+    // MARK: - Helpers
+
+    /// Seeds the in-memory watchlist via Try an Example, then opens Watchlist.
+    private func trackPreviewShowAndOpenWatchlist() {
         tapTryExample()
         waitForSearchResultRow(named: UITestPreviewShow.name, timeout: UITestTimeout.extended)
 
@@ -79,10 +130,7 @@ final class AccessibilityAuditUITests: XCTestCase, NextSeasonUITesting {
 
         app.tabBars.buttons["Watchlist"].tap()
         waitForWatchlistRow(named: UITestPreviewShow.name, timeout: UITestTimeout.trackState)
-        auditCurrentScreen("Watchlist populated")
     }
-
-    // MARK: - Helpers
 
     /// Audits the current screen and fails with every outstanding issue.
     /// Known issues are ignored in `shouldIgnore` so this test stays a
@@ -130,41 +178,143 @@ final class AccessibilityAuditUITests: XCTestCase, NextSeasonUITesting {
             """
     }
 
-    /// Ignore issues that are understood and not yet worth failing CI.
-    /// Remove an entry here when the underlying UI is fixed.
+    /// Ignore only known system or SwiftUI false positives, identified by
+    /// element. Remove an entry here when the underlying UI is fixed.
     private func shouldIgnore(_ issue: XCUIAccessibilityAuditIssue) -> Bool {
-        let label = issue.element?.label ?? ""
-        let description = issue.compactDescription
-
-        // Custom `foregroundStyle` on system text styles trips this audit
-        // even though the fonts themselves are Dynamic Type styles.
-        if issue.auditType.contains(.dynamicType) {
-            return true
-        }
-
-        // System search field and ContentUnavailableView predict clipping
-        // at the largest accessibility sizes.
-        if issue.auditType.contains(.textClipped) {
-            return true
-        }
-
-        // Secondary/caption copy is intentionally `.secondary`. "Nearly
-        // passed" is expected at this contrast.
-        if issue.auditType.contains(.contrast) {
-            return description.hasPrefix("Contrast nearly passed")
-        }
-
-        // System search-field clear button is smaller than 44pt by design.
-        if description.hasPrefix("Hit area") && label == "Clear text" {
-            return true
-        }
-
-        // SwiftUI reports an unlabeled node that looks like "Search" on
-        // Watchlist even though the toolbar button has an accessibility label.
-        if description.contains("looks like: Search") {
-            return true
-        }
-
+        if isSystemSearchClearButton(issue) { return true }
+        if isUnlabeledWatchlistSearchChrome(issue) { return true }
+        if isSystemSearchFieldTextClipped(issue) { return true }
+        if isKnownContentUnavailableTextClipped(issue) { return true }
+        if isKnownSwiftUIDynamicTypeFalsePositive(issue) { return true }
+        if isKnownSecondaryContrastNearlyPassed(issue) { return true }
         return false
     }
+
+    /// System search-field clear button is smaller than 44pt by design.
+    private func isSystemSearchClearButton(_ issue: XCUIAccessibilityAuditIssue) -> Bool {
+        guard issue.auditType.contains(.hitRegion) else { return false }
+        let label = issue.element?.label ?? ""
+        return label == "Clear text"
+            || issue.detailedDescription.contains("_UITextFieldClearButton")
+    }
+
+    /// SwiftUI reports an unlabeled node that looks like "Search" on Watchlist
+    /// even though the toolbar button already has an accessibility label.
+    private func isUnlabeledWatchlistSearchChrome(_ issue: XCUIAccessibilityAuditIssue) -> Bool {
+        guard issue.auditType.contains(.sufficientElementDescription) else { return false }
+        let label = issue.element?.label ?? ""
+        return label.isEmpty && issue.compactDescription.contains("looks like: Search")
+    }
+
+    /// System `UISearchBarTextField` predicts clipping at the largest sizes.
+    /// Limited to the two known `.searchable` fields; a future search field
+    /// must not inherit this exception from the `.searchField` role alone.
+    private func isSystemSearchFieldTextClipped(_ issue: XCUIAccessibilityAuditIssue) -> Bool {
+        guard issue.auditType.contains(.textClipped) else { return false }
+        let label = issue.element?.label ?? ""
+        return label == "Search TV shows" || label == "Search Watchlist"
+    }
+
+    /// `ContentUnavailableView` titles/descriptions predict clipping at the
+    /// largest accessibility sizes even though they use wrapping system styles.
+    private func isKnownContentUnavailableTextClipped(_ issue: XCUIAccessibilityAuditIssue) -> Bool
+    {
+        guard issue.auditType.contains(.textClipped) else { return false }
+        return Self.contentUnavailableCopy.contains(issue.element?.label ?? "")
+    }
+
+    /// Custom `foregroundStyle` on system text styles trips Dynamic Type even
+    /// though the fonts themselves scale. Limited to nodes already observed.
+    private func isKnownSwiftUIDynamicTypeFalsePositive(_ issue: XCUIAccessibilityAuditIssue)
+        -> Bool
+    {
+        guard issue.auditType.contains(.dynamicType) else { return false }
+        return matchesKnownStyledCopy(issue)
+    }
+
+    /// Secondary/caption copy is intentionally `.secondary`. "Nearly passed"
+    /// is expected at footnote/caption size. Limited to nodes already observed.
+    private func isKnownSecondaryContrastNearlyPassed(_ issue: XCUIAccessibilityAuditIssue) -> Bool
+    {
+        guard issue.auditType.contains(.contrast) else { return false }
+        guard issue.compactDescription.hasPrefix("Contrast nearly passed") else { return false }
+        return matchesKnownStyledCopy(issue)
+    }
+
+    /// True when the issue's element is one of the known styled-copy nodes.
+    private func matchesKnownStyledCopy(_ issue: XCUIAccessibilityAuditIssue) -> Bool {
+        let identifier = issue.element?.identifier ?? ""
+        let label = issue.element?.label ?? ""
+
+        if Self.knownStyledCopyIdentifiers.contains(identifier) { return true }
+        if Self.knownStyledCopyLabels.contains(label) { return true }
+        if Self.knownStyledCopyLabelPrefixes.contains(where: { label.hasPrefix($0) }) {
+            return true
+        }
+        return false
+    }
+
+    /// Identifiers on nodes the SwiftUI audit has already flagged.
+    private static let knownStyledCopyIdentifiers: Set<String> = [
+        AccessibilityID.Search.tryExampleButton,
+        AccessibilityID.Search.idlePrompt,
+        AccessibilityID.Search.noResults,
+        AccessibilityID.Search.resultsHint,
+        AccessibilityID.Search.tvdbAttribution,
+        AccessibilityID.Watchlist.emptyState,
+        AccessibilityID.Watchlist.noResults,
+        AccessibilityID.Watchlist.undoButton,
+        AccessibilityID.Watchlist.confirmButton,
+        AccessibilityID.Watchlist.searchButton,
+        "\(AccessibilityID.Search.result).\(UITestPreviewShow.tvdbID)",
+        "\(AccessibilityID.Search.trackButton).\(UITestPreviewShow.tvdbID)",
+        "\(AccessibilityID.Watchlist.row).\(UITestPreviewShow.id)",
+        "\(AccessibilityID.Watchlist.trackButton).\(UITestPreviewShow.id)",
+        "\(AccessibilityID.ShowDetail.trackButton).\(UITestPreviewShow.id)",
+    ]
+
+    /// Stable copy (or UI-test fixture text) on nodes the audit has flagged.
+    private static let knownStyledCopyLabels: Set<String> = [
+        "Try an Example",
+        "Find Your Next Season",
+        "Search for a show to see its next-season status. Use the search field above, or try an example.",
+        "Can't Find Your Show?",
+        "Try a more specific title — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”).",
+        "Something Went Wrong",
+        "No Tracked Shows",
+        "Find a Show",
+        "Track shows you care about — tap the star on any search result.",
+        "No Matches",
+        "Data provided by TVMaze",
+        "Metadata provided by TheTVDB. Please consider adding missing information or subscribing.",
+        "Waiting for a Date",
+        "Season 3 announced — date to be confirmed",
+        "Ongoing series",
+        "Apple TV",
+        "Drama\u{00A0}· Science-Fiction\u{00A0}· Mystery",
+        UITestPreviewShow.name,
+        UITestPreviewShow.searchStatus,
+        "Mark leads a team whose memories are surgically divided between work and personal lives.",
+        "Enable notifications to get alerts when a tracked show's next season gets a release date or status update.",
+        "Removed from watchlist",
+    ]
+
+    /// Labels whose suffix is data-dependent (timestamps, typed queries).
+    private static let knownStyledCopyLabelPrefixes: [String] = [
+        "Updated ",
+        "No tracked shows match",
+    ]
+
+    /// `ContentUnavailableView` copy observed as text-clipped false positives.
+    private static let contentUnavailableCopy: Set<String> = [
+        "Find Your Next Season",
+        "Search for a show to see its next-season status. Use the search field above, or try an example.",
+        "Can't Find Your Show?",
+        "Try a more specific title — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”).",
+        "Something Went Wrong",
+        "No Tracked Shows",
+        "Track shows you care about — tap the star on any search result.",
+        "No Matches",
+    ]
+
 }
