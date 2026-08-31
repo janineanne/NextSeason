@@ -8,7 +8,8 @@ import Foundation
 import UniformTypeIdentifiers
 
 /// A cached CSV file ready for the system share sheet.
-nonisolated struct WatchlistExportFile: Transferable, Sendable {
+nonisolated struct WatchlistExportFile: Transferable, Sendable, Identifiable {
+    var id: URL { url }
     let url: URL
 
     static var transferRepresentation: some TransferRepresentation {

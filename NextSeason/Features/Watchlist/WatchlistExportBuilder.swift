@@ -21,7 +21,22 @@ enum WatchlistExportBuilder {
         now: Date = .now,
         directory: URL? = nil
     ) async throws -> WatchlistExportFile {
-        let shows = try await repository.all()
+        try await makeFile(
+            shows: try await repository.all(),
+            showIDMapping: showIDMapping,
+            now: now,
+            directory: directory
+        )
+    }
+
+    /// Writes a CSV from an already-loaded watchlist. Used by About export and
+    /// by best-effort recovery export when the store may only be partially readable.
+    static func makeFile(
+        shows: [TrackedShow],
+        showIDMapping: any ShowIDMapping,
+        now: Date = .now,
+        directory: URL? = nil
+    ) async throws -> WatchlistExportFile {
         var tvdbIDsByTVMazeID: [Int: Int] = [:]
         for show in shows {
             if let tvdbID = await showIDMapping.tvdbID(forTVMazeID: show.id) {

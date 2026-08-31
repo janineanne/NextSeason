@@ -761,6 +761,42 @@
     "Export Watchlist" : {
 
     },
+    "Checking whether any watchlist data can still be exported…" : {
+
+    },
+    "Couldn't export the watchlist. You can still reset local data." : {
+
+    },
+    "No watchlist shows could be recovered for export." : {
+
+    },
+    "Reset Without Exporting" : {
+
+    },
+    "Share Export" : {
+
+    },
+    "The local store is too damaged to export any watchlist data." : {
+
+    },
+    "This file contains whatever watchlist data could still be read. It may be incomplete." : {
+
+    },
+    "This permanently deletes your saved watchlist and scheduled reminders on this device. No watchlist shows could be recovered for export. You can search for shows and add them again afterward. This cannot be undone." : {
+
+    },
+    "This permanently deletes your saved watchlist and scheduled reminders on this device. The local store is too damaged to export any watchlist data. You can search for shows and add them again afterward. This cannot be undone." : {
+
+    },
+    "This permanently deletes your saved watchlist and scheduled reminders on this device. You can try to export whatever can still be read first. The exported file may be incomplete. This cannot be undone." : {
+
+    },
+    "Watchlist Export Ready" : {
+
+    },
+    "You can try to export whatever watchlist data can still be read before resetting. The exported file may be incomplete." : {
+
+    },
     "Exports every show on your watchlist as a CSV file you can open in Numbers or Excel." : {
 
     },

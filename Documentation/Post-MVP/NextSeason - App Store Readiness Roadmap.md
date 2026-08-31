@@ -50,7 +50,7 @@ The watchlist currently uses `List` with `Section`. Native pinned section header
 - Verify that upgrades preserve user data.
 - Project should be structured to support fixture-based migration testing in the future.
 
-## Persistence Recovery
+## Persistence Recovery (Complete)
 
 Replace the startup `fatalError` with a user-facing recovery flow before release.
 
