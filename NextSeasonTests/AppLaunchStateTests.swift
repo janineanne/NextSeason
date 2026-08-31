@@ -9,6 +9,8 @@ import Testing
 
 @testable import NextSeason
 
+/// Bootstrap and recovery flows for composition failures, persistence reset, and
+/// crash-loop skip. Uses injectable `makeRoot` throws and `LaunchFailureTracker` stubs.
 @MainActor
 struct AppLaunchStateTests {
     @Test("Bootstrap presents recovery when composition fails")
@@ -376,6 +378,7 @@ struct AppLaunchStateTests {
         #expect(composed)
     }
 
+    /// Isolated `UserDefaults` suite cleared before each tracker/bootstrap test.
     private func makeDefaults() -> UserDefaults {
         let suiteName = "AppLaunchStateTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -383,6 +386,7 @@ struct AppLaunchStateTests {
         return defaults
     }
 
+    /// Tracker wired to isolated defaults with unexpected-termination counting enabled.
     private func makeTracker() -> LaunchFailureTracker {
         LaunchFailureTracker(
             defaults: makeDefaults(),
@@ -399,6 +403,7 @@ struct AppLaunchStateTests {
     }
 }
 
+/// Mutable test clock so retry/reset can advance time without recording a new process launch.
 private final class MutableClock: Sendable {
     private let storage: Mutex<Date>
 
@@ -412,6 +417,7 @@ private final class MutableClock: Sendable {
     }
 }
 
+/// Deterministic composition/reset error with a stable string description for diagnostics.
 private struct StubLaunchError: Error, LocalizedError, CustomStringConvertible {
     let message: String
     var description: String { message }

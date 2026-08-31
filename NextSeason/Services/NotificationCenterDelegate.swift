@@ -7,11 +7,14 @@ import Foundation
 import UIKit
 import UserNotifications
 
-/// Forwards notification taps to `AppNavigationCoordinator` on the main actor.
+/// Forwards notification taps to `AppNavigationCoordinator` on the main actor
+/// and records production season-notification experience for the review prompt.
 @MainActor
 enum NotificationRouting {
     static weak var coordinator: AppNavigationCoordinator?
     static var analytics: (any AnalyticsTracking)?
+    /// Attached from `AppCompositionRoot.configureNonUITestRuntime`; may be nil
+    /// during background delivery.
     static weak var reviewPrompt: ReviewPromptCoordinator?
     private static var bufferedShowID: Int?
     private static var bufferedAnimated = false
@@ -25,6 +28,8 @@ enum NotificationRouting {
         self.analytics = analytics
     }
 
+    /// Wires the review coordinator before `installDelegate()` so foreground
+    /// presentation can record notification delivery.
     static func setReviewPrompt(_ coordinator: ReviewPromptCoordinator?) {
         reviewPrompt = coordinator
     }
@@ -39,6 +44,12 @@ enum NotificationRouting {
         return !requestIdentifier.hasPrefix("debug-")
     }
 
+    /// Records that the user received a production season notification
+    /// (banner, tap, or successful schedule).
+    ///
+    /// Drives the per-version review prompt, or persists to
+    /// `unattachedReviewPromptStore` when the coordinator is not attached yet
+    /// (background launch).
     static func noteShowNotificationExperience(
         userInfo: [AnyHashable: Any],
         requestIdentifier: String
@@ -103,6 +114,8 @@ enum NotificationRouting {
         }
     #endif
 
+    /// Fallback persistence when `reviewPrompt` is nil so a background-delivered
+    /// notification still qualifies for a review on next foreground.
     private static var unattachedReviewPromptStore: ReviewPromptStore {
         #if DEBUG
             if let unattachedReviewPromptStoreForTesting {

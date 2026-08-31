@@ -8,6 +8,8 @@ import Testing
 
 @testable import NextSeason
 
+/// Crash-loop threshold, build rollover, graceful background, stabilization, and
+/// debugger-attached DEBUG overrides for `LaunchFailureTracker`.
 @MainActor
 struct LaunchFailureTrackerTests {
     @Test("A clean first launch does not skip composition")
@@ -282,6 +284,7 @@ struct LaunchFailureTrackerTests {
         )
     }
 
+    /// Isolated `UserDefaults` suite cleared before each launch-attempt sequence.
     private func makeDefaults() -> UserDefaults {
         let suiteName = "LaunchFailureTrackerTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -289,6 +292,7 @@ struct LaunchFailureTrackerTests {
         return defaults
     }
 
+    /// Tracker with unexpected-termination counting enabled (production-like default).
     private func makeTracker() -> LaunchFailureTracker {
         LaunchFailureTracker(
             defaults: makeDefaults(),

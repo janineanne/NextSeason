@@ -27,7 +27,9 @@ enum WatchlistTracking {
         case ignored
     }
 
-    /// Persists the show, records analytics, and arms the notification prompt when needed.
+    /// Persists the show when under the free-tier cap, records analytics, and arms
+    /// the notification prompt when needed. Returns `.paywallRequired` without
+    /// touching persistence when `PurchaseService` blocks another add.
     ///
     /// Search hits omit seasons / next episode. When those are missing, this loads the
     /// full `/shows/:id` payload so stored `nextSeason` matches show detail.

@@ -22,20 +22,31 @@ nonisolated enum StoreEntitlementState: Equatable, Sendable {
 @Observable
 @MainActor
 final class PurchaseService {
+    /// StoreKit Plus entitlement; `.loading` until the first read completes.
     private(set) var storeEntitlement: StoreEntitlementState
+    /// Annual subscription product from the last successful `loadProducts()`.
     private(set) var annualProduct: StoreProduct?
+    /// Lifetime purchase product from the last successful `loadProducts()`.
     private(set) var lifetimeProduct: StoreProduct?
+    /// Consumable tip products, sorted trailer → pilot → hit show.
     private(set) var tipProducts: [StoreProduct] = []
+    /// True while `Product.products(for:)` is in flight.
     private(set) var isLoadingProducts = false
+    /// True after the first product load attempt finishes (success or failure).
+    /// Distinguishes "not yet loaded" from "loaded but empty."
     private(set) var hasCompletedProductLoad = false
+    /// True while a purchase or restore call is in progress.
     private(set) var isPurchasing = false
+    /// User-facing purchase or restore error for alerts.
     private(set) var lastErrorMessage: String?
+    /// Shown once per verified tip transaction (deduped by transaction ID).
     private(set) var thankYouMessage: String?
 
     private let store: any PurchaseStoreClient
     private let entitlementStore: PlusEntitlementStore
     private var didStartObserving = false
     private var entitlementWaiters: [CheckedContinuation<Void, Never>] = []
+    /// Prevents duplicate thank-you toasts when StoreKit redelivers the same tip.
     private var processedTransactionIDs: Set<UInt64> = []
 
     /// True when StoreKit has reported an active Plus subscription or lifetime purchase.
@@ -46,6 +57,9 @@ final class PurchaseService {
         return false
     }
 
+    /// True once the initial StoreKit entitlement read has finished.
+    /// UI that gates on free vs Plus should wait for this (or use
+    /// `waitForInitialEntitlementResolution()` for adds).
     var hasResolvedStoreEntitlement: Bool {
         if case .resolved = storeEntitlement { return true }
         return false
@@ -56,6 +70,7 @@ final class PurchaseService {
         isStoreEntitled || entitlementStore.isGrandfathered
     }
 
+    /// Sticky beta flag: unlimited watchlist without an active StoreKit purchase.
     var isGrandfathered: Bool {
         entitlementStore.isGrandfathered
     }
@@ -124,6 +139,8 @@ final class PurchaseService {
         }
     }
 
+    /// Whether another show may be added after entitlement resolution.
+    /// Grandfathered and Plus users are always allowed; free users hit the cap.
     func canAddToWatchlist(currentCount: Int) async -> Bool {
         await waitForInitialEntitlementResolution()
         return WatchlistLimitPolicy.canAddShow(
@@ -132,6 +149,7 @@ final class PurchaseService {
         )
     }
 
+    /// Loads Plus and tip products from StoreKit and partitions them by kind.
     func loadProducts() async {
         isLoadingProducts = true
         lastErrorMessage = nil
@@ -162,6 +180,8 @@ final class PurchaseService {
         }
     }
 
+    /// Purchases a product; verified transactions refresh entitlements or
+    /// set `thankYouMessage` for tips before the store client finishes them.
     func purchase(_ product: StoreProduct) async -> PurchaseOutcome {
         guard !isPurchasing else { return .pending }
         isPurchasing = true
@@ -190,6 +210,7 @@ final class PurchaseService {
         }
     }
 
+    /// Syncs with App Store (restore) then re-reads Plus entitlements.
     func restorePurchases() async -> PurchaseOutcome {
         guard !isPurchasing else { return .pending }
         isPurchasing = true
@@ -211,6 +232,7 @@ final class PurchaseService {
         }
     }
 
+    /// Re-reads `Transaction.currentEntitlements` and updates `storeEntitlement`.
     func refreshEntitlements() async {
         let entitled = await store.hasActivePlusEntitlement()
         if Task.isCancelled { return }
@@ -218,6 +240,7 @@ final class PurchaseService {
         resumeEntitlementWaiters()
     }
 
+    /// Clears user-visible purchase feedback (errors and tip thank-you).
     func clearMessages() {
         lastErrorMessage = nil
         thankYouMessage = nil
@@ -256,6 +279,7 @@ final class PurchaseService {
         }
     }
 
+    /// Stable tip ordering independent of StoreKit's product array order.
     private func tipSortIndex(_ productID: String) -> Int {
         switch StoreProductID(rawValue: productID) {
         case .tipTrailer: 0

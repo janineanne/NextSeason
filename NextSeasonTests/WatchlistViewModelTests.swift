@@ -9,6 +9,8 @@ import Testing
 
 @testable import NextSeason
 
+/// Watchlist list UI model: reload, pending removal/undo, swipe delete, in-list search,
+/// section grouping/sorting, and stale-reload generation discard.
 @MainActor
 struct WatchlistViewModelTests {
     private var sampleShow: Show {
@@ -35,6 +37,7 @@ struct WatchlistViewModelTests {
         )
     }
 
+    /// View model preloaded from an in-memory repository and already reloaded to `.loaded`.
     private func loadedViewModel(with shows: [Show]) async throws -> WatchlistViewModel {
         let repository = InMemoryWatchlistRepository()
         let removalCoordinator = WatchlistPendingRemoval(

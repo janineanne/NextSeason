@@ -54,10 +54,13 @@ struct TipJarSection: View {
         }
     }
 
+    /// True while StoreKit products are loading or the first load has not finished.
+    /// Distinguishes a spinner from the empty-state retry UI after a failed load.
     private var isWaitingForTips: Bool {
         purchases.isLoadingProducts || !purchases.hasCompletedProductLoad
     }
 
+    /// Maps known tip product IDs to stable accessibility identifiers for UI tests.
     private func tipIdentifier(for productID: String) -> String {
         switch StoreProductID(rawValue: productID) {
         case .tipTrailer: AccessibilityID.Store.tipTrailer

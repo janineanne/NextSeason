@@ -32,6 +32,7 @@ struct ReviewPromptModifier: ViewModifier {
 }
 
 extension View {
+    /// Attaches the review prompt flow to a root view. Skipped under UI testing.
     func requestReviewAfterShowNotification(
         coordinator: ReviewPromptCoordinator
     ) -> some View {

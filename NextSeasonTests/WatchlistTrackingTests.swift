@@ -10,6 +10,8 @@ import UserNotifications
 
 @testable import NextSeason
 
+/// Shared watchlist toggle/add paths: undo removal, detail fetch for search stubs, Plus
+/// paywall, grandfathering, and StoreKit entitlement loading races.
 @MainActor
 struct WatchlistTrackingTests {
     private var sampleShow: Show {
@@ -32,6 +34,7 @@ struct WatchlistTrackingTests {
         )
     }
 
+    /// TVMaze stub recording fetched show ids and serving preloaded full-show payloads.
     private final class MockTVMazeService: TVMazeService, @unchecked Sendable {
         var showByID: [Int: Show] = [:]
         private(set) var fetchedShowIDs: [Int] = []
@@ -51,6 +54,7 @@ struct WatchlistTrackingTests {
         func updatedShows(since period: TVMazeUpdatePeriod) async throws -> [Int: Date] { [:] }
     }
 
+    /// Notification service with isolated defaults and `.denied` authorization for toggle tests.
     private func makeNotificationService(analytics: any AnalyticsTracking) -> NotificationService {
         let suiteName = "WatchlistTrackingTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -440,6 +444,7 @@ struct WatchlistTrackingTests {
         #expect(purchases.isGrandfathered == false)
     }
 
+    /// Yields until delayed StoreKit entitlement resolution is suspended (see PurchaseServiceTests).
     private func waitUntilEntitlementIsHeld(_ store: StubPurchaseStoreClient) async {
         for _ in 0..<200 {
             if store.entitlementWaiterCount > 0 { return }

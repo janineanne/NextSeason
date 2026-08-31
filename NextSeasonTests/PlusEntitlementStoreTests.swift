@@ -8,6 +8,7 @@ import Testing
 
 @testable import NextSeason
 
+/// One-time grandfathering for watchlists above the free limit on first evaluation.
 @MainActor
 struct PlusEntitlementStoreTests {
     @Test("First launch with more than three shows grandfathers unlimited access")
@@ -34,6 +35,7 @@ struct PlusEntitlementStoreTests {
         #expect(store.isGrandfathered == false)
     }
 
+    /// Fresh entitlement store backed by an isolated, cleared `UserDefaults` suite.
     private func makeStore() -> PlusEntitlementStore {
         let suiteName = "PlusEntitlementStoreTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

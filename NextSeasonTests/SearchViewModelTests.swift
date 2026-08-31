@@ -9,6 +9,8 @@ import Testing
 
 @testable import NextSeason
 
+/// Search state machine: TheTVDB pagination, TVDB→TVMaze mapping filter/overlay,
+/// analytics, and debounce disabled (`.zero`) for deterministic async tests.
 @MainActor
 struct SearchViewModelTests {
     /// A `TheTVDBService` whose search behavior is supplied per test.
@@ -20,6 +22,7 @@ struct SearchViewModelTests {
         }
     }
 
+    /// Configurable TVMaze stub for lookup/show resolution in search detail flows.
     private struct MockTVMazeService: TVMazeService {
         var lookupHandler: @Sendable (Int) async throws -> Show = { _ in .preview }
         var showHandler: @Sendable (Int) async throws -> Show = { _ in .preview }
@@ -52,6 +55,7 @@ struct SearchViewModelTests {
         }
     }
 
+    /// TVMaze stub that counts TheTVDB lookup attempts (should stay zero for mapped search).
     private struct CountingTVMazeService: TVMazeService {
         let counter: LookupCounter
         var showHandler: @Sendable (Int) async throws -> Show = { _ in .preview }
@@ -85,6 +89,7 @@ struct SearchViewModelTests {
         posterURL: nil
     )
 
+    /// In-memory mapping with a default Severance TVDB↔TVMaze pair.
     private func showIDMapping(
         map: [Int: Int] = [371980: 44933]
     ) -> InMemoryShowIDMapping {
@@ -106,6 +111,7 @@ struct SearchViewModelTests {
         )
     }
 
+    /// View model with zero debounce and injectable search/TVMaze/mapping/analytics doubles.
     private func makeViewModel(
         search: MockSearchService,
         tvMaze: some TVMazeService = MockTVMazeService(),
@@ -628,6 +634,7 @@ struct SearchViewModelTests {
         )
     }
 
+    /// Thread-safe invocation counter for paginated search handlers.
     private final class CallCounter: Sendable {
         private let count = Mutex(0)
 
@@ -640,6 +647,7 @@ struct SearchViewModelTests {
         }
     }
 
+    /// Records TheTVDB page offsets requested during pagination tests.
     private final class OffsetRecorder: Sendable {
         private let stored = Mutex<[Int]>([])
 

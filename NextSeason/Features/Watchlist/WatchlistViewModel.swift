@@ -41,6 +41,10 @@ final class WatchlistViewModel {
         Self.sectionGroups(from: filteredShows)
     }
 
+    /// Groups shows into non-empty sections in `WatchlistSection` display order.
+    ///
+    /// Coming Soon sorts by premiere date (soonest first); every other section
+    /// sorts alphabetically. Exposed as `static` for unit tests.
     static func sectionGroups(from shows: [TrackedShow]) -> [WatchlistSectionGroup] {
         var buckets: [WatchlistSection: [TrackedShow]] = [:]
         for show in shows {

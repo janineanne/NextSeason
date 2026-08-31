@@ -87,11 +87,13 @@ private struct AppRootView: View {
     @Bindable var navigationCoordinator: AppNavigationCoordinator
     @Bindable var removalCoordinator: WatchlistPendingRemoval
     let refreshService: WatchlistRefreshService
+    /// StoreKit purchases and Plus entitlement; started at launch and re-checked on foreground.
     let purchaseService: PurchaseService
     let searchService: any TheTVDBService
     let tvMaze: any TVMazeService
     let showIDMapping: any ShowIDMapping
     let onForegroundShowIDMappingRefresh: @MainActor () async -> Void
+    /// Per-version App Store review request after the user receives a production season notification.
     let reviewPromptCoordinator: ReviewPromptCoordinator
 
     var body: some View {

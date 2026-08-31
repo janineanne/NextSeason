@@ -8,6 +8,7 @@ import Testing
 
 @testable import NextSeason
 
+/// CSV export formatting: header, escaping, formula-prefix sanitization, sorting, and TVDB column.
 struct WatchlistCSVFormatterTests {
     @Test("CSV includes a header and one row per show")
     func includesHeaderAndRows() throws {
@@ -114,6 +115,7 @@ struct WatchlistCSVFormatterTests {
         #expect(ids == ["10", "11", "20"])
     }
 
+    /// Minimal `TrackedShow` fixture for CSV row assertions.
     private func trackedShow(
         id: Int,
         name: String,

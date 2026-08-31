@@ -8,6 +8,7 @@ import Testing
 
 @testable import NextSeason
 
+/// Version-scoped delivery and request flags persisted by `ReviewPromptStore`.
 @MainActor
 struct ReviewPromptStoreTests {
     @Test("Delivery and request are scoped to the marketing version")
@@ -31,6 +32,7 @@ struct ReviewPromptStoreTests {
         #expect(nextVersion.isEligibleToRequest)
     }
 
+    /// Isolated `UserDefaults` cleared before each store scenario.
     private func makeDefaults() -> UserDefaults {
         let suiteName = "ReviewPromptStoreTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

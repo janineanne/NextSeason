@@ -54,6 +54,7 @@ nonisolated enum StoreProductID: String, CaseIterable, Sendable {
         }
     }
 
+    /// Description used by previews, tests, and stubs. Production UI uses StoreKit.
     var fallbackDescription: String {
         switch self {
         case .plusAnnual:
@@ -66,6 +67,7 @@ nonisolated enum StoreProductID: String, CaseIterable, Sendable {
     }
 }
 
+/// Product category for partitioning loaded StoreKit products and entitlements.
 nonisolated enum StoreProductKind: Equatable, Sendable {
     case plusAnnual
     case plusLifetime

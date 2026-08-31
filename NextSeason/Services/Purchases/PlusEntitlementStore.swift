@@ -11,7 +11,9 @@ import Foundation
 /// unlimited watchlist. The flag is sticky: later removals do not revoke it.
 @MainActor
 final class PlusEntitlementStore {
+    /// UserDefaults flag: grandfathering was evaluated on first StoreKit launch.
     static let evaluatedKey = "plusGrandfatheringEvaluated"
+    /// UserDefaults flag: user exceeded the free cap before the limit shipped.
     static let grandfatheredKey = "plusGrandfathered"
 
     private let userDefaults: UserDefaults
@@ -20,10 +22,12 @@ final class PlusEntitlementStore {
         self.userDefaults = userDefaults
     }
 
+    /// Whether the one-time grandfathering check has already run.
     var hasEvaluatedGrandfathering: Bool {
         userDefaults.bool(forKey: Self.evaluatedKey)
     }
 
+    /// Whether the user keeps an unlimited watchlist from beta grandfathering.
     var isGrandfathered: Bool {
         userDefaults.bool(forKey: Self.grandfatheredKey)
     }
@@ -38,6 +42,7 @@ final class PlusEntitlementStore {
     }
 
     #if DEBUG
+        /// Clears grandfathering flags in this store's defaults suite between tests.
         func resetForTesting() {
             userDefaults.removeObject(forKey: Self.evaluatedKey)
             userDefaults.removeObject(forKey: Self.grandfatheredKey)

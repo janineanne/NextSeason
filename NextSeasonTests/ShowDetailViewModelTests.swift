@@ -10,6 +10,8 @@ import UserNotifications
 
 @testable import NextSeason
 
+/// Show-detail watchlist toggle: stale-state reconciliation, lookup failures, add
+/// failures, and free-tier paywall. Uses denied notification authorization by default.
 @MainActor
 struct ShowDetailViewModelTests {
     private var sampleShow: Show {
@@ -32,6 +34,7 @@ struct ShowDetailViewModelTests {
         )
     }
 
+    /// Notification service with isolated defaults and fixed `.denied` authorization for tests.
     private func makeNotificationService(analytics: any AnalyticsTracking) -> NotificationService {
         let suiteName = "ShowDetailViewModelTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -43,6 +46,7 @@ struct ShowDetailViewModelTests {
         )
     }
 
+    /// TVMaze stub returning an optional fixed show; fails if fetched unexpectedly.
     private final class StubTVMazeService: TVMazeService, @unchecked Sendable {
         private let showToReturn: Show?
 
@@ -111,6 +115,7 @@ struct ShowDetailViewModelTests {
         func updateAfterRefresh(_ tracked: TrackedShow) async throws {}
     }
 
+    /// Repository whose `add` always fails so the detail view keeps loaded content.
     private final class FailingAddRepository: WatchlistRepository {
         func all() async throws -> [TrackedShow] { [] }
 

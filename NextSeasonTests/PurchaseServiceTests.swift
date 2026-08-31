@@ -8,6 +8,8 @@ import Testing
 
 @testable import NextSeason
 
+/// Purchase flow, entitlement resolution timing, transaction updates, and catalog edge
+/// cases using `StubPurchaseStoreClient` (in-memory StoreKit double from the app target).
 @MainActor
 struct PurchaseServiceTests {
     @Test("Start applies grandfathering and loads stub products")
@@ -407,6 +409,7 @@ struct PurchaseServiceTests {
         #expect(store.finishedTransactionIDs == [7])
     }
 
+    /// `PurchaseService` with isolated entitlement storage and injectable initial StoreKit state.
     private func makePurchases(
         store: StubPurchaseStoreClient,
         initial: StoreEntitlementState = .loading
@@ -421,6 +424,8 @@ struct PurchaseServiceTests {
         )
     }
 
+    /// Yields until `StubPurchaseStoreClient` suspends entitlement resolution so loading-state
+    /// behavior can be observed before `releaseEntitlementResolution()`.
     private func waitUntilEntitlementIsHeld(_ store: StubPurchaseStoreClient) async {
         for _ in 0..<200 {
             if store.entitlementWaiterCount > 0 { return }
@@ -429,6 +434,7 @@ struct PurchaseServiceTests {
         Issue.record("StoreKit entitlement resolution did not suspend")
     }
 
+    /// Yields until deinit stops transaction observation (verifies observer teardown).
     private func waitUntilObservationStops(_ store: StubPurchaseStoreClient) async {
         for _ in 0..<200 {
             if store.stopObservingTransactionUpdatesCallCount > 0 { return }

@@ -58,6 +58,10 @@ struct LaunchFailureTracker: Sendable {
     private let buildIdentifier: String
     private let countsPreviousUnexpectedTermination: Bool
 
+    /// - Parameter countsPreviousUnexpectedTermination: When `false`, an
+    ///   unexpected previous termination does not increment the crash-loop
+    ///   streak. Tests pass explicit values; production uses
+    ///   `defaultCountsPreviousUnexpectedTermination`.
     init(
         defaults: UserDefaults = .standard,
         now: @escaping @Sendable () -> Date = { Date.now },
@@ -172,6 +176,8 @@ struct LaunchFailureTracker: Sendable {
         }
     #endif
 
+    /// Production default: DEBUG excludes Xcode Stop unless
+    /// `--enable-crash-loop-detection` is set; release always counts.
     private static var defaultCountsPreviousUnexpectedTermination: Bool {
         #if DEBUG
             shouldCountPreviousUnexpectedTermination(

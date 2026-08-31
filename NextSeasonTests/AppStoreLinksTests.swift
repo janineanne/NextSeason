@@ -8,6 +8,7 @@ import Testing
 
 @testable import NextSeason
 
+/// Verifies the App Store write-review URL is built from the configured Apple ID.
 struct AppStoreLinksTests {
     @Test("Write-review URL opens the App Store review composer")
     func writeReviewURLUsesAppStoreAction() {

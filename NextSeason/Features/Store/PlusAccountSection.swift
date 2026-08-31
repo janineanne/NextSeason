@@ -6,8 +6,13 @@
 import SwiftUI
 
 /// About-screen Plus status, upgrade CTA, and Restore Purchases.
+///
+/// Distinguishes StoreKit entitlement (including unresolved "Checking…"),
+/// beta grandfathering, and the free-tier cap. The upgrade button appears
+/// only after StoreKit resolves and the user is still limited.
 struct PlusAccountSection: View {
     @Environment(PurchaseService.self) private var purchases
+    /// Bound to the parent sheet that presents `PlusStoreView`.
     @Binding var isShowingPlusStore: Bool
 
     var body: some View {
@@ -41,6 +46,8 @@ struct PlusAccountSection: View {
         }
     }
 
+    /// Watchlist capacity label: unlimited (Plus or grandfathered),
+    /// "Checking…" while StoreKit entitlements are unresolved, or the free cap.
     private var statusValue: String {
         if purchases.isStoreEntitled || purchases.isGrandfathered {
             return String(localized: "Unlimited")
@@ -53,6 +60,7 @@ struct PlusAccountSection: View {
         )
     }
 
+    /// Footer copy explaining Plus, grandfathering, or entitlement confirmation.
     private var footerText: String {
         if purchases.isStoreEntitled {
             return String(localized: "You have NextSeason Plus.")
