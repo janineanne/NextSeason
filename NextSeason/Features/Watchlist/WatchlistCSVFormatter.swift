@@ -45,16 +45,26 @@ nonisolated enum WatchlistCSVFormatter {
 
     private static func row(for show: TrackedShow, tvdbID: Int?) -> String {
         let fields = [
-            show.name,
-            String(show.id),
-            tvdbID.map(String.init) ?? "",
-            show.status.displayLabel,
-            show.nextSeason.headline,
-            premiereDateString(show.nextSeason),
-            dateAddedString(show.dateAdded),
-            show.tvMazeURL?.absoluteString ?? "",
+            escape(sanitizeForSpreadsheet(show.name)),
+            escape(String(show.id)),
+            escape(tvdbID.map(String.init) ?? ""),
+            escape(show.status.displayLabel),
+            escape(show.nextSeason.headline),
+            escape(premiereDateString(show.nextSeason)),
+            escape(dateAddedString(show.dateAdded)),
+            escape(show.tvMazeURL?.absoluteString ?? ""),
         ]
-        return fields.map(escape).joined(separator: ",")
+        return fields.joined(separator: ",")
+    }
+
+    /// Prefixes formula-leading values so spreadsheet apps treat them as text.
+    ///
+    /// Excel and Numbers still execute `=`, `+`, `-`, and `@` after CSV quoting.
+    private static func sanitizeForSpreadsheet(_ field: String) -> String {
+        guard let first = field.first, Self.formulaPrefixes.contains(first) else {
+            return field
+        }
+        return "'" + field
     }
 
     /// TVMaze premiere dates are UTC calendar days; keep that day in the CSV.
@@ -68,6 +78,8 @@ nonisolated enum WatchlistCSVFormatter {
     private static func dateAddedString(_ date: Date) -> String {
         date.formatted(Date.ISO8601FormatStyle(timeZone: .gmt))
     }
+
+    private static let formulaPrefixes: Set<Character> = ["=", "+", "-", "@"]
 
     /// Quotes a field when it contains a comma, quote, or line break.
     private static func escape(_ field: String) -> String {

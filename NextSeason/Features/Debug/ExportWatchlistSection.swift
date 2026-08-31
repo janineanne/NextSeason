@@ -12,12 +12,11 @@ struct ExportWatchlistSection: View {
     @Environment(\.watchlistRepository) private var repository
     @Environment(\.showIDMapping) private var showIDMapping
 
-    @State private var exportFile: WatchlistExportFile?
-    @State private var exportErrorMessage: String?
+    @State private var preparation = WatchlistExportPreparation()
 
     var body: some View {
         Section {
-            if let exportFile {
+            if let exportFile = preparation.exportFile {
                 ShareLink(
                     item: exportFile,
                     preview: SharePreview(exportFile.url.lastPathComponent)
@@ -28,7 +27,7 @@ struct ExportWatchlistSection: View {
                 .accessibilityIdentifier(AccessibilityID.App.exportWatchlist)
             } else {
                 Button("Export Watchlist", systemImage: "square.and.arrow.up", action: retryExport)
-                    .disabled(exportErrorMessage == nil)
+                    .disabled(preparation.isExportControlDisabled)
                     .accessibilityHint(hintText)
                     .accessibilityIdentifier(AccessibilityID.App.exportWatchlist)
             }
@@ -45,10 +44,10 @@ struct ExportWatchlistSection: View {
             isPresented: errorAlertPresented
         ) {
             Button("OK", role: .cancel) {
-                exportErrorMessage = nil
+                preparation.dismissError()
             }
         } message: {
-            Text(exportErrorMessage ?? "")
+            Text(preparation.errorMessage ?? "")
         }
     }
 
@@ -58,8 +57,8 @@ struct ExportWatchlistSection: View {
 
     private var errorAlertPresented: Binding<Bool> {
         Binding(
-            get: { exportErrorMessage != nil },
-            set: { if !$0 { exportErrorMessage = nil } }
+            get: { preparation.errorMessage != nil },
+            set: { if !$0 { preparation.dismissError() } }
         )
     }
 
@@ -68,18 +67,10 @@ struct ExportWatchlistSection: View {
     }
 
     private func prepareExport() async {
-        do {
-            exportFile = try await WatchlistExportBuilder.makeFile(
-                repository: repository,
-                showIDMapping: showIDMapping
-            )
-            exportErrorMessage = nil
-        } catch {
-            exportFile = nil
-            exportErrorMessage = String(
-                localized: "Couldn't read your watchlist. Please try again."
-            )
-        }
+        await preparation.prepare(
+            repository: repository,
+            showIDMapping: showIDMapping
+        )
     }
 }
 

@@ -66,6 +66,37 @@ struct WatchlistCSVFormatterTests {
         #expect(row.hasPrefix(#""The ""Good"" Place, Again",2,"#))
     }
 
+    @Test(
+        "Titles beginning with formula characters are prefixed with an apostrophe",
+        arguments: ["=", "+", "-", "@"]
+    )
+    func sanitizesFormulaPrefix(_ prefix: String) {
+        let show = trackedShow(id: 1, name: "\(prefix)HYPERLINK")
+        let csv = WatchlistCSVFormatter.csv(shows: [show], tvdbIDsByTVMazeID: [:])
+        let row = csv.split(separator: "\r\n").dropFirst().first.map(String.init) ?? ""
+
+        #expect(row.hasPrefix("'\(prefix)HYPERLINK,1,,"))
+    }
+
+    @Test("Ordinary titles are not prefixed")
+    func leavesOrdinaryTitleUnchanged() {
+        let show = trackedShow(id: 1, name: "Severance")
+        let csv = WatchlistCSVFormatter.csv(shows: [show], tvdbIDsByTVMazeID: [:])
+        let row = csv.split(separator: "\r\n").dropFirst().first.map(String.init) ?? ""
+
+        #expect(row.hasPrefix("Severance,1,,"))
+        #expect(row.hasPrefix("'Severance") == false)
+    }
+
+    @Test("Formula-leading titles that need CSV quoting are sanitized then escaped")
+    func sanitizesThenEscapesFormulaTitle() {
+        let show = trackedShow(id: 1, name: #"=HYPERLINK("evil"),x"#)
+        let csv = WatchlistCSVFormatter.csv(shows: [show], tvdbIDsByTVMazeID: [:])
+        let row = csv.split(separator: "\r\n").dropFirst().first.map(String.init) ?? ""
+
+        #expect(row.hasPrefix(#""'=HYPERLINK(""evil""),x",1,"#))
+    }
+
     @Test("Shows are sorted by name, then TVMaze ID")
     func sortsByNameThenID() {
         let shows = [
