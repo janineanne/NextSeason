@@ -77,7 +77,7 @@ Complete a final accessibility pass and address everything that can reasonably b
 - Verify that state is not communicated by color alone.
 - Test empty, loading, error, and recovery states.
 
-## Watchlist Export
+## Watchlist Export (Complete)
 
 Give users a way to export their watchlist so that their data is not locked into NextSeason.
 
