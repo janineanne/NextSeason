@@ -7,8 +7,8 @@ import Foundation
 
 /// Persists watchlist UI configuration across launches (UserDefaults).
 struct WatchlistPreferences {
-    /// UserDefaults key for `WatchlistSection.persistenceID` strings. Public so
-    /// tests can seed or inspect raw storage without going through the accessor.
+    /// UserDefaults key for WatchlistSection.persistenceID strings. Kept internal so tests
+    /// can seed or inspect raw storage directly.
     static let collapsedSectionsKey = "watchlistCollapsedSections"
 
     private let userDefaults: UserDefaults

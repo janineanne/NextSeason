@@ -44,8 +44,8 @@ enum NotificationRouting {
         return !requestIdentifier.hasPrefix("debug-")
     }
 
-    /// Records that the user received a production season notification
-    /// (banner, tap, or successful schedule).
+    /// Records a qualifying production notification experience (successful scheduling,
+    /// foreground presentation, or tap).
     ///
     /// Drives the per-version review prompt, or persists to
     /// `unattachedReviewPromptStore` when the coordinator is not attached yet

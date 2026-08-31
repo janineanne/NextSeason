@@ -183,6 +183,7 @@
 		E19A33A43044F6D700CC7190 /* 8-30-2026 Review Accessibility Audit Suite.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-30-2026 Review Accessibility Audit Suite.md"; sourceTree = "<group>"; };
 		E19A37033045063D00CC7190 /* 8-30-2026 Implement Watchlist Export.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-30-2026 Implement Watchlist Export.md"; sourceTree = "<group>"; };
 		E19A37043045068800CC7190 /* 8-30-2026 Review Watchlist Export.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-30-2026 Review Watchlist Export.md"; sourceTree = "<group>"; };
+		E19A42AC304604B900CC7190 /* 8-31-2026 Review Comments.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-31-2026 Review Comments.md"; sourceTree = "<group>"; };
 		E1AB76CA3033D0740045498C /* MVP-Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.png"; sourceTree = "<group>"; };
 		E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Show-Detail.png"; sourceTree = "<group>"; };
 		E1AB76CC3033D0740045498C /* MVP-Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Watchlist.png"; sourceTree = "<group>"; };
@@ -405,6 +406,7 @@
 				E19A33A43044F6D700CC7190 /* 8-30-2026 Review Accessibility Audit Suite.md */,
 				E19A37033045063D00CC7190 /* 8-30-2026 Implement Watchlist Export.md */,
 				E19A37043045068800CC7190 /* 8-30-2026 Review Watchlist Export.md */,
+				E19A42AC304604B900CC7190 /* 8-31-2026 Review Comments.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
