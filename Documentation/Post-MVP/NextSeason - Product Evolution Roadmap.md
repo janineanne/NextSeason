@@ -189,6 +189,8 @@ Vision Pro is not currently planned.
   - Do not depend on detecting whether the app has been offloaded; iOS does not provide a reliable offload-state signal.
   - Test remote notification behavior explicitly with NextSeason in the offloaded state.
   - Where the user has opted into email fallback, use email when push delivery is definitively known to be unavailable rather than attempting to infer that the app was offloaded.
+- Offer the user the option to receive a regular status update notification showing the current status of all tracked shows, even when nothing has changed.
+    - Status update notifications must not count toward review-request eligibility. Continue to base that eligibility on the user’s first show-status-change notification.
   
 ## Identity & Accounts
 
