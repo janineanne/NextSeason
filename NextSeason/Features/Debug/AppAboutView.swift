@@ -45,7 +45,7 @@ private struct AppAboutToolbarButtonModifier: ViewModifier {
 }
 
 /// About sheet: version, notifications, NextSeason Plus, optional tips,
-/// Rate NextSeason, and (in Debug / TestFlight) the Diagnostics entry point.
+/// Rate NextSeason, watchlist export, and (in Debug / TestFlight) Diagnostics.
 @MainActor
 struct AppAboutView: View {
     @Environment(\.dismiss) private var dismiss
@@ -66,6 +66,8 @@ struct AppAboutView: View {
                 PlusAccountSection(isShowingPlusStore: $isShowingPlusStore)
 
                 TipJarSection()
+
+                ExportWatchlistSection()
 
                 Section {
                     Button("Rate NextSeason", systemImage: "star.bubble") {
@@ -213,5 +215,7 @@ struct AppAboutView: View {
                 \.notificationService, NotificationService(analytics: RecordingAnalyticsService())
             )
             .environment(PurchaseService.preview)
+            .environment(\.watchlistRepository, InMemoryWatchlistRepository())
+            .environment(\.showIDMapping, InMemoryShowIDMapping(map: [:]))
     }
 #endif

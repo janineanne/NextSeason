@@ -23,6 +23,7 @@ enum AccessibilityID {
     enum App {
         static let aboutButton = "app.aboutButton"
         static let rateOnAppStore = "app.rateOnAppStore"
+        static let exportWatchlist = "app.exportWatchlist"
     }
 
     enum PersistenceRecovery {

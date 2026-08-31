@@ -22,9 +22,15 @@ nonisolated struct ShowIDMappingRecord: Equatable, Sendable {
 ///
 /// This is a search-display cache, not the source of truth for seasons or
 /// watchlist state. After the user selects a result, live TVMaze remains canonical.
+/// Watchlist export also uses the reverse lookup for a TVDB id when one exists.
 nonisolated protocol ShowIDMapping: Sendable {
     /// Mapping row for a TheTVDB series id, or `nil` when unknown locally.
     func record(forTVDBID id: Int) async -> ShowIDMappingRecord?
+    /// A TheTVDB series id for this TVMaze show, or `nil` when unknown locally.
+    ///
+    /// A TVMaze show can theoretically map from more than one TheTVDB id; the
+    /// lowest id is returned so the result is stable.
+    func tvdbID(forTVMazeID id: Int) async -> Int?
 }
 
 extension ShowIDMapping {

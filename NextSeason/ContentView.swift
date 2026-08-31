@@ -148,15 +148,17 @@ struct ContentView: View {
 #if DEBUG
     #Preview {
         let repository = InMemoryWatchlistRepository()
+        let showIDMapping = InMemoryShowIDMapping(
+            map: [TVDBSearchResult.previewSearchResult.id: Show.preview.id]
+        )
         ContentView(
             coordinator: AppNavigationCoordinator(),
             searchService: PreviewTheTVDBService(stub: .previewSearchResult),
             tvMaze: PreviewTVMazeService(stub: .preview),
-            showIDMapping: InMemoryShowIDMapping(
-                map: [TVDBSearchResult.previewSearchResult.id: Show.preview.id]
-            )
+            showIDMapping: showIDMapping
         )
         .environment(\.watchlistRepository, repository)
+        .environment(\.showIDMapping, showIDMapping)
         .environment(PurchaseService.preview)
         .environment(
             \.watchlistPendingRemoval,

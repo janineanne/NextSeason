@@ -8,7 +8,8 @@ import SwiftUI
 /// User-facing presentation for `NextSeasonStatus`. Kept in the feature layer so
 /// the domain enum stays free of display concerns.
 extension NextSeasonStatus {
-    var headline: String {
+    /// Safe to call from CSV export and other non-UI code.
+    nonisolated var headline: String {
         switch self {
         case .airing(let season):
             String(localized: "Currently showing Season \(season)")

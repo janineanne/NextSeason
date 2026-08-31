@@ -125,6 +125,15 @@ struct ShowIDMappingDatabaseTests {
         #expect(record.name == "Severance")
     }
 
+    @Test("TVMaze ID maps back to the lowest matching TVDB ID")
+    func mapsTVMazeIDToTVDBID() async throws {
+        let (database, url) = try await makeDatabase(seed: [(371980, 44933), (999_001, 44933)])
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        #expect(await database.tvdbID(forTVMazeID: 44933) == 371980)
+        #expect(await database.tvdbID(forTVMazeID: 999_999_999) == nil)
+    }
+
     @Test("Unknown TVDB ID returns no mapping")
     func unknownTVDBIDReturnsNil() async throws {
         let (database, url) = try await makeDatabase(seed: [(371980, 44933)])

@@ -48,6 +48,10 @@ actor InMemoryShowIDMapping: ShowIDMapping {
         records[id]
     }
 
+    func tvdbID(forTVMazeID id: Int) async -> Int? {
+        records.filter { $0.value.tvMazeID == id }.map(\.key).min()
+    }
+
     /// Inserts or replaces a mapping and bumps `highestTVMazeID` when needed.
     /// Nil display fields keep any values already stored for this TheTVDB id.
     func upsert(

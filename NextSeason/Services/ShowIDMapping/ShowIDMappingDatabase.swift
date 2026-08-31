@@ -50,6 +50,10 @@ actor ShowIDMappingDatabase: ShowIDMapping {
         lookupRecord(forTVDBID: id)
     }
 
+    func tvdbID(forTVMazeID id: Int) async -> Int? {
+        lookupTVDBID(forTVMazeID: id)
+    }
+
     /// Synchronous TheTVDB → TVMaze lookup for callers already on this actor
     /// (refresh writes, recovery). Prefer `record(forTVDBID:)` from outside.
     func lookupRecord(forTVDBID id: Int) -> ShowIDMappingRecord? {
@@ -67,6 +71,20 @@ actor ShowIDMappingDatabase: ShowIDMapping {
         let name = Self.columnText(statement, index: 1)
         let poster = Self.columnText(statement, index: 2).flatMap(URL.init(string:))
         return ShowIDMappingRecord(tvMazeID: tvMazeID, name: name, posterMediumURL: poster)
+    }
+
+    /// Synchronous TVMaze → TheTVDB lookup for callers already on this actor.
+    func lookupTVDBID(forTVMazeID id: Int) -> Int? {
+        guard let db else { return nil }
+        let sql = "SELECT tvdb_id FROM mappings WHERE tvmaze_id = ? ORDER BY tvdb_id ASC LIMIT 1;"
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            return nil
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_int64(statement, 1, sqlite3_int64(id))
+        guard sqlite3_step(statement) == SQLITE_ROW else { return nil }
+        return Int(sqlite3_column_int64(statement, 0))
     }
 
     /// Inserts or replaces the mapping keyed by TheTVDB id.

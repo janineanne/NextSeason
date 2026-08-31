@@ -342,6 +342,9 @@
     "Couldn't Complete Purchase" : {
 
     },
+    "Couldn't Export Watchlist" : {
+
+    },
     "Couldn't load purchase options. Please try again." : {
 
     },
@@ -360,6 +363,9 @@
           }
         }
       }
+    },
+    "Couldn't read your watchlist. Please try again." : {
+
     },
     "Couldn't restore purchases. Please try again." : {
 
@@ -750,6 +756,12 @@
       }
     },
     "Export Diagnostics" : {
+
+    },
+    "Export Watchlist" : {
+
+    },
+    "Exports every show on your watchlist as a CSV file you can open in Numbers or Excel." : {
 
     },
     "Failed to fetch TVMaze updates" : {
@@ -1819,6 +1831,9 @@
           }
         }
       }
+    },
+    "Shares your watchlist as a CSV file." : {
+
     },
     "Show detail views" : {
       "localizations" : {

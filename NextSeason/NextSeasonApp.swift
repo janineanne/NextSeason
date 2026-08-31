@@ -38,6 +38,7 @@ struct NextSeasonApp: App {
                     reviewPromptCoordinator: composition.reviewPromptCoordinator
                 )
                 .environment(\.watchlistRepository, composition.watchlistRepository)
+                .environment(\.showIDMapping, composition.showIDMapping)
                 .environment(\.watchlistRefreshService, composition.refreshService)
                 .environment(\.watchlistPendingRemoval, composition.watchlistPendingRemoval)
                 .environment(\.notificationService, composition.notificationService)
