@@ -8,6 +8,7 @@ import Testing
 
 @testable import NextSeason
 
+/// Verifies in-memory counter increments for tracked analytics events.
 @MainActor
 struct AnalyticsCountersTests {
     @Test("Counters increment from tracked events")
@@ -46,6 +47,7 @@ struct AnalyticsCountersTests {
     }
 }
 
+/// Verifies `AnalyticsCountersStore` persists counters via isolated `UserDefaults`.
 @MainActor
 struct AnalyticsCountersStoreTests {
     @Test("Store persists counters across instances")
@@ -64,6 +66,7 @@ struct AnalyticsCountersStoreTests {
     }
 }
 
+/// Verifies diagnostics report formatting, including optional launch and persistence fields.
 @MainActor
 struct AnalyticsDiagnosticsReportTests {
     @Test("Report includes version and counters")

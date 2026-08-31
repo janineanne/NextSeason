@@ -10,6 +10,8 @@ import Foundation
 /// Column headers stay English and stable so a later import can match them.
 /// Human-readable status text uses the same localized copy the app shows.
 nonisolated enum WatchlistCSVFormatter {
+    /// English column headers in export order. Kept stable (not localized) so a
+    /// future import can match columns reliably across app versions.
     static let headerColumns = [
         "Show Name",
         "TVMaze ID",
@@ -75,6 +77,8 @@ nonisolated enum WatchlistCSVFormatter {
         )
     }
 
+    /// Full ISO-8601 timestamp in UTC. Unlike premiere dates (calendar days only),
+    /// `dateAdded` is a wall-clock instant and needs time-of-day for sorting.
     private static func dateAddedString(_ date: Date) -> String {
         date.formatted(Date.ISO8601FormatStyle(timeZone: .gmt))
     }

@@ -7,6 +7,7 @@ import Testing
 
 @testable import NextSeason
 
+/// Free-tier add cap (three shows) vs unlimited Plus entitlement rules.
 struct WatchlistLimitPolicyTests {
     @Test("Free users can add until they reach three shows")
     func freeTierAllowsUpToThree() {

@@ -27,9 +27,13 @@ final class SearchWatchlistTracking {
         let notificationService: any NotificationManaging
         let notificationPrompt: WatchlistNotificationPromptState
         let analytics: any AnalyticsTracking
+        /// Free-tier cap enforcement for add-to-watchlist from search rows.
         let purchases: PurchaseService
         let onWatchlistChanged: () -> Void
         let onSearchResultsHintDismissed: () -> Void
+        /// Presents the Plus store when `WatchlistTracking.toggle` returns
+        /// `.paywallRequired`. Called from the view layer so this helper stays
+        /// unaware of paywall UI.
         let onPaywallRequired: () -> Void
     }
 

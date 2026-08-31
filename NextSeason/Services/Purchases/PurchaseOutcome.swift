@@ -6,6 +6,9 @@
 import Foundation
 
 /// Result of a StoreKit purchase or restore attempt, mapped for UI handling.
+///
+/// `.pending` covers Ask to Buy and other deferred completions. `.failed`
+/// carries a localized message suitable for alerts.
 nonisolated enum PurchaseOutcome: Equatable, Sendable {
     case success
     case cancelled
@@ -13,6 +16,10 @@ nonisolated enum PurchaseOutcome: Equatable, Sendable {
     case failed(String)
 }
 
+/// Errors thrown before or during StoreKit verification.
+///
+/// Mapped to user-facing copy via `LocalizedError`; surfaced by
+/// `PurchaseService` as `.failed` outcomes or thrown from store clients.
 nonisolated enum PurchaseError: LocalizedError, Equatable {
     case productUnavailable
     case unverified

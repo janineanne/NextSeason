@@ -48,6 +48,10 @@ nonisolated struct WatchlistExportFile: Transferable, Sendable {
         return WatchlistExportFile(url: url)
     }
 
+    /// User-visible export filename: `NextSeason-Watchlist-YYYY-MM-DD.csv`.
+    ///
+    /// The date stamp uses `timeZone` (default `.current`) so an evening export
+    /// on the West Coast is not labeled with the next UTC calendar day.
     static func fileName(now: Date, timeZone: TimeZone = .current) -> String {
         let stamp = now.formatted(
             Date.ISO8601FormatStyle(timeZone: timeZone).year().month().day()

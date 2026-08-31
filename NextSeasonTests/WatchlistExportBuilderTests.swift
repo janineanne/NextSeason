@@ -8,6 +8,8 @@ import Testing
 
 @testable import NextSeason
 
+/// End-to-end export file creation: UTF-8 BOM, filename pattern, TVDB lookup, and
+/// export of all shows regardless of Plus/free-tier limits.
 @MainActor
 struct WatchlistExportBuilderTests {
     @Test("Export includes every stored show, including those above the free-tier limit")

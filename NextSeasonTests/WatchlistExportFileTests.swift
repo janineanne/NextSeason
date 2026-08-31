@@ -8,6 +8,7 @@ import Testing
 
 @testable import NextSeason
 
+/// Export filename uses the local calendar day (not UTC) and writes without a unique suffix.
 struct WatchlistExportFileTests {
     @Test("File name uses the local calendar day, not UTC")
     func fileNameUsesLocalCalendarDay() throws {

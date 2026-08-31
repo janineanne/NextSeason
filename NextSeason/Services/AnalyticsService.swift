@@ -20,6 +20,8 @@ enum AnalyticsEvent: Equatable, Sendable {
         durationMs: Int,
         outcome: SearchPerformedOutcome
     )
+    /// User tapped a search row (before detail appears). Distinct from
+    /// `searchResultOpened`, which fires when detail loads. Remote-only.
     case searchResultSelected(alreadyOnWatchlist: Bool)
     case searchResultOpened(showID: Int)
     case exampleSearchUsed
@@ -62,6 +64,8 @@ enum SearchPerformedOutcome: String, Sendable {
 enum AptabaseAppKey {
     static let infoDictionaryKey = "AptabaseAppKey"
 
+    /// Returns a trimmed Aptabase key, or `nil` when missing, empty, or still
+    /// an unsubstituted `${…}` build placeholder.
     static func resolved(from infoDictionary: [String: Any]?) -> String? {
         let key =
             (infoDictionary?[infoDictionaryKey] as? String)?
@@ -307,6 +311,8 @@ final class AnalyticsService: AnalyticsTracking {
     private static var didAttemptAptabaseInitialization = false
     private static var isAptabaseConfigured = false
 
+    /// One-shot Aptabase setup from Info.plist. Skipped under automated tests
+    /// and when the key is missing.
     private static func initializeAptabaseIfNeeded(logger: Logger) {
         guard !didAttemptAptabaseInitialization else { return }
         didAttemptAptabaseInitialization = true
@@ -319,6 +325,7 @@ final class AnalyticsService: AnalyticsTracking {
         isAptabaseConfigured = true
     }
 
+    /// Forwards whitelisted events only; catalog cases without a `remoteEvent` stay local.
     private func sendToAptabase(_ event: AnalyticsEvent) {
         guard Self.isAptabaseConfigured, let remote = event.remoteEvent else { return }
         if remote.properties.isEmpty {

@@ -64,6 +64,7 @@ enum AccessibilityID {
         static let confirmButton = "watchlist.confirm"
     }
 
+    /// NextSeason Plus paywall and tip-jar controls.
     enum Store {
         static let plusUnlock = "store.plusUnlock"
         static let plusAnnual = "store.plusAnnual"

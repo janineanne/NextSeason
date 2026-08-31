@@ -8,6 +8,8 @@ import Testing
 
 @testable import NextSeason
 
+/// Export prepare UI state: in-progress disabling, error dismissal, and retry after failure.
+/// Uses a gated repository to observe mid-flight state before `all()` completes.
 @MainActor
 struct WatchlistExportPreparationTests {
     @Test("Failed prepare stays retryable after the error is dismissed")

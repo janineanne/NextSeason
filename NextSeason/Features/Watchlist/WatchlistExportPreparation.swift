@@ -12,8 +12,12 @@ import Foundation
 @Observable
 @MainActor
 final class WatchlistExportPreparation {
+    /// Cached CSV ready for ShareLink; nil until the first successful prepare
+    /// or after a failed prepare clears it.
     private(set) var exportFile: WatchlistExportFile?
+    /// User-facing prepare failure; cleared by `dismissError()` without blocking retry.
     private(set) var errorMessage: String?
+    /// True while `prepare` is in flight; concurrent prepares are ignored.
     private(set) var isPreparing = false
 
     /// True while a prepare is running — the only reason to disable export.
@@ -23,6 +27,10 @@ final class WatchlistExportPreparation {
         errorMessage = nil
     }
 
+    /// Builds (or rebuilds) `exportFile` from the on-device watchlist.
+    ///
+    /// On failure, sets `errorMessage` and clears `exportFile` so the About
+    /// sheet can show a retry button. Pass `directory` in tests for isolation.
     func prepare(
         repository: any WatchlistRepository,
         showIDMapping: any ShowIDMapping,

@@ -6,6 +6,10 @@
 import SwiftUI
 
 /// Paywall / upgrade sheet: annual subscription, lifetime purchase, and restore.
+///
+/// Loads products on first appear, shows a blocking overlay while products
+/// or a purchase are in flight, and dismisses automatically once the watchlist
+/// becomes unlimited (purchase success or restored entitlement).
 struct PlusStoreView: View {
     @Environment(PurchaseService.self) private var purchases
     @Environment(\.dismiss) private var dismiss
@@ -156,6 +160,8 @@ struct PlusStoreView: View {
         )
     }
 
+    /// Derived alert binding: presented when `PurchaseService` sets
+    /// `lastErrorMessage`; clearing the alert clears the message too.
     private var errorAlertPresented: Binding<Bool> {
         Binding(
             get: { purchases.lastErrorMessage != nil },
@@ -186,6 +192,7 @@ struct PlusStoreView: View {
         .accessibilityLabel("\(title), \(subtitle)")
     }
 
+    /// Starts a StoreKit purchase and dismisses the sheet on `.success`.
     private func purchase(_ product: StoreProduct) async {
         let outcome = await purchases.purchase(product)
         if outcome == .success {

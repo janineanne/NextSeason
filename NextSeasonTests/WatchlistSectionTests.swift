@@ -7,6 +7,7 @@ import Testing
 
 @testable import NextSeason
 
+/// Section header copy: row counts appear only when a section is collapsed.
 @MainActor
 struct WatchlistSectionTests {
     @Test("Expanded section headers omit the row count")

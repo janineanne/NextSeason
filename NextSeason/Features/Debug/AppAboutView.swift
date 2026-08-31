@@ -12,7 +12,7 @@ private struct OpenAppAboutKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    /// Presents the About sheet when set by the app root (beta / DEBUG).
+    /// Presents the About sheet when set by the app root. Nil during UI tests.
     var openAppAbout: (() -> Void)? {
         get { self[OpenAppAboutKey.self] }
         set { self[OpenAppAboutKey.self] = newValue }
@@ -21,7 +21,7 @@ extension EnvironmentValues {
 
 extension View {
     /// Leading ellipsis that presents the About sheet when an About entry point
-    /// is available (beta / DEBUG).
+    /// is available (omitted during UI tests).
     func appAboutToolbarButton() -> some View {
         modifier(AppAboutToolbarButtonModifier())
     }
@@ -167,6 +167,8 @@ struct AppAboutView: View {
         }
     }
 
+    /// Purchase-error alert binding. Suppressed while the Plus store sheet is open
+    /// so a failed purchase there does not also flash an alert on dismiss.
     private var errorAlertPresented: Binding<Bool> {
         Binding(
             get: { purchases.lastErrorMessage != nil && !isShowingPlusStore },

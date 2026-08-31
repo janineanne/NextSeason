@@ -9,8 +9,11 @@ import Testing
 
 @testable import NextSeason
 
+/// Notification routing, review-prompt side effects, and tab/path navigation.
+/// Tests call `NotificationRouting.resetForTesting()` because routing uses process-wide state.
 @MainActor
 struct AppNavigationCoordinatorTests {
+    /// Stub TVMaze that records fetched show ids and serves preloaded shows.
     private final class MockTVMazeService: TVMazeService, @unchecked Sendable {
         var shows: [Int: Show] = [:]
         private(set) var fetchedIDs: [Int] = []
@@ -269,6 +272,7 @@ struct AppNavigationCoordinatorTests {
         #expect(analytics.events.contains(.appOpenedFromNotification(showID: show.id)))
     }
 
+    /// Isolated `UserDefaults` for review-prompt persistence without cross-test leakage.
     private func isolatedDefaults() -> UserDefaults {
         let suiteName = "AppNavigationCoordinatorTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

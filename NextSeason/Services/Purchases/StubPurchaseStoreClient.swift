@@ -8,10 +8,15 @@ import Foundation
 /// In-memory StoreKit double for tests, previews, and UI tests.
 @MainActor
 final class StubPurchaseStoreClient: PurchaseStoreClient {
+    /// Catalog returned by `loadProducts(ids:)`.
     var products: [StoreProduct]
+    /// Entitlement state returned by `hasActivePlusEntitlement()`.
     var isStoreEntitled: Bool
+    /// Outcome returned from `purchase`; `.success` still delivers a transaction when applicable.
     var purchaseOutcome: PurchaseOutcome
+    /// When set, `restorePurchases()` throws this error.
     var restoreError: (any Error)?
+    /// When set, `loadProducts(ids:)` throws this error.
     var loadError: (any Error)?
 
     /// When true, `hasActivePlusEntitlement()` suspends until
@@ -22,13 +27,18 @@ final class StubPurchaseStoreClient: PurchaseStoreClient {
     /// immediately before the stub records it as finished.
     var onFinish: (@MainActor () -> Void)?
 
+    /// Transaction IDs passed through verify → onVerified → finish in order.
     private(set) var finishedTransactionIDs: [UInt64] = []
+    /// Last transaction created by a successful stub purchase.
     private(set) var lastPurchasedTransaction: StoreTransaction?
+    /// Number of continuations blocked in `hasActivePlusEntitlement()` when delayed.
     private(set) var entitlementWaiterCount = 0
     private(set) var observeTransactionUpdatesCallCount = 0
     private(set) var stopObservingTransactionUpdatesCallCount = 0
+    /// Ordered record of entitlement and observer calls for test assertions.
     private(set) var recordedCalls: [RecordedCall] = []
 
+    /// Recorded side effects for test assertions.
     enum RecordedCall: Equatable, Sendable {
         case observeTransactionUpdates
         case hasActivePlusEntitlement
@@ -108,6 +118,7 @@ final class StubPurchaseStoreClient: PurchaseStoreClient {
         transactionObserver = nil
     }
 
+    /// Whether a transaction-update observer is currently registered.
     var isObservingTransactionUpdates: Bool {
         transactionObserver != nil
     }

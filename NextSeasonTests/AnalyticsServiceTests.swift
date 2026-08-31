@@ -8,6 +8,9 @@ import Testing
 
 @testable import NextSeason
 
+/// Covers `AnalyticsService` recording, local counters, diagnostics, Aptabase key
+/// resolution, remote-event whitelist, and the `-UITesting` / test-target guards that
+/// disable remote transmission.
 @MainActor
 struct AnalyticsServiceTests {
     @Test("Recording service stores tracked events")

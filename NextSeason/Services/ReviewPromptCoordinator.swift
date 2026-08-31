@@ -23,6 +23,7 @@ final class ReviewPromptCoordinator {
     /// Bumped when a newly eligible delivery arrives so the view task restarts.
     private(set) var deliveryGeneration = 0
 
+    /// - Parameter sleep: Injectable delay for tests; defaults to `Task.sleep(for:)`.
     init(
         userDefaults: UserDefaults = .standard,
         marketingVersion: String = AppVersionInfo.marketingVersion,

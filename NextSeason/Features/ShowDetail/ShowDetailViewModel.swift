@@ -34,6 +34,7 @@ final class ShowDetailViewModel {
     private let repository: any WatchlistRepository
     private let notifications: any NotificationManaging
     private let analytics: any AnalyticsTracking
+    /// Enforces the free watchlist cap before persisting a new track from detail.
     private let purchases: PurchaseService
 
     /// Notification service used by the shared prompt alerts modifier.
@@ -125,6 +126,9 @@ final class ShowDetailViewModel {
     }
 
     /// Shared track/untrack orchestration; local star state updates from the outcome.
+    ///
+    /// When the free-tier cap blocks an add, invokes `onPaywallRequired` so the
+    /// view can present the Plus store.
     func handleTrackButton(
         anchor: CGRect,
         removalCoordinator: WatchlistPendingRemoval?,

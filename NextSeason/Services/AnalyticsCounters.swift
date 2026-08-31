@@ -29,8 +29,9 @@ extension AnalyticsCounters {
     /// `resultCount > 0`), `emptySearchResultsShown` → `noResultSearches`,
     /// `exampleSearchUsed`, `showDetailViewed`, watchlist add/remove, notification
     /// permission (+ grants), `notificationReminderScheduled`.
-    /// Navigation / error events (`searchResultOpened`, taps, `nonFatalError`, etc.)
-    /// are tracked for logging but do not bump these aggregates.
+    /// Navigation / error events (`searchResultOpened`, `searchResultSelected`,
+    /// taps, `nonFatalError`, etc.) are tracked for logging but do not bump
+    /// these aggregates. `searchResultSelected` is remote-only tap intent.
     mutating func record(_ event: AnalyticsEvent) {
         switch event {
         case .appLaunched:

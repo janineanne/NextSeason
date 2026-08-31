@@ -8,6 +8,7 @@ import Testing
 
 @testable import NextSeason
 
+/// Collapsed watchlist section persistence, unknown-id filtering, and section persistence IDs.
 @MainActor
 struct WatchlistPreferencesTests {
     @Test("Collapsed sections persist across instances")
@@ -56,6 +57,7 @@ struct WatchlistPreferencesTests {
         }
     }
 
+    /// Isolated `UserDefaults` cleared before each preferences scenario.
     private func makeDefaults() -> UserDefaults {
         let suiteName = "WatchlistPreferencesTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

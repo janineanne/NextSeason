@@ -7,6 +7,9 @@ import Foundation
 import StoreKit
 
 /// Live StoreKit 2 client: product loading, purchase, entitlements, and restore.
+///
+/// Caches loaded `Product` values for purchase. Verified transactions are
+/// delivered to the app before `finish()` so entitlement state can update first.
 @MainActor
 final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
     private var productsByID: [String: Product] = [:]
@@ -46,6 +49,8 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         }
     }
 
+    /// Scans current entitlements for an active Plus subscription or lifetime
+    /// purchase. Ignores revoked transactions and consumable tips.
     func hasActivePlusEntitlement() async -> Bool {
         for await result in Transaction.currentEntitlements {
             guard let transaction = try? checkVerified(result) else { continue }
@@ -98,6 +103,7 @@ final class StoreKitPurchaseStoreClient: PurchaseStoreClient {
         await transaction.finish()
     }
 
+    /// Returns verified StoreKit payloads; throws (typically `PurchaseError.unverified`) otherwise.
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case .unverified(_, let error):

@@ -11,7 +11,9 @@ import Foundation
 /// One request attempt per `CFBundleShortVersionString`. A later version can
 /// ask again, but only after that version has also delivered a show notification.
 struct ReviewPromptStore: Sendable {
+    /// UserDefaults: marketing version when a show notification was first experienced.
     static let deliveredVersionKey = "reviewPrompt.notificationDeliveredVersion"
+    /// UserDefaults: marketing version when `RequestReviewAction` was last attempted.
     static let requestedVersionKey = "reviewPrompt.requestedVersion"
 
     private let defaults: UserDefaults
@@ -43,6 +45,7 @@ struct ReviewPromptStore: Sendable {
         requestedVersion == currentVersion
     }
 
+    /// True when this version delivered a notification and has not yet attempted a review prompt.
     var isEligibleToRequest: Bool {
         hasDeliveredNotificationThisVersion && !hasRequestedThisVersion
     }
@@ -56,6 +59,7 @@ struct ReviewPromptStore: Sendable {
         return true
     }
 
+    /// Records that this marketing version already attempted a review request.
     func markRequested() {
         defaults.set(currentVersion, forKey: Self.requestedVersionKey)
     }

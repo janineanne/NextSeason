@@ -7,6 +7,8 @@ import Foundation
 
 /// Persists watchlist UI configuration across launches (UserDefaults).
 struct WatchlistPreferences {
+    /// UserDefaults key for WatchlistSection.persistenceID strings. Kept internal so tests
+    /// can seed or inspect raw storage directly.
     static let collapsedSectionsKey = "watchlistCollapsedSections"
 
     private let userDefaults: UserDefaults
@@ -30,6 +32,7 @@ struct WatchlistPreferences {
     }
 
     #if DEBUG
+        /// Clears persisted collapse state in the standard defaults suite between tests.
         static func resetCollapsedSectionsForTesting() {
             UserDefaults.standard.removeObject(forKey: collapsedSectionsKey)
         }

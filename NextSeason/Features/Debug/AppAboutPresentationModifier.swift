@@ -52,6 +52,9 @@ struct AppAboutPresentationModifier: ViewModifier {
     }
 }
 
+/// Mutually exclusive sheets wired from environment callbacks (`openAppAbout`,
+/// `openDiagnostics`, `presentPlusStore`). About can hand off to Diagnostics
+/// without dismissing the sheet stack first.
 private enum AppInfoSheet: Identifiable {
     case about
     case diagnostics

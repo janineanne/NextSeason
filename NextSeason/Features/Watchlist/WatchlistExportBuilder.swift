@@ -11,6 +11,10 @@ import Foundation
 /// is exported, including shows kept after a subscription expires.
 @MainActor
 enum WatchlistExportBuilder {
+    /// Fetches every persisted show, resolves TVDB IDs from the bundled mapping,
+    /// and writes a cached CSV under `directory` (defaults to Caches/WatchlistExport).
+    ///
+    /// `now` stamps the filename; inject both for deterministic tests.
     static func makeFile(
         repository: any WatchlistRepository,
         showIDMapping: any ShowIDMapping,

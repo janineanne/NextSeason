@@ -73,7 +73,10 @@ enum WatchlistSection: Int, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// A non-empty watchlist section ready for display.
+/// A non-empty watchlist section ready for list rendering.
+///
+/// Built by `WatchlistViewModel.sectionGroups(from:)`; empty sections are omitted
+/// so collapsible headers always reflect at least one row.
 struct WatchlistSectionGroup: Identifiable, Equatable, Sendable {
     let section: WatchlistSection
     let shows: [TrackedShow]

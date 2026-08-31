@@ -8,6 +8,8 @@ import Testing
 
 @testable import NextSeason
 
+/// Eligibility, one-request-per-version, delay/cancellation, and persistence across
+/// coordinator instances. Uses injectable `sleep` instead of real foreground delays.
 @MainActor
 struct ReviewPromptCoordinatorTests {
     @Test("A show notification makes this version eligible after the delay")
@@ -81,6 +83,7 @@ struct ReviewPromptCoordinatorTests {
         #expect(await foreground.prepareReviewRequestIfEligible())
     }
 
+    /// Coordinator with isolated defaults and a stubbed prompt delay.
     private func makeCoordinator(
         userDefaults: UserDefaults? = nil,
         version: String = "1.0",
@@ -93,6 +96,7 @@ struct ReviewPromptCoordinatorTests {
         )
     }
 
+    /// Isolated `UserDefaults` cleared before each review-prompt scenario.
     private func makeDefaults() -> UserDefaults {
         let suiteName = "ReviewPromptCoordinatorTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -101,6 +105,7 @@ struct ReviewPromptCoordinatorTests {
     }
 }
 
+/// Controls whether the injected sleep throws `CancellationError` on the first call.
 private final class SleepBehavior: @unchecked Sendable {
     var shouldCancel = true
 }
