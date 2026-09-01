@@ -90,6 +90,44 @@ struct PersistenceRecoveryExportPreparationTests {
         #expect(preparation.availability == .available(showCount: 1))
     }
 
+    @Test("An overlapping probe waits for the in-flight read and still offers export")
+    func overlappingProbeAwaitsInFlightRead() async {
+        let show = sampleShow(id: 44933, name: "Severance")
+        let loader = GatedRecoveryExportLoader(
+            result: WatchlistRecoveryExportRead(shows: [show], storeWasReadable: true)
+        )
+        let preparation = PersistenceRecoveryExportPreparation {
+            await loader.load()
+        }
+
+        let first = Task {
+            await preparation.probeIfNeeded()
+        }
+        await loader.waitUntilLoadBegan()
+        #expect(preparation.availability == .probing)
+        #expect(preparation.canExport == false)
+        #expect(loader.callCount == 1)
+
+        var secondFinished = false
+        let second = Task {
+            await preparation.probeIfNeeded()
+            secondFinished = true
+        }
+        await Task.yield()
+        #expect(secondFinished == false)
+        #expect(preparation.availability == .probing)
+        #expect(loader.callCount == 1)
+
+        loader.resume()
+        await first.value
+        await second.value
+
+        #expect(secondFinished)
+        #expect(preparation.canExport)
+        #expect(preparation.availability == .available(showCount: 1))
+        #expect(loader.callCount == 1)
+    }
+
     @Test("A successful prepare writes a CSV from recovered shows")
     func successfulPrepareWritesCSV() async throws {
         let show = sampleShow(id: 44933, name: "Severance")
@@ -130,5 +168,44 @@ struct PersistenceRecoveryExportPreparationTests {
             lastCheckedAt: Date(timeIntervalSince1970: 0),
             dateAdded: Date(timeIntervalSince1970: 0)
         )
+    }
+}
+
+/// Suspends inside `load()` until released so overlapping `probeIfNeeded()`
+/// calls can be observed before recoverability is known.
+@MainActor
+private final class GatedRecoveryExportLoader {
+    var result: WatchlistRecoveryExportRead
+    private(set) var callCount = 0
+    private var beganContinuation: CheckedContinuation<Void, Never>?
+    private var gateContinuation: CheckedContinuation<Void, Never>?
+
+    init(result: WatchlistRecoveryExportRead) {
+        self.result = result
+    }
+
+    func waitUntilLoadBegan() async {
+        await withCheckedContinuation { continuation in
+            if gateContinuation != nil {
+                continuation.resume()
+                return
+            }
+            beganContinuation = continuation
+        }
+    }
+
+    func resume() {
+        gateContinuation?.resume()
+        gateContinuation = nil
+    }
+
+    func load() async -> WatchlistRecoveryExportRead {
+        callCount += 1
+        beganContinuation?.resume()
+        beganContinuation = nil
+        await withCheckedContinuation { continuation in
+            gateContinuation = continuation
+        }
+        return result
     }
 }

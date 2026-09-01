@@ -29,6 +29,8 @@ enum RecoveryExportUnavailability: Equatable, Sendable {
 ///
 /// Probe and prepare failures never disable reset. A successful probe with
 /// zero shows skips the export action rather than offering an empty file.
+/// Concurrent `probeIfNeeded()` callers join one in-flight read so Reset
+/// cannot present while recoverability is still unknown.
 @Observable
 @MainActor
 final class PersistenceRecoveryExportPreparation {
@@ -47,8 +49,10 @@ final class PersistenceRecoveryExportPreparation {
         return false
     }
 
-    /// Set after the first probe so a later Reset tap does not re-read the store.
-    private var didProbe = false
+    /// Shared in-flight (or completed) probe. Later callers await this instead
+    /// of treating “started” as “finished,” so Reset cannot present while
+    /// availability is still `.probing`.
+    private var probeTask: Task<Void, Never>?
     /// Production reads the on-disk store; tests inject a stubbed result.
     private let loadShows: @MainActor () async -> WatchlistRecoveryExportRead
 
@@ -62,11 +66,25 @@ final class PersistenceRecoveryExportPreparation {
         self.loadShows = loadShows
     }
 
-    /// Reads the store once per recovery presentation. Later calls are no-ops.
+    /// Reads the store once per recovery presentation. Concurrent callers
+    /// join the same in-flight task and do not return until availability
+    /// is known. Completed probes are reused so the store is not re-read.
     func probeIfNeeded() async {
-        guard didProbe == false else { return }
-        didProbe = true
+        if let probeTask {
+            await probeTask.value
+            return
+        }
 
+        let task = Task { @MainActor in
+            await self.performProbe()
+        }
+        probeTask = task
+        await task.value
+    }
+
+    /// Applies `loadShows()` to `availability`. Isolated so overlapping
+    /// `probeIfNeeded()` calls share one read.
+    private func performProbe() async {
         let read = await loadShows()
         recoveredShows = read.shows
         // Distinguish "opened but empty" from "could not read at all" so the
