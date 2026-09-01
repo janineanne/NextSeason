@@ -47,7 +47,9 @@ final class PersistenceRecoveryExportPreparation {
         return false
     }
 
+    /// Set after the first probe so a later Reset tap does not re-read the store.
     private var didProbe = false
+    /// Production reads the on-disk store; tests inject a stubbed result.
     private let loadShows: @MainActor () async -> WatchlistRecoveryExportRead
 
     /// `loadShows` is injectable so tests can stub recoverability without
@@ -67,6 +69,8 @@ final class PersistenceRecoveryExportPreparation {
 
         let read = await loadShows()
         recoveredShows = read.shows
+        // Distinguish "opened but empty" from "could not read at all" so the
+        // confirmation can explain why Export Watchlist is omitted.
         if read.shows.isEmpty {
             availability =
                 read.storeWasReadable
@@ -114,6 +118,7 @@ final class PersistenceRecoveryExportPreparation {
         }
     }
 
+    /// Clears a prepare failure so the user can reset or try export again.
     func dismissExportError() {
         exportErrorMessage = nil
     }

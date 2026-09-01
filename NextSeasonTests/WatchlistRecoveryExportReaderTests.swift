@@ -27,6 +27,7 @@ struct WatchlistRecoveryExportReaderTests {
         #expect(read.shows.map(\.id) == [44933])
         #expect(read.shows.map(\.name) == ["Severance"])
 
+        // Also assert the SQLite path can discover Core Data `Z`-prefixed columns.
         let sqlite = WatchlistRecoveryExportReader.loadViaSQLite(storeURL: storeURL)
         #expect(sqlite.foundWatchlistTable)
         #expect(sqlite.shows.map(\.id) == [44933])
@@ -108,6 +109,8 @@ struct WatchlistRecoveryExportReaderTests {
         #expect(byID[2]?.name == "Fallback Only")
     }
 
+    /// Writes shows through SwiftData, then drops the container so later
+    /// readers can open the same URL (and its WAL sidecars).
     private func seedStore(at storeURL: URL, shows: [TrackedShow]) throws {
         try {
             let container = try NextSeasonModelContainer.make(
@@ -121,6 +124,8 @@ struct WatchlistRecoveryExportReaderTests {
         }()
     }
 
+    /// Overwrites one row's `nextSeasonSnapshot` so SwiftData `toDomain()` fails
+    /// and SQLite must still recover name and TVMaze ID.
     private func corruptNextSeasonSnapshot(storeURL: URL, tvMazeID: Int) throws {
         var db: OpaquePointer?
         guard sqlite3_open(storeURL.path, &db) == SQLITE_OK, let db else {
@@ -149,6 +154,7 @@ struct WatchlistRecoveryExportReaderTests {
         }
     }
 
+    /// Discovers the watchlist table plus ID/snapshot columns, including `Z` prefixes.
     private func watchlistSnapshotColumns(db: OpaquePointer) -> (String, String, String)? {
         var tableStatement: OpaquePointer?
         guard
@@ -190,10 +196,12 @@ struct WatchlistRecoveryExportReaderTests {
         return nil
     }
 
+    /// Same identifier quoting as `WatchlistRecoveryExportReader`.
     private func quote(_ identifier: String) -> String {
         "\"" + identifier.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 
+    /// Matches production `normalize` so `ZTVMAZEID` and `tvMazeID` both resolve.
     private func normalizeColumnName(_ name: String) -> String {
         var normalized = name.lowercased().replacingOccurrences(of: "_", with: "")
         if normalized.first == "z" {
@@ -202,6 +210,7 @@ struct WatchlistRecoveryExportReaderTests {
         return normalized
     }
 
+    /// Minimal SQLite file that is not a SwiftData store, so only the fallback path runs.
     private func writeIdentityOnlySQLiteStore(at url: URL, id: Int, name: String) throws {
         var db: OpaquePointer?
         guard sqlite3_open(url.path, &db) == SQLITE_OK, let db else {
@@ -235,6 +244,7 @@ struct WatchlistRecoveryExportReaderTests {
         }
     }
 
+    /// Isolated temp directory per test so parallel runs do not share store files.
     private func makeTemporaryDirectory() throws -> URL {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(
@@ -243,6 +253,7 @@ struct WatchlistRecoveryExportReaderTests {
         return directory
     }
 
+    /// Representative V1 row; next-season status is set so snapshot corruption is visible.
     private func sampleShow(id: Int, name: String) -> TrackedShow {
         TrackedShow(
             id: id,

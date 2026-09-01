@@ -73,6 +73,8 @@ struct PersistenceRecoveryExportPreparationTests {
         }
         await preparation.probeIfNeeded()
 
+        // A file at the destination path makes `createDirectory` throw so
+        // prepare fails without blocking reset.
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("recovery-export-file-\(UUID().uuidString)")
         try Data().write(to: directory)
@@ -115,6 +117,7 @@ struct PersistenceRecoveryExportPreparationTests {
         #expect(preparation.canExport)
     }
 
+    /// Minimal tracked show for probe/prepare assertions.
     private func sampleShow(id: Int, name: String) -> TrackedShow {
         TrackedShow(
             id: id,

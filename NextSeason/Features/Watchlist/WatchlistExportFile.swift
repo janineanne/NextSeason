@@ -8,7 +8,11 @@ import Foundation
 import UniformTypeIdentifiers
 
 /// A cached CSV file ready for the system share sheet.
+///
+/// `Identifiable` lets recovery present the file with `sheet(item:)`. The
+/// identity is the file URL so a later export in a new directory can present again.
 nonisolated struct WatchlistExportFile: Transferable, Sendable, Identifiable {
+    /// Share-sheet item identity; unique per written file URL.
     var id: URL { url }
     let url: URL
 

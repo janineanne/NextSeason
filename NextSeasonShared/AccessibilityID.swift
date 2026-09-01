@@ -31,7 +31,9 @@ enum AccessibilityID {
         static let screen = "persistenceRecovery.screen"
         static let exportDiagnostics = "persistenceRecovery.exportDiagnostics"
         static let resetLocalData = "persistenceRecovery.resetLocalData"
+        /// Last-chance watchlist export on the reset confirmation or share sheet.
         static let exportWatchlist = "persistenceRecovery.exportWatchlist"
+        /// Destructive reset that skips the optional export.
         static let resetWithoutExporting = "persistenceRecovery.resetWithoutExporting"
         static let tryAgain = "persistenceRecovery.tryAgain"
     }

@@ -31,6 +31,9 @@ enum WatchlistExportBuilder {
 
     /// Writes a CSV from an already-loaded watchlist. Used by About export and
     /// by best-effort recovery export when the store may only be partially readable.
+    ///
+    /// TVDB IDs are resolved when the mapping is available; missing IDs become
+    /// empty CSV cells rather than failing the export.
     static func makeFile(
         shows: [TrackedShow],
         showIDMapping: any ShowIDMapping,

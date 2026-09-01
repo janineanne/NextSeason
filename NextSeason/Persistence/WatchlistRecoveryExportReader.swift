@@ -11,6 +11,7 @@ import os
 /// Outcome of a best-effort recovery read. `shows` may be incomplete even
 /// when `storeWasReadable` is true.
 struct WatchlistRecoveryExportRead: Equatable, Sendable {
+    /// Recovered rows. May be a subset of what the user originally saved.
     var shows: [TrackedShow]
     /// True when SwiftData opened or SQLite found a watchlist table.
     var storeWasReadable: Bool
@@ -44,6 +45,8 @@ enum WatchlistRecoveryExportReader {
         let copyDirectory = copyURL.deletingLastPathComponent()
         defer { try? fileManager.removeItem(at: copyDirectory) }
 
+        // SwiftData can still fail on the copy (same corruption as launch).
+        // SQLite then supplies name/ID for rows `toDomain()` could not rebuild.
         var openedSwiftData = false
         let swiftDataShows: [TrackedShow]
         do {
@@ -89,6 +92,8 @@ enum WatchlistRecoveryExportReader {
     /// SwiftData's internal names, which can vary across store formats.
     static func loadViaSQLite(storeURL: URL) -> (shows: [TrackedShow], foundWatchlistTable: Bool) {
         var db: OpaquePointer?
+        // Read-only so a damaged store is never mutated; FULLMUTEX because
+        // this can run while other recovery work is still on the main actor.
         let flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX
         guard sqlite3_open_v2(storeURL.path, &db, flags, nil) == SQLITE_OK, let db else {
             if let db { sqlite3_close(db) }
@@ -98,6 +103,8 @@ enum WatchlistRecoveryExportReader {
 
         guard let table = watchlistTableName(db: db) else { return ([], false) }
         let columns = tableColumns(db: db, table: table)
+        // A watchlist table without an ID column is still "readable" — there
+        // is just nothing we can export.
         guard let idColumn = column(named: "tvmazeid", in: columns) else { return ([], true) }
 
         let nameColumn = column(named: "name", in: columns)
@@ -124,6 +131,8 @@ enum WatchlistRecoveryExportReader {
         }
         defer { sqlite3_finalize(statement) }
 
+        // SELECT lists only columns that exist, in this fixed order, so the
+        // reader index advances only for columns that were actually projected.
         var shows: [TrackedShow] = []
         while sqlite3_step(statement) == SQLITE_ROW {
             var index: Int32 = 0
@@ -170,6 +179,7 @@ enum WatchlistRecoveryExportReader {
                 tvMazeURL = nil
             }
 
+            // Refresh-only fields are unused by CSV export; identity columns matter.
             shows.append(
                 TrackedShow(
                     id: tvMazeID,
@@ -238,6 +248,8 @@ enum WatchlistRecoveryExportReader {
 
     // MARK: - SQLite discovery
 
+    /// Prefers `TrackedShowEntity` / `ZTRACKEDSHOWENTITY` and ignores SwiftData
+    /// metadata tables whose names also contain "trackedshow".
     private static func watchlistTableName(db: OpaquePointer) -> String? {
         let sql = "SELECT name FROM sqlite_master WHERE type='table';"
         var statement: OpaquePointer?
@@ -263,6 +275,7 @@ enum WatchlistRecoveryExportReader {
         return candidates.first
     }
 
+    /// Column names from `PRAGMA table_info`, used to match `tvMazeID` / `ZTVMAZEID`.
     private static func tableColumns(db: OpaquePointer, table: String) -> [String] {
         let sql = "PRAGMA table_info(\(quote(table)));"
         var statement: OpaquePointer?
@@ -280,6 +293,7 @@ enum WatchlistRecoveryExportReader {
         return columns
     }
 
+    /// Original column name whose normalized form equals `normalizedName`.
     private static func column(named normalizedName: String, in columns: [String]) -> String? {
         columns.first { normalize($0) == normalizedName }
     }
@@ -294,10 +308,12 @@ enum WatchlistRecoveryExportReader {
         return normalized
     }
 
+    /// Quotes a SQLite identifier so discovered Core Data names stay safe in SQL.
     private static func quote(_ identifier: String) -> String {
         "\"" + identifier.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 
+    /// UTF-8 text, or `nil` for NULL / missing values.
     private static func columnText(_ statement: OpaquePointer?, index: Int32) -> String? {
         guard let statement, sqlite3_column_type(statement, index) != SQLITE_NULL else {
             return nil
@@ -306,6 +322,7 @@ enum WatchlistRecoveryExportReader {
         return String(cString: cString)
     }
 
+    /// Decodes the persisted `NextSeasonStatus` blob; corrupt JSON becomes `.unknown`.
     private static func decodeNextSeason(
         _ statement: OpaquePointer?,
         index: Int32
@@ -337,5 +354,6 @@ enum WatchlistRecoveryExportReader {
 
 /// Failures while preparing a side copy of the watchlist store for recovery export.
 enum RecoveryExportReadError: Error {
+    /// The production `default.store` file is not on disk.
     case storeMissing
 }

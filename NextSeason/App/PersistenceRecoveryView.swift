@@ -23,10 +23,15 @@ struct PersistenceRecoveryView: View {
     /// Non-destructive composition retry in this already-running process.
     let onRetryLaunch: () -> Void
 
+    /// Destructive-reset confirmation; buttons depend on export recoverability.
     @State private var isConfirmingReset = false
+    /// Best-effort probe/prepare; injected in previews so they never open the real store.
     @State private var exportPreparation: PersistenceRecoveryExportPreparation
+    /// Set after a successful prepare so `sheet(item:)` can present the CSV.
     @State private var shareFile: WatchlistExportFile?
 
+    /// `exportPreparation` is injectable so previews and tests can stub
+    /// recoverability without touching the on-device watchlist store.
     init(
         context: AppLaunchState.RecoveryContext,
         onResetLocalData: @escaping () -> Void,
@@ -86,10 +91,12 @@ struct PersistenceRecoveryView: View {
         .appAccentTint()
         .appScreenBackground()
         .task {
+            // Crash-loop recovery does not offer reset, so it does not probe.
             guard context.allowsPersistenceReset else { return }
             await exportPreparation.probeIfNeeded()
         }
         .alert("Reset Local Data?", isPresented: $isConfirmingReset) {
+            // Export is omitted (not just disabled) when nothing could be read.
             if exportPreparation.canExport {
                 Button("Export Watchlist", action: startRecoveryExport)
                     .accessibilityIdentifier(AccessibilityID.PersistenceRecovery.exportWatchlist)
@@ -103,6 +110,7 @@ struct PersistenceRecoveryView: View {
         } message: {
             Text(confirmationMessage)
         }
+        // Prepare failure must not trap the user: reset stays available here.
         .alert(
             "Couldn't Export Watchlist",
             isPresented: exportFailedAlertPresented
@@ -153,6 +161,7 @@ struct PersistenceRecoveryView: View {
             )
         }
         var text = base
+        // Append export availability only when reset is actually offered.
         if context.allowsPersistenceReset {
             text += "\n\n\(recoveryExportDescription)"
         }
@@ -160,6 +169,8 @@ struct PersistenceRecoveryView: View {
         return text + "\n\n\(genericResetFailureText)"
     }
 
+    /// Last-chance export copy for the recovery screen. Does not claim the
+    /// exported file is complete when data can still be read.
     private var recoveryExportDescription: String {
         switch exportPreparation.availability {
         case .probing:
@@ -189,6 +200,8 @@ struct PersistenceRecoveryView: View {
         )
     }
 
+    /// Confirmation text for the three-button export/reset alert, or the
+    /// two-button reset-only alert when nothing could be recovered.
     private var confirmationMessage: String {
         if exportPreparation.canExport {
             String(
@@ -211,6 +224,7 @@ struct PersistenceRecoveryView: View {
         }
     }
 
+    /// Follow-up after a failed prepare; still invites the user to reset.
     private var exportFailedMessage: String {
         exportPreparation.exportErrorMessage
             ?? String(
@@ -218,6 +232,8 @@ struct PersistenceRecoveryView: View {
             )
     }
 
+    /// Shown only when prepare failed and the share sheet is not up, so a
+    /// successful export is not covered by the failure alert.
     private var exportFailedAlertPresented: Binding<Bool> {
         Binding(
             get: { exportPreparation.exportErrorMessage != nil && shareFile == nil },
@@ -225,6 +241,7 @@ struct PersistenceRecoveryView: View {
         )
     }
 
+    /// Waits for the probe so the confirmation buttons match recoverability.
     private func presentResetConfirmation() {
         Task {
             await exportPreparation.probeIfNeeded()
@@ -232,6 +249,8 @@ struct PersistenceRecoveryView: View {
         }
     }
 
+    /// Prepares a CSV in a unique temp folder so a later retry gets a new URL
+    /// for `sheet(item:)`. A nil result leaves reset available via the failure alert.
     private func startRecoveryExport() {
         Task {
             let directory = FileManager.default.temporaryDirectory
@@ -249,6 +268,7 @@ struct PersistenceRecoveryView: View {
         }
     }
 
+    /// Dismisses the export sheet (if any) and performs the destructive reset.
     private func confirmReset() {
         shareFile = nil
         onResetLocalData()
@@ -271,6 +291,7 @@ private struct RecoveryWatchlistExportSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let file: WatchlistExportFile
+    /// Destructive reset after the user has had a chance to share the CSV.
     let onReset: () -> Void
 
     var body: some View {
@@ -321,6 +342,7 @@ private struct RecoveryWatchlistExportSheet: View {
 #if DEBUG
     private struct PreviewPersistenceError: Error {}
 
+    /// Stubbed probe result so previews never copy or open the production store.
     private func previewRecoveryExportPreparation(
         shows: [TrackedShow] = [],
         storeWasReadable: Bool = false
@@ -330,6 +352,7 @@ private struct RecoveryWatchlistExportSheet: View {
         }
     }
 
+    /// Sample row for the export-available preview only.
     private func previewRecoveredShow() -> TrackedShow {
         TrackedShow(
             id: 44933,
