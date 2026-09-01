@@ -35,10 +35,10 @@ Recommended events and properties:
 
 The watchlist currently uses `List` with `Section`. Native pinned section headers allow rows to scroll beneath the header, which creates an unattractive text-over-text effect in the current design.
 
-- Replace the sectioned `List` with `ScrollView` and `LazyVStack`, unless another native solution produces an equally polished result.
-- Preserve accessibility, Dynamic Type behavior, separators, row navigation, deletion, and editing behavior.
-- Verify that section headers scroll normally rather than remaining pinned.
-- Re-test the tab bar, search field, empty state, and VoiceOver order after the change.
+- Preserve the native sectioned `List` behavior, including pinned section headers.
+- Ensure pinned section headers remain visually distinct from the content scrolling beneath them.
+- Use an opaque app-background treatment on section headers so underlying text does not show through or interfere with readability.
+- Verify correct behavior across Dynamic Type sizes, and accessibility settings.
 
 ## Watchlist Management (Complete)
 
@@ -127,7 +127,6 @@ Write a document explaining how AI was used during development, including:
 - Update README screenshots to match the release candidate.
 - Verify that all repository links point to the public repository.
 - Remove internal-only notes, temporary instructions, and obsolete planning text.
-- Archive a v1.0 documentation snapshot before beginning substantial post-launch work.
 
 # App Store Submission Checklist
 
@@ -206,6 +205,7 @@ Starting queries:
 - Confirm which diagnostics remain intentionally available to users.
 - Increment version and build numbers for release.
 - Confirm the release candidate matches the screenshots and App Store description.
+- Once the release candidate is accepted as the final v1.0 build, create and push a v1.0 Git tag to preserve the exact code and documentation shipped to the App Store.
 
 ## App Store Connect
 
