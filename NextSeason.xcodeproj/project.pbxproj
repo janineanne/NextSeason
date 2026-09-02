@@ -190,6 +190,7 @@
 		E19A58AF3047A29B00CC7190 /* Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Search-Results.png"; sourceTree = "<group>"; };
 		E19A58B03047A29B00CC7190 /* Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Show-Detail.png"; sourceTree = "<group>"; };
 		E19A58B13047A29B00CC7190 /* Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Watchlist.png; sourceTree = "<group>"; };
+		E19A5A673047A99C00CC7190 /* 9-1-2026 Documentation Review and Update.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "9-1-2026 Documentation Review and Update.md"; sourceTree = "<group>"; };
 		E1AB76CA3033D0740045498C /* MVP-Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.png"; sourceTree = "<group>"; };
 		E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Show-Detail.png"; sourceTree = "<group>"; };
 		E1AB76CC3033D0740045498C /* MVP-Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Watchlist.png"; sourceTree = "<group>"; };
@@ -417,6 +418,7 @@
 				E19A3DA7304601F800CC7190 /* 8-31-2026 Review Roadmap Updates.md */,
 				E19A49653046508E00CC7190 /* 8-31-2026 Implement Fix to Recovery Process.md */,
 				E19A49663046514900CC7190 /* 8-31-2026 Review Fix to Recovery Process.md */,
+				E19A5A673047A99C00CC7190 /* 9-1-2026 Documentation Review and Update.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";

@@ -81,5 +81,5 @@ Development continues beyond the MVP. Planned work includes:
 * Expanded DocC documentation
 * New application features
 
-Development beyond the MVP is tracked in the [`../Post-MVP/NextSeason - Product Evolution Roadmap.md`](../Post-MVP/NextSeason%20-%20App%20Store%20Readiness%20Roadmap.md)
- and [`../Post-MVP/NextSeason - Product Evolution Roadmap.md`](../Post-MVP/NextSeason%20-%20Product%20Evolution%20Roadmap.md). The first covers the work required to prepare the MVP for its initial App Store release; the second covers enhancements planned after release.
+Development beyond the MVP is tracked in the [`Documentation/Post-MVP/NextSeason - App Store Readiness Roadmap.md`](Documentation/Post-MVP/NextSeason%20-%20App%20Store%20Readiness%20Roadmap.md)
+ and [`Documentation/Post-MVP/NextSeason - Product Evolution Roadmap.md`](Documentation/Post-MVP/NextSeason%20-%20Product%20Evolution%20Roadmap.md). The first covers the work required to prepare the MVP for its initial App Store release; the second covers enhancements planned after release.
