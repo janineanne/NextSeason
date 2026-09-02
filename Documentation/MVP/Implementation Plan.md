@@ -128,4 +128,5 @@ notification when a new season becomes available — with no ongoing manual effo
   `TVMazeResearch.md` (Cursor / Claude).
 - Phase 4 — Implementation: **in progress**. Slice 1 (Guest Search) = **done**.
   Next: Slice 2 (Save & Notify).
+  (Phase 4 was subsequently finished before the MVP was tagged)
 ```

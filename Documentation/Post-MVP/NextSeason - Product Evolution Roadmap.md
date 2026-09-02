@@ -174,7 +174,7 @@ Planned after iCloud / CloudKit Sync is implemented:
 
 Vision Pro is not currently planned.
 
-## Monitoring & Notifications
+## Server-Side Monitoring & Push Notifications
 
 - Move season monitoring to a backend service.
 - Monitor each relevant show centrally rather than independently polling the same show for every user who tracks it.

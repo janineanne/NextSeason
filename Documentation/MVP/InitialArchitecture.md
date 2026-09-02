@@ -1,4 +1,4 @@
-> **Historical Document:** This document primarily captures the original MVP architectural design. As the project evolved, implementation details diverged in several areas (navigation coordination, watchlist tracking workflow, notification state management, diagnostics, etc.). Treat this as a design-history document rather than a precise description of the current implementation. See [`MVPArchitecture.md`](MVPArchitecture.md), for the authoritative description of the current application architecture.
+> **Historical Document:** This document primarily captures the original MVP architectural design. As the project evolved, implementation details diverged in several areas (navigation coordination, watchlist tracking workflow, notification state management, diagnostics, etc.). Treat this as a design-history document rather than a precise description of the current implementation. See [`MVPArchitecture.md`](MVPArchitecture.md), for the authoritative description of the implemented MVP architecture.
 
 # Initial Architecture
 
@@ -260,7 +260,7 @@ Notes & trade-offs:
 
 **Implemented in Slice 2 (local notifications only).** Push notifications and a
 cloud notification service are post-MVP (see
-[`../Post-MVP/Post-MVP Roadmap.md`](../Post-MVP/Post-MVP%20Roadmap.md)).
+[`../Post-MVP/NextSeason - Product Evaluation Roadmap.md`](../Post-MVP/NextSeason%20-%20Product%20Evaluation%20Roadmap.md)).
 
 - **`NotificationService`** wraps `UNUserNotificationCenter`: permission request,
   scheduling **local** notifications, and tap handling that routes to the

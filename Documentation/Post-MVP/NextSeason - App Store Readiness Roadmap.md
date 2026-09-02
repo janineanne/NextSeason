@@ -99,7 +99,7 @@ Import and restoration from an exported watchlist are not required for the initi
 
 ## StoreKit (Complete for testing)
 
-See [NextSeason Monetization Strategy](NextSeason%20-%20Monetization%20Strategy%20Roadmap.md) for the proposed pricing and purchase structure.
+See [`../Post-MVP/NextSeason - Monetization Strategy Roadmap`](../Post-MVP/NextSeason%20-%20Monetization%20Strategy%20Roadmap.md) for the proposed pricing and purchase structure.
 
 - Make and Implement a plan to charge users through the App Store.
 - Implement RequestReviewAction to arrive a few seconds after the first show notification (per version) has been delivered.

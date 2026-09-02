@@ -339,7 +339,7 @@ catalog. We mitigate it with honest UI (timestamps, attribution), debounced
 notifications, and graceful failure handling — rather than by assuming the data is
 perfect.
 
-**Contingency:** tThe networking layer is isolated behind the `TVMazeService` protocol (`MVPArchitecture.md` §4). If freshness proves insufficient
+**Contingency:** The networking layer is isolated behind the `TVMazeService` protocol (`MVPArchitecture.md` §4). If freshness proves insufficient
 in practice, a second provider (TheTVDB — TV-first, very stable; or TMDB — broad,
 but episode ordering can shift) could be added or swapped behind that protocol
 without touching the UI. No need to build multi-source now; just preserved as an
