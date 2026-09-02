@@ -259,7 +259,7 @@ Notes & trade-offs:
 
 **Implemented in Slice 2 (local notifications only).** Push notifications and a
 cloud notification service are post-MVP (see
-[`../Post-MVP/NextSeason - Product Evaluation Roadmap.md`](../Post-MVP/NextSeason%20-%20Product%20Evaluation%20Roadmap.md)).
+[`../Post-MVP/NextSeason - Product Evolution Roadmap.md`](../Post-MVP/NextSeason%20-%20Product%20Evolution%20Roadmap.md)).
 
 - **`NotificationService`** wraps `UNUserNotificationCenter`: permission request,
   scheduling **local** notifications, and tap handling that routes to the
@@ -384,5 +384,6 @@ are **resolved** in the shipped MVP unless noted as post-MVP.
 - **Resolved (Slice 2):** local notification copy and meaningful-change triggers
   implemented via `StatusChangeDetector` and debounce rules (PD-008).
 - **Post-MVP:** push notifications, user accounts, and cloud watchlist sync.
-  See [`../Post-MVP/Post-MVP Roadmap.md`](../Post-MVP/Post-MVP%20Roadmap.md).
+  See [`../Post-MVP/NextSeason - Product Evolution Roadmap.md`](../Post-MVP/NextSeason%20-%20App%20Store%20Readiness%20Roadmap.md)
+ and [`../Post-MVP/NextSeason - Product Evolution Roadmap.md`](../Post-MVP/NextSeason%20-%20Product%20Evolution%20Roadmap.md). The first covers the work required to prepare the MVP for its initial App Store release; the second covers enhancements planned after release.
 ```

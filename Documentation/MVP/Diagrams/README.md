@@ -27,7 +27,7 @@ Includes:
 - Search
 - Watchlist
 - Show Details
-- Settings/About
+- About
 - Diagnostics
 
 ---
