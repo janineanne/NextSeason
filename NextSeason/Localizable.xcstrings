@@ -267,6 +267,9 @@
         }
       }
     },
+    "Checking whether any watchlist data can still be exported…" : {
+
+    },
     "Checking…" : {
 
     },
@@ -340,6 +343,9 @@
       }
     },
     "Couldn't Complete Purchase" : {
+
+    },
+    "Couldn't export the watchlist. You can still reset local data." : {
 
     },
     "Couldn't Export Watchlist" : {
@@ -759,42 +765,6 @@
 
     },
     "Export Watchlist" : {
-
-    },
-    "Checking whether any watchlist data can still be exported…" : {
-
-    },
-    "Couldn't export the watchlist. You can still reset local data." : {
-
-    },
-    "No watchlist shows could be recovered for export." : {
-
-    },
-    "Reset Without Exporting" : {
-
-    },
-    "Share Export" : {
-
-    },
-    "The local store is too damaged to export any watchlist data." : {
-
-    },
-    "This file contains whatever watchlist data could still be read. It may be incomplete." : {
-
-    },
-    "This permanently deletes your saved watchlist and scheduled reminders on this device. No watchlist shows could be recovered for export. You can search for shows and add them again afterward. This cannot be undone." : {
-
-    },
-    "This permanently deletes your saved watchlist and scheduled reminders on this device. The local store is too damaged to export any watchlist data. You can search for shows and add them again afterward. This cannot be undone." : {
-
-    },
-    "This permanently deletes your saved watchlist and scheduled reminders on this device. You can try to export whatever can still be read first. The exported file may be incomplete. This cannot be undone." : {
-
-    },
-    "Watchlist Export Ready" : {
-
-    },
-    "You can try to export whatever watchlist data can still be read before resetting. The exported file may be incomplete." : {
 
     },
     "Exports every show on your watchlist as a CSV file you can open in Numbers or Excel." : {
@@ -1310,6 +1280,9 @@
         }
       }
     },
+    "No watchlist shows could be recovered for export." : {
+
+    },
     "No-result searches" : {
       "localizations" : {
         "en" : {
@@ -1611,6 +1584,9 @@
     "Reset Local Data?" : {
 
     },
+    "Reset Without Exporting" : {
+
+    },
     "Restore Purchases" : {
 
     },
@@ -1848,6 +1824,9 @@
         }
       }
     },
+    "Share Export" : {
+
+    },
     "Share report" : {
       "localizations" : {
         "en" : {
@@ -2062,6 +2041,9 @@
     "The free watchlist holds %lld shows. With NextSeason Plus you can track unlimited shows, starting with the shows already on your list." : {
 
     },
+    "The local store is too damaged to export any watchlist data." : {
+
+    },
     "The purchase could not be completed. Please try again." : {
 
     },
@@ -2084,7 +2066,16 @@
     "TheTVDB is having trouble right now. Please try again later." : {
 
     },
-    "This permanently deletes your saved watchlist and scheduled reminders on this device. You can search for shows and add them again afterward. This cannot be undone." : {
+    "This file contains whatever watchlist data could still be read. It may be incomplete." : {
+
+    },
+    "This permanently deletes your saved watchlist and scheduled reminders on this device. No watchlist shows could be recovered for export. You can search for shows and add them again afterward. This cannot be undone." : {
+
+    },
+    "This permanently deletes your saved watchlist and scheduled reminders on this device. The local store is too damaged to export any watchlist data. You can search for shows and add them again afterward. This cannot be undone." : {
+
+    },
+    "This permanently deletes your saved watchlist and scheduled reminders on this device. You can try to export whatever can still be read first. The exported file may be incomplete. This cannot be undone." : {
 
     },
     "This series has ended." : {
@@ -2347,6 +2338,9 @@
         }
       }
     },
+    "Watchlist Export Ready" : {
+
+    },
     "Watchlist removals" : {
       "localizations" : {
         "en" : {
@@ -2390,6 +2384,9 @@
           }
         }
       }
+    },
+    "You can try to export whatever watchlist data can still be read before resetting. The exported file may be incomplete." : {
+
     },
     "You can turn on notifications in Settings to get alerts when a tracked show's next season gets a release date or status update." : {
       "localizations" : {

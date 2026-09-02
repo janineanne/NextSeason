@@ -187,6 +187,9 @@
 		E19A42AC304604B900CC7190 /* 8-31-2026 Review Comments.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-31-2026 Review Comments.md"; sourceTree = "<group>"; };
 		E19A49653046508E00CC7190 /* 8-31-2026 Implement Fix to Recovery Process.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = "8-31-2026 Implement Fix to Recovery Process.md"; sourceTree = "<group>"; };
 		E19A49663046514900CC7190 /* 8-31-2026 Review Fix to Recovery Process.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-31-2026 Review Fix to Recovery Process.md"; sourceTree = "<group>"; };
+		E19A58AF3047A29B00CC7190 /* Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Search-Results.png"; sourceTree = "<group>"; };
+		E19A58B03047A29B00CC7190 /* Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Show-Detail.png"; sourceTree = "<group>"; };
+		E19A58B13047A29B00CC7190 /* Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Watchlist.png; sourceTree = "<group>"; };
 		E1AB76CA3033D0740045498C /* MVP-Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.png"; sourceTree = "<group>"; };
 		E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Show-Detail.png"; sourceTree = "<group>"; };
 		E1AB76CC3033D0740045498C /* MVP-Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Watchlist.png"; sourceTree = "<group>"; };
@@ -348,6 +351,7 @@
 		E102F0FC2FE5F1F40076FCDD /* Post-MVP */ = {
 			isa = PBXGroup;
 			children = (
+				E19A58B23047A29B00CC7190 /* Screenshots */,
 				E167D080301040BB007F7098 /* NextSeason - App Store Readiness Roadmap.md */,
 				E1AB8C4C3037BB410045498C /* NextSeason - Monetization Strategy Roadmap.md */,
 				E167D081301040BB007F7098 /* NextSeason - Product Evolution Roadmap.md */,
@@ -451,6 +455,16 @@
 				E1AB76CA3033D0740045498C /* MVP-Search-Results.png */,
 				E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */,
 				E1AB76CC3033D0740045498C /* MVP-Watchlist.png */,
+			);
+			path = Screenshots;
+			sourceTree = "<group>";
+		};
+		E19A58B23047A29B00CC7190 /* Screenshots */ = {
+			isa = PBXGroup;
+			children = (
+				E19A58AF3047A29B00CC7190 /* Search-Results.png */,
+				E19A58B03047A29B00CC7190 /* Show-Detail.png */,
+				E19A58B13047A29B00CC7190 /* Watchlist.png */,
 			);
 			path = Screenshots;
 			sourceTree = "<group>";
