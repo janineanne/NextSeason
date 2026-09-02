@@ -4,6 +4,10 @@ This folder contains Mermaid diagrams documenting the architecture and major wor
 
 These diagrams are intended to complement the source code and README by providing a high-level overview of how the application is organized and how its major components interact.
 
+## Do not change these diagrams (or this file)
+
+These diagrams document the application architecture at the MVP milestone. They are historical artifacts and should not be updated to reflect subsequent implementation changes. Changes should be limited to corrections that make the diagrams more accurately represent the tagged MVP.
+
 ## Diagrams
 
 ### 1. App Architecture
@@ -110,6 +114,3 @@ Highlights:
 
 Mermaid diagrams are stored as plain Markdown, making them easy to review, version-control, and update alongside the source code. Git diffs clearly show architectural changes over time, and the diagrams can be rendered directly by GitHub and many Markdown editors.
 
-## Keeping the diagrams current
-
-These diagrams describe the architecture of the application rather than every implementation detail. They should be updated whenever significant architectural changes are made, such as introducing new services, modifying data flow, or changing major user workflows.

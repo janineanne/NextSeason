@@ -8,11 +8,7 @@ depth, see the source docs linked below.
 
 - Problem: [`ProblemStatement.md`](ProblemStatement.md)
 - Scope: [`MVPDefinition.md`](MVPDefinition.md)
-- Backlog: [`MVPBacklog.md`](MVPBacklog.md)
-- Requirements: [`FunctionalRequirements.md`](FunctionalRequirements.md)
 - User stories: [`UserStories.md`](UserStories.md)
-- Decisions: [`DecisionLog.md`](DecisionLog.md)
-- Architecture: [`Architecture.md`](Architecture.md)
 - API research: [`TVMazeResearch.md`](TVMazeResearch.md)
 
 ---
@@ -90,11 +86,9 @@ To prevent scope creep in every phase, NextSeason is:
 
 A "status change" is any meaningful delta in next-season fields: date announced,
 date changed, new season airing, or show ended. Field-level detail lives in
-[`TVMazeResearch.md`](TVMazeResearch.md) §4–5; the architecture path is in
-[`Architecture.md`](Architecture.md).
+[`TVMazeResearch.md`](TVMazeResearch.md) §4–5.
 
-Slice 2 uses **on-device storage only** — no user accounts or sign-in. See
-PD-001 in [`DecisionLog.md`](DecisionLog.md).
+Slice 2 uses **on-device storage only** — no user accounts or sign-in. 
 
 ## 7. Data source
 

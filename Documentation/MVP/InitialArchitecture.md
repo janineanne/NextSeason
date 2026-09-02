@@ -10,7 +10,7 @@ networking, notification, and testing strategies adopted for the MVP.
 a diagram-first view of the running MVP, see
 [`Diagrams/01-app-architecture.md`](Diagrams/01-app-architecture.md).
 
-Companion docs: [`ImplementationPlan.md`](ImplementationPlan.md),
+Companion docs: [`Implementation Plan.md`](Implementation Plan.md),
 [`TVMazeResearch.md`](TVMazeResearch.md).
 
 ---
@@ -27,8 +27,7 @@ From `AGENTS.md` and the Cursor rules:
 - Files under 500 lines; views kept small; accessibility required.
 
 The architecture was sized for **Slice 1 (Guest Search)** first, then extended to
-**Slice 2 (Save & Notify)**. Both slices are now shipped in the MVP. (Terminology
-— MVP vs. slices — is defined in [`ProductSpec.md`](ProductSpec.md).)
+**Slice 2 (Save & Notify)**. Both slices are now shipped in the MVP.
 
 ---
 
