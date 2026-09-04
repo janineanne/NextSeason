@@ -213,6 +213,7 @@
 		E1BCD132304A73520049DE1D /* Search-Results.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Search-Results.jpeg"; sourceTree = "<group>"; };
 		E1BCD133304A73520049DE1D /* Show-Detail.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Show-Detail.jpeg"; sourceTree = "<group>"; };
 		E1BCD134304A73520049DE1D /* Watchlist.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Watchlist.jpeg; sourceTree = "<group>"; };
+		E1BCD136304A765D0049DE1D /* 9-3-2026 Review Beta Feedback Fixes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "9-3-2026 Review Beta Feedback Fixes.md"; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
@@ -421,6 +422,7 @@
 				E19A49663046514900CC7190 /* 8-31-2026 Review Fix to Recovery Process.md */,
 				E19A5A673047A99C00CC7190 /* 9-1-2026 Documentation Review and Update.md */,
 				E1BCCDC5304A65970049DE1D /* 9-3-2026 Final Full Review.md */,
+				E1BCD136304A765D0049DE1D /* 9-3-2026 Review Beta Feedback Fixes.md */,
 			);
 			path = "AI Transcripts";
 			sourceTree = "<group>";
