@@ -514,6 +514,16 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
         section.headerTitle(showCount: shows.count, isExpanded: isExpanded)
     }
 
+    /// Default `.headline` line height; scales with Dynamic Type so hit spacing
+    /// shrinks once the title itself already meets the 44pt tap target.
+    @ScaledMetric(relativeTo: .headline) private var headlineLineHeight: CGFloat = 30
+
+    /// Extra vertical hit area so a text-sized header still meets Apple's 44pt
+    /// minimum without adding visible padding.
+    private var headerVerticalHitSpacing: CGFloat {
+        max(0, (44 - headlineLineHeight) / 2)
+    }
+
     var body: some View {
         Section(isExpanded: $isExpanded) {
             ForEach(shows) { tracked in
@@ -537,10 +547,11 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
                         .rotationEffect(.degrees(isExpanded ? 0 : -90))
                         .accessibilityHidden(true)
                 }
-                .padding(.vertical, AppSpacing.tight)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(AppColor.background)
+                .padding(.vertical, headerVerticalHitSpacing)
                 .contentShape(Rectangle())
+                .padding(.vertical, -headerVerticalHitSpacing)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(displayedTitle)
