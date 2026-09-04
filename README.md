@@ -70,15 +70,14 @@ Helpful links:
 
 [Documentation](Documentation/MVP)<br>
 [Diagrams](Documentation/MVP/Diagrams)<br>
-[AI Transcripts](Documentation/MVP/AI\ Transcripts)
+[AI Transcripts](Documentation/MVP/AI\ Transcripts)<br>
+[AI-Assisted Development Workflow](Documentation/AI-Assisted%20Development%20Workflow.md)
 
 ## What's Next
 
 Development continues beyond the MVP. Planned work includes:
 
 * Additional architectural documentation
-* A write-up describing my AI-assisted development workflow
-* Expanded DocC documentation
 * New application features
 
 Development beyond the MVP is tracked in the [`Documentation/Post-MVP/NextSeason - App Store Readiness  Roadmap.md`](Documentation/Post-MVP/NextSeason%20-%20App%20Store%20Readiness%20Roadmap.md)
