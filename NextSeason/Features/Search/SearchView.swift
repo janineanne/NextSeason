@@ -204,8 +204,15 @@ struct SearchView: View {
                         .appPrimaryText()
                 }
             } description: {
-                Text(FirstRunCopy.searchIdleDescription)
+                if !hasCompletedFirstSearch {
+                    Text(FirstRunCopy.searchIdleDescription)
+                        .appSecondaryText()
+                } else {
+                    Text(
+                        "Search for a show to see its next-season status. Use the search field above."
+                    )
                     .appSecondaryText()
+                }
             } actions: {
                 if !hasCompletedFirstSearch {
                     Button(FirstRunCopy.tryExampleButtonTitle) {

@@ -197,6 +197,7 @@ struct WatchlistView: View {
             toggleWatchlistSearch()
         } label: {
             Image(systemName: isSearchPresented ? "xmark" : "magnifyingglass")
+                .accessibilityHidden(true)
         }
         .accessibilityLabel(
             isSearchPresented
@@ -204,7 +205,6 @@ struct WatchlistView: View {
                 : String(localized: "Search watchlist")
         )
         .accessibilityIdentifier(AccessibilityID.Watchlist.searchButton)
-        .accessibilityElement(children: .ignore)
     }
 
     private func toggleWatchlistSearch() {
@@ -531,6 +531,7 @@ private struct WatchlistCollapsibleSection<Row: View>: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                        .accessibilityHidden(true)
                 }
                 .padding(.vertical, AppSpacing.tight)
                 .frame(maxWidth: .infinity, alignment: .leading)

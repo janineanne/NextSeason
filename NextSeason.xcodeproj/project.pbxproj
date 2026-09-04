@@ -191,9 +191,6 @@
 		E19A58B03047A29B00CC7190 /* Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Show-Detail.png"; sourceTree = "<group>"; };
 		E19A58B13047A29B00CC7190 /* Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Watchlist.png; sourceTree = "<group>"; };
 		E19A5A673047A99C00CC7190 /* 9-1-2026 Documentation Review and Update.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "9-1-2026 Documentation Review and Update.md"; sourceTree = "<group>"; };
-		E1AB76CA3033D0740045498C /* MVP-Search-Results.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Search-Results.png"; sourceTree = "<group>"; };
-		E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Show-Detail.png"; sourceTree = "<group>"; };
-		E1AB76CC3033D0740045498C /* MVP-Watchlist.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MVP-Watchlist.png"; sourceTree = "<group>"; };
 		E1AB79793033D2680045498C /* 8-17-2026 Discuss and Review SwiftData Migration Plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-17-2026 Discuss and Review SwiftData Migration Plan.md"; sourceTree = "<group>"; };
 		E1AB797A3033D2C30045498C /* 8-17-2026 Implement SwiftData Migration Plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-17-2026 Implement SwiftData Migration Plan.md"; sourceTree = "<group>"; };
 		E1AB8180303628370045498C /* 8-14-2026 Improving App Icon 1.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-14-2026 Improving App Icon 1.md"; sourceTree = "<group>"; };
@@ -213,6 +210,9 @@
 		E1AB9FC8303E3DA90045498C /* 8-25-2026 Discuss Watchlist Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-25-2026 Discuss Watchlist Improvements.md"; sourceTree = "<group>"; };
 		E1AB9FC9303E3DC70045498C /* 8-25-2026 Implement Watchlist Improvements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "8-25-2026 Implement Watchlist Improvements.md"; sourceTree = "<group>"; };
 		E1BCCDC5304A65970049DE1D /* 9-3-2026 Final Full Review.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "9-3-2026 Final Full Review.md"; sourceTree = "<group>"; };
+		E1BCD132304A73520049DE1D /* Search-Results.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Search-Results.jpeg"; sourceTree = "<group>"; };
+		E1BCD133304A73520049DE1D /* Show-Detail.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Show-Detail.jpeg"; sourceTree = "<group>"; };
+		E1BCD134304A73520049DE1D /* Watchlist.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Watchlist.jpeg; sourceTree = "<group>"; };
 		E1DA26BC2FDDD99700C37DAC /* safety.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = safety.mdc; path = .cursor/rules/safety.mdc; sourceTree = "<group>"; };
 		E1DA26BD2FDDD99700C37DAC /* swiftui-project-style.mdc */ = {isa = PBXFileReference; lastKnownFileType = text; name = "swiftui-project-style.mdc"; path = ".cursor/rules/swiftui-project-style.mdc"; sourceTree = "<group>"; };
 		E1DA26C02FDDDE7400C37DAC /* ProjectKickoff.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ProjectKickoff.md; sourceTree = "<group>"; };
@@ -334,7 +334,7 @@
 		E102F0FA2FE5F18F0076FCDD /* MVP */ = {
 			isa = PBXGroup;
 			children = (
-				E197FEB02FF7134F00D34A28 /* Screenshots */,
+				E1BCD135304A73520049DE1D /* Screenshots */,
 				E102F0622FE4A8D10076FCDD /* Diagrams */,
 				E1DAC54B2FDE2E1F00BD81E5 /* AI Transcripts */,
 				E17E04952FDE291A00708D7A /* ProblemStatement.md */,
@@ -453,22 +453,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		E197FEB02FF7134F00D34A28 /* Screenshots */ = {
-			isa = PBXGroup;
-			children = (
-				E1AB76CA3033D0740045498C /* MVP-Search-Results.png */,
-				E1AB76CB3033D0740045498C /* MVP-Show-Detail.png */,
-				E1AB76CC3033D0740045498C /* MVP-Watchlist.png */,
-			);
-			path = Screenshots;
-			sourceTree = "<group>";
-		};
 		E19A58B23047A29B00CC7190 /* Screenshots */ = {
 			isa = PBXGroup;
 			children = (
 				E19A58AF3047A29B00CC7190 /* Search-Results.png */,
 				E19A58B03047A29B00CC7190 /* Show-Detail.png */,
 				E19A58B13047A29B00CC7190 /* Watchlist.png */,
+			);
+			path = Screenshots;
+			sourceTree = "<group>";
+		};
+		E1BCD135304A73520049DE1D /* Screenshots */ = {
+			isa = PBXGroup;
+			children = (
+				E1BCD132304A73520049DE1D /* Search-Results.jpeg */,
+				E1BCD133304A73520049DE1D /* Show-Detail.jpeg */,
+				E1BCD134304A73520049DE1D /* Watchlist.jpeg */,
 			);
 			path = Screenshots;
 			sourceTree = "<group>";

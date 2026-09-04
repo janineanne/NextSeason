@@ -167,6 +167,7 @@ struct DiagnosticsView: View {
                         isShowingDocumentation = true
                     } label: {
                         Image(systemName: "questionmark.circle")
+                            .accessibilityHidden(true)
                     }
                     .accessibilityLabel("Diagnostics help")
                     .accessibilityHint("Explains what each field and action does")

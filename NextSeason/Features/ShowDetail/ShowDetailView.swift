@@ -230,7 +230,7 @@ struct ShowDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .padding(AppSpacing.row)
+        .padding(.vertical, AppSpacing.row)
         .appSurfaceCard()
 
         if case .failed = viewModel.loadState {
