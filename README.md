@@ -6,6 +6,7 @@
 * SwiftUI
 * MVVM architecture
 * Swift Concurrency
+* TheTVDB API
 * TVMaze API
 * Xcode
 * XCTest and XCUITest
@@ -22,7 +23,7 @@ NextSeason TV is an iPhone app that lets users build a watchlist of television s
 
 It also serves as a portfolio app that demonstrates how I use modern AI tools to design, implement, review, and refine a production-quality SwiftUI application.
 
-Version 1.0 is a focused, polished implementation of the core feature set (MVP), suitable for beta testing and inclusion in my portfolio. Development will continue as NextSeason TV grows up to become a Real App and joins the rest of the superheroes in the App Store.
+Version 1.0 is a focused, polished implementation of the core feature set (MVP), being prepared for its initial App Store release and inclusion in my portfolio. Development will continue as NextSeason TV grows up to become a Real App and joins the rest of the superheroes in the App Store.
 
 This project was developed using an AI-assisted workflow. I directed the engineering decisions, reviewed and refined AI-generated code, tested the application, made product and UX decisions, and iterated on the design throughout development.
 

@@ -73,7 +73,7 @@ Complete a final accessibility pass and address everything that can reasonably b
 
 - Verify VoiceOver labels, values, hints, traits, and navigation order.
 - Verify Dynamic Type at the largest accessibility sizes.
-- Verify sufficient contrast in every theme.
+- Verify sufficient contrast throughout the app.
 - Verify controls remain usable with Button Shapes, Increase Contrast, Reduce Transparency, and Reduce Motion enabled.
 - Verify that state is not communicated by color alone.
 - Test empty, loading, error, and recovery states.
@@ -187,7 +187,6 @@ Starting queries:
 - Verify background refresh behavior.
 - Verify behavior with notifications disabled.
 - Verify behavior with Background App Refresh disabled.
-- Verify all supported themes.
 - Verify Dynamic Type and VoiceOver.
 - Verify English-only localization assumptions and text expansion.
 - Verify offline and poor-network behavior.
