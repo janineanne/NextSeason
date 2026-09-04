@@ -378,6 +378,10 @@ struct WatchlistView: View {
                 value: viewModel.filteredShows.map { "\($0.id):\($0.nextSeason.headline)" }
             )
             .appPlainListStyle()
+            // Plain lists still insert default spacing between sections, but not
+            // before the first header or after the last row. Collapse that gap
+            // so later headers sit as tightly as the first one under the title.
+            .listSectionSpacing(0)
             .refreshable {
                 await viewModel.refreshFromNetwork()
                 await notificationStatus.refresh(using: notificationService)
