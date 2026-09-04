@@ -1691,7 +1691,14 @@
       }
     },
     "Search for a show to see its next-season status. Use the search field above." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for a show to see its next-season status. Use the search field above."
+          }
+        }
+      }
     },
     "Search on TVMaze.com" : {
       "extractionState" : "stale",

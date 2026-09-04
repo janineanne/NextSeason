@@ -278,6 +278,7 @@ final class AccessibilityAuditUITests: XCTestCase, NextSeasonUITesting {
         "Try an Example",
         "Find Your Next Season",
         "Search for a show to see its next-season status. Use the search field above, or try an example.",
+        "Search for a show to see its next-season status. Use the search field above.",
         "Can't Find Your Show?",
         "Try a more specific title — add a subtitle or the year (for example, “Title: Subtitle” or “Title 2019”).",
         "Something Went Wrong",
