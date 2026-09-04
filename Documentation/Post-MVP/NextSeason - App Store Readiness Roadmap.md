@@ -109,9 +109,9 @@ See [`../Post-MVP/NextSeason - Monetization Strategy Roadmap`](../Post-MVP/NextS
 
 # Documentation Readiness
 
-## AI-Assisted Development Workflow
+## AI-Assisted Development Workflow (Complete)
 
-Write a document explaining how AI was used during development, including:
+[`AI-Assisted Development Workflow.md`](../AI-Assisted%20Development%20Workflow.md) documents how AI was used during development, including:
 
 - Why AI-assisted development was used.
 - The distinct roles of ChatGPT and Cursor.
@@ -119,7 +119,7 @@ Write a document explaining how AI was used during development, including:
 - Which product, design, and engineering decisions remained mine.
 - Links to representative transcripts, such as initial architecture, accessibility review, performance review, analytics, TestFlight preparation, and README review.
 
-## Documentation Review
+## Documentation Review (Complete)
 
 - Verify that documentation reflects the release candidate rather than an earlier MVP state.
 - Check all links among documentation files.
