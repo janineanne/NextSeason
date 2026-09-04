@@ -18,6 +18,7 @@ nonisolated enum NextSeasonCalculator {
     /// Priority order: dated upcoming season → next-episode hint → currently
     /// airing latest season → undated upcoming row → overall show status.
     ///
+    /// - Parameter show: Domain show whose seasons and next episode drive the status.
     /// - Parameter at: Reference "today" for premiere / end comparisons (UTC days).
     static func status(for show: Show, at: Date = .now) -> NextSeasonStatus {
         // Ignore specials / season 0 for "next season" purposes.

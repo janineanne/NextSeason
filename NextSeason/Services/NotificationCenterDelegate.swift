@@ -75,6 +75,7 @@ enum NotificationRouting {
 
     /// If the coordinator has been set, queue the show from the notification tap.  If it has not, buffer
     /// (save) it for processing later.
+    /// - Parameter showID: TVMaze show ID from the notification payload.
     /// - Parameter animated: `true` when the app was already foreground-active at the
     ///   time of the tap (in-app navigation), `false` for a launch/foreground tap.
     static func routeToShow(showID: Int, animated: Bool) {

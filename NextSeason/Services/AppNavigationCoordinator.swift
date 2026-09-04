@@ -69,6 +69,7 @@ final class AppNavigationCoordinator {
     /// user on whatever tab they were last using.
     private var didResolveInitialTab = false
 
+    /// - Parameter showID: TVMaze show ID to open on the detail screen.
     /// - Parameter animated: `true` when the tap happened while the app was already
     ///   foreground-active (in-app navigation), `false` for a launch/foreground tap.
     func queueShowNavigation(showID: Int, animated: Bool = false) {

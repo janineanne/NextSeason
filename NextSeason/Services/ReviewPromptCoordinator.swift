@@ -23,6 +23,8 @@ final class ReviewPromptCoordinator {
     /// Bumped when a newly eligible delivery arrives so the view task restarts.
     private(set) var deliveryGeneration = 0
 
+    /// - Parameter userDefaults: Persistence for per-version delivery and request flags.
+    /// - Parameter marketingVersion: `CFBundleShortVersionString` used as the eligibility key.
     /// - Parameter sleep: Injectable delay for tests; defaults to `Task.sleep(for:)`.
     init(
         userDefaults: UserDefaults = .standard,

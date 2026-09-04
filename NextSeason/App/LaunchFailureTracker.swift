@@ -58,6 +58,9 @@ struct LaunchFailureTracker: Sendable {
     private let buildIdentifier: String
     private let countsPreviousUnexpectedTermination: Bool
 
+    /// - Parameter defaults: Persistence for the consecutive-failure count and last-seen build.
+    /// - Parameter now: Injectable clock for launch diagnostics; defaults to `Date.now`.
+    /// - Parameter buildIdentifier: `CFBundleVersion` used to reset the streak on a new build.
     /// - Parameter countsPreviousUnexpectedTermination: When `false`, an
     ///   unexpected previous termination does not increment the crash-loop
     ///   streak. Tests pass explicit values; production uses
