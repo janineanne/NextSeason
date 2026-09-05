@@ -15,6 +15,15 @@ nonisolated enum StoreEntitlementState: Equatable, Sendable {
     case resolved(isEntitled: Bool)
 }
 
+/// Product-catalog presentation for Plus and tip UIs.
+///
+/// Distinct from `isPurchasing`, which is a transaction-in-flight concern.
+nonisolated enum StoreCatalogAvailability: Equatable, Sendable {
+    case loading
+    case available
+    case unavailable
+}
+
 /// Observable purchasing and Plus entitlement state for the SwiftUI environment.
 ///
 /// Unlimited watchlist access comes from an active annual subscription, a
@@ -73,6 +82,34 @@ final class PurchaseService {
     /// Sticky beta flag: unlimited watchlist without an active StoreKit purchase.
     var isGrandfathered: Bool {
         entitlementStore.isGrandfathered
+    }
+
+    /// Plus annual/lifetime catalog for `PlusStoreView`.
+    ///
+    /// Loading wins while a fetch is in flight (or has never completed) so the
+    /// paywall can overlay a spinner without treating a reload as unavailable.
+    var plusCatalogAvailability: StoreCatalogAvailability {
+        if isLoadingProducts || !hasCompletedProductLoad {
+            return .loading
+        }
+        if annualProduct != nil || lifetimeProduct != nil {
+            return .available
+        }
+        return .unavailable
+    }
+
+    /// Tip catalog for `TipJarSection`.
+    ///
+    /// Loaded tips stay `.available` even during a later reload, matching the
+    /// section's product-first rendering.
+    var tipCatalogAvailability: StoreCatalogAvailability {
+        if !tipProducts.isEmpty {
+            return .available
+        }
+        if isLoadingProducts || !hasCompletedProductLoad {
+            return .loading
+        }
+        return .unavailable
     }
 
     init(

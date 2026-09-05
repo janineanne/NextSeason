@@ -322,8 +322,12 @@ struct WatchlistView: View {
             // The List is kept mounted even when empty (empty state is an overlay)
             // so removing the last row doesn't tear the List down mid-animation,
             // which crashes UICollectionView with "invalid number of items".
+            let presentation = WatchlistLoadedPresentation(
+                viewModel: viewModel,
+                showsNotificationBanner: notificationStatus.showsDisabledBanner
+            )
             List {
-                if notificationStatus.showsDisabledBanner {
+                if presentation.showsNotificationBanner {
                     NotificationsDisabledBanner(
                         buttonTitle: notificationStatus.enablementButtonTitle
                     ) {
@@ -333,7 +337,7 @@ struct WatchlistView: View {
                 // Keeps the list scroll-backed so the large navigation title renders
                 // when there are no rows to show (empty watchlist or no search
                 // matches, and no banner).
-                if viewModel.filteredShows.isEmpty, !notificationStatus.showsDisabledBanner {
+                if presentation.showsTitlePreservingSpacer {
                     Color.clear
                         .frame(height: 1)
                         .listRowInsets(EdgeInsets())
@@ -366,7 +370,7 @@ struct WatchlistView: View {
                 // Omit attribution when the empty/no-results overlay is up — a List
                 // footer behind ContentUnavailableView clips, overlaps the star, and
                 // leaves a misaligned white strip (same pattern as Search idle/empty).
-                if !viewModel.filteredShows.isEmpty {
+                if presentation.showsAttribution {
                     Section {
                     } footer: {
                         TVMazeAttributionView()
@@ -387,9 +391,12 @@ struct WatchlistView: View {
                 await notificationStatus.refresh(using: notificationService)
             }
             .overlay {
-                if viewModel.shows.isEmpty, viewModel.pendingRemoval == nil {
+                switch presentation.overlay {
+                case .none:
+                    EmptyView()
+                case .emptyWatchlist:
                     emptyState
-                } else if viewModel.filteredShows.isEmpty {
+                case .noSearchResults:
                     noSearchResults(query: viewModel.searchText)
                 }
             }

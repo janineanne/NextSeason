@@ -15,6 +15,12 @@ enum FirstRunCopy {
             "Search for a show to see its next-season status. Use the search field above, or try an example."
     )
 
+    /// Idle Search copy after the user has already completed a first search.
+    static let searchIdleSubsequentDescription = String(
+        localized:
+            "Search for a show to see its next-season status. Use the search field above."
+    )
+
     static let watchlistEmptyDescription = String(
         localized: "Track shows you care about — tap the star on any search result."
     )

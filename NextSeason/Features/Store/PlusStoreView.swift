@@ -38,8 +38,8 @@ struct PlusStoreView: View {
             }
             .disabled(purchases.isPurchasing)
             .overlay {
-                if purchases.isPurchasing || purchases.isLoadingProducts
-                    || !purchases.hasCompletedProductLoad
+                if purchases.isPurchasing
+                    || purchases.plusCatalogAvailability == .loading
                 {
                     ProgressView()
                         .controlSize(.large)
@@ -107,9 +107,7 @@ struct PlusStoreView: View {
                 }
             }
 
-            if purchases.annualProduct == nil && purchases.lifetimeProduct == nil
-                && !purchases.isLoadingProducts && purchases.hasCompletedProductLoad
-            {
+            if purchases.plusCatalogAvailability == .unavailable {
                 ContentUnavailableView {
                     Label("Purchase Options Unavailable", systemImage: "cart")
                 } description: {

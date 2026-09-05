@@ -179,6 +179,14 @@ struct SearchView: View {
         searchResultsHintDismissed = true
     }
 
+    /// Complete idle-state paragraph: first-run copy includes the example CTA;
+    /// subsequent visits point only at the search field.
+    private var searchIdleDescription: String {
+        hasCompletedFirstSearch
+            ? FirstRunCopy.searchIdleSubsequentDescription
+            : FirstRunCopy.searchIdleDescription
+    }
+
     /// Once the user reaches a real search outcome, they've demonstrated they
     /// know how to search, so retire the "Try an Example" affordance for good.
     private func markFirstSearchCompletedIfNeeded(for state: SearchViewModel.State) {
@@ -204,15 +212,8 @@ struct SearchView: View {
                         .appPrimaryText()
                 }
             } description: {
-                if !hasCompletedFirstSearch {
-                    Text(FirstRunCopy.searchIdleDescription)
-                        .appSecondaryText()
-                } else {
-                    Text(
-                        "Search for a show to see its next-season status. Use the search field above."
-                    )
+                Text(searchIdleDescription)
                     .appSecondaryText()
-                }
             } actions: {
                 if !hasCompletedFirstSearch {
                     Button(FirstRunCopy.tryExampleButtonTitle) {

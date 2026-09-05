@@ -26,6 +26,8 @@ struct PurchaseServiceTests {
         #expect(purchases.annualProduct != nil)
         #expect(purchases.lifetimeProduct != nil)
         #expect(purchases.tipProducts.count == 3)
+        #expect(purchases.plusCatalogAvailability == .available)
+        #expect(purchases.tipCatalogAvailability == .available)
     }
 
     @Test("Purchasing annual Plus unlocks the unlimited watchlist")
@@ -141,6 +143,20 @@ struct PurchaseServiceTests {
         #expect(await purchases.canAddToWatchlist(currentCount: 2))
     }
 
+    @Test("Catalog availability is loading before the first product load")
+    func catalogAvailabilityIsLoadingBeforeFirstLoad() {
+        let purchases = makePurchases(
+            store: StubPurchaseStoreClient(),
+            initial: .resolved(isEntitled: false)
+        )
+
+        #expect(purchases.hasCompletedProductLoad == false)
+        #expect(purchases.isLoadingProducts == false)
+        #expect(purchases.plusCatalogAvailability == .loading)
+        #expect(purchases.tipCatalogAvailability == .loading)
+        #expect(purchases.isPurchasing == false)
+    }
+
     @Test("StoreKit product loading failure records an error and leaves purchase buttons empty")
     func productLoadingFailureLeavesCatalogEmpty() async {
         let store = StubPurchaseStoreClient()
@@ -154,6 +170,8 @@ struct PurchaseServiceTests {
         #expect(purchases.annualProduct == nil)
         #expect(purchases.lifetimeProduct == nil)
         #expect(purchases.tipProducts.isEmpty)
+        #expect(purchases.plusCatalogAvailability == .unavailable)
+        #expect(purchases.tipCatalogAvailability == .unavailable)
         #expect(purchases.hasResolvedStoreEntitlement)
 
         store.loadError = nil
@@ -176,6 +194,8 @@ struct PurchaseServiceTests {
         #expect(purchases.tipProducts.isEmpty)
         #expect(purchases.hasCompletedProductLoad)
         #expect(purchases.lastErrorMessage == nil)
+        #expect(purchases.plusCatalogAvailability == .available)
+        #expect(purchases.tipCatalogAvailability == .unavailable)
     }
 
     @Test("Partial catalog keeps loaded tips when Plus products are missing")
@@ -192,6 +212,8 @@ struct PurchaseServiceTests {
         #expect(purchases.lifetimeProduct == nil)
         #expect(purchases.tipProducts.count == 3)
         #expect(purchases.hasCompletedProductLoad)
+        #expect(purchases.plusCatalogAvailability == .unavailable)
+        #expect(purchases.tipCatalogAvailability == .available)
     }
 
     @Test("Restore Purchases can activate an existing Plus entitlement")

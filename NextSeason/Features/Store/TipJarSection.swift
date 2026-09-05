@@ -13,7 +13,8 @@ struct TipJarSection: View {
 
     var body: some View {
         Section {
-            if !purchases.tipProducts.isEmpty {
+            switch purchases.tipCatalogAvailability {
+            case .available:
                 ForEach(purchases.tipProducts) { product in
                     Button {
                         Task { _ = await purchases.purchase(product) }
@@ -28,11 +29,11 @@ struct TipJarSection: View {
                     .accessibilityLabel("\(product.displayName), \(product.displayPrice)")
                     .disabled(purchases.isPurchasing)
                 }
-            } else if isWaitingForTips {
+            case .loading:
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .accessibilityLabel("Loading tip options")
-            } else {
+            case .unavailable:
                 Text("NextSeason couldn't load tip options right now.")
                     .appSecondaryText()
                 Button("Try Again") {
@@ -52,12 +53,6 @@ struct TipJarSection: View {
                 await purchases.loadProducts()
             }
         }
-    }
-
-    /// True while StoreKit products are loading or the first load has not finished.
-    /// Distinguishes a spinner from the empty-state retry UI after a failed load.
-    private var isWaitingForTips: Bool {
-        purchases.isLoadingProducts || !purchases.hasCompletedProductLoad
     }
 
     /// Maps known tip product IDs to stable accessibility identifiers for UI tests.
